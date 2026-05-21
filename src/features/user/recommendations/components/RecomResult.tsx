@@ -1,5 +1,5 @@
-export default function Page() {
+export default function RecommendationResult() {
     return (
-        <div></div>
+        <div>Recommendation Result</div>
     );
 }

@@ -1,5 +1,5 @@
-export default function Page() {
+export default function CourseListPage() {
     return (
-        <div></div>
+        <div>카테고리 내 강의 리스트</div>
     );
 }

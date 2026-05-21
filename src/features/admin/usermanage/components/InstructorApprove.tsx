@@ -1,5 +1,5 @@
-export default function Page() {
+export default function InstructorApprove() {
     return (
-        <div></div>
+        <div>강사 승인 관리</div>
     );
 }

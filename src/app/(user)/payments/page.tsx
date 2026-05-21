@@ -1,5 +1,5 @@
-export default function Page() {
+export default function PaymentPage() {
     return (
-        <div></div>
+        <div>Payment Page</div>
     );
 }

@@ -1,5 +1,5 @@
-export default function Page() {
+export default function CourseDetailPage() {
     return (
-        <div></div>
+        <div>강의 상세</div>
     );
 }

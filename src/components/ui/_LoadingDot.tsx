@@ -1,5 +1,5 @@
-export default function Page() {
+export default function LoadingDotPage() {
     return (
-        <div></div>
+        <div>로딩 페이지</div>
     );
 }

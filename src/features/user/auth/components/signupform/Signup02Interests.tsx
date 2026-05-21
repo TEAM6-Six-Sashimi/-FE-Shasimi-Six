@@ -1,5 +1,5 @@
-export default function Page() {
+export default function Signup02Interests() {
     return (
-        <div></div>
+        <div>Signup02. Interests</div>
     );
 }

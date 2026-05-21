@@ -1,5 +1,5 @@
-export default function Page() {
+export default function OneButtonModal() {
     return (
-        <div></div>
+        <div>OneButtonModal</div>
     );
 }

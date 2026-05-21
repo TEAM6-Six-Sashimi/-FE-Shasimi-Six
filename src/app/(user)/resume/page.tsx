@@ -1,5 +1,5 @@
-export default function Page() {
+export default function ResumePage() {
     return (
-        <div></div>
+        <div>이력서 작성 및 분석</div>
     );
 }

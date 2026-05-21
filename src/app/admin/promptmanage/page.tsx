@@ -1,5 +1,5 @@
-export default function Page() {
+export default function PromptManagePage() {
     return (
-        <div></div>
+        <div>AI 프롬프트 관리</div>
     );
 }

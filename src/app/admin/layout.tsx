@@ -1,5 +1,5 @@
-export default function Page() {
+export default function AdminLayout() {
     return (
-        <div></div>
+        <div>관리자 레이아웃</div>
     );
 }

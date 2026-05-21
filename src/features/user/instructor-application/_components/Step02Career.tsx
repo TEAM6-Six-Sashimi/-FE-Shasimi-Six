@@ -1,5 +1,5 @@
-export default function Page() {
+export default function Step02Career() {
     return (
-        <div></div>
+        <div>Step02. Career</div>
     );
 }

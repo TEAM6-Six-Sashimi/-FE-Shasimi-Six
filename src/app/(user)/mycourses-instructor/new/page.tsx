@@ -1,5 +1,5 @@
-export default function Page() {
+export default function NewCoursePage() {
     return (
-        <div></div>
+        <div>Create New Course Page</div>
     );
 }

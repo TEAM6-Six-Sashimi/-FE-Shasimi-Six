@@ -1,5 +1,5 @@
-export default function Page() {
+export default function ErrorMessagePage() {
     return (
-        <div></div>
+        <div>에러 페이지</div>
     );
 }

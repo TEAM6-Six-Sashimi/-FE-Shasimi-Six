@@ -1,5 +1,5 @@
-export default function Page() {
+export default function UserManagePage() {
     return (
-        <div></div>
+        <div>회원 관리</div>
     );
 }

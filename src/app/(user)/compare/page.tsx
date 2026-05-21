@@ -1,5 +1,5 @@
-export default function Page() {
+export default function CourseComparePage() {
     return (
-        <div></div>
+        <div>Course Compare</div>
     );
 }

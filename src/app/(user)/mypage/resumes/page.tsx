@@ -1,5 +1,5 @@
-export default function Page() {
+export default function MyPageResumePage() {
     return (
-        <div></div>
+        <div>MyPage Resume Page</div>
     );
 }

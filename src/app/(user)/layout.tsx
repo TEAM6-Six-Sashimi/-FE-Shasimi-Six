@@ -1,5 +1,5 @@
-export default function Page() {
+export default function UserLayout() {
     return (
-        <div></div>
+        <div>UserLayout</div>
     );
 }

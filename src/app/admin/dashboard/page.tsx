@@ -1,5 +1,5 @@
-export default function Page() {
+export default function DashboardPage() {
     return (
-        <div></div>
+        <div>관리자 대시보드</div>
     );
 }

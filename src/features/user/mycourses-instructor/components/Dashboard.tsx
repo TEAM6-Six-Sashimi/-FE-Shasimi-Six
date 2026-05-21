@@ -1,5 +1,5 @@
-export default function Page() {
+export default function InstructorDashboard() {
     return (
-        <div></div>
+        <div>Instructor Dashboard</div>
     );
 }

@@ -1,5 +1,5 @@
-export default function Page() {
+export default function AllAlarmPage() {
     return (
-        <div></div>
+        <div>All Alarm Page</div>
     );
 }
