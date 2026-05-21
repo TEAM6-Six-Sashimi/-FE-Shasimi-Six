@@ -1,5 +1,5 @@
-export default function Page() {
+export default function CourseManagePage() {
     return (
-        <div></div>
+        <div>강의 관리</div>
     );
 }

@@ -1,5 +1,5 @@
-export default function Page() {
+export default function StepIndicator() {
     return (
-        <div></div>
+        <div>Step Indicator</div>
     );
 }

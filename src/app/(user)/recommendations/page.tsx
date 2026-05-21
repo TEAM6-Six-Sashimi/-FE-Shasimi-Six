@@ -1,5 +1,5 @@
-export default function Page() {
+export default function RecommendationPage() {
     return (
-        <div></div>
+        <div>AI 맞춤 추천</div>
     );
 }

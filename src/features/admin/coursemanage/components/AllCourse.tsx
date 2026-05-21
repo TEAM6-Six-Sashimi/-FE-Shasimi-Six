@@ -1,5 +1,5 @@
-export default function Page() {
+export default function AllCourse() {
     return (
-        <div></div>
+        <div>All Course</div>
     );
 }

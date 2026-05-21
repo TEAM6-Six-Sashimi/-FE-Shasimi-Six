@@ -1,5 +1,5 @@
-export default function Page() {
+export default function InstructorPendingCourse() {
     return (
-        <div></div>
+        <div>Instructor Pending Course</div>
     );
 }

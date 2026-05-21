@@ -1,5 +1,5 @@
-export default function Page() {
+export default function CartPage() {
     return (
-        <div></div>
+        <div>Cart</div>
     );
 }

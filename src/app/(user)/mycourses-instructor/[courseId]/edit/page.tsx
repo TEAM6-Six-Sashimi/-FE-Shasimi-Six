@@ -1,5 +1,5 @@
-export default function Page() {
+export default function EditCoursePage() {
     return (
-        <div></div>
+        <div>Instructor Edit Course</div>
     );
 }

@@ -1,5 +1,5 @@
-export default function Page() {
+export default function VideoPage() {
     return (
-        <div></div>
+        <div>VideoPage</div>
     );
 }

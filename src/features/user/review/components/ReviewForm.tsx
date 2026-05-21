@@ -1,5 +1,5 @@
-export default function Page() {
+export default function CourseReviewForm() {
     return (
-        <div></div>
+        <div>Course Review Form</div>
     );
 }

@@ -1,5 +1,5 @@
-export default function Page() {
+export default function PaymentManagePage() {
     return (
-        <div></div>
+        <div>결제 관리</div>
     );
 }
