@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "src/features/intstructor-application/_components/Step02Career.tsx"  ],
   "exclude": ["node_modules"]
 }
