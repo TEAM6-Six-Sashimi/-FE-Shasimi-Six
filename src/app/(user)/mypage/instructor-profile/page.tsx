@@ -1,5 +1,5 @@
 export default function InstructorProfilePage() {
     return (
-        <div>MyPage Instructor Profile Edit</div>
+        <div>MyPage Instructor Profile</div>
     );
 }
