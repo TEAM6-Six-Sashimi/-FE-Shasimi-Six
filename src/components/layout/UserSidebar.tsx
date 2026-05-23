@@ -25,7 +25,7 @@ export default function UserSidebar() {
       </div>
 
       {/* 메뉴 목록 */}
-      <nav className="flex flex-col gap-1">
+      <nav className="flex flex-col gap-2">
         {SIDEBAR_MENUS.map(({ label, href, icon }) => {
           const isActive = pathname === href;
           return (
