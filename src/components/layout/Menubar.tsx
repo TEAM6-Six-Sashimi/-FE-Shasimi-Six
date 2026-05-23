@@ -22,29 +22,25 @@ const NAV_LINKS = [
   {
     id: 'ai',
     label: 'AI 추천',
-    icon: '/menubar/recommendation-Icon.svg',
-    iconWhite: '/menubar/recommendation-Icon-white.svg',
+    icon: 'recommendations',
     href: '/recommendations',
   },
   {
     id: 'roadmap',
     label: '로드맵',
-    icon: '/menubar/roadmap-Icon.svg',
-    iconWhite: '/menubar/roadmap-Icon-white.svg',
+    icon: 'roadmap',
     href: '/roadmap',
   },
   {
     id: 'mycourse',
     label: '내 강의',
-    icon: '/menubar/mycourses-Icon.svg',
-    iconWhite: '/menubar/mycourses-Icon-white.svg',
+    icon: 'mycourses',
     href: '/mycourses-student',
   },
   {
     id: 'instructor',
     label: '강사지원',
-    icon: '/menubar/instructor-Icon.svg',
-    iconWhite: '/menubar/instructor-Icon-white.svg',
+    icon: 'instructor',
     href: '/instructor/application',
   },
 ] as const;
@@ -70,7 +66,7 @@ export default function Menubar() {
           className={`
             flex items-center gap-2 h-full pr-4 mr-2
             border-r border-white/10
-            text-[13px] font-semibold tracking-tight whitespace-nowrap
+            text-[13px] font-semibold whitespace-nowrap
             bg-transparent cursor-pointer transition-colors duration-150
             ${open ? 'text-[#CFEE5D]' : 'text-[#E5E7EB] hover:text-[#CFEE5D]'}
           `}
@@ -84,7 +80,7 @@ export default function Menubar() {
 
         {/* 우측 링크 그룹 */}
         <div className="flex items-center gap-0.5 ml-auto">
-          {NAV_LINKS.map(({ id, label, icon, iconWhite, href }) => {
+          {NAV_LINKS.map(({ id, label, icon, href }) => {
             const isActive = pathname.startsWith(href);
             return (
               <Link
@@ -95,7 +91,7 @@ export default function Menubar() {
                 <span className="relative flex items-center shrink-0 w-4 h-4">
                   {/* 기본: 흰색 아이콘 */}
                   <Image
-                    src={iconWhite}
+                    src={`/menubar/${icon}-Icon-white.svg`}
                     alt=""
                     width={16}
                     height={16}
@@ -103,7 +99,7 @@ export default function Menubar() {
                   />
                   {/* 호버/활성: 라임색 아이콘 */}
                   <Image
-                    src={icon}
+                    src={`/menubar/${icon}-Icon.svg`}
                     alt=""
                     width={16}
                     height={16}
@@ -134,7 +130,7 @@ export default function Menubar() {
               className={`px-3.5 ${i === 0 ? 'pl-1' : ''} ${i === CATEGORIES.length - 1 ? 'border-r-0 pr-1' : 'border-r border-white/10'}`}
             >
               {/* 카테고리 타이틀 */}
-              <div className="text-[#CFEE5D] text-[13.5px] font-extrabold tracking-tight leading-snug mb-3 pb-2.5 border-b border-white/10">
+              <div className="text-[#CFEE5D] text-[13.5px] font-extrabold leading-snug mb-3 pb-2.5 border-b border-white/10">
                 {cat.label}
               </div>
 
@@ -145,7 +141,7 @@ export default function Menubar() {
                   onClick={() => setOpen(false)}
                   className={`
                     block w-full text-left bg-transparent border-none cursor-pointer
-                    text-[12.5px] tracking-tight py-1.5 transition-colors duration-150
+                    text-[12.5px] py-1.5 transition-colors duration-150
                     text-[#F9FAFB] hover:text-[#CFEE5D]
                     ${item === '전체' ? 'font-semibold mb-0.5' : 'font-normal'}
                   `}
