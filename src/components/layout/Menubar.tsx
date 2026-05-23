@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -52,12 +52,10 @@ const NAV_LINKS = [
 // ---- 메인 컴포넌트 --------------------------------------------
 export default function Menubar() {
   const [open, setOpen] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
   return (
     <nav
-      ref={wrapperRef}
       className="relative z-50 bg-[#1E2125] border-b border-white/10 font-sans"
       onMouseLeave={() => setOpen(false)}
     >
