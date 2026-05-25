@@ -130,24 +130,28 @@ export default function Menubar() {
               className={`px-3.5 ${i === 0 ? 'pl-1' : ''} ${i === CATEGORIES.length - 1 ? 'border-r-0 pr-1' : 'border-r border-white/10'}`}
             >
               {/* 카테고리 타이틀 */}
-              <div className="text-[#CFEE5D] text-[13.5px] font-extrabold leading-snug mb-3 pb-2.5 border-b border-white/10">
+              <div className="text-[#CFEE5D] text-[13.5px] font-extrabold tracking-tight leading-snug mb-3 pb-2.5 border-b border-white/10 cursor-default">
                 {cat.label}
               </div>
 
               {/* 서브 항목 */}
               {cat.sub.map((item) => (
-                <button
+                <Link
                   key={item}
+                  href={
+                    item === '전체'
+                      ? `/courses/${encodeURIComponent(cat.label)}`
+                      : `/courses/${encodeURIComponent(cat.label)}?sub=${encodeURIComponent(item)}`
+                  }
                   onClick={() => setOpen(false)}
                   className={`
-                    block w-full text-left bg-transparent border-none cursor-pointer
-                    text-[12.5px] py-1.5 transition-colors duration-150
+                    block text-[12.5px] tracking-tight py-1.5 transition-colors duration-150
                     text-[#F9FAFB] hover:text-[#CFEE5D]
                     ${item === '전체' ? 'font-semibold mb-0.5' : 'font-normal'}
                   `}
                 >
                   {item}
-                </button>
+                </Link>
               ))}
             </div>
           ))}
