@@ -11,7 +11,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import CourseCard from '@/features/user/courses/components/CourseCard';
-import FilterDropdown, { type FilterValues } from '@/features/user/courses/components/FilterDropdown';
+import FilterDropdown, {
+  type FilterValues,
+} from '@/features/user/courses/components/FilterDropdown';
 import { MOCK_COURSES } from '@/constants/mockCourses';
 import { CATEGORIES } from '@/constants/categories';
 import Image from 'next/image';
@@ -91,7 +93,7 @@ export default function CourseListPage() {
   );
 
   return (
-    <div className="min-h-screen bg-white px-6 py-15">
+    <div className="min-h-screen bg-white px-15 py-15">
       <div className="flex items-center justify-between gap-3 mb-4">
         {/* 카테고리 타이틀 */}
         <h1 className="text-[#1E2125] text-3xl font-bold mb-4">{category}</h1>
