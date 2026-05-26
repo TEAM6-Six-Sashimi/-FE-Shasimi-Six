@@ -4,9 +4,9 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CATEGORIES } from '@/constants/categories';
+import type { Category } from '@/lib/api/categories';
 
-// ---- Chevron (열림/닫힘 회전 애니메이션)----------------------
+// ---- Chevron ---------------------------------------------------
 const ChevronIcon = ({ open }: { open: boolean }) => (
   <Image
     src="/menubar/open-Icon.svg"
@@ -17,36 +17,20 @@ const ChevronIcon = ({ open }: { open: boolean }) => (
   />
 );
 
-// ---- 네비게이션 링크 정의--------------------------------------
+// ---- 네비게이션 링크 --------------------------------------------
 const NAV_LINKS = [
-  {
-    id: 'ai',
-    label: 'AI 추천',
-    icon: 'recommendations',
-    href: '/recommendations',
-  },
-  {
-    id: 'roadmap',
-    label: '로드맵',
-    icon: 'roadmap',
-    href: '/roadmap',
-  },
-  {
-    id: 'mycourse',
-    label: '내 강의',
-    icon: 'mycourses',
-    href: '/mycourses-student',
-  },
-  {
-    id: 'instructor',
-    label: '강사지원',
-    icon: 'instructor',
-    href: '/instructor/application',
-  },
+  { id: 'ai',         label: 'AI 추천',  icon: 'recommendations', href: '/recommendations' },
+  { id: 'roadmap',    label: '로드맵',   icon: 'roadmap',          href: '/roadmap' },
+  { id: 'mycourse',   label: '내 강의',  icon: 'mycourses',        href: '/mycourses-student' },
+  { id: 'instructor', label: '강사지원', icon: 'instructor',       href: '/instructor/application' },
 ] as const;
 
-// ---- 메인 컴포넌트 --------------------------------------------
-export default function Menubar() {
+interface MenubarProps {
+  categories: Category[];
+}
+
+// ---- 메인 컴포넌트 ---------------------------------------------
+export default function Menubar({ categories }: MenubarProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -55,7 +39,6 @@ export default function Menubar() {
       className="relative z-50 bg-[#1E2125] border-b border-white/10 font-sans"
       onMouseLeave={() => setOpen(false)}
     >
-      {/* 메뉴바 내부 */}
       <div className="flex items-center h-12 px-5">
         {/* 카테고리 토글 버튼 */}
         <button
@@ -89,7 +72,6 @@ export default function Menubar() {
                 className={`group flex items-center gap-1.5 h-9 px-3 rounded-md text-[13px] font-medium tracking-tight whitespace-nowrap transition-colors duration-150 hover:text-[#CFEE5D] hover:bg-white/5 ${isActive ? 'text-[#CFEE5D]' : 'text-[#F9FAFB]'}`}
               >
                 <span className="relative flex items-center shrink-0 w-4 h-4">
-                  {/* 기본: 흰색 아이콘 */}
                   <Image
                     src={`/menubar/${icon}-Icon-white.svg`}
                     alt=""
@@ -97,7 +79,6 @@ export default function Menubar() {
                     height={16}
                     className={`transition-opacity duration-150 ${isActive ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`}
                   />
-                  {/* 호버/활성: 라임색 아이콘 */}
                   <Image
                     src={`/menubar/${icon}-Icon.svg`}
                     alt=""
@@ -123,25 +104,25 @@ export default function Menubar() {
           ${open ? 'max-h-140 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}
         `}
       >
-        <div className="grid grid-cols-7 px-5 py-6">
-          {CATEGORIES.map((cat, i) => (
+        <div className={`grid px-5 py-6`} style={{ gridTemplateColumns: `repeat(${categories.length}, 1fr)` }}>
+          {categories.map((cat, i) => (
             <div
-              key={cat.label}
-              className={`px-3.5 ${i === 0 ? 'pl-1' : ''} ${i === CATEGORIES.length - 1 ? 'border-r-0 pr-1' : 'border-r border-white/10'}`}
+              key={cat.name}
+              className={`px-3.5 ${i === 0 ? 'pl-1' : ''} ${i === categories.length - 1 ? 'border-r-0 pr-1' : 'border-r border-white/10'}`}
             >
               {/* 카테고리 타이틀 */}
               <div className="text-[#CFEE5D] text-[13.5px] font-extrabold tracking-tight leading-snug mb-3 pb-2.5 border-b border-white/10 cursor-default">
-                {cat.label}
+                {cat.name}
               </div>
 
               {/* 서브 항목 */}
-              {cat.sub.map((item) => (
+              {['전체', ...cat.subCategories].map((item) => (
                 <Link
                   key={item}
                   href={
                     item === '전체'
-                      ? `/courses/${encodeURIComponent(cat.label)}`
-                      : `/courses/${encodeURIComponent(cat.label)}?sub=${encodeURIComponent(item)}`
+                      ? `/courses/${encodeURIComponent(cat.name)}`
+                      : `/courses/${encodeURIComponent(cat.name)}?sub=${encodeURIComponent(item)}`
                   }
                   onClick={() => setOpen(false)}
                   className={`
