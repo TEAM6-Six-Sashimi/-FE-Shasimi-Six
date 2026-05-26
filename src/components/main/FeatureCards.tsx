@@ -36,7 +36,7 @@ const FEATURE_CARDS = [
 
 export default function FeatureCards() {
   return (
-    <div className="grid grid-cols-3 gap- px-24">
+    <div className="grid grid-cols-3 gap-8 px-24">
       {FEATURE_CARDS.map(({ href, icon, iconBg, title, description, buttonLabel, buttonStyle, cardBg }) => (
         <div
           key={href}
