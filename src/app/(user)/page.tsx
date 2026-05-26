@@ -1,4 +1,4 @@
-import FeatureCards from "@/features/user/main/FeatureCards";
+import FeatureCards from "@/features/user/main/components/FeatureCards";
 
 export default function MainPage() {
   return (
