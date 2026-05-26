@@ -1,5 +1,12 @@
-export default function AdminLayout() {
-    return (
-        <div>관리자 레이아웃</div>
-    );
+import AdminSidebar from "@/components/layout/AdminSidebar";
+import Footer from "@/components/layout/Footer";
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen flex flex-row">
+      <AdminSidebar />
+      <main className="flex-1 px-4 py-8">{children}</main>
+      <Footer />
+    </div>
+  );
 }
