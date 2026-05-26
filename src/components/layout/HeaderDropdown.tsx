@@ -1,6 +1,6 @@
 'use client'
 
-import { UserInfo } from "@/features/user/auth/types"
+import { UserInfo } from "@/features/auth/types"
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
