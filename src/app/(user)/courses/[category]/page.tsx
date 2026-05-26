@@ -11,7 +11,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import CourseCard from '@/features/user/courses/components/CourseCard';
-import FilterDropdown, { type FilterValues } from '@/features/user/courses/components/FilterDropdown';
+import FilterDropdown, {
+  type FilterValues,
+} from '@/features/user/courses/components/FilterDropdown';
 import { MOCK_COURSES } from '@/constants/mockCourses';
 import { CATEGORIES } from '@/constants/categories';
 import Image from 'next/image';
