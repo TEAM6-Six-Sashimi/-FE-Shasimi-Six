@@ -5,13 +5,9 @@ import StepIndicator from './StepIndicator';
 import Step01Introduction from './Step01Introduction';
 import Step02Career from './Step02Career';
 import Step03Documents from './Step03Documents';
-import type { UserInfo } from '@/lib/api/users';
+import type { UserInfo } from '@/lib/users';
 
-const STEPS = [
-  { label: '자기소개' },
-  { label: '경력 및 전문성' },
-  { label: '서류 제출' },
-];
+const STEPS = [{ label: '자기소개' }, { label: '경력 및 전문성' }, { label: '서류 제출' }];
 
 const DEFAULT_STEP01 = {
   motivation: '',
@@ -41,7 +37,9 @@ interface InstructorApplicationClientProps {
   userInfo: UserInfo;
 }
 
-export default function InstructorApplicationClient({ userInfo }: InstructorApplicationClientProps) {
+export default function InstructorApplicationClient({
+  userInfo,
+}: InstructorApplicationClientProps) {
   const [step, setStep] = useState(1);
   const [step01Data, setStep01Data] = useState(DEFAULT_STEP01);
   const [step02Data, setStep02Data] = useState(DEFAULT_STEP02);
@@ -68,7 +66,9 @@ export default function InstructorApplicationClient({ userInfo }: InstructorAppl
       {/* 타이틀 */}
       <div className="mb-6">
         <h1 className="text-[24px] font-bold text-[#1E2125]">강사 지원</h1>
-        <p className="text-[13.5px] text-[#6A7282] mt-1">우리 플랫폼의 강사가 되어 여러분의 지식을 공유해주세요</p>
+        <p className="text-[13.5px] text-[#6A7282] mt-1">
+          우리 플랫폼의 강사가 되어 여러분의 지식을 공유해주세요
+        </p>
       </div>
 
       {/* 단계 표시기 */}
@@ -77,25 +77,13 @@ export default function InstructorApplicationClient({ userInfo }: InstructorAppl
       {/* 폼 카드 */}
       <div className="bg-white rounded-2xl shadow-md p-8">
         {step === 1 && (
-          <Step01Introduction
-            userInfo={userInfo}
-            data={step01Data}
-            onNext={handleStep01Next}
-          />
+          <Step01Introduction userInfo={userInfo} data={step01Data} onNext={handleStep01Next} />
         )}
         {step === 2 && (
-          <Step02Career
-            data={step02Data}
-            onNext={handleStep02Next}
-            onPrev={() => setStep(1)}
-          />
+          <Step02Career data={step02Data} onNext={handleStep02Next} onPrev={() => setStep(1)} />
         )}
         {step === 3 && (
-          <Step03Documents
-            data={step03Data}
-            onSubmit={handleSubmit}
-            onPrev={() => setStep(2)}
-          />
+          <Step03Documents data={step03Data} onSubmit={handleSubmit} onPrev={() => setStep(2)} />
         )}
       </div>
     </div>

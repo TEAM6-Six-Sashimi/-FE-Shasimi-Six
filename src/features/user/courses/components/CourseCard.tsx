@@ -1,46 +1,30 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import type { Course } from '@/constants/mockCourses';
+import { CourseFromAPI } from '../types';
+
 
 interface CourseCardProps {
-  course: Course;
+  course: CourseFromAPI;
   category: string;
 }
 
 export default function CourseCard({ course, category }: CourseCardProps) {
   return (
     <div className="flex flex-col bg-[#F9FAFB] rounded-xl overflow-hidden border border-[#D1D5DB] hover:shadow-lg transition-shadow duration-200">
-      {/* 썸네일 — 클릭 시 상세 이동 */}
+
+      {/* 썸네일 */}
       <Link
-        href={`/courses/${encodeURIComponent(category)}/${course.id}`}
-        className="relative aspect-video w-full block shrink-0"
+        href={`/courses/${encodeURIComponent(category)}/${encodeURIComponent(course.title)}`}
+        className="relative block shrink-0"
       >
-        {/* <Image
-          src={course.thumbnail}
-          alt={course.title}
-          fill
-          className="object-cover"
-        /> */}
-        <div className="w-full h-full bg-[#E5E7EB]" />
-        {/* 뱃지 */}
-        {course.badge && (
-          <span
-            className={`absolute top-2 left-2 text-[11px] font-bold px-2 py-0.5 rounded-full ${
-              course.badge === '인기' ? 'bg-[#FF5E5E] text-white' : 'bg-[#CFEE5D] text-[#1E2125]'
-            }`}
-          >
-            {course.badge}
-          </span>
-        )}
+        <div className="w-full aspect-video bg-[#E5E7EB]" />
       </Link>
 
-      {/* 카드 본문 — 클릭 시 상세 이동 */}
+      {/* 카드 본문 */}
       <Link
-        href={`/courses/${encodeURIComponent(category)}/${course.id}`}
+        href={`/courses/${encodeURIComponent(category)}/${encodeURIComponent(course.title)}`}
         className="flex flex-col gap-1.5 px-3.5 pt-3 pb-2 flex-1"
       >
         {/* 제목 */}
@@ -48,16 +32,12 @@ export default function CourseCard({ course, category }: CourseCardProps) {
           {course.title}
         </p>
         {/* 강사 */}
-        <p className="text-[#6A7282] text-[12px]">{course.instructor}</p>
+        <p className="text-[#6A7282] text-[12px]">{course.instructorName}</p>
         {/* 평점 */}
         <div className="flex items-center gap-1">
           <span className="text-[#FFD700] text-[12px]">★</span>
-          <span className="text-[#1E2125] text-[12px] font-semibold">
-            {course.rating.toFixed(1)}
-          </span>
-          <span className="text-[#6A7282] text-[11px]">
-            ({course.reviewCount.toLocaleString()})
-          </span>
+          <span className="text-[#1E2125] text-[12px] font-semibold">{course.ratingAvg.toFixed(1)}</span>
+          <span className="text-[#6A7282] text-[11px]">({course.studentCount.toLocaleString()}명)</span>
         </div>
         {/* 가격 */}
         <p className="text-[#1E2125] text-[14px] font-bold mt-auto">
@@ -65,7 +45,7 @@ export default function CourseCard({ course, category }: CourseCardProps) {
         </p>
       </Link>
 
-      {/* 버튼 영역 */}
+      {/* 버튼 */}
       <div className="flex gap-2 px-3.5 pb-3.5">
         <Button
           size="sm"
