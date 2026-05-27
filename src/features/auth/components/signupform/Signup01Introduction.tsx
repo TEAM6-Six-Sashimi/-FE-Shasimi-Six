@@ -1,3 +1,7 @@
+'use client';
+
+import { useState, useEffect } from "react";
+
 interface IntroductionProps {
     onNext: () => void;
 }
@@ -13,10 +17,23 @@ export default function Signup01Introduction({ onNext }: IntroductionProps) {
                 <div><input type="radio" /> 남성 <input type="radio" /> 여성</div>
 
                 <div className="flex"><p>생년월일</p><p>*</p></div>
-                <input type="calendar" />
+                <input type="date" />
 
                 <div className="flex"><p>전화번호</p><p>*</p></div>
-                <input type="email" />
+                <input type="number" />
+
+                <div className="flex"><p>이메일</p><p>*</p></div>
+                <div><input type="email" /><button>인증번호 발송</button></div>
+
+                <div className="flex"><p>아이디</p><p>*</p></div>
+                <div><input type="text" /><button>중복 확인</button></div>
+
+                <div className="flex"><p>비밀번호</p><p>*</p></div>
+                <input type="password" />
+                <p>대소문자, 숫자, 특수문자(!@#$%^_) 포함, 8자 이상 16자 이하</p>
+
+                <div className="flex"><p>비밀번호 확인</p><p>*</p></div>
+                <input type="password" />
 
                 <button
                     onClick={onNext}
