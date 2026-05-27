@@ -32,10 +32,10 @@ export default function LoginForm() {
                 password: userPasswordInput
             });
 
-            localStorage.setItem("accessToken", result.token);
-            
+            localStorage.setItem("accessToken", result.accessToken ?? result.token ?? "");
+
             alert(`🎉 ${result.name}님, 환영합니다!`);
-            
+
             router.push("/");
             router.refresh();
             
