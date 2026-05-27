@@ -3,6 +3,7 @@ export interface CurriculumItem {
   title: string;
   duration: string; // "10:30"
   isPreview: boolean; // 구매 전 미리보기 가능 여부
+  progress: number;
 }
 
 export interface Review {
@@ -76,14 +77,14 @@ export const MOCK_COURSE_DETAIL: CourseDetail = {
     code: 'NCS 코드: 20010201_14v2',
   },
   curriculum: [
-    { id: 1, title: '강의 소개 및 학습 목표',     duration: '10:30', isPreview: true },
-    { id: 2, title: '개발 환경 설정하기',          duration: '15:20', isPreview: true },
-    { id: 3, title: '기본 문법 이해하기',          duration: '25:40', isPreview: false },
-    { id: 4, title: '실습 프로젝트 1 - 계산기 만들기', duration: '30:15', isPreview: false },
-    { id: 5, title: '자료구조의 이해',             duration: '28:50', isPreview: false },
-    { id: 6, title: '알고리즘 기초',               duration: '22:10', isPreview: false },
-    { id: 7, title: '데이터베이스 개론',           duration: '35:00', isPreview: false },
-    { id: 8, title: '네트워크 기초 이론',          duration: '18:45', isPreview: false },
+    { id: 1, title: '강의 소개 및 학습 목표',     duration: '10:30', isPreview: true, progress: 100 },
+    { id: 2, title: '개발 환경 설정하기',          duration: '15:20', isPreview: true,  progress: 100 },
+    { id: 3, title: '기본 문법 이해하기',          duration: '25:40', isPreview: false, progress: 20 },
+    { id: 4, title: '실습 프로젝트 1 - 계산기 만들기', duration: '30:15', isPreview: false, progress: 100 },
+    { id: 5, title: '자료구조의 이해',             duration: '28:50', isPreview: false, progress: 90 },
+    { id: 6, title: '알고리즘 기초',               duration: '22:10', isPreview: false, progress: 70 },
+    { id: 7, title: '데이터베이스 개론',           duration: '35:00', isPreview: false, progress: 0 },
+    { id: 8, title: '네트워크 기초 이론',          duration: '18:45', isPreview: false, progress: 30 },
   ],
   ratingDistribution: [
     { star: 5, percentage: 80 },
@@ -116,3 +117,4 @@ export const MOCK_COURSE_DETAIL: CourseDetail = {
     },
   ],
 };
+
