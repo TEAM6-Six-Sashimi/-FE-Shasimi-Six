@@ -23,10 +23,10 @@ export default function SignupPage() {
     }
 
     return (
-        <div className="flex flex-col justify-between items-center w-full min-h-[calc(100vh-48px)] py-16 px-4 bg-[#F9FAFB]">
+        <div className="flex flex-col items-center w-full min-h-[calc(100vh-48px)] py-10 px-4 bg-[#F9FAFB]">
             <SignupIndicator currentStep={step} steps={STEPS}/>
-            <div className="bg-white w-full max-w-lg rounded-2xl p-10 shadow-md">
-                <div className="text-[29px] font-bold text-center">회원가입</div>
+            <div className="bg-white w-full max-w-xl rounded-2xl p-10 shadow-md">
+                <div className="text-[29px] font-bold text-center mb-8">회원가입</div>
                 {step === 1 && (
                     <Signup01Introduction onNext={nextStep} />
                 )}
