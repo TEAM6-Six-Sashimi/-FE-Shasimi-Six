@@ -1,4 +1,3 @@
-
 import { fetchCategories } from '@/services/categories.service';
 import CourseListPage from './_components/CourseListPage';
 import { fetchCourses } from '@/services/course.service';

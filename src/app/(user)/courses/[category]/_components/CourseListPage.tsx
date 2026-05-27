@@ -32,6 +32,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
   const searchParams = useSearchParams();
   const category = decodeURIComponent(params.category as string);
   const sub = searchParams.get('sub') ? decodeURIComponent(searchParams.get('sub')!) : null;
+  const subCategoryId = sub ? Number(sub) : null;
 
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortType>('인기순');
@@ -39,7 +40,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
   const [filters, setFilters] = useState<FilterValues>({
     level: '전체',
     priceRange: [0, 100000],
-    durationRange: [0, 100],
+    durationRange: [0, 1000],
     ratingRange: [0, 5],
   });
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,7 +48,9 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
 
   // 현재 카테고리의 서브카테고리 목록
   const currentCategory = categories.find((c) => c.name === category);
-  const subCategories = currentCategory ? ['전체', ...currentCategory.subCategories] : ['전체'];
+  const subCategories = currentCategory
+    ? [{ id: 0, name: '전체' }, ...currentCategory.options]
+    : [{ id: 0, name: '전체' }];
 
   // 필터 외부 클릭 닫기
   useEffect(() => {
@@ -140,7 +143,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
                   setFilters({
                     level: '전체',
                     priceRange: [0, 100000],
-                    durationRange: [0, 100],
+                    durationRange: [0, 1000],
                     ratingRange: [0, 5],
                   })
                 }
@@ -153,14 +156,14 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
         <div className="flex items-center justify-between mb-6 border-b border-[#E5E7EB]">
           <div className="flex items-center gap-0 overflow-x-auto">
             {subCategories.map((item) => {
-              const isActive = sub ? sub === item : item === '전체';
+              const isActive = subCategoryId ? subCategoryId === item.id : item.id === 0;
               const href =
-                item === '전체'
+                item.id === 0
                   ? `/courses/${encodeURIComponent(category)}`
-                  : `/courses/${encodeURIComponent(category)}?sub=${encodeURIComponent(item)}`;
+                  : `/courses/${encodeURIComponent(category)}?sub=${item.id}`;
               return (
                 <Link
-                  key={item}
+                  key={item.id}
                   href={href}
                   className={`px-4 py-2.5 text-[13px] font-medium whitespace-nowrap border-b-2 transition-colors duration-150 ${
                     isActive
@@ -168,7 +171,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
                       : 'border-transparent text-[#6A7282] hover:text-[#1E2125]'
                   }`}
                 >
-                  {item}
+                  {item.name}
                 </Link>
               );
             })}
