@@ -1,7 +1,28 @@
-import { fetchCategories } from '@/lib/api/categories';
+import { fetchCategories } from '@/services/categories.service';
 import CourseListPage from './_components/CourseListPage';
+import { fetchCourses } from '@/services/course.service';
 
-export default async function Page() {
-  const categories = await fetchCategories();
-  return <CourseListPage categories={categories} />;
+interface PageProps {
+  params: Promise<{ category: string }>;
+  searchParams: Promise<{ sub?: string }>;
+}
+
+export default async function Page({ params, searchParams }: PageProps) {
+  const { category } = await params;
+  const { sub } = await searchParams;
+
+  const decodedCategory = decodeURIComponent(category);
+  const decodedSub = sub ? decodeURIComponent(sub) : undefined;
+
+  const [categories, initialCourses] = await Promise.all([
+    fetchCategories(),
+    fetchCourses(decodedCategory, decodedSub),
+  ]);
+
+  return (
+    <CourseListPage
+      categories={categories}
+      initialCourses={initialCourses}
+    />
+  );
 }

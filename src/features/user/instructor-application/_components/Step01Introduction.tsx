@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import type { UserInfo } from '@/lib/api/users';
+import type { UserInfo } from '@/lib/users';
 
 interface Step01Data {
   motivation: string;
@@ -47,11 +47,11 @@ export default function Step01Introduction({ userInfo, data, onNext }: Step01Int
   return (
     <div className="flex flex-col gap-6">
       {/* 안내 메시지 */}
-      <div className={`flex items-center gap-2 rounded-lg px-4 py-3 border transition-colors ${
-        isError
-          ? 'bg-[#FFEBEB] border-[#FF5E5E]'
-          : 'bg-[#F9FBE7] border-[#827717]'
-      }`}>
+      <div
+        className={`flex items-center gap-2 rounded-lg px-4 py-3 border transition-colors ${
+          isError ? 'bg-[#FFEBEB] border-[#FF5E5E]' : 'bg-[#F9FBE7] border-[#827717]'
+        }`}
+      >
         <span className={`font-semibold ${isError ? 'text-[#FF5E5E]' : 'text-[#827717]'}`}>ⓘ</span>
         <p className={`text-[13px] font-semibold ${isError ? 'text-[#FF5E5E]' : 'text-[#827717]'}`}>
           지원자 기본 정보와 자기소개를 입력해주세요. 모든 항목은 필수 입력 사항입니다.

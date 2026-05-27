@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import type { Category } from '@/lib/api/categories';
+import type { Category } from '@/features/categories/types';
 
 // ── 타입 ────────────────────────────────────────────────────────
 interface Lecture {
@@ -61,8 +61,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
     lectures: [{ id: 1, ...DEFAULT_LECTURE }],
   });
 
-  const subCategories =
-    categories.find((c) => c.name === form.category)?.subCategories ?? [];
+  const subCategories = categories.find((c) => c.name === form.category)?.subCategories ?? [];
 
   // ── 기본정보 핸들러 ──────────────────────────────────────────
   const handleField = <K extends keyof CourseFormData>(key: K, value: CourseFormData[K]) => {
@@ -89,10 +88,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
   const addLecture = () => {
     setForm((prev) => ({
       ...prev,
-      lectures: [
-        ...prev.lectures,
-        { id: Date.now(), ...DEFAULT_LECTURE },
-      ],
+      lectures: [...prev.lectures, { id: Date.now(), ...DEFAULT_LECTURE }],
     }));
   };
 
@@ -224,7 +220,13 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
           {/* 대표 이미지 */}
           <div>
             <label className={labelCls}>대표 이미지{requiredMark}</label>
-            <input type="file" accept="image/*" ref={thumbnailRef} onChange={handleThumbnail} className="hidden" />
+            <input
+              type="file"
+              accept="image/*"
+              ref={thumbnailRef}
+              onChange={handleThumbnail}
+              className="hidden"
+            />
             <button
               type="button"
               onClick={() => thumbnailRef.current?.click()}

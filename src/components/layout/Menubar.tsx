@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { Category } from '@/lib/api/categories';
+import type { Category } from '@/features/categories/types';
 
 // ---- Chevron ---------------------------------------------------
 const ChevronIcon = ({ open }: { open: boolean }) => (
@@ -19,10 +19,10 @@ const ChevronIcon = ({ open }: { open: boolean }) => (
 
 // ---- 네비게이션 링크 --------------------------------------------
 const NAV_LINKS = [
-  { id: 'ai',         label: 'AI 추천',  icon: 'recommendations', href: '/recommendations' },
-  { id: 'roadmap',    label: '로드맵',   icon: 'roadmap',          href: '/roadmap' },
-  { id: 'mycourse',   label: '내 강의',  icon: 'mycourses',        href: '/mycourses-student' },
-  { id: 'instructor', label: '강사지원', icon: 'instructor',       href: '/instructor/application' },
+  { id: 'ai', label: 'AI 추천', icon: 'recommendations', href: '/recommendations' },
+  { id: 'roadmap', label: '로드맵', icon: 'roadmap', href: '/roadmap' },
+  { id: 'mycourse', label: '내 강의', icon: 'mycourses', href: '/mycourses-student' },
+  { id: 'instructor', label: '강사지원', icon: 'instructor', href: '/instructor/application' },
 ] as const;
 
 interface MenubarProps {
@@ -104,7 +104,10 @@ export default function Menubar({ categories }: MenubarProps) {
           ${open ? 'max-h-140 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}
         `}
       >
-        <div className={`grid px-5 py-6`} style={{ gridTemplateColumns: `repeat(${categories.length}, 1fr)` }}>
+        <div
+          className={`grid px-5 py-6`}
+          style={{ gridTemplateColumns: `repeat(${categories.length}, 1fr)` }}
+        >
           {categories.map((cat, i) => (
             <div
               key={cat.name}

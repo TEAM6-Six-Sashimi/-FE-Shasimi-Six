@@ -1,11 +1,8 @@
-export interface Category {
-  name: string;
-  subCategories: string[];
-}
+import { Category } from '@/features/categories/types';
 
 export async function fetchCategories(): Promise<Category[]> {
   try {
-    const res = await fetch('http://localhost:8080/api/categories?type=COURSE', {
+    const res = await fetch('http://localhost:8080/api/categories', {
       next: { revalidate: 3600 }, // 1시간 캐시
     });
 

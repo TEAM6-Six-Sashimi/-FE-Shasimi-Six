@@ -14,9 +14,9 @@ import CourseCard from '@/features/user/courses/components/CourseCard';
 import FilterDropdown, {
   type FilterValues,
 } from '@/features/user/courses/components/FilterDropdown';
-import { MOCK_COURSES } from '@/constants/mockCourses';
-import type { Category } from '@/lib/api/categories';
 import Image from 'next/image';
+import { Category } from '@/features/categories/types';
+import { CourseFromAPI } from '@/features/user/courses/types';
 
 const ITEMS_PER_PAGE = 16;
 
@@ -24,13 +24,15 @@ type SortType = '인기순' | '최신순' | '높은 평점순';
 
 interface CourseListPageProps {
   categories: Category[];
+  initialCourses: CourseFromAPI[];
 }
 
-export default function CourseListPage({ categories }: CourseListPageProps) {
+export default function CourseListPage({ categories, initialCourses }: CourseListPageProps) {
   const params = useParams();
   const searchParams = useSearchParams();
   const category = decodeURIComponent(params.category as string);
   const sub = searchParams.get('sub') ? decodeURIComponent(searchParams.get('sub')!) : null;
+  const subCategoryId = sub ? Number(sub) : null;
 
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortType>('인기순');
@@ -38,7 +40,7 @@ export default function CourseListPage({ categories }: CourseListPageProps) {
   const [filters, setFilters] = useState<FilterValues>({
     level: '전체',
     priceRange: [0, 100000],
-    durationRange: [0, 100],
+    durationRange: [0, 1000],
     ratingRange: [0, 5],
   });
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,7 +48,9 @@ export default function CourseListPage({ categories }: CourseListPageProps) {
 
   // 현재 카테고리의 서브카테고리 목록
   const currentCategory = categories.find((c) => c.name === category);
-  const subCategories = currentCategory ? ['전체', ...currentCategory.subCategories] : ['전체'];
+  const subCategories = currentCategory
+    ? [{ id: 0, name: '전체' }, ...currentCategory.options]
+    : [{ id: 0, name: '전체' }];
 
   // 필터 외부 클릭 닫기
   useEffect(() => {
@@ -59,37 +63,36 @@ export default function CourseListPage({ categories }: CourseListPageProps) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // 페이지 변경 시 맨 위로
+  // 페이지 변경 시 초기화
   useEffect(() => {
     setCurrentPage(1);
   }, [category, sub, search, filters, sort]);
 
-  // 필터링 + 정렬
+  // 필터링 + 정렬 (프론트에서 처리, 추후 백엔드 페이지네이션으로 교체 예정)
   const filteredCourses = useMemo(() => {
-    let result = MOCK_COURSES.filter((c) => c.category === category);
+    let result = [...initialCourses];
 
-    if (sub) result = result.filter((c) => c.subCategory === sub);
     if (search)
-      result = result.filter((c) => c.title.includes(search) || c.instructor.includes(search));
-    if (filters.level !== '전체') result = result.filter((c) => c.level === filters.level);
+      result = result.filter((c) => c.title.includes(search) || c.instructorName.includes(search));
+
     result = result.filter(
       (c) =>
         c.price >= filters.priceRange[0] &&
         c.price <= filters.priceRange[1] &&
-        c.duration >= filters.durationRange[0] &&
-        c.duration <= filters.durationRange[1] &&
-        c.rating >= filters.ratingRange[0] &&
-        c.rating <= filters.ratingRange[1],
+        c.totalDuration >= filters.durationRange[0] &&
+        c.totalDuration <= filters.durationRange[1] &&
+        c.ratingAvg >= filters.ratingRange[0] &&
+        c.ratingAvg <= filters.ratingRange[1],
     );
 
-    if (sort === '인기순') result = [...result].sort((a, b) => b.reviewCount - a.reviewCount);
-    if (sort === '최신순') result = [...result].sort((a, b) => b.id - a.id);
-    if (sort === '높은 평점순') result = [...result].sort((a, b) => b.rating - a.rating);
+    if (sort === '인기순') result = result.sort((a, b) => b.studentCount - a.studentCount);
+    if (sort === '최신순') result = result; // TODO: 백엔드에서 createdAt 필드 추가 후 정렬
+    if (sort === '높은 평점순') result = result.sort((a, b) => b.ratingAvg - a.ratingAvg);
 
     return result;
-  }, [category, sub, search, filters, sort]);
+  }, [initialCourses, search, filters, sort]);
 
-  // 페이지네이션
+  // 페이지네이션 (추후 백엔드 페이지네이션으로 교체 예정)
   const totalPages = Math.ceil(filteredCourses.length / ITEMS_PER_PAGE);
   const pagedCourses = filteredCourses.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -105,7 +108,6 @@ export default function CourseListPage({ categories }: CourseListPageProps) {
 
           {/* 검색 + 상세검색 */}
           <div className="flex items-center gap-3">
-            {/* 검색창 */}
             <div className="relative flex-1 max-w-xl">
               <input
                 type="text"
@@ -119,7 +121,6 @@ export default function CourseListPage({ categories }: CourseListPageProps) {
               </span>
             </div>
 
-            {/* 상세검색 버튼 + 드롭다운 */}
             <div className="relative" ref={filterRef}>
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
@@ -142,7 +143,7 @@ export default function CourseListPage({ categories }: CourseListPageProps) {
                   setFilters({
                     level: '전체',
                     priceRange: [0, 100000],
-                    durationRange: [0, 100],
+                    durationRange: [0, 1000],
                     ratingRange: [0, 5],
                   })
                 }
@@ -153,17 +154,16 @@ export default function CourseListPage({ categories }: CourseListPageProps) {
 
         {/* 서브카테고리 탭 + 정렬 */}
         <div className="flex items-center justify-between mb-6 border-b border-[#E5E7EB]">
-          {/* 서브카테고리 탭 */}
           <div className="flex items-center gap-0 overflow-x-auto">
             {subCategories.map((item) => {
-              const isActive = sub ? sub === item : item === '전체';
+              const isActive = subCategoryId ? subCategoryId === item.id : item.id === 0;
               const href =
-                item === '전체'
+                item.id === 0
                   ? `/courses/${encodeURIComponent(category)}`
-                  : `/courses/${encodeURIComponent(category)}?sub=${encodeURIComponent(item)}`;
+                  : `/courses/${encodeURIComponent(category)}?sub=${item.id}`;
               return (
                 <Link
-                  key={item}
+                  key={item.id}
                   href={href}
                   className={`px-4 py-2.5 text-[13px] font-medium whitespace-nowrap border-b-2 transition-colors duration-150 ${
                     isActive
@@ -171,13 +171,12 @@ export default function CourseListPage({ categories }: CourseListPageProps) {
                       : 'border-transparent text-[#6A7282] hover:text-[#1E2125]'
                   }`}
                 >
-                  {item}
+                  {item.name}
                 </Link>
               );
             })}
           </div>
 
-          {/* 정렬 */}
           <div className="shrink-0 ml-4 mb-1">
             <Select value={sort} onValueChange={(v) => setSort(v as SortType)}>
               <SelectTrigger className="h-8 w-32 text-[12.5px] border-[#D1D5DB] text-[#1E2125]">
@@ -197,8 +196,8 @@ export default function CourseListPage({ categories }: CourseListPageProps) {
         {/* 강의 그리드 */}
         {pagedCourses.length > 0 ? (
           <div className="grid grid-cols-4 gap-5 mb-10">
-            {pagedCourses.map((course) => (
-              <CourseCard key={course.id} course={course} category={category} />
+            {pagedCourses.map((course, idx) => (
+              <CourseCard key={idx} course={course} category={category} />
             ))}
           </div>
         ) : (
