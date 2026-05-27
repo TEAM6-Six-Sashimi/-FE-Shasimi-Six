@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local API spec cache (downloaded from backend Swagger)
+_api-docs*.json
