@@ -31,7 +31,8 @@ export default function Step01Introduction({ userInfo, data, onNext }: Step01Int
     }));
   };
 
-  const isValid = !!form.motivation.trim() && !!form.introduction.trim();
+  // 간략한 자기소개만 필수
+  const isValid = !!form.introduction.trim();
 
   const handleNext = () => {
     setSubmitted(true);
@@ -89,11 +90,9 @@ export default function Step01Introduction({ userInfo, data, onNext }: Step01Int
         </div>
       </div>
 
-      {/* 지원 동기 */}
+      {/* 지원 동기 (선택) */}
       <div>
-        <label className={labelCls}>
-          지원 동기 <span className="text-[#FF5E5E]">*</span>
-        </label>
+        <label className={labelCls}>지원 동기 (선택)</label>
         <textarea
           placeholder="강사로 지원하게 된 동기를 작성해주세요"
           value={form.motivation}
@@ -103,7 +102,7 @@ export default function Step01Introduction({ userInfo, data, onNext }: Step01Int
         />
       </div>
 
-      {/* 간략한 자기 소개 */}
+      {/* 간략한 자기 소개 (필수) */}
       <div>
         <label className={labelCls}>
           간략한 자기 소개 <span className="text-[#FF5E5E]">*</span>
@@ -117,7 +116,7 @@ export default function Step01Introduction({ userInfo, data, onNext }: Step01Int
         />
       </div>
 
-      {/* 활영 장비 보유 여부 */}
+      {/* 활영 장비 보유 여부 (선택) */}
       <div>
         <label className={labelCls}>활영 장비 보유 여부 (선택)</label>
         <div className="flex flex-col gap-2.5">
