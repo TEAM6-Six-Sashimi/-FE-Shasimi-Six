@@ -17,22 +17,24 @@ const ChevronIcon = ({ open }: { open: boolean }) => (
   />
 );
 
-// ---- 네비게이션 링크 --------------------------------------------
-const NAV_LINKS = [
-  { id: 'ai', label: 'AI 추천', icon: 'recommendations', href: '/recommendations' },
-  { id: 'roadmap', label: '로드맵', icon: 'roadmap', href: '/roadmap' },
-  { id: 'mycourse', label: '내 강의', icon: 'mycourses', href: '/mycourses-student' },
-  { id: 'instructor', label: '강사지원', icon: 'instructor', href: '/instructor/application' },
-] as const;
-
 interface MenubarProps {
   categories: Category[];
+  role?: 'STUDENT' | 'INSTRUCTOR' | 'GUEST';
 }
 
 // ---- 메인 컴포넌트 ---------------------------------------------
-export default function Menubar({ categories }: MenubarProps) {
+export default function Menubar({ categories, role }: MenubarProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+
+  const myCoursesHref = role === 'INSTRUCTOR' ? '/mycourses-instructor' : '/mycourses-student';
+
+  const NAV_LINKS = [
+    { id: 'ai', label: 'AI 추천', icon: 'recommendations', href: '/recommendations' },
+    { id: 'roadmap', label: '로드맵', icon: 'roadmap', href: '/roadmap' },
+    { id: 'mycourse', label: '내 강의', icon: 'mycourses', href: myCoursesHref },
+    { id: 'instructor', label: '강사지원', icon: 'instructor', href: '/instructor/application' },
+  ];
 
   return (
     <nav
