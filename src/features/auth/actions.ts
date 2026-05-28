@@ -1,6 +1,7 @@
 'use server'
 
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { loginService } from '@/services/auth.service';
 import { LoginRequest } from '@/features/auth/types';
 
@@ -28,4 +29,11 @@ export async function loginAction(payload: LoginRequest): Promise<{ name: string
   });
 
   return { name: result.name };
+}
+
+export async function logoutAction(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete('accessToken');
+  cookieStore.delete('refreshToken');
+  redirect('/');
 }
