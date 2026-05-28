@@ -1,19 +1,25 @@
+import { cookies } from 'next/headers';
 import Footer from '@/components/layout/Footer';
 import Menubar from '@/components/layout/Menubar';
 import { fetchCategories } from '@/services/categories.service';
-
-type Role = 'STUDENT' | 'INSTRUCTOR' | 'GUEST';
-
-async function fetchUserRole(): Promise<Role> {
-  // TODO: 실제 로그인 유저 role API 연결
-  return 'STUDENT'; // 임시 목업 → 'INSTRUCTOR'로 바꾸면 강사 메뉴로 전환
-}
+import { fetchUserMe } from '@/services/user.service';
 
 export default async function UserLayout({ children }: { children: React.ReactNode }) {
-  const [categories, role] = await Promise.all([
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+
+  console.log('=== Layout Debug ===');
+  console.log('accessToken:', accessToken ? accessToken.slice(0, 20) + '...' : '없음');
+
+  const [categories, user] = await Promise.all([
     fetchCategories(),
-    fetchUserRole(),
+    accessToken ? fetchUserMe(accessToken) : Promise.resolve(null),
   ]);
+
+  console.log('user:', user);
+  console.log('role:', user?.role ?? 'GUEST');
+
+  const role = user?.role === 'STUDENT' || user?.role === 'INSTRUCTOR' ? user.role : 'GUEST';
 
   return (
     <div className="min-h-screen flex flex-col">

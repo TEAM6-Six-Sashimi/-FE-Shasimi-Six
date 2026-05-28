@@ -1,5 +1,7 @@
 import { CourseFromAPI } from "@/features/user/courses/types";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export async function fetchCourses(
   categoryName: string,
   subCategory?: string,
@@ -14,7 +16,7 @@ export async function fetchCourses(
     }
 
     const res = await fetch(
-      `http://localhost:8080/api/courses?${params.toString()}`,
+      `${API_BASE_URL}/api/courses?${params.toString()}`,
       {
         next: { revalidate: 60 },
       },
