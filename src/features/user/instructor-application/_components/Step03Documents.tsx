@@ -141,7 +141,7 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
       {/* 포트폴리오 (필수) */}
       <div>
         <label className={labelCls}>
-          포트폴리오 <span className="text-[#6A7282] text-[12px]">(선택)</span>
+          포트폴리오 <span className="text-[#FF5E5E]">*</span>
         </label>
         <div className="relative">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6A7282]">🔗</span>
