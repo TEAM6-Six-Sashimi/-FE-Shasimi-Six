@@ -1,12 +1,13 @@
 'use client'
 
-import { UserInfo } from "@/features/auth/types"
+import { UserMe } from "@/features/auth/types"
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { logoutAction } from "@/features/auth/actions";
 
 interface HeaderDropdownProps {
-    user: UserInfo
+    user: UserMe;
 }
 
 export default function HeaderDropdown({ user }: HeaderDropdownProps) {
@@ -19,7 +20,7 @@ export default function HeaderDropdown({ user }: HeaderDropdownProps) {
                 { label: "나의 이력서", href: "/mypage/resume"},
                 { label: "고객센터", href: "/customer-service"},
             ],
-            TEACHER: [
+            INSTRUCTOR: [
                 { label: "마이페이지", href: "/mypage"},
                 { label: "강사프로필", href: "/mypage/instructor-profile"},
                 { label: "고객센터", href: "/customer-service"},
@@ -28,10 +29,16 @@ export default function HeaderDropdown({ user }: HeaderDropdownProps) {
                 { label: "마이페이지", href: "/mypage"},
                 { label: "나의 이력서", href: "/mypage/resume"},
                 { label: "고객센터", href: "/customer-service"},
-            ]
+            ],
+            GUEST: []
     }
 
     const currentMenu = dropMenu[user.role] || [];
+
+    // (강사)
+    const displayName = user.role === 'INSTRUCTOR'
+        ? `${user.name} (강사)`
+        : user.name;
 
     return (
         <div
@@ -58,9 +65,13 @@ export default function HeaderDropdown({ user }: HeaderDropdownProps) {
                         </Link>
                     ))}
                     <hr className="border-[#D1D5DB]"/>
-                    <div className="w-full text-left block px-4 py-2 text-[#D14848] hover:bg-[#E5E7EB]">
-                        로그아웃
-                    </div>
+                    <form action={logoutAction}>
+                        <button 
+                            type="submit"
+                            className="w-full text-left block px-4 py-2 text-[#D14848] hover:bg-[#E5E7EB]">
+                            로그아웃
+                        </button>
+                    </form>
                 </div>
             )}
         </div>
