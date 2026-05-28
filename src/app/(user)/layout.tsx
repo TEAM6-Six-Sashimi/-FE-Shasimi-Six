@@ -6,7 +6,7 @@ type Role = 'STUDENT' | 'INSTRUCTOR' | 'GUEST';
 
 async function fetchUserRole(): Promise<Role> {
   // TODO: 실제 로그인 유저 role API 연결
-  return 'INSTRUCTOR'; // 임시 목업 → 'INSTRUCTOR'로 바꾸면 강사 메뉴로 전환
+  return 'STUDENT'; // 임시 목업 → 'INSTRUCTOR'로 바꾸면 강사 메뉴로 전환
 }
 
 export default async function UserLayout({ children }: { children: React.ReactNode }) {
