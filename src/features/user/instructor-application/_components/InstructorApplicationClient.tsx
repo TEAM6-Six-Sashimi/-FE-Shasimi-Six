@@ -22,7 +22,7 @@ const DEFAULT_STEP02 = {
   platformName: '',
   studentCount: '',
   reviewLink: '',
-  certifications: [] as string[],
+  certifications: [] as { name: string; file: File }[],
   channelLink: '',
 };
 
