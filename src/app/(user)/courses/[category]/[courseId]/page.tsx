@@ -10,7 +10,7 @@ export default async function Page({ params }: PageProps) {
 
   // TODO: 실제 구매 여부 API 연결
   // const isPurchased = await checkPurchased(courseId);
-  const isPurchased = true; // 임시 목업
+  const isPurchased = false; // 임시 목업
 
   return isPurchased ? <CourseDetailPageOwned /> : <CourseDetailPage />;
 }

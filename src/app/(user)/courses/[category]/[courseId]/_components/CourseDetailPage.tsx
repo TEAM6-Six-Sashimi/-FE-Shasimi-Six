@@ -140,7 +140,7 @@ export default function CourseDetailPage() {
           </div>
 
           {/* ── 우측 구매 박스 ── */}
-          <div className="w-72 shrink-0">
+          <div className="w-72 shrink-0 sticky top-4">
             <CourseDetailSidebar course={course} />
           </div>
         </div>

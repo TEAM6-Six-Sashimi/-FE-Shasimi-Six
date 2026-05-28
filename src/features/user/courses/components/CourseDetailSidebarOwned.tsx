@@ -13,7 +13,7 @@ interface CourseDetailSidebarOwnedProps {
 
 export default function CourseDetailSidebarOwned({ course }: CourseDetailSidebarOwnedProps) {
   return (
-    <div className="sticky top-4 w-80 shrink-0 flex flex-col gap-3 bg-white rounded-xl shadow-md p-6">
+    <div className="w-80 shrink-0 flex flex-col gap-3 bg-white rounded-xl shadow-md p-6">
       {/* 썸네일 */}
       <div className="w-full aspect-video rounded-xl bg-[#E5E7EB] overflow-hidden" />
 

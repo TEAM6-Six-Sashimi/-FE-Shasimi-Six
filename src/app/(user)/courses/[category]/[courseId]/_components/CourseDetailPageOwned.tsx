@@ -140,7 +140,7 @@ export default function CourseDetailPageOwned() {
           </div>
 
           {/* ── 우측 사이드바 (구매 후) ── */}
-          <div className="w-72 shrink-0">
+          <div className="w-72 shrink-0 sticky top-4">
             <CourseDetailSidebarOwned
               course={{
                 lectureCount: course.lectureCount,
