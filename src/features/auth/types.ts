@@ -1,10 +1,36 @@
+export interface EmailVerifyResponseDto {
+  targetEmail: string;
+  purpose: 'SIGNUP' | 'PASSWORD_RESET' | 'EMAIL_CHANGE';
+  verified: boolean;
+}
+
 export interface LoginRequest {
   loginId: string;
   password: string;
 }
 
 export interface LoginResponse {
-  token: string;
+  grantType: string;
+  accessToken: string;
+  refreshToken: string;
+  accessTokenExpiresIn: number;
   name: string;
-  role: string;
 }
+
+export interface ReissueRequest {
+  refreshToken: string;
+}
+
+export interface ReissueResponse {
+  grantType: string;
+  accessToken: string;
+  refreshToken: string;
+  accessTokenExpiresIn: number;
+  name: string;
+}
+
+export interface LoginIdCheckResponseDto {
+  login_id: string;
+  available: boolean;
+}
+
