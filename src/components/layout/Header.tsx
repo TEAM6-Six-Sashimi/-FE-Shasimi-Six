@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { UserInfo } from "@/features/user/auth/types";
+import { UserInfo } from "@/features/auth/types";
 import HeaderDropdown from "./HeaderDropdown";
 
 export default function Header() {

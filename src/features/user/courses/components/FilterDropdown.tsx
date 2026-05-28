@@ -20,7 +20,7 @@ interface FilterDropdownProps {
 const DEFAULT_FILTERS: FilterValues = {
   level: '전체',
   priceRange: [0, 100000],
-  durationRange: [0, 100],
+  durationRange: [0, 1000],
   ratingRange: [0, 5],
 };
 
@@ -87,7 +87,7 @@ export default function FilterDropdown({ open, onApply, onReset }: FilterDropdow
         </div>
         <Slider
           min={0}
-          max={100}
+          max={1000}
           step={1}
           value={filters.durationRange}
           onValueChange={(v) =>
