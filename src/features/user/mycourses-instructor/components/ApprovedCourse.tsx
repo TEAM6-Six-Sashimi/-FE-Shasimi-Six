@@ -7,6 +7,14 @@ import Image from 'next/image';
 import type { ApprovedCourse as ApprovedCourseType } from '@/features/user/mycourses-instructor/types';
 import type { Category } from '@/features/categories/types';
 
+type SortOption = 'latest' | 'popular' | 'rating';
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: 'latest', label: '최신순' },
+  { value: 'popular', label: '인기순' },
+  { value: 'rating', label: '평점순' },
+];
+
 interface Props {
   courses: ApprovedCourseType[];
   categories: Category[];
@@ -14,10 +22,10 @@ interface Props {
 
 export default function ApprovedCourse({ courses = [], categories = [] }: Props) {
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<SortOption>('latest');
 
   const getCategoryName = (categoryId: number) => {
     if (!categories || categories.length === 0) return String(categoryId);
-    
     for (const cat of categories) {
       if (cat.mainCategoryId === categoryId) return cat.name;
       const option = cat.options?.find((o) => o.id === categoryId);
@@ -26,28 +34,52 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
     return String(categoryId);
   };
 
-  // 1. courses가 null/undefined일 경우 대비
-  // 2. title이 없을 경우 대비
-  // 3. 검색어 대소문자 무시
-  const filtered = (courses || []).filter((c) => 
-    c.title?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = (courses || [])
+    .filter((c) => c.title?.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => {
+      if (sort === 'popular') return b.studentCount - a.studentCount;
+      if (sort === 'rating') return b.ratingAvg - a.ratingAvg;
+      return b.courseId - a.courseId; // latest: courseId 높을수록 최신
+    });
 
   return (
     <div className="flex flex-col gap-6">
+      {/* 검색 + 정렬 + 강의 신청 버튼 */}
       <div className="flex items-center justify-between gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="강의 검색..."
-            className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
-          />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6A7282]">
-            <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
-          </span>
+        <div className="flex items-center gap-3 flex-1">
+          {/* 검색창 */}
+          <div className="relative flex-1 max-w-sm">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="강의 검색..."
+              className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6A7282]">
+              <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
+            </span>
+          </div>
+
+          {/* 정렬 드롭다운 */}
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortOption)}
+            className="h-11 px-3 pr-8 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] outline-none focus:border-[#1E2125] transition-colors cursor-pointer appearance-none"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236A7282' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 12px center',
+            }}
+          >
+            {SORT_OPTIONS.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
         </div>
+
         <Link href="/mycourses-instructor/new">
           <Button className="h-11 px-5 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[13px] font-semibold cursor-pointer shrink-0">
             + 강의 신청
@@ -55,6 +87,7 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
         </Link>
       </div>
 
+      {/* 강의 목록 */}
       <div className="flex flex-col gap-3">
         {filtered.length === 0 ? (
           <div className="flex items-center justify-center h-40 text-[#6A7282] text-[14px] bg-white rounded-xl border border-dashed border-[#D1D5DB]">
@@ -68,9 +101,7 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
             >
               <div className="flex flex-col gap-1">
                 <p className="text-[14.5px] font-semibold text-[#1E2125]">{course.title}</p>
-                <p className="text-[12px] text-[#6A7282]">
-                  {getCategoryName(course.categoryId)}
-                </p>
+                <p className="text-[12px] text-[#6A7282]">{getCategoryName(course.categoryId)}</p>
                 <div className="flex items-center gap-2 text-[12px] text-[#6A7282]">
                   <span className="text-[#FFD700]">★</span>
                   <span>{course.ratingAvg?.toFixed(1) || '0.0'}</span>
