@@ -12,10 +12,12 @@ interface Props {
   categories: Category[];
 }
 
-export default function ApprovedCourse({ courses, categories }: Props) {
+export default function ApprovedCourse({ courses = [], categories = [] }: Props) {
   const [search, setSearch] = useState('');
 
   const getCategoryName = (categoryId: number) => {
+    if (!categories || categories.length === 0) return String(categoryId);
+    
     for (const cat of categories) {
       if (cat.mainCategoryId === categoryId) return cat.name;
       const option = cat.options?.find((o) => o.id === categoryId);
@@ -24,11 +26,15 @@ export default function ApprovedCourse({ courses, categories }: Props) {
     return String(categoryId);
   };
 
-  const filtered = courses.filter((c) => c.title.includes(search));
+  // 1. courses가 null/undefined일 경우 대비
+  // 2. title이 없을 경우 대비
+  // 3. 검색어 대소문자 무시
+  const filtered = (courses || []).filter((c) => 
+    c.title?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col gap-6">
-      {/* 검색 + 강의 신청 버튼 */}
       <div className="flex items-center justify-between gap-3">
         <div className="relative flex-1 max-w-sm">
           <input
@@ -49,19 +55,17 @@ export default function ApprovedCourse({ courses, categories }: Props) {
         </Link>
       </div>
 
-      {/* 강의 목록 */}
       <div className="flex flex-col gap-3">
         {filtered.length === 0 ? (
-          <div className="flex items-center justify-center h-40 text-[#6A7282] text-[14px]">
-            승인된 강의가 없습니다.
+          <div className="flex items-center justify-center h-40 text-[#6A7282] text-[14px] bg-white rounded-xl border border-dashed border-[#D1D5DB]">
+            {search ? '검색 결과가 없습니다.' : '승인된 강의가 없습니다.'}
           </div>
         ) : (
-          filtered.map((course, index) => (
+          filtered.map((course) => (
             <div
               key={course.courseId}
-              className="bg-white rounded-xl border border-[#D1D5DB] px-5 py-4 flex items-center justify-between"
+              className="bg-white rounded-xl border border-[#D1D5DB] px-5 py-4 flex items-center justify-between hover:shadow-sm transition-shadow"
             >
-              {/* 강의 정보 */}
               <div className="flex flex-col gap-1">
                 <p className="text-[14.5px] font-semibold text-[#1E2125]">{course.title}</p>
                 <p className="text-[12px] text-[#6A7282]">
@@ -69,15 +73,15 @@ export default function ApprovedCourse({ courses, categories }: Props) {
                 </p>
                 <div className="flex items-center gap-2 text-[12px] text-[#6A7282]">
                   <span className="text-[#FFD700]">★</span>
-                  <span>{course.ratingAvg.toFixed(1)}</span>
-                  <span>수강생 {course.studentCount.toLocaleString()}명</span>
+                  <span>{course.ratingAvg?.toFixed(1) || '0.0'}</span>
+                  <span className="w-[1px] h-2 bg-[#D1D5DB]" />
+                  <span>수강생 {course.studentCount?.toLocaleString() || 0}명</span>
                 </div>
               </div>
 
-              {/* 가격 + 버튼 */}
               <div className="flex flex-col items-end gap-2 shrink-0">
                 <span className="text-[15px] font-bold text-[#1E2125]">
-                  {course.price.toLocaleString()}{' '}
+                  {course.price?.toLocaleString() || 0}{' '}
                   <span className="text-[13px] font-normal text-[#6A7282]">크레딧</span>
                 </span>
                 <div className="flex items-center gap-2">

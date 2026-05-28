@@ -3,8 +3,9 @@ import Link from 'next/link';
 import Dashboard from '@/features/user/mycourses-instructor/components/Dashboard';
 import ApprovedCourse from '@/features/user/mycourses-instructor/components/ApprovedCourse';
 import PendingCourse from '@/features/user/mycourses-instructor/components/PendingCourse';
-import { fetchApprovedCourses } from '@/services/instructor.service';
 import { fetchCategories } from '@/services/categories.service';
+import { fetchApprovedCourses } from '@/services/instructor.service';
+import { fetchUserMe } from '@/services/user.service';
 import type { InstructorTab } from '@/constants/mockInstructorCourses';
 
 const TABS: { id: InstructorTab; label: string }[] = [
@@ -25,12 +26,17 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  const [approvedCourses, categories] = activeTab === 'approved' && accessToken
-    ? await Promise.all([
-        fetchApprovedCourses(accessToken),
-        fetchCategories(),
-      ])
-    : [[], []];
+  const [approvedCourses, categories] =
+    activeTab === 'approved' && accessToken
+      ? await (async () => {
+          const user = await fetchUserMe(accessToken);
+          if (!user) return [[], []];
+          return Promise.all([
+            fetchApprovedCourses(accessToken, String(user.id)),
+            fetchCategories(),
+          ]);
+        })()
+      : [[], []];
 
   return (
     <div className="max-w-275 container mx-auto px-6 py-8">

@@ -1,31 +1,37 @@
-import { ApprovedCourse } from "@/features/user/mycourses-instructor/types";
+import { ApprovedCourse } from '@/features/user/mycourses-instructor/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export async function fetchApprovedCourses(accessToken: string): Promise<ApprovedCourse[]> {
+export async function fetchApprovedCourses(
+  accessToken: string,
+  userId: string,
+): Promise<ApprovedCourse[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/instructor/courses/approved`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
+    const response = await fetch(
+      `${API_BASE_URL}/instructor/courses/approved`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'X-USER-ID': userId,
+        },
+        cache: 'no-store',
       },
-      cache: 'no-store',
-    });
+    );
 
     console.log('fetchApprovedCourses status:', response.status);
 
     if (!response.ok) {
       const errorBody = await response.text();
-      console.log('fetchApprovedCourses error body:', errorBody);
+      console.error('fetchApprovedCourses error:', errorBody);
       return [];
     }
 
-    const data = await response.json();
-    console.log('fetchApprovedCourses data:', data);
-    return data;
+    const result = await response.json();
+    return Array.isArray(result) ? result : result.data ?? [];
   } catch (e) {
-    console.log('fetchApprovedCourses error:', e);
+    console.error('fetchApprovedCourses fetch error:', e);
     return [];
   }
 }
