@@ -1,7 +1,10 @@
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import Dashboard from '@/features/user/mycourses-instructor/components/Dashboard';
 import ApprovedCourse from '@/features/user/mycourses-instructor/components/ApprovedCourse';
 import PendingCourse from '@/features/user/mycourses-instructor/components/PendingCourse';
+import { fetchApprovedCourses } from '@/services/instructor.service';
+import { fetchCategories } from '@/services/categories.service';
 import type { InstructorTab } from '@/constants/mockInstructorCourses';
 
 const TABS: { id: InstructorTab; label: string }[] = [
@@ -19,12 +22,20 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
   const activeTab: InstructorTab =
     tab === 'approved' || tab === 'pending' ? tab : 'dashboard';
 
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+
+  const [approvedCourses, categories] = activeTab === 'approved' && accessToken
+    ? await Promise.all([
+        fetchApprovedCourses(accessToken),
+        fetchCategories(),
+      ])
+    : [[], []];
+
   return (
     <div className="max-w-275 container mx-auto px-6 py-8">
-      {/* 타이틀 */}
       <h1 className="text-[24px] font-bold text-[#1E2125] mb-5">내 강의</h1>
 
-      {/* 탭 */}
       <div className="flex items-center gap-0 border-b border-[#E5E7EB] mb-6">
         {TABS.map(({ id, label }) => (
           <Link
@@ -41,10 +52,11 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
         ))}
       </div>
 
-      {/* 탭 콘텐츠 */}
       {activeTab === 'dashboard' && <Dashboard />}
-      {activeTab === 'approved'  && <ApprovedCourse />}
-      {activeTab === 'pending'   && <PendingCourse />}
+      {activeTab === 'approved' && (
+        <ApprovedCourse courses={approvedCourses} categories={categories} />
+      )}
+      {activeTab === 'pending' && <PendingCourse />}
     </div>
   );
 }
