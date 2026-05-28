@@ -118,3 +118,38 @@ export const MOCK_COURSE_DETAIL: CourseDetail = {
   ],
 };
 
+export interface StudentCourse {
+  id: number;
+  title: string;
+  instructor: string;
+  thumbnail: string;
+  progress: number; // 0~100
+  lastLecture: string;
+}
+
+export const MOCK_STUDENT_COURSES: StudentCourse[] = [
+  {
+    id: 1,
+    title: '[2026 최신판!] 정보처리기사 필기 완전정복',
+    instructor: '김정보',
+    thumbnail: '/mock/course1.jpg',
+    progress: 68,
+    lastLecture: 'Section 3. 운영체제 & 시스템 소프트웨어',
+  },
+  {
+    id: 2,
+    title: 'Python 데이터 분석 완벽 가이드',
+    instructor: '김강사',
+    thumbnail: '/mock/course2.jpg',
+    progress: 100,
+    lastLecture: '',
+  },
+  {
+    id: 3,
+    title: 'SQL 데이터베이스 기초부터 실무까지',
+    instructor: '이강사',
+    thumbnail: '/mock/course3.jpg',
+    progress: 42,
+    lastLecture: 'Section 2. DDL & DML 완전정복',
+  },
+];
