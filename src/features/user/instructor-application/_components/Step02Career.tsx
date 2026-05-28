@@ -1,7 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
+
+interface CertificationItem {
+  name: string;
+  file: File;
+}
 
 interface Step02Data {
   job: string;
@@ -10,7 +15,7 @@ interface Step02Data {
   platformName: string;
   studentCount: string;
   reviewLink: string;
-  certifications: string[];
+  certifications: CertificationItem[];
   channelLink: string;
 }
 
@@ -22,11 +27,11 @@ interface Step02CareerProps {
 
 export default function Step02Career({ data, onNext, onPrev }: Step02CareerProps) {
   const [form, setForm] = useState<Step02Data>(data);
-  const [certInput, setCertInput] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const certFileRef = useRef<HTMLInputElement>(null);
 
-  const isValid =
-    !!form.job.trim() && !!form.yearsOfExperience.trim() && form.hasOnlineExperience !== null;
+  const isValid = form.certifications.length > 0;
+  const isError = submitted && !isValid;
 
   const handleNext = () => {
     setSubmitted(true);
@@ -34,18 +39,15 @@ export default function Step02Career({ data, onNext, onPrev }: Step02CareerProps
     onNext(form);
   };
 
-  const inputCls =
-    'w-full h-11 px-4 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors';
-  const labelCls = 'block text-[13.5px] font-semibold text-[#1E2125] mb-1.5';
-  const isError = submitted && !isValid;
-
-  const addCertification = () => {
-    if (!certInput.trim()) return;
+  const addCertificationFiles = (files: File[]) => {
     setForm((prev) => ({
       ...prev,
-      certifications: [...prev.certifications, certInput.trim()],
+      certifications: [
+        ...prev.certifications,
+        ...files.map((file) => ({ name: file.name.replace(/\.[^/.]+$/, ''), file })),
+      ],
     }));
-    setCertInput('');
+    if (certFileRef.current) certFileRef.current.value = '';
   };
 
   const removeCertification = (idx: number) => {
@@ -55,13 +57,15 @@ export default function Step02Career({ data, onNext, onPrev }: Step02CareerProps
     }));
   };
 
+  const inputCls =
+    'w-full h-11 px-4 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors';
+  const labelCls = 'block text-[13.5px] font-semibold text-[#1E2125] mb-1.5';
+
   return (
     <div className="flex flex-col gap-6">
       {/* 안내 메시지 */}
       <div className={`flex items-center gap-2 rounded-lg px-4 py-3 border transition-colors ${
-        isError
-          ? 'bg-[#FFEBEB] border-[#FF5E5E]'
-          : 'bg-[#F9FBE7] border-[#827717]'
+        isError ? 'bg-[#FFEBEB] border-[#FF5E5E]' : 'bg-[#F9FBE7] border-[#827717]'
       }`}>
         <span className={`font-semibold ${isError ? 'text-[#FF5E5E]' : 'text-[#827717]'}`}>ⓘ</span>
         <p className={`text-[13px] font-semibold ${isError ? 'text-[#FF5E5E]' : 'text-[#827717]'}`}>
@@ -69,11 +73,9 @@ export default function Step02Career({ data, onNext, onPrev }: Step02CareerProps
         </p>
       </div>
 
-      {/* 현재 직업/소속 */}
+      {/* 현재 직업/소속 (선택) */}
       <div>
-        <label className={labelCls}>
-          현재 직업 / 소속 <span className="text-[#FF5E5E]">*</span>
-        </label>
+        <label className={labelCls}>현재 직업 / 소속 (선택)</label>
         <input
           type="text"
           placeholder="예: ○○회사 데이터분석팀 / 프리랜서 강사"
@@ -83,11 +85,9 @@ export default function Step02Career({ data, onNext, onPrev }: Step02CareerProps
         />
       </div>
 
-      {/* 실무 경력 연수 */}
+      {/* 실무 경력 연수 (선택) */}
       <div>
-        <label className={labelCls}>
-          관련 분야 실무 경력 연수 <span className="text-[#FF5E5E]">*</span>
-        </label>
+        <label className={labelCls}>관련 분야 실무 경력 연수 (선택)</label>
         <input
           type="number"
           min={0}
@@ -98,15 +98,20 @@ export default function Step02Career({ data, onNext, onPrev }: Step02CareerProps
         />
       </div>
 
-      {/* 온라인 강의 경험 */}
+      {/* 온라인 강의 경험 (선택) */}
       <div>
-        <label className={labelCls}>온라인 강의 경험 여부</label>
+        <label className={labelCls}>온라인 강의 경험 여부 (선택)</label>
         <div className="grid grid-cols-2 gap-3">
           {[true, false].map((val) => (
             <button
               key={String(val)}
               type="button"
-              onClick={() => setForm((prev) => ({ ...prev, hasOnlineExperience: val }))}
+              onClick={() =>
+                setForm((prev) => ({
+                  ...prev,
+                  hasOnlineExperience: prev.hasOnlineExperience === val ? null : val,
+                }))
+              }
               className={`h-11 rounded-lg text-[13.5px] font-semibold border transition-colors cursor-pointer ${
                 form.hasOnlineExperience === val
                   ? 'bg-[#FF5E5E] border-[#FF5E5E] text-white'
@@ -118,7 +123,6 @@ export default function Step02Career({ data, onNext, onPrev }: Step02CareerProps
           ))}
         </div>
 
-        {/* 있음 선택 시 추가 필드 */}
         {form.hasOnlineExperience === true && (
           <div className="mt-4 flex flex-col gap-3 p-4 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB]">
             <div>
@@ -145,48 +149,66 @@ export default function Step02Career({ data, onNext, onPrev }: Step02CareerProps
         )}
       </div>
 
-      {/* 보유 자격증 */}
+      {/* 보유 자격증 (필수) */}
       <div>
-        <label className={labelCls}>보유 자격증</label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="자격증명을 입력하고 추가 버튼을 클릭하세요"
-            value={certInput}
-            onChange={(e) => setCertInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addCertification()}
-            className={`${inputCls} flex-1`}
-          />
-          <Button
-            type="button"
-            onClick={addCertification}
-            className="h-11 px-5 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold cursor-pointer shrink-0"
-          >
-            추가
-          </Button>
-        </div>
+        <label className={labelCls}>
+          보유 자격증 <span className="text-[#FF5E5E]">*</span>
+        </label>
+
+        {/* 파일 첨부 버튼 */}
+        <input
+          type="file"
+          ref={certFileRef}
+          accept=".pdf,.jpg,.jpeg,.png"
+          multiple
+          onChange={(e) => {
+            const files = Array.from(e.target.files ?? []);
+            if (files.length > 0) addCertificationFiles(files);
+          }}
+          className="hidden"
+        />
+        <button
+          type="button"
+          onClick={() => certFileRef.current?.click()}
+          className={`w-full h-11 rounded-lg border border-dashed text-[13px] transition-colors cursor-pointer flex items-center justify-center gap-2 ${
+            isError
+              ? 'border-[#FF5E5E] bg-[#FFEBEB] text-[#FF5E5E]'
+              : 'border-[#D1D5DB] bg-[#F9FAFB] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125]'
+          }`}
+        >
+          <span>↑</span> 자격증 파일 첨부 (PDF, JPG, PNG · 여러 개 가능)
+        </button>
+
+        {isError && (
+          <p className="text-[12px] text-[#FF5E5E] mt-1">자격증을 1개 이상 첨부해주세요.</p>
+        )}
+
+        {/* 첨부된 자격증 목록 */}
         {form.certifications.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2.5">
+          <div className="flex flex-col gap-2 mt-2.5">
             {form.certifications.map((cert, idx) => (
-              <span
+              <div
                 key={idx}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F9FBE7] text-[12.5px] text-[#827717] font-semibold"
+                className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-[#CFEE5D] bg-[#F1FFC1]"
               >
-                {cert}
+                <div className="flex items-center gap-2">
+                  <span className="text-[#A8D014]">✓</span>
+                  <span className="text-[13px] font-medium text-[#1E2125]">📎 {cert.name}</span>
+                </div>
                 <button
                   type="button"
                   onClick={() => removeCertification(idx)}
-                  className="text-[#6A7282] hover:text-[#FF5E5E] cursor-pointer"
+                  className="text-[#6A7282] hover:text-[#FF5E5E] cursor-pointer text-[16px]"
                 >
                   ×
                 </button>
-              </span>
+              </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* 참고 채널 링크 */}
+      {/* 참고 채널 링크 (선택) */}
       <div>
         <label className={labelCls}>참고 채널 링크 (선택)</label>
         <input

@@ -25,9 +25,8 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
   const portfolioRef = useRef<HTMLInputElement>(null);
   const curriculumRef = useRef<HTMLInputElement>(null);
 
-  const isValid =
-    !!form.resumeFile && !!form.portfolioFile && !!form.curriculumFile && !!form.sampleVideoLink.trim();
-
+  // 포트폴리오만 필수
+  const isValid = !!form.portfolioFile;
   const isError = submitted && !isValid;
 
   const handleSubmit = () => {
@@ -57,7 +56,12 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
   }) => (
     <div>
       <label className={labelCls}>
-        {label} {required && <span className="text-[#FF5E5E]">*</span>}
+        {label}{' '}
+        {required ? (
+          <span className="text-[#FF5E5E]">*</span>
+        ) : (
+          <span className="text-[#6A7282] text-[12px]">(선택)</span>
+        )}
       </label>
       <input
         type="file"
@@ -84,9 +88,11 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
           </button>
         </div>
       ) : (
-        <div className={`flex items-center justify-between px-4 py-3 rounded-lg border border-dashed ${
-          isError && required ? 'border-[#FF5E5E] bg-[#FFEBEB]' : 'border-[#D1D5DB] bg-[#F9FAFB]'
-        }`}>
+        <div
+          className={`flex items-center justify-between px-4 py-3 rounded-lg border border-dashed ${
+            isError && required ? 'border-[#FF5E5E] bg-[#FFEBEB]' : 'border-[#D1D5DB] bg-[#F9FAFB]'
+          }`}
+        >
           <div className="flex items-center gap-2">
             <span className="text-[#6A7282]">↑</span>
             <div>
@@ -110,21 +116,21 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
   return (
     <div className="flex flex-col gap-6">
       {/* 안내 메시지 */}
-      <div className={`flex items-center gap-2 rounded-lg px-4 py-3 border transition-colors ${
-        isError
-          ? 'bg-[#FFEBEB] border-[#FF5E5E]'
-          : 'bg-[#F9FBE7] border-[#827717]'
-      }`}>
+      <div
+        className={`flex items-center gap-2 rounded-lg px-4 py-3 border transition-colors ${
+          isError ? 'bg-[#FFEBEB] border-[#FF5E5E]' : 'bg-[#F9FBE7] border-[#827717]'
+        }`}
+      >
         <span className={`font-semibold ${isError ? 'text-[#FF5E5E]' : 'text-[#827717]'}`}>ⓘ</span>
         <p className={`text-[13px] font-semibold ${isError ? 'text-[#FF5E5E]' : 'text-[#827717]'}`}>
-          모든 서류는 필수 제출 항목입니다. 제출 후 사내 평가를 거쳐 일주일 이내에 결과를 이메일로 안내드립니다.
+          포트폴리오는 필수 제출 항목입니다. <br/> 제출 후 사내 평가를 거쳐 일주일 이내에 결과를 이메일로
+          안내드립니다.
         </p>
       </div>
 
-      {/* 이력서 */}
+      {/* 이력서 (선택) */}
       <FileUploadField
         label="이력서"
-        required
         accept=".pdf,.doc,.docx"
         acceptLabel="PDF, DOC, DOCX"
         file={form.resumeFile}
@@ -132,21 +138,28 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
         onFile={(f) => setForm((prev) => ({ ...prev, resumeFile: f }))}
       />
 
-      {/* 포트폴리오 */}
-      <FileUploadField
-        label="포트폴리오"
-        required
-        accept=".pdf,.ppt,.pptx"
-        acceptLabel="PDF, PPT, PPTX"
-        file={form.portfolioFile}
-        inputRef={portfolioRef}
-        onFile={(f) => setForm((prev) => ({ ...prev, portfolioFile: f }))}
-      />
+      {/* 포트폴리오 (필수) */}
+      <div>
+        <label className={labelCls}>
+          포트폴리오 <span className="text-[#FF5E5E]">*</span>
+        </label>
+        <div className="relative">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6A7282]">🔗</span>
+          <input
+            type="url"
+            required
+            placeholder="링크를 입력해주세요"
+            value={form.sampleVideoLink}
+            onChange={(e) => setForm((prev) => ({ ...prev, sampleVideoLink: e.target.value }))}
+            className="w-full h-11 pl-9 pr-4 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
+          />
+        </div>
+      </div>
 
-      {/* 강의계획서 / 샘플 커리큘럼 */}
+
+      {/* 강의계획서 / 샘플 커리큘럼 (선택) */}
       <FileUploadField
         label="강의계획서 / 샘플 커리큘럼"
-        required
         accept=".pdf,.doc,.docx,.ppt,.pptx"
         acceptLabel="PDF, DOC, DOCX, PPT, PPTX"
         file={form.curriculumFile}
@@ -154,10 +167,10 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
         onFile={(f) => setForm((prev) => ({ ...prev, curriculumFile: f }))}
       />
 
-      {/* 샘플 강의 영상 링크 */}
+      {/* 샘플 강의 영상 링크 (선택) */}
       <div>
         <label className={labelCls}>
-          샘플 강의 영상 링크 <span className="text-[#FF5E5E]">*</span>
+          샘플 강의 영상 링크 <span className="text-[#6A7282] text-[12px]">(선택)</span>
         </label>
         <div className="relative">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6A7282]">🔗</span>
@@ -166,9 +179,7 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
             placeholder="유튜브 또는 구글 드라이브 링크를 입력해주세요"
             value={form.sampleVideoLink}
             onChange={(e) => setForm((prev) => ({ ...prev, sampleVideoLink: e.target.value }))}
-            className={`w-full h-11 pl-9 pr-4 rounded-lg border bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors ${
-              isError && !form.sampleVideoLink.trim() ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]'
-            }`}
+            className="w-full h-11 pl-9 pr-4 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
           />
         </div>
       </div>
@@ -188,7 +199,7 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
           onClick={handleSubmit}
           className="h-12 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer"
         >
-         지원하기
+          지원하기
         </Button>
       </div>
     </div>
