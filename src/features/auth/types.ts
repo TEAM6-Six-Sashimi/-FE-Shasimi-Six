@@ -34,3 +34,15 @@ export interface LoginIdCheckResponseDto {
   available: boolean;
 }
 
+export interface UserMe {
+  id: number;
+  name: string;
+  loginId: string;
+  email: string;
+  birthDate: string;
+  role: 'STUDENT' | 'INSTRUCTOR' | 'ADMIN';
+  status: string;
+  emailVerified: boolean;
+  referralCode: string;
+  interestCategoryIds: number[];
+}
