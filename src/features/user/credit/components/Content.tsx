@@ -40,7 +40,7 @@ export default function Content({
 
     return (
         <div>
-            <h1 className="text-[27px] font-bold mt-2 mb-8">크래딧 충전</h1>
+            <h1 className="text-[27px] font-bold mt-2 mb-8">크레딧 충전</h1>
             <div className="mb-10">
                 <h2 className="text-[17px] font-semibold mb-3">충전 금액 선택</h2>
                 <div className="grid grid-cols-4 gap-3">
