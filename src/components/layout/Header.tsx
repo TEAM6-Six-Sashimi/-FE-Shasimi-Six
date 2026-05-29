@@ -9,7 +9,12 @@ export default async function Header() {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken')?.value;
 
+    console.log('=== Header 렌더링 ===');
+    console.log('accessToken 존재:', !!accessToken);
+
     const user = accessToken ? await fetchUserMe(accessToken) : GUEST_USER;
+
+    console.log('user.role:', user.role);
 
     return (
         <div
@@ -61,7 +66,7 @@ export default async function Header() {
 
                     {user.role === "ADMIN" && (
                         <div className="flex items-center gap-2.5">
-                            <Link href="/admin/dashboard" className="flex items-center text-[15px] font-medium justify-center bg-[#CFEE5D] h-8 w-30 rounded-sm gap-1">
+                            <Link href="/admin" className="flex items-center text-[15px] font-medium justify-center bg-[#CFEE5D] hover:bg-[#A8D014] h-8 w-30 rounded-sm gap-1">
                                 <Image src="header/admin.svg" width={17} height={17} alt=""/>
                                 관리자 모드
                             </Link>
