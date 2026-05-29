@@ -65,9 +65,10 @@ export default function PendingCourses({ courses, setCourses, categories }: Prop
           <thead>
             <tr className="border-b border-[#E5E7EB]">
               <th className="py-3 w-[30%] text-center font-semibold text-[#1E2125]">강의명</th>
-              <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">카테고리</th>
-              <th className="py-3 w-[17%] text-center font-semibold text-[#1E2125]">등록 요청일</th>
-              <th className="py-3 w-[20%] text-center font-semibold text-[#1E2125]">관리</th>
+              <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">강사명</th>
+              <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">카테고리</th>
+              <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">등록 요청일</th>
+              <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">관리</th>
             </tr>
           </thead>
           <tbody>
@@ -78,7 +79,8 @@ export default function PendingCourses({ courses, setCourses, categories }: Prop
             ) : (
               sorted.map((c) => (
                 <tr key={c.courseId} className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors">
-                  <td className="py-3 text-center font-semibold text-[#1E2125]">{c.title}</td>
+                  <td className="py-3 px-6 text-left font-semibold text-[#1E2125]">{c.title}</td>
+                  <td className="py-3 text-center font-semibold text-[#1E2125]">{c.instructorName}</td>
                   <td className="py-3 text-center text-[#6A7282]">{getCategoryName(c.categoryId)}</td>
                   <td className="py-3 text-center text-[#6A7282]">{c.createdAt.slice(0, 10)}</td>
                   <td className="py-3 text-center">
@@ -132,7 +134,7 @@ export default function PendingCourses({ courses, setCourses, categories }: Prop
                 disabled={loading}
                 className="px-5 py-2 rounded border-2 border-[#FF5E5E] bg-[#FF5E5E] text-[13px] font-semibold text-white hover:bg-[#D14848] hover:border-[#D14848] cursor-pointer transition-colors disabled:opacity-50"
               >
-                {loading ? '처리 중...' : '반려 확정'}
+                {loading ? '처리 중...' : '반려'}
               </button>
             </div>
           </div>
