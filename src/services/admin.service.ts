@@ -2,7 +2,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function fetchAdminCourses(accessToken: string) {
   try {
-    const res = await fetch(`http://localhost:8080/admin/courses`, {
+    const res = await fetch(`${API_BASE_URL}/admin/courses`, {
       headers: { 'Authorization': `Bearer ${accessToken}` },
       cache: 'no-store',
     });

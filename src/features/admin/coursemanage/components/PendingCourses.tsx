@@ -1,18 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { approveCourse, rejectCourse } from '@/services/admin.service';
 import type { Category } from '@/features/categories/types';
 import { AdminCourse } from '../type';
+import { approveCourseAction, rejectCourseAction } from '../action';
 
 interface Props {
   courses: AdminCourse[];
   setCourses: React.Dispatch<React.SetStateAction<AdminCourse[]>>;
   categories: Category[];
-  accessToken: string;
 }
 
-export default function PendingCourses({ courses, setCourses, categories, accessToken }: Props) {
+export default function PendingCourses({ courses, setCourses, categories }: Props) {
   const [rejectModal, setRejectModal] = useState<{ courseId: number; title: string } | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,9 +32,9 @@ export default function PendingCourses({ courses, setCourses, categories, access
   const handleApprove = async (courseId: number) => {
     try {
       setLoading(true);
-      await approveCourse(accessToken, courseId);
+      await approveCourseAction(courseId);
       setCourses((prev) => prev.filter((c) => c.courseId !== courseId));
-    } catch (e) {
+    } catch {
       alert('승인 처리에 실패했습니다.');
     } finally {
       setLoading(false);
@@ -47,11 +46,11 @@ export default function PendingCourses({ courses, setCourses, categories, access
     if (!rejectReason.trim()) { alert('반려 사유를 입력해주세요.'); return; }
     try {
       setLoading(true);
-      await rejectCourse(accessToken, rejectModal.courseId, rejectReason);
+      await rejectCourseAction(rejectModal.courseId, rejectReason);
       setCourses((prev) => prev.filter((c) => c.courseId !== rejectModal.courseId));
       setRejectModal(null);
       setRejectReason('');
-    } catch (e) {
+    } catch {
       alert('반려 처리에 실패했습니다.');
     } finally {
       setLoading(false);
@@ -123,7 +122,8 @@ export default function PendingCourses({ courses, setCourses, categories, access
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setRejectModal(null)}
-                className="px-5 py-2 rounded border-2 border-[#D1D5DB] text-[13px] font-semibold text-[#1E2125] hover:bg-[#F9FAFB] cursor-pointer transition-colors"
+                disabled={loading}
+                className="px-5 py-2 rounded border-2 border-[#D1D5DB] text-[13px] font-semibold text-[#1E2125] hover:bg-[#F9FAFB] cursor-pointer transition-colors disabled:opacity-50"
               >
                 취소
               </button>
@@ -132,7 +132,7 @@ export default function PendingCourses({ courses, setCourses, categories, access
                 disabled={loading}
                 className="px-5 py-2 rounded border-2 border-[#FF5E5E] bg-[#FF5E5E] text-[13px] font-semibold text-white hover:bg-[#D14848] hover:border-[#D14848] cursor-pointer transition-colors disabled:opacity-50"
               >
-                반려 확정
+                {loading ? '처리 중...' : '반려 확정'}
               </button>
             </div>
           </div>

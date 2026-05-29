@@ -18,7 +18,6 @@ export default async function Page() {
       allCourses={allCourses}
       pendingCourses={pendingCourses}
       categories={categories}
-      accessToken={accessToken}
     />
   );
 }
