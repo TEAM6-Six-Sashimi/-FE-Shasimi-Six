@@ -35,3 +35,23 @@ export async function fetchApprovedCourses(
     return [];
   }
 }
+
+import { InstructorInProgressCourse } from '@/features/user/mycourses-instructor/types';
+
+export async function fetchInProgressCourses(
+  accessToken: string,
+  userId: string,
+): Promise<InstructorInProgressCourse[]> {
+  try {
+    const res = await fetch('http://localhost:8080/instructor/courses/in-progress', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'X-USER-ID': userId,
+      },
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    return res.json();
+  } catch { return []; }
+}
