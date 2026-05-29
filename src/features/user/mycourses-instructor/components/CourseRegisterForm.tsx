@@ -61,7 +61,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
     lectures: [{ id: 1, ...DEFAULT_LECTURE }],
   });
 
-  const subCategories = categories.find((c) => c.name === form.category)?.subCategories ?? [];
+  const subCategories = categories.find((c) => c.name === form.category)?.options ?? [];
 
   // ── 기본정보 핸들러 ──────────────────────────────────────────
   const handleField = <K extends keyof CourseFormData>(key: K, value: CourseFormData[K]) => {
@@ -176,8 +176,8 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                 </SelectTrigger>
                 <SelectContent position="popper">
                   {subCategories.map((sub) => (
-                    <SelectItem key={sub} value={sub} className="text-[13px]">
-                      {sub}
+                    <SelectItem key={sub.id} value={String(sub.id)} className="text-[13px]">
+                      {sub.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

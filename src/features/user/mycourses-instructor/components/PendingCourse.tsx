@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import type { InstructorInProgressCourse } from '../types';
 import type { Category } from '@/features/categories/types';
+import { deleteCourseAction } from '../actions';
+import TwoButtonModal from '@/components/modals/TwoButtonModal';
 
 type FilterType = '전체' | '대기' | '보관' | '반려';
 
@@ -30,17 +32,20 @@ export default function PendingCourse({ courses, categories }: Props) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterType>('전체');
   const [rejectionModal, setRejectionModal] = useState<string | null>(null);
+  const [localCourses, setLocalCourses] = useState(courses);
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const getCategoryName = (categoryId: number) => {
     for (const cat of categories) {
-      if ((cat.mainCategoryId) === categoryId) return cat.name;
+      if (cat.mainCategoryId === categoryId) return cat.name;
       const option = cat.options?.find((o) => o.id === categoryId);
       if (option) return cat.name;
     }
     return String(categoryId);
   };
 
-  const filtered = courses.filter((c) => {
+  const filtered = localCourses.filter((c) => {
     const matchSearch = c.title.includes(search);
     const statusLabel = STATUS_LABEL[c.status] ?? '';
     const matchFilter =
@@ -50,6 +55,20 @@ export default function PendingCourse({ courses, categories }: Props) {
       (filter === '반려' && statusLabel === '반려');
     return matchSearch && matchFilter;
   });
+
+  const handleDelete = async () => {
+    if (deleteTargetId === null) return;
+    try {
+      setDeleteLoading(true);
+      await deleteCourseAction(deleteTargetId);
+      setLocalCourses((prev) => prev.filter((c) => c.courseId !== deleteTargetId));
+      setDeleteTargetId(null);
+    } catch {
+      alert('삭제 처리에 실패했습니다.');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4 min-h-[63vh]">
@@ -93,7 +112,7 @@ export default function PendingCourse({ courses, categories }: Props) {
 
       {/* 강의 목록 */}
       <div className="flex flex-col gap-3">
-        {courses.length === 0 ? (
+        {localCourses.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-60 gap-3 text-[#6A7282]">
             <p className="text-[16px] font-medium">신청한 강의가 없습니다.</p>
           </div>
@@ -112,7 +131,9 @@ export default function PendingCourse({ courses, categories }: Props) {
               >
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded-md text-[11.5px] font-semibold ${STATUS_STYLE[statusLabel] ?? ''}`}>
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-[11.5px] font-semibold ${STATUS_STYLE[statusLabel] ?? ''}`}
+                    >
                       {statusLabel}
                     </span>
                     {course.status === 'REJECTED' && course.rejectReason && (
@@ -135,19 +156,28 @@ export default function PendingCourse({ courses, categories }: Props) {
                   </span>
                   <div className="flex items-center gap-2">
                     {isPending ? (
-                      <Button size="sm" disabled className="h-9 px-4 text-[12.5px] font-semibold text-[#6A7282] bg-[#E5E7EB] cursor-not-allowed">
+                      <Button
+                        size="sm"
+                        disabled
+                        className="h-9 px-4 text-[12.5px] font-semibold text-[#6A7282] bg-[#E5E7EB] cursor-not-allowed"
+                      >
                         📝 수정
                       </Button>
                     ) : (
                       <Link href={`/mycourses-instructor/${course.courseId}/edit`}>
-                        <Button variant="outline" size="sm" className="h-9 px-4 border-[#D1D5DB] text-[#1E2125] text-[12.5px] font-semibold hover:bg-[#F9FAFB] cursor-pointer">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-9 px-4 border-[#D1D5DB] text-[#1E2125] text-[12.5px] font-semibold hover:bg-[#F9FAFB] cursor-pointer"
+                        >
                           📝 수정
                         </Button>
                       </Link>
                     )}
                     <Button
                       size="sm"
-                      disabled={isPending}
+                      disabled={isPending || deleteLoading}
+                      onClick={() => setDeleteTargetId(course.courseId)}
                       className={`h-9 px-4 text-[12.5px] font-semibold transition-colors ${
                         isPending
                           ? 'text-[#6A7282] bg-[#E5E7EB] cursor-not-allowed'
@@ -166,15 +196,34 @@ export default function PendingCourse({ courses, categories }: Props) {
 
       {/* 반려 사유 모달 */}
       {rejectionModal !== null && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setRejectionModal(null)}>
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+          onClick={() => setRejectionModal(null)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 flex flex-col gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-[16px] font-bold text-[#1E2125]">반려 사유</h3>
             <p className="text-[13.5px] text-[#6A7282] leading-relaxed">{rejectionModal}</p>
-            <Button onClick={() => setRejectionModal(null)} className="w-full h-10 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold cursor-pointer">
+            <Button
+              onClick={() => setRejectionModal(null)}
+              className="w-full h-10 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold cursor-pointer"
+            >
               확인
             </Button>
           </div>
         </div>
+      )}
+      {deleteTargetId !== null && (
+        <TwoButtonModal
+          title="강의 삭제"
+          message={`정말 삭제하시겠습니까?\n삭제된 강의는 복구할 수 없습니다.`}
+          confirmLabel="삭제"
+          cancelLabel="취소"
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTargetId(null)}
+        />
       )}
     </div>
   );
