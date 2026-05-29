@@ -1,7 +1,6 @@
 export interface Category {
   mainCategoryId: number;
   name: string;
-  subCategories: string[];
   options: CategoryOption[];
 }
 
