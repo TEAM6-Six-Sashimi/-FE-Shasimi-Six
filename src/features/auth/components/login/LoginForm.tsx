@@ -29,8 +29,7 @@ export default function LoginForm() {
       });
 
       alert(`🎉 ${name}님, 환영합니다!`);
-      router.push("/");
-      router.refresh();
+      window.location.href = "/";
 
     } catch (error: any) {
       setErrorMessage(error.message || "서버와 연결할 수 없습니다.");
