@@ -66,7 +66,7 @@ export default async function Header() {
 
                     {user.role === "ADMIN" && (
                         <div className="flex items-center gap-2.5">
-                            <Link href="/admin" className="flex items-center text-[15px] font-medium justify-center bg-[#CFEE5D] h-8 w-30 rounded-sm gap-1">
+                            <Link href="/admin" className="flex items-center text-[15px] font-medium justify-center bg-[#CFEE5D] hover:bg-[#A8D014] h-8 w-30 rounded-sm gap-1">
                                 <Image src="header/admin.svg" width={17} height={17} alt=""/>
                                 관리자 모드
                             </Link>
