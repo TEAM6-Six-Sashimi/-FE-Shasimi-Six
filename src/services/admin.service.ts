@@ -1,4 +1,22 @@
+import { InstructorApplication } from "@/features/admin/usermanage/types";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+export async function fetchInstructorApplications(accessToken: string): Promise<InstructorApplication[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/members/instructor-applications/pending`, {
+      headers: { 'Authorization': `Bearer ${accessToken}` },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) return [];
+
+    const data = await res.json();
+    return Array.isArray(data) ? data : data.data ?? [];
+  } catch {
+    return [];
+  }
+}
 
 export async function fetchAdminCourses(accessToken: string) {
   try {
@@ -7,8 +25,6 @@ export async function fetchAdminCourses(accessToken: string) {
       cache: 'no-store',
     });
 
-    console.log('fetchAdminCourses status:', res.status);
-
     if (!res.ok) {
       const errorBody = await res.text();
       console.log('fetchAdminCourses error:', errorBody);
@@ -16,10 +32,8 @@ export async function fetchAdminCourses(accessToken: string) {
     }
 
     const data = await res.json();
-    console.log('fetchAdminCourses data:', data);
     return data;
   } catch (e) {
-    console.log('fetchAdminCourses error:', e);
     return [];
   }
 }
