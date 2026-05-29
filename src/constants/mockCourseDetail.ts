@@ -32,7 +32,7 @@ export interface CourseDetail {
   studentCount: number;
   duration: number; // 총 강의 시간 (시간)
   lectureCount: number; // 총 강의 수
-  level: '입문' | '초급' | '중급' | '고급';
+  level: '초급' | '중급' | '고급';
   updatedAt: string;
   instructor: {
     name: string;

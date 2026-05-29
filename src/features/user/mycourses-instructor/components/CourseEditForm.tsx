@@ -37,7 +37,7 @@ interface CourseEditFormProps {
   initialData: CourseFormData; // 기존 강의 데이터
 }
 
-const LEVELS = ['입문', '초급', '중급', '고급'] as const;
+const LEVELS = ['초급', '중급', '고급'] as const;
 
 const DEFAULT_LECTURE: Omit<Lecture, 'id'> = {
   title: '',
