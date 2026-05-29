@@ -31,7 +31,7 @@ export default async function Header() {
                 <div className="flex flex-1 justify-end">
                     {user.role === "STUDENT" && (
                         <div className="flex items-center gap-3">
-                            <Link href="/payments" className="flex text-[15px] font-medium gap-1">
+                            <Link href="/credit" className="flex text-[15px] font-medium gap-1">
                                 <Image src="/header/credit.svg" width={17} height={17} alt=""/> 크레딧 충전
                             </Link>
                             <Link href="/cart">
@@ -46,7 +46,7 @@ export default async function Header() {
 
                     {user.role === "INSTRUCTOR" && (
                         <div className="flex items-center gap-2.5">
-                            <Link href="/payments" className="flex text-[15px] font-medium gap-1">
+                            <Link href="/credit" className="flex text-[15px] font-medium gap-1">
                                 <Image src="/header/credit.svg" width={17} height={17} alt=""/> 크레딧 충전
                             </Link>
                             <Link href="/cart">
@@ -65,7 +65,7 @@ export default async function Header() {
                                 <Image src="header/admin.svg" width={17} height={17} alt=""/>
                                 관리자 모드
                             </Link>
-                            <Link href="/payments" className="flex text-[15px] font-medium gap-1">
+                            <Link href="/credit" className="flex text-[15px] font-medium gap-1">
                                 <Image src="/header/credit.svg" width={17} height={17} alt=""/> 크레딧 충전
                             </Link>
                             <Link href="/cart">
