@@ -183,7 +183,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {(['인기순', '최신순', '높은 평점순'] as SortType[]).map((s) => (
+                {(['인기순', '최신순', '평점순'] as SortType[]).map((s) => (
                   <SelectItem key={s} value={s} className="text-[12.5px]">
                     {s}
                   </SelectItem>
