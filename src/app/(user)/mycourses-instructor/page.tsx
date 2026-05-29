@@ -4,14 +4,14 @@ import Dashboard from '@/features/user/mycourses-instructor/components/Dashboard
 import ApprovedCourse from '@/features/user/mycourses-instructor/components/ApprovedCourse';
 import PendingCourse from '@/features/user/mycourses-instructor/components/PendingCourse';
 import { fetchCategories } from '@/services/categories.service';
-import { fetchApprovedCourses, fetchInProgressCourses } from '@/services/instructor.service';
+import { fetchApprovedCourses } from '@/services/instructor.service';
 import { fetchUserMe } from '@/services/user.service';
 import type { InstructorTab } from '@/constants/mockInstructorCourses';
 
 const TABS: { id: InstructorTab; label: string }[] = [
   { id: 'dashboard', label: '대시보드' },
-  { id: 'approved', label: '승인된 강의' },
-  { id: 'pending', label: '대기/보관/반려' },
+  { id: 'approved',  label: '승인된 강의' },
+  { id: 'pending',   label: '대기/보관/반려' },
 ];
 
 interface PageProps {
@@ -26,17 +26,17 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  const user = accessToken ? await fetchUserMe(accessToken) : null;
-  const userId = user ? String(user.id) : '';
-
-  const [approvedCourses, inProgressCourses, categories] =
-    accessToken && userId
-      ? await Promise.all([
-          activeTab === 'approved' ? fetchApprovedCourses(accessToken, userId) : Promise.resolve([]),
-          activeTab === 'pending' ? fetchInProgressCourses(accessToken, userId) : Promise.resolve([]),
-          fetchCategories(),
-        ])
-      : [[], [], []];
+  const [approvedCourses, categories] =
+    activeTab === 'approved' && accessToken
+      ? await (async () => {
+          const user = await fetchUserMe(accessToken);
+          if (!user) return [[], []];
+          return Promise.all([
+            fetchApprovedCourses(accessToken, String(user.id)),
+            fetchCategories(),
+          ]);
+        })()
+      : [[], []];
 
   return (
     <div className="max-w-275 container mx-auto px-6 py-8">
@@ -62,9 +62,7 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
       {activeTab === 'approved' && (
         <ApprovedCourse courses={approvedCourses} categories={categories} />
       )}
-      {activeTab === 'pending' && (
-        <PendingCourse courses={inProgressCourses} categories={categories} />
-      )}
+      {activeTab === 'pending' && <PendingCourse />}
     </div>
   );
 }
