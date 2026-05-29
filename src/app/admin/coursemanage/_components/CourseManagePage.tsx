@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Category } from '@/features/categories/types';
-import { AdminCourse } from '@/features/admin/coursemanage/type';
+import { AdminCourse, RejectedCourse } from '@/features/admin/coursemanage/type';
 import AllCourses from '@/features/admin/coursemanage/components/AllCourses';
 import PendingCourses from '@/features/admin/coursemanage/components/PendingCourses';
 import RejectedCourses from '@/features/admin/coursemanage/components/RejectedCourses';
@@ -12,10 +12,11 @@ type Tab = 'all' | 'pending' | 'rejected';
 interface Props {
   allCourses: AdminCourse[];
   pendingCourses: AdminCourse[];
+  rejectedCourses: RejectedCourse[];
   categories: Category[];
 }
 
-export default function CourseManagePage({ allCourses, pendingCourses, categories }: Props) {
+export default function CourseManagePage({ allCourses, pendingCourses, rejectedCourses, categories }: Props) {
   const [tab, setTab] = useState<Tab>('all');
   const [pending, setPending] = useState<AdminCourse[]>(pendingCourses);
 
@@ -53,7 +54,7 @@ export default function CourseManagePage({ allCourses, pendingCourses, categorie
           categories={categories}
         />
       )}
-      {tab === 'rejected' && <RejectedCourses />}
+      {tab === 'rejected' && <RejectedCourses courses={rejectedCourses} />}
     </div>
   );
 }

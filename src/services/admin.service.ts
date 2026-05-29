@@ -68,3 +68,14 @@ export async function rejectCourse(accessToken: string, courseId: number, reject
   });
   if (!res.ok) throw new Error('반려 처리에 실패했습니다.');
 }
+
+export async function fetchAdminRejectedCourses(accessToken: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/courses/rejected`, {
+      headers: { 'Authorization': `Bearer ${accessToken}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    return res.json();
+  } catch { return []; }
+}

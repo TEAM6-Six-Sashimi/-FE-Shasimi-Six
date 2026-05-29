@@ -20,7 +20,7 @@ interface Props {
   categories: Category[];
 }
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 7;
 
 export default function AllCourses({ courses, categories }: Props) {
   const [search, setSearch] = useState('');
@@ -40,6 +40,15 @@ export default function AllCourses({ courses, categories }: Props) {
     return String(categoryId);
   };
 
+  console.log(
+    'courses categoryIds:',
+    courses.map((c) => c.categoryId),
+  );
+  console.log(
+    'categories:',
+    categories.map((c) => ({ id: c.mainCategoryId, name: c.name, options: c.options })),
+  );
+
   const filtered = useMemo(() => {
     let result = [...courses];
     if (search) result = result.filter((c) => c.title.includes(search));
@@ -48,7 +57,11 @@ export default function AllCourses({ courses, categories }: Props) {
     if (sort === '인기순') result.sort((a, b) => b.studentCount - a.studentCount);
     if (sort === '높은 평점순') result.sort((a, b) => b.ratingAvg - a.ratingAvg);
     if (sort === '최신순')
-      result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      result.sort(
+        (a, b) =>
+          new Date(b.approvedAt ?? b.createdAt).getTime() -
+          new Date(a.approvedAt ?? a.createdAt).getTime(),
+      );
     return result;
   }, [courses, search, sort, categoryFilter]);
 
@@ -97,8 +110,9 @@ export default function AllCourses({ courses, categories }: Props) {
         <thead>
           <tr className="border-b border-[#E5E7EB]">
             <th className="py-3 w-[28%] text-center font-semibold text-[#1E2125]">강의명</th>
+            <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">강사명</th>
             <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125]">
-              <div className="flex items-center justify-center gap-1">
+              <div className="flex items-center text-center justify-center gap-1">
                 카테고리
                 <div className="relative">
                   <button
@@ -133,7 +147,7 @@ export default function AllCourses({ courses, categories }: Props) {
                 </div>
               </div>
             </th>
-            <th className="py-3 w-[13%] text-center font-semibold text-[#1E2125]">수강생 수</th>
+            <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">수강생 수</th>
             <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">평점</th>
             <th className="py-3 w-[13%] text-center font-semibold text-[#1E2125]">등록일</th>
             <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">상태</th>
@@ -152,7 +166,7 @@ export default function AllCourses({ courses, categories }: Props) {
                 key={c.courseId}
                 className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
               >
-                <td className="py-3 text-center">
+                <td className="px-6 py-3 text-left">
                   <Link
                     href={`/courses/${encodeURIComponent(getCategoryName(c.categoryId))}/${c.courseId}`}
                     className="font-semibold text-[#1E2125] hover:text-[#FF5E5E] hover:underline transition-colors"
@@ -160,6 +174,7 @@ export default function AllCourses({ courses, categories }: Props) {
                     {c.title}
                   </Link>
                 </td>
+                <td className="py-3 text-center text-[#6A7282]">{c.instructorName}</td>
                 <td className="py-3 text-center text-[#6A7282]">{getCategoryName(c.categoryId)}</td>
                 <td className="py-3 text-center text-[#6A7282]">
                   {c.studentCount.toLocaleString()}명
@@ -170,7 +185,9 @@ export default function AllCourses({ courses, categories }: Props) {
                     {c.ratingAvg.toFixed(1)}
                   </span>
                 </td>
-                <td className="py-3 text-center text-[#6A7282]">{c.createdAt.slice(0, 10)}</td>
+                <td className="py-3 text-center text-[#6A7282]">
+                  {c.approvedAt?.slice(0, 10) ?? '-'}
+                </td>
                 <td className="py-3 text-center">
                   {c.status === 'APPROVED' ? (
                     <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#1E2125] bg-[#F1FFC1] border border-[#CFEE5D]">
@@ -178,7 +195,7 @@ export default function AllCourses({ courses, categories }: Props) {
                     </span>
                   ) : (
                     <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#6A7282] border border-[#D1D5DB]">
-                      비공개
+                      - {/* 비공개 */}
                     </span>
                   )}
                 </td>

@@ -2,6 +2,7 @@ export interface AdminCourse {
     courseId: number;
     categoryId: number;
     title: string;
+    instructorName: string;
     description: string;
     price: number;
     difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
@@ -18,10 +19,10 @@ export interface AdminCourse {
 }
 
 export interface RejectedCourse {
-  id: number;
+  courseId: number;
   title: string;
   instructorName: string;
-  category: string;
-  rejectedAt: string;
+  categoryName: string;
+  updatedAt: string | null;
   rejectReason: string;
 }
