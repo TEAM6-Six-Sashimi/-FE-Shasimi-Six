@@ -30,7 +30,7 @@ export default function RejectedCourses() {
               <td className="py-3 text-center text-[#6A7282]">{c.instructorName}</td>
               <td className="py-3 text-center text-[#6A7282]">{c.category}</td>
               <td className="py-3 text-center text-[#6A7282]">{c.rejectedAt}</td>
-              <td className="py-3 text-center text-[#6A7282] text-left px-4">{c.rejectReason}</td>
+              <td className="py-3 text-[#6A7282] text-left px-4">{c.rejectReason}</td>
             </tr>
           ))}
         </tbody>

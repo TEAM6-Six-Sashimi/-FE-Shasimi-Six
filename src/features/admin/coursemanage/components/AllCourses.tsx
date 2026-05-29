@@ -110,7 +110,7 @@ export default function AllCourses({ courses, categories }: Props) {
                     </svg>
                   </button>
                   {categoryOpen && (
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white border border-[#E5E7EB] rounded-lg shadow-lg z-10 min-w-[120px]">
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white border border-[#E5E7EB] rounded-lg shadow-lg z-10 min-w-30">
                       {categoryNames.map((cat) => (
                         <button
                           key={cat}
