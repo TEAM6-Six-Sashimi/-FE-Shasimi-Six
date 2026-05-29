@@ -36,7 +36,7 @@ interface CourseRegisterFormProps {
   categories: Category[];
 }
 
-const LEVELS = ['입문', '초급', '중급', '고급'] as const;
+const LEVELS = ['초급', '중급', '고급'] as const;
 
 const DEFAULT_LECTURE: Omit<Lecture, 'id'> = {
   title: '',
