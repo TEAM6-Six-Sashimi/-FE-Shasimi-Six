@@ -3,17 +3,18 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import Image from 'next/image';
 import type { ApprovedCourse as ApprovedCourseType } from '@/features/user/mycourses-instructor/types';
 import type { Category } from '@/features/categories/types';
 
-type SortOption = 'latest' | 'popular' | 'rating';
-
-const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: 'latest', label: '최신순' },
-  { value: 'popular', label: '인기순' },
-  { value: 'rating', label: '평점순' },
-];
+type SortOption = '최신순' | '인기순' | '평점순';
 
 interface Props {
   courses: ApprovedCourseType[];
@@ -22,7 +23,7 @@ interface Props {
 
 export default function ApprovedCourse({ courses = [], categories = [] }: Props) {
   const [search, setSearch] = useState('');
-  const [sort, setSort] = useState<SortOption>('latest');
+  const [sort, setSort] = useState<SortOption>('최신순');
 
   const getCategoryName = (categoryId: number) => {
     if (!categories || categories.length === 0) return String(categoryId);
@@ -37,9 +38,9 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
   const filtered = (courses || [])
     .filter((c) => c.title?.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
-      if (sort === 'popular') return b.studentCount - a.studentCount;
-      if (sort === 'rating') return b.ratingAvg - a.ratingAvg;
-      return b.courseId - a.courseId; // latest: courseId 높을수록 최신
+      if (sort === '인기순') return b.studentCount - a.studentCount;
+      if (sort === '평점순') return b.ratingAvg - a.ratingAvg;
+      return b.courseId - a.courseId; // 최신순
     });
 
   return (
@@ -62,22 +63,18 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
           </div>
 
           {/* 정렬 드롭다운 */}
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortOption)}
-            className="h-11 px-3 pr-8 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] outline-none focus:border-[#1E2125] transition-colors cursor-pointer appearance-none"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236A7282' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 12px center',
-            }}
-          >
-            {SORT_OPTIONS.map(({ value, label }) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+            <SelectTrigger className="h-11 w-28 text-[13.5px] border-[#D1D5DB] bg-[#F9FAFB] rounded-full cursor-pointer">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent position="popper">
+              {(['최신순', '인기순', '평점순'] as SortOption[]).map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <Link href="/mycourses-instructor/new">
@@ -105,7 +102,7 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
                 <div className="flex items-center gap-2 text-[12px] text-[#6A7282]">
                   <span className="text-[#FFD700]">★</span>
                   <span>{course.ratingAvg?.toFixed(1) || '0.0'}</span>
-                  <span className="w-[1px] h-2 bg-[#D1D5DB]" />
+                  <span className="w-px h-2 bg-[#D1D5DB]" />
                   <span>수강생 {course.studentCount?.toLocaleString() || 0}명</span>
                 </div>
               </div>

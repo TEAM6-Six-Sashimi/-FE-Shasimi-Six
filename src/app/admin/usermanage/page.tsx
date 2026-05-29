@@ -1,5 +1,5 @@
-export default function UserManagePage() {
-    return (
-        <div>회원 관리</div>
-    );
+import UserManagePage from "./_components/UserManagePage";
+
+export default function Page() {
+  return <UserManagePage />;
 }
