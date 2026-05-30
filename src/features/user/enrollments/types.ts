@@ -1,18 +1,19 @@
-export interface CourseItem {
-  id: string;
+export interface EnrollmentCourseItem {
+  courseId: number;
   title: string;
   category: string;
-  instructor: string;
+  instructorName: string;
   price: number;
-  thumbnailUrl: string;
+  thumbnail: string;
 }
 
 export interface EnrollmentSummary {
-  items: CourseItem[];
+  items: EnrollmentCourseItem[];
   totalPrice: number;
   ownedCredits: number;
   remainingCredits: number;
   shortfallCredits: number;
+  source: 'single' | 'cart';
 }
 
 export interface EnrollmentFormState {
