@@ -1,4 +1,5 @@
 import { ApprovedCourse } from '@/features/user/mycourses-instructor/types';
+import { InstructorInProgressCourse } from '@/features/user/mycourses-instructor/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -36,14 +37,13 @@ export async function fetchApprovedCourses(
   }
 }
 
-import { InstructorInProgressCourse } from '@/features/user/mycourses-instructor/types';
 
 export async function fetchInProgressCourses(
   accessToken: string,
   userId: string,
 ): Promise<InstructorInProgressCourse[]> {
   try {
-    const res = await fetch('http://localhost:8080/instructor/courses/in-progress', {
+    const res = await fetch(`${API_BASE_URL}/instructor/courses/in-progress`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -55,3 +55,4 @@ export async function fetchInProgressCourses(
     return res.json();
   } catch { return []; }
 }
+
