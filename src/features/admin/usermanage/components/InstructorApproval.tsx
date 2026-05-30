@@ -14,11 +14,7 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // const filtered = applicants.filter((a) => a.name.includes(search) || a.loginId.includes(search));
-  // 백의 api 수정이 안되어서 임시로 작성함 
-  const filtered = (applicants ?? []).filter(
-    (a) => (a.name ?? '').includes(search) || (a.loginId ?? '').includes(search),
-  );
+  const filtered = applicants.filter((a) => a.name.includes(search) || a.loginId.includes(search));
 
   const handleApprove = async (applicationId: number) => {
     try {
