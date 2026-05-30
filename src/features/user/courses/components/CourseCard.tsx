@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CourseFromAPI } from '../types';
-import { addCartItemAction } from '@/services/cart.service';
+import { addCartItemAction } from '../../cart/actions';
 
 
 interface CourseCardProps {

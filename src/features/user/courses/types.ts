@@ -1,4 +1,5 @@
 export interface CourseFromAPI {
+  courseId: number;
   instructorName: string;
   title: string;
   price: number;

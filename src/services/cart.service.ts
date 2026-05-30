@@ -32,9 +32,10 @@ export async function fetchCart(accessToken: string): Promise<CartResponse> {
     return response.json();
 }
 
-//   'CART_002'        → 이미 장바구니에 담긴 강의
-//   'ENROLLMENT_001'  → 이미 수강 중인 강의
-//   'UNAUTHORIZED'    → 로그인 필요
+// 장바구니 추가
+//   CART_002        -> 이미 장바구니에 담긴 강의
+//   ENROLLMENT_001  -> 이미 수강 중인 강의
+//   UNAUTHORIZED    -> 로그인 필요
 export async function addCartItem(
   accessToken: string,
   courseId: number
