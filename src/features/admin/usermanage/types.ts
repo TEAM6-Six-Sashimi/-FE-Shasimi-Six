@@ -1,6 +1,12 @@
 export interface InstructorApplication {
-  id: number;
-  userId: number;
+  applicationId: number;
+  name: string;
+  loginId: string;
+  email: string;
+  createdAt: string;
+}
+
+export interface InstructorApplicationDetail {
   bio: string;
   portfolioUrl: string;
   certificationName: string;
