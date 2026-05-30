@@ -1,4 +1,4 @@
-import { InstructorApplication } from "@/features/admin/usermanage/types";
+import { InstructorApplication, InstructorApplicationDetail } from "@/features/admin/usermanage/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -74,4 +74,19 @@ export async function fetchAdminRejectedCourses(accessToken: string) {
     if (!res.ok) return [];
     return res.json();
   } catch { return []; }
+}
+
+export async function fetchInstructorApplicationDetail(
+  accessToken: string,
+  applicationId: number
+): Promise<InstructorApplicationDetail | null> {
+  try {
+    const res = await fetch(`http://localhost:8080/api/members/instructor-applications/${applicationId}`, {
+      headers: { 'Authorization': `Bearer ${accessToken}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.data ?? data;
+  } catch { return null; }
 }
