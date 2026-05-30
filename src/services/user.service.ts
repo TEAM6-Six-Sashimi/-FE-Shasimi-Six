@@ -38,3 +38,4 @@ export async function fetchUserMe(accessToken: string): Promise<UserMe> {
     return GUEST_USER;
   }
 }
+

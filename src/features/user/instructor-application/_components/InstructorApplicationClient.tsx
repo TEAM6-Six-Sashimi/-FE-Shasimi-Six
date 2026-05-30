@@ -30,6 +30,7 @@ const DEFAULT_STEP03 = {
   resumeFile: null as File | null,
   portfolioFile: null as File | null,
   curriculumFile: null as File | null,
+  portfolioUrl: '',
   sampleVideoLink: '',
 };
 
@@ -55,12 +56,37 @@ export default function InstructorApplicationClient({
     setStep(3);
   };
 
-  const handleSubmit = (data: typeof DEFAULT_STEP03) => {
+  const handleSubmit = async (data: typeof DEFAULT_STEP03) => {
     setStep03Data(data);
-    console.log('제출 데이터:', { step01Data, step02Data, data });
-    // TODO: 강사 지원 API 연결
-  };
 
+    const certFile = step02Data.certifications[0]?.file;
+    if (!certFile) {
+      alert('자격증 파일이 없습니다.');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('bio', step01Data.introduction);
+      formData.append('portfolioUrl', data.portfolioUrl); // sampleVideoLink → portfolioUrl
+      formData.append('file', certFile);
+
+      const res = await fetch('/api/instructor-apply', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || '강사 지원에 실패했습니다.');
+      }
+
+      alert('강사 지원이 완료되었습니다!');
+    } catch (error: any) {
+      alert(error.message || '강사 지원에 실패했습니다.');
+    }
+  };
+  
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
       {/* 타이틀 */}
