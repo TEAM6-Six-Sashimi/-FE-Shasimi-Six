@@ -7,6 +7,7 @@ interface Step03Data {
   resumeFile: File | null;
   portfolioFile: File | null;
   curriculumFile: File | null;
+  portfolioUrl: string;
   sampleVideoLink: string;
 }
 
@@ -26,7 +27,7 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
   const curriculumRef = useRef<HTMLInputElement>(null);
 
   // 포트폴리오만 필수
-  const isValid = !!form.portfolioFile;
+  const isValid = !!form.portfolioUrl.trim();
   const isError = submitted && !isValid;
 
   const handleSubmit = () => {
@@ -123,8 +124,8 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
       >
         <span className={`font-semibold ${isError ? 'text-[#FF5E5E]' : 'text-[#827717]'}`}>ⓘ</span>
         <p className={`text-[13px] font-semibold ${isError ? 'text-[#FF5E5E]' : 'text-[#827717]'}`}>
-          포트폴리오는 필수 제출 항목입니다. <br/> 제출 후 사내 평가를 거쳐 일주일 이내에 결과를 이메일로
-          안내드립니다.
+          포트폴리오는 필수 제출 항목입니다. <br /> 제출 후 사내 평가를 거쳐 일주일 이내에 결과를
+          이메일로 안내드립니다.
         </p>
       </div>
 
@@ -149,13 +150,12 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
             type="url"
             required
             placeholder="링크를 입력해주세요"
-            value={form.sampleVideoLink}
-            onChange={(e) => setForm((prev) => ({ ...prev, sampleVideoLink: e.target.value }))}
+            value={form.portfolioUrl}
+            onChange={(e) => setForm((prev) => ({ ...prev, portfolioUrl: e.target.value }))}
             className="w-full h-11 pl-9 pr-4 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
           />
         </div>
       </div>
-
 
       {/* 강의계획서 / 샘플 커리큘럼 (선택) */}
       <FileUploadField
