@@ -5,7 +5,7 @@ import StepIndicator from './StepIndicator';
 import Step01Introduction from './Step01Introduction';
 import Step02Career from './Step02Career';
 import Step03Documents from './Step03Documents';
-import type { UserInfo } from '@/lib/users';
+import { UserMe } from '@/features/auth/types';
 
 const STEPS = [{ label: '자기소개' }, { label: '경력 및 전문성' }, { label: '서류 제출' }];
 
@@ -34,7 +34,7 @@ const DEFAULT_STEP03 = {
 };
 
 interface InstructorApplicationClientProps {
-  userInfo: UserInfo;
+  userInfo: UserMe;
 }
 
 export default function InstructorApplicationClient({
