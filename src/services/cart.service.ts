@@ -68,7 +68,7 @@ export async function addCartItem(
 // 장바구니 아이템 삭제
 export async function deleteCartItems(
     accessToken: string,
-    courseIds: number[]
+    cartItemIds: number[]
 ): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/cart`, {
         method: 'DELETE',
@@ -76,7 +76,7 @@ export async function deleteCartItems(
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ courseIds }),
+        body: JSON.stringify({ cartItemIds }),
     });
  
     if (!response.ok) {
