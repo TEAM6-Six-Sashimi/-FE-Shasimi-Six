@@ -6,7 +6,8 @@ import PendingCourse from '@/features/user/mycourses-instructor/components/Pendi
 import { fetchCategories } from '@/services/categories.service';
 import { fetchApprovedCourses, fetchInProgressCourses } from '@/services/instructor.service';
 import { fetchUserMe } from '@/services/user.service';
-import type { InstructorTab } from '@/constants/mockInstructorCourses';
+
+type InstructorTab = 'dashboard' | 'approved' | 'pending';
 
 const TABS: { id: InstructorTab; label: string }[] = [
   { id: 'dashboard', label: '대시보드' },
