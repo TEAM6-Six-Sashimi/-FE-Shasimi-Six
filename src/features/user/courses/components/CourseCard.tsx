@@ -1,8 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CourseFromAPI } from '../types';
+import { addCartItemAction } from '../../cart/actions';
 
 
 interface CourseCardProps {
@@ -11,6 +14,41 @@ interface CourseCardProps {
 }
 
 export default function CourseCard({ course, category }: CourseCardProps) {
+
+  const router = useRouter();
+  const [ isAddingToCart, setIsAddingToCart ] = useState(false);
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isAddingToCart) return;
+
+    setIsAddingToCart(true);
+    try {
+      await addCartItemAction(course.courseId);
+      router.push("/cart");
+    } catch (err) {
+      const code = err instanceof Error ? err.message : '';
+
+      if (code === 'UNAUTHORIZED') {
+        router.push('/login');
+        return;
+      }
+
+      if (code === 'CART_002') {
+        alert('이미 장바구니에 담긴 강의입니다.');
+      } else if (code === 'ENROLLMENT_001') {
+        alert('이미 수강 중인 강의입니다.');
+      } else {
+        alert('장바구니 추가에 실패했습니다. 다시 시도해주세요.');
+      }
+    } finally {
+      setIsAddingToCart(false);
+    }
+  }
+
+  const handlePurchase = (e: React.MouseEvent) => {
+    e.preventDefault();
+  }
   return (
     <div className="flex flex-col bg-[#F9FAFB] rounded-xl overflow-hidden border border-[#D1D5DB] hover:shadow-lg transition-shadow duration-200">
 
@@ -50,10 +88,7 @@ export default function CourseCard({ course, category }: CourseCardProps) {
         <Button
           size="sm"
           className="flex-1 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[12.5px] font-semibold h-8 cursor-pointer"
-          onClick={(e) => {
-            e.preventDefault();
-            // TODO: 결제 페이지 연결
-          }}
+          onClick={handlePurchase}
         >
           구매하기
         </Button>
@@ -61,10 +96,8 @@ export default function CourseCard({ course, category }: CourseCardProps) {
           size="sm"
           variant="outline"
           className="flex-1 border-[#D1D5DB] text-[#1E2125] text-[12.5px] font-semibold h-8 hover:bg-[#E5E7EB] cursor-pointer"
-          onClick={(e) => {
-            e.preventDefault();
-            // TODO: 장바구니 기능 연결
-          }}
+          onClick={handleAddToCart}
+          disabled={isAddingToCart}
         >
           장바구니
         </Button>
