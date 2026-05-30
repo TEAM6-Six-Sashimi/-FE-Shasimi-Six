@@ -14,15 +14,17 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const filtered = applicants.filter((a) =>
-    String(a.userId).includes(search)
+  // const filtered = applicants.filter((a) => a.name.includes(search) || a.loginId.includes(search));
+  // 백의 api 수정이 안되어서 임시로 작성함 
+  const filtered = (applicants ?? []).filter(
+    (a) => (a.name ?? '').includes(search) || (a.loginId ?? '').includes(search),
   );
 
-  const handleApprove = async (id: number) => {
+  const handleApprove = async (applicationId: number) => {
     try {
       setLoading(true);
-      await approveInstructorAction(id);
-      setApplicants((prev) => prev.filter((a) => a.id !== id));
+      await approveInstructorAction(applicationId);
+      setApplicants((prev) => prev.filter((a) => a.applicationId !== applicationId));
     } catch {
       alert('승인 처리에 실패했습니다.');
     } finally {
@@ -30,11 +32,11 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
     }
   };
 
-  const handleReject = async (id: number) => {
+  const handleReject = async (applicationId: number) => {
     try {
       setLoading(true);
-      await rejectInstructorAction(id);
-      setApplicants((prev) => prev.filter((a) => a.id !== id));
+      await rejectInstructorAction(applicationId);
+      setApplicants((prev) => prev.filter((a) => a.applicationId !== applicationId));
     } catch {
       alert('반려 처리에 실패했습니다.');
     } finally {
@@ -60,15 +62,15 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
         </div>
       </div>
 
-      <table className="w-full text-[15px] table-fixed">
+      <table className="w-full text-[13px] table-fixed">
         <thead>
           <tr className="border-b border-[#E5E7EB]">
-            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">신청 ID</th>
-            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">유저 ID</th>
-            <th className="py-3 w-[20%] text-center font-semibold text-[#1E2125]">자격증</th>
-            <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">발급 기관</th>
-            <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">신청일</th>
-            <th className="py-3 w-[20%] text-center font-semibold text-[#1E2125]">관리</th>
+            <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">이름</th>
+            <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">아이디</th>
+            <th className="py-3 w-[25%] text-center font-semibold text-[#1E2125]">이메일</th>
+            <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">신청일</th>
+            <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">서류</th>
+            <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">관리</th>
           </tr>
         </thead>
         <tbody>
@@ -80,25 +82,32 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
             </tr>
           ) : (
             filtered.map((a) => (
-              <tr key={a.id} className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors">
-                <td className="py-3 text-center text-[#6A7282]">{a.id}</td>
-                <td className="py-3 text-center text-[#6A7282]">{a.userId}</td>
-                <td className="py-3 text-center font-semibold text-[#1E2125]">{a.certificationName}</td>
-                <td className="py-3 text-center text-[#6A7282]">{a.issuedBy}</td>
+              <tr
+                key={a.applicationId}
+                className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
+              >
+                <td className="py-3 text-center font-semibold text-[#1E2125]">{a.name}</td>
+                <td className="py-3 text-center text-[#6A7282]">{a.loginId}</td>
+                <td className="py-3 text-center text-[#6A7282]">{a.email}</td>
                 <td className="py-3 text-center text-[#6A7282]">{a.createdAt.slice(0, 10)}</td>
+                <td className="py-3 text-center">
+                  <button className="px-3 py-1.5 rounded border-2 border-[#D1D5DB] text-[12px] font-semibold text-[#1E2125] bg-white hover:border-[#6A7282] cursor-pointer transition-colors">
+                    서류 확인
+                  </button>
+                </td>
                 <td className="py-3 text-center">
                   <div className="flex items-center justify-center gap-2">
                     <button
-                      onClick={() => handleApprove(a.id)}
+                      onClick={() => handleApprove(a.applicationId)}
                       disabled={loading}
-                      className="px-6 py-1.5 rounded border-2 border-[#CFEE5D] text-[12px] font-semibold text-[#1E2125] bg-white hover:border-[#A8D014] hover:bg-[#F9FBE7] cursor-pointer transition-colors disabled:opacity-50"
+                      className="px-4 py-1.5 rounded border-2 border-[#CFEE5D] text-[12px] font-semibold text-[#1E2125] bg-white hover:border-[#A8D014] hover:bg-[#F9FBE7] cursor-pointer transition-colors disabled:opacity-50"
                     >
                       승인
                     </button>
                     <button
-                      onClick={() => handleReject(a.id)}
+                      onClick={() => handleReject(a.applicationId)}
                       disabled={loading}
-                      className="px-6 py-1.5 rounded border-2 border-[#FF5E5E] text-[12px] font-semibold text-white bg-[#FF5E5E] hover:bg-[#D14848] hover:border-[#D14848] cursor-pointer transition-colors disabled:opacity-50"
+                      className="px-4 py-1.5 rounded border-2 border-[#FF5E5E] text-[12px] font-semibold text-white bg-[#FF5E5E] hover:bg-[#D14848] hover:border-[#D14848] cursor-pointer transition-colors disabled:opacity-50"
                     >
                       거절
                     </button>

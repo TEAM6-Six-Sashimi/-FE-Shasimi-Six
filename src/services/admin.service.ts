@@ -8,14 +8,10 @@ export async function fetchInstructorApplications(accessToken: string): Promise<
       headers: { 'Authorization': `Bearer ${accessToken}` },
       cache: 'no-store',
     });
-
     if (!res.ok) return [];
-
     const data = await res.json();
     return Array.isArray(data) ? data : data.data ?? [];
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 }
 
 export async function fetchAdminCourses(accessToken: string) {
