@@ -14,6 +14,21 @@ export async function fetchInstructorApplications(accessToken: string): Promise<
   } catch { return []; }
 }
 
+export async function fetchInstructorApplicationDetail(
+  accessToken: string,
+  applicationId: number
+): Promise<InstructorApplicationDetail | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/members/instructor-applications/${applicationId}`, {
+      headers: { 'Authorization': `Bearer ${accessToken}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.data ?? data;
+  } catch { return null; }
+}
+
 export async function fetchAdminCourses(accessToken: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/admin/courses`, {
@@ -74,19 +89,4 @@ export async function fetchAdminRejectedCourses(accessToken: string) {
     if (!res.ok) return [];
     return res.json();
   } catch { return []; }
-}
-
-export async function fetchInstructorApplicationDetail(
-  accessToken: string,
-  applicationId: number
-): Promise<InstructorApplicationDetail | null> {
-  try {
-    const res = await fetch(`http://localhost:8080/api/members/instructor-applications/${applicationId}`, {
-      headers: { 'Authorization': `Bearer ${accessToken}` },
-      cache: 'no-store',
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.data ?? data;
-  } catch { return null; }
 }

@@ -14,16 +14,14 @@ export async function POST(req: NextRequest) {
   }
 
   const formData = await req.formData();
-  const file = formData.get('file') as File;
+  const files = formData.getAll('file') as File[];  // files
 
-  console.log('file type:', file?.type);
-  console.log('file size:', file?.size);
-
-  // 새 FormData 만들어서 전달
   const newFormData = new FormData();
   newFormData.append('bio', formData.get('bio') as string);
   newFormData.append('portfolioUrl', formData.get('portfolioUrl') as string);
-  newFormData.append('file', file, file.name); // 파일명 명시적으로 전달
+  files.forEach((file) => {
+    newFormData.append('file', file); // files
+  });
 
   const res = await fetch(`${API_BASE_URL}/api/members/${user.id}/instructor-apply`, {
     method: 'POST',
