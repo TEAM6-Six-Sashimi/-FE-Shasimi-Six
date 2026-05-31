@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 interface Step03Data {
   resumeFile: File | null;
-  portfolioFile: File | null;
+  // portfolioFile: File | null;
   curriculumFile: File | null;
   portfolioUrl: string;
   sampleVideoLink: string;
@@ -23,7 +23,7 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
   const [form, setForm] = useState<Step03Data>(data);
   const [submitted, setSubmitted] = useState(false);
   const resumeRef = useRef<HTMLInputElement>(null);
-  const portfolioRef = useRef<HTMLInputElement>(null);
+  // const portfolioRef = useRef<HTMLInputElement>(null);
   const curriculumRef = useRef<HTMLInputElement>(null);
 
   // 포트폴리오만 필수
