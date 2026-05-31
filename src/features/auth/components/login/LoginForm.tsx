@@ -28,7 +28,6 @@ export default function LoginForm() {
         password: userPasswordInput,
       });
 
-      alert(`🎉 ${name}님, 환영합니다!`);
       window.location.href = "/";
 
     } catch (error: any) {
