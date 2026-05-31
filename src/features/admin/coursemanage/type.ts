@@ -1,6 +1,6 @@
 export interface AdminCourse {
     courseId: number;
-    categoryId: number;
+    categoryName: string;
     title: string;
     instructorName: string;
     description: string;

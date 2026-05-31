@@ -27,7 +27,9 @@ interface CourseListPageProps {
   initialCourses: CourseFromAPI[];
 }
 
+
 export default function CourseListPage({ categories, initialCourses }: CourseListPageProps) {
+  console.log('initialCourses:', initialCourses.map(c => c.courseId));
   const params = useParams();
   const searchParams = useSearchParams();
   const category = decodeURIComponent(params.category as string);
@@ -39,7 +41,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState<FilterValues>({
     level: '전체',
-    priceRange: [0, 100000],
+    priceRange: [0, 100000000],
     durationRange: [0, 1000],
     ratingRange: [0, 5],
   });
@@ -71,6 +73,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
   // 필터링 + 정렬 (프론트에서 처리, 추후 백엔드 페이지네이션으로 교체 예정)
   const filteredCourses = useMemo(() => {
     let result = [...initialCourses];
+    console.log('before filter:', result.map(c => c.courseId));
 
     if (search)
       result = result.filter((c) => c.title.includes(search) || c.instructorName.includes(search));
@@ -84,6 +87,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
         c.ratingAvg >= filters.ratingRange[0] &&
         c.ratingAvg <= filters.ratingRange[1],
     );
+    console.log('after filter:', result.map(c => c.courseId));
 
     if (sort === '인기순') result = result.sort((a, b) => b.studentCount - a.studentCount);
     if (sort === '최신순') result = result; // TODO: 백엔드에서 createdAt 필드 추가 후 정렬
@@ -99,6 +103,9 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
     currentPage * ITEMS_PER_PAGE,
   );
 
+  
+console.log('pagedCourses:', pagedCourses.map(c => c.courseId));
+console.log('filteredCourses:', filteredCourses.map(c => c.courseId));
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-6 py-8">
@@ -142,7 +149,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
                 onReset={() =>
                   setFilters({
                     level: '전체',
-                    priceRange: [0, 100000],
+                    priceRange: [0, 100000000],
                     durationRange: [0, 1000],
                     ratingRange: [0, 5],
                   })

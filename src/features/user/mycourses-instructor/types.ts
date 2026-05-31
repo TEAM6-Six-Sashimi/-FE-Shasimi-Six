@@ -9,6 +9,7 @@ export interface CreateCourseRequest {
   sessions: {
     title: string;
     videoUrl: string;
+    preview: boolean;
   }[];
 }
 
@@ -28,7 +29,7 @@ export interface Session {
   title: string;
   videoUrl: string;
   materialFile?: string;
-  isFree?: boolean;
+  preview: boolean;
 }
 
 export interface UpdateCourseRequest {
@@ -42,6 +43,7 @@ export interface UpdateCourseRequest {
   sessions: {
     title: string;
     videoUrl: string;
+    preview: boolean;
   }[];
 }
 

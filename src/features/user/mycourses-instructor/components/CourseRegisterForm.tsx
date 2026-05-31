@@ -32,7 +32,7 @@ const DEFAULT_SESSION: Omit<Session, 'id'> = {
   title: '',
   videoUrl: '',
   materialFile: '',
-  isFree: false,
+  preview: false,
 };
 
 // ── 메인 컴포넌트 ────────────────────────────────────────────────
@@ -113,6 +113,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
       sessions: form.sessions.map((s) => ({
         title: s.title,
         videoUrl: s.videoUrl,
+        preview: s.preview,
       })),
     };
 
@@ -389,8 +390,8 @@ function SessionItem({ session, index, canRemove, onUpdate, onRemove }: SessionI
       <label className="flex items-center gap-2 cursor-pointer w-fit">
         <input
           type="checkbox"
-          checked={session.isFree}
-          onChange={(e) => onUpdate(session.id, 'isFree', e.target.checked)}
+          checked={session.preview ?? false}
+          onChange={(e) => onUpdate(session.id, 'preview', e.target.checked)}
           className="w-4 h-4 accent-[#CFEE5D] cursor-pointer"
         />
         <span className="text-[13px] text-[#1E2125]">무료 공개</span>

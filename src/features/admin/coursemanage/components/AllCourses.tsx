@@ -10,57 +10,37 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import Image from 'next/image';
-import type { Category } from '@/features/categories/types';
 import { AdminCourse } from '../type';
 
 type SortOption = '최신순' | '인기순' | '높은 평점순';
 
 interface Props {
   courses: AdminCourse[];
-  categories: Category[];
 }
 
 const ITEMS_PER_PAGE = 7;
 
-export default function AllCourses({ courses, categories }: Props) {
+export default function AllCourses({ courses }: Props) {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortOption>('최신순');
   const [categoryFilter, setCategoryFilter] = useState('전체');
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const categoryNames = ['전체', ...Array.from(new Set(categories.map((cat) => cat.name)))];
-
-  const getCategoryName = (categoryId: number) => {
-    for (const cat of categories) {
-      if (cat.mainCategoryId === categoryId) return cat.name;
-      const option = cat.options?.find((o) => o.id === categoryId);
-      if (option) return cat.name; // 서브카테고리면 부모 카테고리 이름 반환
-    }
-    return String(categoryId);
-  };
-
-  console.log(
-    'courses categoryIds:',
-    courses.map((c) => c.categoryId),
-  );
-  console.log(
-    'categories:',
-    categories.map((c) => ({ id: c.mainCategoryId, name: c.name, options: c.options })),
-  );
+  const categoryNames = ['전체', ...Array.from(new Set(courses.map((c) => c.categoryName)))];
 
   const filtered = useMemo(() => {
     let result = [...courses];
     if (search) result = result.filter((c) => c.title.includes(search));
     if (categoryFilter !== '전체')
-      result = result.filter((c) => getCategoryName(c.categoryId) === categoryFilter);
+      result = result.filter((c) => c.categoryName === categoryFilter);
     if (sort === '인기순') result.sort((a, b) => b.studentCount - a.studentCount);
     if (sort === '높은 평점순') result.sort((a, b) => b.ratingAvg - a.ratingAvg);
     if (sort === '최신순')
       result.sort(
         (a, b) =>
-          new Date(b.approvedAt ?? b.createdAt).getTime() -
-          new Date(a.approvedAt ?? a.createdAt).getTime(),
+          new Date(b.approvedAt ?? 0).getTime() -
+          new Date(a.approvedAt ?? 0).getTime(),
       );
     return result;
   }, [courses, search, sort, categoryFilter]);
@@ -156,7 +136,7 @@ export default function AllCourses({ courses, categories }: Props) {
         <tbody>
           {paged.length === 0 ? (
             <tr>
-              <td colSpan={6} className="py-16 text-center text-[#6A7282]">
+              <td colSpan={7} className="py-16 text-center text-[#6A7282]">
                 검색 결과가 없습니다.
               </td>
             </tr>
@@ -168,14 +148,14 @@ export default function AllCourses({ courses, categories }: Props) {
               >
                 <td className="px-6 py-3 text-left">
                   <Link
-                    href={`/courses/${encodeURIComponent(getCategoryName(c.categoryId))}/${c.courseId}`}
+                    href={`/courses/${encodeURIComponent(c.categoryName)}/${c.courseId}`}
                     className="font-semibold text-[#1E2125] hover:text-[#FF5E5E] hover:underline transition-colors"
                   >
                     {c.title}
                   </Link>
                 </td>
                 <td className="py-3 text-center text-[#6A7282]">{c.instructorName}</td>
-                <td className="py-3 text-center text-[#6A7282]">{getCategoryName(c.categoryId)}</td>
+                <td className="py-3 text-center text-[#6A7282]">{c.categoryName}</td>
                 <td className="py-3 text-center text-[#6A7282]">
                   {c.studentCount.toLocaleString()}명
                 </td>
@@ -189,15 +169,9 @@ export default function AllCourses({ courses, categories }: Props) {
                   {c.approvedAt?.slice(0, 10) ?? '-'}
                 </td>
                 <td className="py-3 text-center">
-                  {c.status === 'APPROVED' ? (
-                    <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#1E2125] bg-[#F1FFC1] border border-[#CFEE5D]">
-                      공개
-                    </span>
-                  ) : (
-                    <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#6A7282] border border-[#D1D5DB]">
-                      - {/* 비공개 */}
-                    </span>
-                  )}
+                  <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#1E2125] bg-[#F1FFC1] border border-[#CFEE5D]">
+                    공개
+                  </span>
                 </td>
               </tr>
             ))

@@ -53,8 +53,8 @@ export default async function EditCoursePage({ params }: PageProps) {
       title: s.title,
       videoUrl: s.videoUrl,
       materialUrl: s.attachmentUrl ?? '',
-      isFree: s.preview,
-    })) ?? [{ id: 1, title: '', videoUrl: '', materialUrl: '', isFree: false }],
+      preview: s.preview,
+    })) ?? [{ id: 1, title: '', videoUrl: '', materialUrl: '', preview: false }],
   };
 
   return (
