@@ -7,16 +7,18 @@ import { Button } from '@/components/ui/button';
 import { CourseFromAPI } from '../types';
 import { addCartItemAction } from '../../cart/actions';
 
-
 interface CourseCardProps {
   course: CourseFromAPI;
   category: string;
 }
 
 export default function CourseCard({ course, category }: CourseCardProps) {
-
   const router = useRouter();
-  const [ isAddingToCart, setIsAddingToCart ] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+  const thumbnailUrl = course.thumbnail?.startsWith('http')
+  ? course.thumbnail
+  : `http://localhost:8080/${course.thumbnail}`;
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -25,7 +27,7 @@ export default function CourseCard({ course, category }: CourseCardProps) {
     setIsAddingToCart(true);
     try {
       await addCartItemAction(course.courseId);
-      router.push("/cart");
+      router.push('/cart');
     } catch (err) {
       const code = err instanceof Error ? err.message : '';
 
@@ -44,20 +46,23 @@ export default function CourseCard({ course, category }: CourseCardProps) {
     } finally {
       setIsAddingToCart(false);
     }
-  }
+  };
 
   const handlePurchase = (e: React.MouseEvent) => {
     e.preventDefault();
-  }
+  };
   return (
     <div className="flex flex-col bg-[#F9FAFB] rounded-xl overflow-hidden border border-[#D1D5DB] hover:shadow-lg transition-shadow duration-200">
-
       {/* 썸네일 */}
       <Link
         href={`/courses/${encodeURIComponent(category)}/${encodeURIComponent(course.title)}`}
         className="relative block shrink-0"
       >
-        <div className="w-full aspect-video bg-[#E5E7EB]" />
+        <div className="w-full aspect-video bg-[#E5E7EB]">
+          {course.thumbnail && (
+            <img src={thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
+          )}
+        </div>
       </Link>
 
       {/* 카드 본문 */}
@@ -74,8 +79,12 @@ export default function CourseCard({ course, category }: CourseCardProps) {
         {/* 평점 */}
         <div className="flex items-center gap-1">
           <span className="text-[#FFD700] text-[12px]">★</span>
-          <span className="text-[#1E2125] text-[12px] font-semibold">{course.ratingAvg.toFixed(1)}</span>
-          <span className="text-[#6A7282] text-[11px]">({course.studentCount.toLocaleString()}명)</span>
+          <span className="text-[#1E2125] text-[12px] font-semibold">
+            {course.ratingAvg.toFixed(1)}
+          </span>
+          <span className="text-[#6A7282] text-[11px]">
+            ({course.studentCount.toLocaleString()}명)
+          </span>
         </div>
         {/* 가격 */}
         <p className="text-[#1E2125] text-[14px] font-bold mt-auto">
