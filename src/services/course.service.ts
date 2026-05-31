@@ -36,7 +36,6 @@ export async function fetchCourseDetail(
 ): Promise<CourseDetailFromAPI | null> {
   try {
     const url = `${API_BASE_URL}/api/courses/${courseId}`;
-    console.log('[fetchCourseDetail] 호출 URL:', url);
 
     const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}`, {
       headers: {
@@ -45,13 +44,10 @@ export async function fetchCourseDetail(
       },
       cache: 'no-store',
     });
-
-    console.log('[fetchCourseDetail] 응답 status:', res.status);  // ← 추가
  
     if (!res.ok) return null;
     return res.json();
   } catch {
-    console.error('[fetchCourseDetail] 에러:', e);  // ← 추가
     return null;
   }
 }

@@ -56,3 +56,7 @@ export const DIFFICULTY_LABEL: Record<string, string> = {
   INTERMEDIATE: '중급',
   ADVANCED:     '고급',
 };
+
+export interface CourseDetail extends CourseFromAPI {
+  categoryName: string;
+}
