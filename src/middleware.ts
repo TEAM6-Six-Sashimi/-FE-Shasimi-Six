@@ -8,10 +8,8 @@ export function middleware(request: NextRequest) {
   if (!accessToken) {
     if (
       pathname.startsWith('/mycourses-student') ||
-      pathname.startsWith('/mycourses-instructor') ||
       pathname.startsWith('/mypage') ||
-      pathname.startsWith('/instructor/application') ||
-      pathname.startsWith('/admin')
+      pathname.startsWith('/instructor/application')
     ) {
       return NextResponse.redirect(new URL('/auth/login', request.url));
     }
@@ -42,9 +40,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/mycourses-student/:path*',
-    '/mycourses-instructor/:path*',
     '/mypage/:path*',
     '/instructor/application/:path*',
-    '/admin/:path*',
   ],
 };
