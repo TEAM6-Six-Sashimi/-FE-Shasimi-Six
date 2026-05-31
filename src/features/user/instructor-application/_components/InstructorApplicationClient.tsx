@@ -28,7 +28,7 @@ const DEFAULT_STEP02 = {
 
 const DEFAULT_STEP03 = {
   resumeFile: null as File | null,
-  portfolioFile: null as File | null,
+  // portfolioFile: null as File | null,
   curriculumFile: null as File | null,
   portfolioUrl: '',
   sampleVideoLink: '',
@@ -59,8 +59,8 @@ export default function InstructorApplicationClient({
   const handleSubmit = async (data: typeof DEFAULT_STEP03) => {
     setStep03Data(data);
 
-    const certFile = step02Data.certifications[0]?.file;
-    if (!certFile) {
+    const certFiles = step02Data.certifications.map((c) => c.file);
+    if (certFiles.length === 0) {
       alert('자격증 파일이 없습니다.');
       return;
     }
@@ -68,8 +68,10 @@ export default function InstructorApplicationClient({
     try {
       const formData = new FormData();
       formData.append('bio', step01Data.introduction);
-      formData.append('portfolioUrl', data.portfolioUrl); // sampleVideoLink → portfolioUrl
-      formData.append('file', certFile);
+      formData.append('portfolioUrl', data.portfolioUrl);
+      certFiles.forEach((file) => {
+        formData.append('file', file);  // files
+      });
 
       const res = await fetch('/api/instructor-apply', {
         method: 'POST',
@@ -86,7 +88,7 @@ export default function InstructorApplicationClient({
       alert(error.message || '강사 지원에 실패했습니다.');
     }
   };
-  
+
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
       {/* 타이틀 */}
