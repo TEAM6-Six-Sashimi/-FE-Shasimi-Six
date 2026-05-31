@@ -9,8 +9,10 @@ export interface InstructorApplication {
 export interface InstructorApplicationDetail {
   bio: string;
   portfolioUrl: string;
-  certificationName: string;
-  issuedBy: string;
+  certifications: {
+    certificationName: string;
+    issuedBy: string;
+  }[];
   approvalStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
   approvedAt: string | null;
   createdAt: string;

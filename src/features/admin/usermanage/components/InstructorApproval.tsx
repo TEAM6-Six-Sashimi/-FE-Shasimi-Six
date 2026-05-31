@@ -204,20 +204,33 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
                     {detailModal.detail.bio || '-'}
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                {/* 자격증 목록 */}
+                {detailModal.detail.certifications?.length > 0 && (
                   <div>
-                    <p className="text-[11.5px] text-[#6A7282] mb-0.5">자격증명</p>
-                    <p className="text-[13.5px] font-semibold text-[#1E2125]">
-                      {detailModal.detail.certificationName || '-'}
-                    </p>
+                    <p className="text-[11.5px] text-[#6A7282] mb-1.5">자격증</p>
+                    <div className="flex flex-col gap-2">
+                      {detailModal.detail.certifications.map((cert, idx) => (
+                        <div
+                          key={idx}
+                          className="bg-[#F9FAFB] rounded-lg px-3 py-2 grid grid-cols-2 gap-2"
+                        >
+                          <div>
+                            <p className="text-[11px] text-[#6A7282]">자격증명</p>
+                            <p className="text-[13px] font-semibold text-[#1E2125]">
+                              {cert.certificationName}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[11px] text-[#6A7282]">발급 기관</p>
+                            <p className="text-[13px] font-semibold text-[#1E2125]">
+                              {cert.issuedBy}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[11.5px] text-[#6A7282] mb-0.5">발급 기관</p>
-                    <p className="text-[13.5px] font-semibold text-[#1E2125]">
-                      {detailModal.detail.issuedBy || '-'}
-                    </p>
-                  </div>
-                </div>
+                )}
                 {detailModal.detail.portfolioUrl && (
                   <div>
                     <p className="text-[11.5px] text-[#6A7282] mb-0.5">포트폴리오</p>
