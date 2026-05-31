@@ -70,7 +70,7 @@ export default function InstructorApplicationClient({
       formData.append('bio', step01Data.introduction);
       formData.append('portfolioUrl', data.portfolioUrl);
       certFiles.forEach((file) => {
-        formData.append('file', file);  // files
+        formData.append('files', file);
       });
 
       const res = await fetch('/api/instructor-apply', {

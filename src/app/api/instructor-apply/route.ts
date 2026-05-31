@@ -14,13 +14,13 @@ export async function POST(req: NextRequest) {
   }
 
   const formData = await req.formData();
-  const files = formData.getAll('file') as File[];  // files
+  const files = formData.getAll('files') as File[];
 
   const newFormData = new FormData();
   newFormData.append('bio', formData.get('bio') as string);
   newFormData.append('portfolioUrl', formData.get('portfolioUrl') as string);
   files.forEach((file) => {
-    newFormData.append('file', file); // files
+    newFormData.append('files', file); // file → files
   });
 
   const res = await fetch(`${API_BASE_URL}/api/members/${user.id}/instructor-apply`, {
