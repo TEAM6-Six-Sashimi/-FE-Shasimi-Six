@@ -45,7 +45,12 @@ export default function CartClient({ initialItems }: CartClientProps) {
   // 실제 삭제 실행
   const handleConfirmDelete = async () => {
     try {
-      await deleteCartItemsAction(selectedIds);
+      const cartItemIds = items
+        .filter((i) => selectedIds.includes(i.courseId))
+        .map((i) => i.cartItemId);
+ 
+      await deleteCartItemsAction(cartItemIds);
+ 
       setItems((prev) => prev.filter((i) => !selectedIds.includes(i.courseId)));
       setSelectedIds([]);
     } catch (e) {
@@ -55,10 +60,10 @@ export default function CartClient({ initialItems }: CartClientProps) {
     }
   };
  
-  // 구매하기 → 결제 페이지로 이동 (추후 연동)
+  // 구매하기 → 결제 페이지로 이동
   const handlePurchase = () => {
     const ids = selectedItems.map((i) => i.courseId).join(',');
-    router.push(`/checkout?courseIds=${ids}`);
+    router.push(`/enrollments?courseIds=${ids}`);
   };
  
   const selectedItems = items.filter((i) => selectedIds.includes(i.courseId));
@@ -89,8 +94,8 @@ export default function CartClient({ initialItems }: CartClientProps) {
       {showDeleteModal && (
         <TwoButtonModal
           title="선택 삭제"
-          message={`선택한 강의 ${selectedIds.length}개를 장바구니에서 삭제하시겠습니까?`}
-          confirmLabel="삭제"
+          message={`선택 강의 ${selectedIds.length}개를 삭제하시겠습니까?`}
+          confirmLabel="확인"
           cancelLabel="취소"
           onConfirm={handleConfirmDelete}
           onCancel={() => setShowDeleteModal(false)}
