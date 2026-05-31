@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 import type { CourseDetail } from '@/constants/mockCourseDetail';
 
 interface CourseDetailSidebarProps {
@@ -34,7 +35,7 @@ export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps
           // TODO: 장바구니 기능 연결
         }}
       >
-        🛒 장바구니 담기
+        <Image src="/header/cart.svg" width={17} height={17} alt=""/> 장바구니 담기
       </Button>
 
       {/* 강의 정보 */}
