@@ -1,4 +1,5 @@
 import FeatureCards from "@/features/user/main/components/FeatureCards";
+import PopularCourseSlider from "@/features/user/main/components/PopularCourseSlider";
 
 export default function MainPage() {
   return (
@@ -6,7 +7,7 @@ export default function MainPage() {
       {/* 대표 기능 3가지 */}
       <FeatureCards />
       {/* 인기 강의 미리보기 */}
-      {/* 인기 강의 슬라이더 */}
+      <PopularCourseSlider />
     </main>
   );
 }
