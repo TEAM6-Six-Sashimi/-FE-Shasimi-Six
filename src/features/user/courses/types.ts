@@ -8,3 +8,7 @@ export interface CourseFromAPI {
   ratingAvg: number;
   studentCount: number;
 }
+
+export interface CourseDetail extends CourseFromAPI {
+  categoryName: string;
+}
