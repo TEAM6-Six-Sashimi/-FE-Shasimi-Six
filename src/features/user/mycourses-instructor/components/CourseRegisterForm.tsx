@@ -177,6 +177,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
     try {
       setIsLoading(true);
       await createCourseAction(payload);
+      router.push('/mycourses-instructor?tab=pending');
     } catch (error: any) {
       alert(error.message || '강의 등록에 실패했습니다.');
     } finally {
@@ -368,7 +369,6 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
         </section>
 
         {/* ── 버튼 ── */}
-        {/* ── 버튼 ── */}
         <div className="flex items-center justify-between pt-2">
           <Button
             type="button"
@@ -398,26 +398,26 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
             </Button>
           </div>
         </div>
-
-        {/* ── 확인 모달 ── */}
-        {confirmModal && (
-          <TwoButtonModal
-            title={MODAL_CONFIG[confirmModal.type].title}
-            message={MODAL_CONFIG[confirmModal.type].message}
-            confirmLabel="확인"
-            cancelLabel="취소"
-            onConfirm={() => {
-              setConfirmModal(null);
-              if (confirmModal.type === 'cancel') {
-                router.back();
-              } else {
-                handleSubmit(confirmModal.type);
-              }
-            }}
-            onCancel={() => setConfirmModal(null)}
-          />
-        )}
       </div>
+      
+      {/* ── 확인 모달 ── */}
+      {confirmModal && (
+        <TwoButtonModal
+          title={MODAL_CONFIG[confirmModal.type].title}
+          message={MODAL_CONFIG[confirmModal.type].message}
+          confirmLabel="확인"
+          cancelLabel="취소"
+          onConfirm={() => {
+            setConfirmModal(null);
+            if (confirmModal.type === 'cancel') {
+              router.back();
+            } else {
+              handleSubmit(confirmModal.type);
+            }
+          }}
+          onCancel={() => setConfirmModal(null)}
+        />
+      )}
     </div>
   );
 }
