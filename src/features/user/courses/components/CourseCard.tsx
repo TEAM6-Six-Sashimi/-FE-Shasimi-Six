@@ -77,7 +77,7 @@ export default function CourseCard({ course, category }: CourseCardProps) {
 
         {/* 카드 본문 */}
         <Link
-          href={`/courses/${encodeURIComponent(category)}/${encodeURIComponent(course.title)}`}
+          href={`/courses/${encodeURIComponent(category)}/${course.courseId}`}
           className="flex flex-col gap-1.5 px-3.5 pt-3 pb-2 flex-1"
         >
           {/* 제목 */}
