@@ -21,8 +21,7 @@ interface PageProps {
 
 export default async function MyCoursesInstructorPage({ searchParams }: PageProps) {
   const { tab } = await searchParams;
-  const activeTab: InstructorTab =
-    tab === 'approved' || tab === 'pending' ? tab : 'dashboard';
+  const activeTab: InstructorTab = tab === 'approved' || tab === 'pending' ? tab : 'dashboard';
 
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
@@ -33,8 +32,12 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
   const [approvedCourses, inProgressCourses, categories] =
     accessToken && userId
       ? await Promise.all([
-          activeTab === 'approved' ? fetchApprovedCourses(accessToken, userId) : Promise.resolve([]),
-          activeTab === 'pending' ? fetchInProgressCourses(accessToken, userId) : Promise.resolve([]),
+          activeTab === 'approved'
+            ? fetchApprovedCourses(accessToken, userId)
+            : Promise.resolve([]),
+          activeTab === 'pending'
+            ? fetchInProgressCourses(accessToken, userId)
+            : Promise.resolve([]),
           fetchCategories(),
         ])
       : [[], [], []];

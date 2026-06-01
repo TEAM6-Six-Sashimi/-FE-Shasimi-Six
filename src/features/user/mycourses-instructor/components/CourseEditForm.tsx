@@ -10,8 +10,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import type { Category } from '@/features/categories/types';
-
 import type {
   CourseEditFormData,
   Session,
@@ -19,7 +19,6 @@ import type {
 } from '@/features/user/mycourses-instructor/types';
 import { updateCourseAction } from '../actions';
 
-// ── 타입 ───────────────────────────────────────────────────────
 interface CourseEditFormProps {
   categories: Category[];
   initialData: CourseEditFormData;
@@ -40,10 +39,19 @@ const DEFAULT_SESSION: Omit<Session, 'id'> = {
   preview: false,
 };
 
+const MODAL_CONFIG = {
+  save: { title: '수정 사항 임시 저장', message: '수정된 사항을 임시 저장하시겠습니까?' },
+  submit: { title: '승인 요청', message: '수정된 사항으로 승인 요청하시겠습니까?' },
+  cancel: { title: '취소', message: '작성을 취소하시겠습니까?\n작성된 내용이 사라집니다.' },
+};
+
 export default function CourseEditForm({ categories, initialData }: CourseEditFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState<CourseEditFormData>(initialData);
+  const [confirmModal, setConfirmModal] = useState<{
+    type: 'save' | 'submit' | 'cancel';
+  } | null>(null);
 
   const subCategories = categories.find((c) => c.name === form.category)?.options ?? [];
 
@@ -298,10 +306,11 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
           </button>
         </section>
 
+        {/* ── 버튼 ── */}
         <div className="flex items-center justify-between pt-2">
           <Button
             type="button"
-            onClick={() => handleSubmit('save')}
+            onClick={() => setConfirmModal({ type: 'save' })}
             disabled={isLoading}
             className="h-11 px-7 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer disabled:opacity-70"
           >
@@ -310,7 +319,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
           <div className="flex gap-3">
             <Button
               type="button"
-              onClick={() => handleSubmit('submit')}
+              onClick={() => setConfirmModal({ type: 'submit' })}
               disabled={isLoading}
               className="h-11 px-7 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer disabled:opacity-70"
             >
@@ -319,7 +328,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.back()}
+              onClick={() => setConfirmModal({ type: 'cancel' })}
               disabled={isLoading}
               className="h-11 px-7 border-[#D1D5DB] text-[#1E2125] font-semibold text-[14px] hover:bg-[#F9FAFB] cursor-pointer"
             >
@@ -328,6 +337,25 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
           </div>
         </div>
       </div>
+
+      {/* ── 확인 모달 ── */}
+      {confirmModal && (
+        <TwoButtonModal
+          title={MODAL_CONFIG[confirmModal.type].title}
+          message={MODAL_CONFIG[confirmModal.type].message}
+          confirmLabel="확인"
+          cancelLabel="취소"
+          onConfirm={() => {
+            setConfirmModal(null);
+            if (confirmModal.type === 'cancel') {
+              router.back();
+            } else {
+              handleSubmit(confirmModal.type);
+            }
+          }}
+          onCancel={() => setConfirmModal(null)}
+        />
+      )}
     </div>
   );
 }

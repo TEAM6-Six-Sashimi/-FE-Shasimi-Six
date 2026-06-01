@@ -8,35 +8,28 @@ export async function fetchApprovedCourses(
   userId: string,
 ): Promise<ApprovedCourse[]> {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/instructor/courses/approved`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-          'X-USER-ID': userId,
-        },
-        cache: 'no-store',
+    const response = await fetch(`${API_BASE_URL}/instructor/courses/approved`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        'X-USER-ID': userId,
       },
-    );
-
-    console.log('fetchApprovedCourses status:', response.status);
+      cache: 'no-store',
+    });
 
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error('fetchApprovedCourses error:', errorBody);
       return [];
     }
 
     const result = await response.json();
-    return Array.isArray(result) ? result : result.data ?? [];
+    return Array.isArray(result) ? result : (result.data ?? []);
   } catch (e) {
     console.error('fetchApprovedCourses fetch error:', e);
     return [];
   }
 }
-
 
 export async function fetchInProgressCourses(
   accessToken: string,
@@ -46,13 +39,14 @@ export async function fetchInProgressCourses(
     const res = await fetch(`${API_BASE_URL}/instructor/courses/in-progress`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         'X-USER-ID': userId,
       },
       cache: 'no-store',
     });
     if (!res.ok) return [];
     return res.json();
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
-

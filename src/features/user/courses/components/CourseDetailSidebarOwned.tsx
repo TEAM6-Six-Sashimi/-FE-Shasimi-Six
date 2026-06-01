@@ -1,17 +1,22 @@
 'use client';
 
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { CourseDetailFromAPI, EnrollmentInfo, DIFFICULTY_LABEL } from '../types';
 
 interface CourseDetailSidebarOwnedProps {
-  course: {
-    lectureCount: number;
-    duration: number;
-    level: string;
-  };
+  course: CourseDetailFromAPI;
+  enrollmentInfo: EnrollmentInfo;
 }
 
-export default function CourseDetailSidebarOwned({ course }: CourseDetailSidebarOwnedProps) {
+export default function CourseDetailSidebarOwned({
+  course,
+  enrollmentInfo,
+}: CourseDetailSidebarOwnedProps) {
+  const lectureCount = course.sessions.length;
+  const durationHours = Math.ceil(course.totalDuration / 3600);
+  const difficultyLabel = DIFFICULTY_LABEL[course.difficulty] ?? course.difficulty;
+  const progress = enrollmentInfo.progress;
+
   return (
     <div className="w-80 shrink-0 flex flex-col gap-3 bg-white rounded-xl shadow-md p-6">
       {/* 썸네일 */}
@@ -27,15 +32,26 @@ export default function CourseDetailSidebarOwned({ course }: CourseDetailSidebar
         이어 보기
       </Button>
 
-      {/* 해당 강의 전체 수강률 */}
-      수강률 게이지 바
+      {/* 수강률 게이지 바 */}
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[13px] text-[#6A7282]">수강률</span>
+          <span className="text-[13px] font-semibold text-[#1E2125]">{progress}%</span>
+        </div>
+        <div className="w-full h-2 bg-[#E5E7EB] rounded-full overflow-hidden">
+          <div
+            className="h-full rounded-full bg-[#FF5E5E] transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
 
       {/* 강의 정보 */}
       <div className="border border-[#E5E7EB] rounded-xl p-4 flex flex-col gap-2.5 mt-1">
         {[
-          { label: '총 강의 수', value: `${course.lectureCount}강` },
-          { label: '총 강의 시간', value: `${course.duration}시간` },
-          { label: '난이도', value: course.level },
+          { label: '총 강의 수', value: `${lectureCount}강` },
+          { label: '총 강의 시간', value: `${durationHours}시간` },
+          { label: '난이도', value: difficultyLabel },
         ].map(({ label, value }) => (
           <div key={label} className="flex items-center justify-between">
             <span className="text-[#6A7282] text-[13px]">{label}</span>

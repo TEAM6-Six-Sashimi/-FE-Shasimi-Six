@@ -1,5 +1,9 @@
 import { cookies } from 'next/headers';
-import { fetchAdminCourses, fetchAdminPendingCourses, fetchAdminRejectedCourses } from '@/services/admin.service';
+import {
+  fetchAdminCourses,
+  fetchAdminPendingCourses,
+  fetchAdminRejectedCourses,
+} from '@/services/admin.service';
 import { fetchCategories } from '@/services/categories.service';
 import CourseManagePage from './_components/CourseManagePage';
 

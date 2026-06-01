@@ -1,4 +1,4 @@
-'use server'
+'use server';
 
 import { cookies } from 'next/headers';
 
@@ -10,7 +10,7 @@ export async function approveCourseAction(courseId: number) {
 
   const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/approve`, {
     method: 'PATCH',
-    headers: { 'Authorization': `Bearer ${accessToken}` },
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   if (!res.ok) throw new Error('승인 처리에 실패했습니다.');
@@ -23,7 +23,7 @@ export async function rejectCourseAction(courseId: number, rejectReason: string)
   const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/reject`, {
     method: 'PATCH',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ rejectReason }),

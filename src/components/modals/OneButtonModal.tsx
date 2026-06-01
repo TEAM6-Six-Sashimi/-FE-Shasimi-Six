@@ -6,13 +6,13 @@ interface OneButtonModalProps {
 }
 
 export default function OneButtonModal({
-    title,
+  title,
   message,
   confirmLabel = '확인',
   onConfirm,
 }: OneButtonModalProps) {
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-2xl shadow-xl w-85 p-7 flex flex-col gap-5">
         <div>
           <h2 className="text-[18px] font-bold text-[#1E2125] mb-2">{title}</h2>
@@ -27,5 +27,5 @@ export default function OneButtonModal({
         </button>
       </div>
     </div>
-    );
+  );
 }

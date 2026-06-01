@@ -10,9 +10,9 @@ export interface CartCourseItem {
 
 export interface CartResponse {
   items: CartCourseItem[];
-  totalPrice: number;        
-  itemCount: number;         
-  selectedItemCount: number; 
+  totalPrice: number;
+  itemCount: number;
+  selectedItemCount: number;
 }
 
 export interface CartDeleteRequest {
