@@ -111,7 +111,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
 
   const handleSubmit = async (type: 'save' | 'submit') => {
     if (!form.title.trim()) {
-      alert('강의 제목을 입력해주세요.');
+      alert('강의 제목을 입력해주세요.'); // 추후 수정 예정
       return;
     }
     if (!form.description.trim()) {
