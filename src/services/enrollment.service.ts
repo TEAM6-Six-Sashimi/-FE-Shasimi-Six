@@ -32,7 +32,7 @@ export async function fetchCredits(accessToken: string): Promise<{ balance: numb
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     cache: 'no-store',
   });
@@ -48,18 +48,18 @@ export async function fetchCredits(accessToken: string): Promise<{ balance: numb
 // POST /payments/course/{courseId}
 export async function paymentSingleCourse(
   accessToken: string,
-  courseId: number
+  courseId: number,
 ): Promise<PaymentResponse> {
   const response = await fetch(`${API_BASE_URL}/payments/course/${courseId}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
   });
 
   if (!response.ok) {
-    const errorBody: ApiErrorResponse = await response.json().catch(() => ({} as ApiErrorResponse));
+    const errorBody: ApiErrorResponse = await response.json().catch(() => ({}) as ApiErrorResponse);
     throw new Error(errorBody?.errorCode ?? '결제에 실패했습니다.');
   }
 
@@ -70,19 +70,19 @@ export async function paymentSingleCourse(
 // POST /payments/cart/checkout
 export async function paymentCartCheckout(
   accessToken: string,
-  courseIds: number[]
+  courseIds: number[],
 ): Promise<PaymentResponse> {
   const response = await fetch(`${API_BASE_URL}/payments/cart/checkout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({ courseIds }),
   });
 
   if (!response.ok) {
-    const errorBody: ApiErrorResponse = await response.json().catch(() => ({} as ApiErrorResponse));
+    const errorBody: ApiErrorResponse = await response.json().catch(() => ({}) as ApiErrorResponse);
     throw new Error(errorBody?.errorCode ?? '결제에 실패했습니다.');
   }
 

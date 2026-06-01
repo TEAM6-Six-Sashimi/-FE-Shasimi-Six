@@ -31,15 +31,17 @@ function formatDuration(seconds: number): string {
   if (h > 0) return `${h}시간`;
   return `${m}분`;
 }
- 
+
 // 목업 필드 (추후 교체)
 const MOCK_INSTRUCTOR = MOCK_COURSE_DETAIL.instructor;
 const MOCK_NCS = MOCK_COURSE_DETAIL.ncs;
 const MOCK_RATING_DISTRIBUTION: RatingDistribution[] = MOCK_COURSE_DETAIL.ratingDistribution;
 const MOCK_REVIEWS: Review[] = MOCK_COURSE_DETAIL.reviews;
 
-export default function CourseDetailPageOwned({ course, enrollmentInfo }: CourseDetailPageOwnedProps) {
-
+export default function CourseDetailPageOwned({
+  course,
+  enrollmentInfo,
+}: CourseDetailPageOwnedProps) {
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
       <div className="max-w-275 mx-auto py-6 px-6">
@@ -110,7 +112,7 @@ export default function CourseDetailPageOwned({ course, enrollmentInfo }: Course
               <CourseCurriculumOwned
                 sessions={course.sessions}
                 lastSessionId={enrollmentInfo.lastSessionId}
-               />
+              />
             </section>
 
             {/* 강사 정보 */}
@@ -155,10 +157,7 @@ export default function CourseDetailPageOwned({ course, enrollmentInfo }: Course
 
           {/* ── 우측 사이드바 (구매 후) ── */}
           <div className="w-72 shrink-0 sticky top-4">
-            <CourseDetailSidebarOwned
-              course={course}
-              enrollmentInfo={enrollmentInfo}
-            />
+            <CourseDetailSidebarOwned course={course} enrollmentInfo={enrollmentInfo} />
           </div>
         </div>
       </div>

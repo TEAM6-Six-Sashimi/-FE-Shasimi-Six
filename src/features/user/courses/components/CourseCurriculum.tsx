@@ -39,7 +39,9 @@ export default function CourseCurriculum({ sessions }: CourseCurriculumProps) {
 
             {/* 시간 + 버튼 */}
             <div className="flex items-center gap-2.5 shrink-0 ml-3">
-              <span className="text-[#6A7282] text-[12.5px]">{formatSeconds(session.durationSeconds)}</span>
+              <span className="text-[#6A7282] text-[12.5px]">
+                {formatSeconds(session.durationSeconds)}
+              </span>
               {session.preview ? (
                 <button className="px-2.5 py-1 rounded-md bg-[#FF5E5E] text-white text-[11.5px] font-semibold cursor-pointer hover:bg-[#D14848] transition-colors">
                   미리보기

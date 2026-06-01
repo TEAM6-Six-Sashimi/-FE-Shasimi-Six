@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { UserMe } from '@/features/auth/types';
 
-
 interface Step01Data {
   motivation: string;
   introduction: string;
