@@ -172,7 +172,7 @@ export async function registerUser(payload: SignupPayloadDto): Promise<boolean> 
       return true;
     } else {
       const errorData = await response.json().catch(() => ({}));
-      console.error('회원가입 실패 원인:', errorData);
+      console.error('회원가입 실패:', errorData);
       return false;
     }
   } catch (error) {
