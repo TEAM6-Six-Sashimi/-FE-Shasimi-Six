@@ -100,7 +100,7 @@ export default function CourseDetailInstructor({ courseId }: CourseDetailInstruc
 
             {/* 커리큘럼 (강사용 - 재생 버튼만, 진행률 없음) */}
             <section className={CARD}>
-              <CourseCurriculumOwned curriculum={course.curriculum} />
+              <CourseCurriculumOwned sessions={course.sessions} lastSessionId={null} />
             </section>
 
             {/* 강사 정보 */}

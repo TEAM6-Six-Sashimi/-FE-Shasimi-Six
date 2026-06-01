@@ -64,9 +64,11 @@ export default function Step02Career({ data, onNext, onPrev }: Step02CareerProps
   return (
     <div className="flex flex-col gap-6">
       {/* 안내 메시지 */}
-      <div className={`flex items-center gap-2 rounded-lg px-4 py-3 border transition-colors ${
-        isError ? 'bg-[#FFEBEB] border-[#FF5E5E]' : 'bg-[#F9FBE7] border-[#827717]'
-      }`}>
+      <div
+        className={`flex items-center gap-2 rounded-lg px-4 py-3 border transition-colors ${
+          isError ? 'bg-[#FFEBEB] border-[#FF5E5E]' : 'bg-[#F9FBE7] border-[#827717]'
+        }`}
+      >
         <span className={`font-semibold ${isError ? 'text-[#FF5E5E]' : 'text-[#827717]'}`}>ⓘ</span>
         <p className={`text-[13px] font-semibold ${isError ? 'text-[#FF5E5E]' : 'text-[#827717]'}`}>
           강사님의 실무 역량과 경험을 알려주세요.
@@ -126,7 +128,9 @@ export default function Step02Career({ data, onNext, onPrev }: Step02CareerProps
         {form.hasOnlineExperience === true && (
           <div className="mt-4 flex flex-col gap-3 p-4 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB]">
             <div>
-              <label className="block text-[12.5px] font-semibold text-[#1E2125] mb-1.5">플랫폼명</label>
+              <label className="block text-[12.5px] font-semibold text-[#1E2125] mb-1.5">
+                플랫폼명
+              </label>
               <input
                 type="text"
                 placeholder="예: 인프런, 유데미 등"
@@ -136,7 +140,9 @@ export default function Step02Career({ data, onNext, onPrev }: Step02CareerProps
               />
             </div>
             <div>
-              <label className="block text-[12.5px] font-semibold text-[#1E2125] mb-1.5">강의 링크</label>
+              <label className="block text-[12.5px] font-semibold text-[#1E2125] mb-1.5">
+                강의 링크
+              </label>
               <input
                 type="url"
                 placeholder="https://..."

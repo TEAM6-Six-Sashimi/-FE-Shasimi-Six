@@ -1,26 +1,22 @@
 // 회원 서비스(로그인/회원가입)
-import {
-  LoginRequest,
-  LoginResponse,
-  ReissueResponse,
-} from '@/features/auth/types';
+import { LoginRequest, LoginResponse, ReissueResponse } from '@/features/auth/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface EmailVerifyResponseDto {
-    targetEmail: string;
-    purpose: 'SIGNUP' | 'PASSWORD_RESET' | 'EMAIL_CHANGE';
-    verified: boolean;
+  targetEmail: string;
+  purpose: 'SIGNUP' | 'PASSWORD_RESET' | 'EMAIL_CHANGE';
+  verified: boolean;
 }
 
 interface LoginIdCheckResponseDto {
-    login_id: string;
-    available: boolean;
+  login_id: string;
+  available: boolean;
 }
 
 interface ReferralCodeCheckResponseDto {
-    referralCode: string;
-    available: boolean;
+  referralCode: string;
+  available: boolean;
 }
 
 export interface SignupPayloadDto {
@@ -141,21 +137,21 @@ export async function checkReferralCode(referralCode: string): Promise<boolean> 
     const response = await fetch(
       `${API_BASE_URL}/auth/referral-code/check?referralCode=${encodeURIComponent(referralCode)}`,
       {
-        method: "GET",
+        method: 'GET',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-      }
+      },
     );
 
     if (!response.ok) {
-      throw new Error("네트워크 응답에 문제가 발생했습니다.");
+      throw new Error('네트워크 응답에 문제가 발생했습니다.');
     }
 
     const data: ReferralCodeCheckResponseDto = await response.json();
     return data.available;
   } catch (error) {
-    console.error("추천인 코드 확인 중 오류 발생:", error);
+    console.error('추천인 코드 확인 중 오류 발생:', error);
     throw error;
   }
 }
@@ -164,10 +160,10 @@ export async function checkReferralCode(referralCode: string): Promise<boolean> 
 export async function registerUser(payload: SignupPayloadDto): Promise<boolean> {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
       body: JSON.stringify(payload),
     });
@@ -176,11 +172,11 @@ export async function registerUser(payload: SignupPayloadDto): Promise<boolean> 
       return true;
     } else {
       const errorData = await response.json().catch(() => ({}));
-      console.error("회원가입 실패 원인:", errorData);
+      console.error('회원가입 실패 원인:', errorData);
       return false;
     }
   } catch (error) {
-    console.error("회원가입 통신 중 서버 에러:", error);
+    console.error('회원가입 통신 중 서버 에러:', error);
     return false;
   }
 }

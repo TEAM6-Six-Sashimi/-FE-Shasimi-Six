@@ -6,7 +6,7 @@ import { CourseSession } from '../types';
 
 interface CourseCurriculumOwnedProps {
   sessions: CourseSession[];
-  lastSessionId: number;
+  lastSessionId?: number | null;
 }
 
 const PREVIEW_COUNT = 5;
@@ -18,7 +18,10 @@ function formatSeconds(seconds: number): string {
   return `${s}초`;
 }
 
-export default function CourseCurriculumOwned({ sessions, lastSessionId }: CourseCurriculumOwnedProps) {
+export default function CourseCurriculumOwned({
+  sessions,
+  lastSessionId,
+}: CourseCurriculumOwnedProps) {
   const [expanded, setExpanded] = useState(false);
   const sorted = [...sessions].sort((a, b) => a.sessionOrder - b.sessionOrder);
   const visible = expanded ? sorted : sorted.slice(0, PREVIEW_COUNT);
@@ -40,7 +43,7 @@ export default function CourseCurriculumOwned({ sessions, lastSessionId }: Cours
               {/* 회차 헤더 */}
               <div className="flex items-center justify-between">
                 <span className="text-[13.5px] text-[#1E2125]">
-                  {session.sessionOrder}.  {session.title}
+                  {session.sessionOrder}. {session.title}
                   {isLast && (
                     <span className="ml-2 text-[11px] text-[#FF5E5E] font-semibold">
                       마지막 수강
@@ -48,7 +51,9 @@ export default function CourseCurriculumOwned({ sessions, lastSessionId }: Cours
                   )}
                 </span>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[12px] text-[#6A7282]">{formatSeconds(session.durationSeconds)}</span>
+                  <span className="text-[12px] text-[#6A7282]">
+                    {formatSeconds(session.durationSeconds)}
+                  </span>
                   <Button
                     size="sm"
                     className="h-7 px-3 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[12px] font-semibold cursor-pointer"

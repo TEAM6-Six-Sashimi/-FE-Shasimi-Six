@@ -1,4 +1,4 @@
-'use server'
+'use server';
 
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
@@ -21,7 +21,7 @@ export async function createCourseAction(payload: CreateCourseRequest) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'X-USER-ID': String(user.id),
     },
     body: JSON.stringify(payload),
@@ -47,7 +47,7 @@ export async function updateCourseAction(courseId: number, payload: UpdateCourse
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'X-USER-ID': String(user.id),
     },
     body: JSON.stringify(payload),
@@ -70,7 +70,7 @@ export async function deleteCourseAction(courseId: number) {
   const res = await fetch(`${API_BASE_URL}/instructor/courses/${courseId}`, {
     method: 'DELETE',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'X-USER-ID': String(user.id),
     },
   });

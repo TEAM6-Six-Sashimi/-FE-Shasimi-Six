@@ -1,5 +1,5 @@
-import FeatureCards from "@/features/user/main/components/FeatureCards";
-import PopularCourseSlider from "@/features/user/main/components/PopularCourseSlider";
+import FeatureCards from '@/features/user/main/components/FeatureCards';
+import PopularCourseSlider from '@/features/user/main/components/PopularCourseSlider';
 
 export default function MainPage() {
   return (

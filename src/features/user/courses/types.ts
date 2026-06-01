@@ -26,7 +26,7 @@ export interface CourseDetailFromAPI {
   categoryName: string;
   sessions: CourseSession[];
 }
- 
+
 export interface CourseSession {
   sessionId: number;
   sessionUid: string;
@@ -46,15 +46,15 @@ export interface EnrollmentInfo {
   enrollmentId: number;
   courseId: number;
   progress: number;
-  lastSessionId: number;  // 마지막 수강 세션 id(이어보기용)
+  lastSessionId: number; // 마지막 수강 세션 id(이어보기용)
   enrolledAt: string;
 }
- 
+
 // 난이도 한글 변환
 export const DIFFICULTY_LABEL: Record<string, string> = {
-  BEGINNER:     '초급',
+  BEGINNER: '초급',
   INTERMEDIATE: '중급',
-  ADVANCED:     '고급',
+  ADVANCED: '고급',
 };
 
 export interface CourseDetail extends CourseFromAPI {
