@@ -32,15 +32,12 @@ export default function AllCourses({ courses }: Props) {
   const filtered = useMemo(() => {
     let result = [...courses];
     if (search) result = result.filter((c) => c.title.includes(search));
-    if (categoryFilter !== '전체')
-      result = result.filter((c) => c.categoryName === categoryFilter);
+    if (categoryFilter !== '전체') result = result.filter((c) => c.categoryName === categoryFilter);
     if (sort === '인기순') result.sort((a, b) => b.studentCount - a.studentCount);
     if (sort === '높은 평점순') result.sort((a, b) => b.ratingAvg - a.ratingAvg);
     if (sort === '최신순')
       result.sort(
-        (a, b) =>
-          new Date(b.approvedAt ?? 0).getTime() -
-          new Date(a.approvedAt ?? 0).getTime(),
+        (a, b) => new Date(b.approvedAt ?? 0).getTime() - new Date(a.approvedAt ?? 0).getTime(),
       );
     return result;
   }, [courses, search, sort, categoryFilter]);

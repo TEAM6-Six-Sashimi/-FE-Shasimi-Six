@@ -29,11 +29,16 @@ export default function RejectedCourses({ courses }: Props) {
             </tr>
           ) : (
             courses.map((c) => (
-              <tr key={c.courseId} className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors">
+              <tr
+                key={c.courseId}
+                className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
+              >
                 <td className="px-6 py-3 text-left font-semibold text-[#1E2125]">{c.title}</td>
                 <td className="py-3 text-center text-[#6A7282]">{c.instructorName}</td>
                 <td className="py-3 text-center text-[#6A7282]">{c.categoryName}</td>
-                <td className="py-3 text-center text-[#6A7282]">{c.updatedAt?.slice(0, 10) ?? '-'}</td>
+                <td className="py-3 text-center text-[#6A7282]">
+                  {c.updatedAt?.slice(0, 10) ?? '-'}
+                </td>
                 <td className="py-3 text-[#6A7282] text-left px-4">{c.rejectReason}</td>
               </tr>
             ))

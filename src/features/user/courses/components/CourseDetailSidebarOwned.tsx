@@ -8,8 +8,9 @@ interface CourseDetailSidebarOwnedProps {
   enrollmentInfo: EnrollmentInfo;
 }
 
-export default function CourseDetailSidebarOwned({ 
-  course, enrollmentInfo
+export default function CourseDetailSidebarOwned({
+  course,
+  enrollmentInfo,
 }: CourseDetailSidebarOwnedProps) {
   const lectureCount = course.sessions.length;
   const durationHours = Math.ceil(course.totalDuration / 3600);

@@ -37,33 +37,34 @@ const FEATURE_CARDS = [
 export default function FeatureCards() {
   return (
     <div className="grid grid-cols-3 gap-8 px-24">
-      {FEATURE_CARDS.map(({ href, icon, iconBg, title, description, buttonLabel, buttonStyle, cardBg }) => (
-        <div
-          key={href}
-          className={`${cardBg} rounded-xl p-6 flex flex-col gap-4 min-h-55`}
-        >
-          {/* 아이콘 — 원형 배경 */}
-          <div className={`${iconBg} w-13 h-13 rounded-full flex items-center justify-center shrink-0`}>
-            <Image src={icon} alt="" width={24} height={24} />
-          </div>
-
-          {/* 텍스트 */}
-          <div className="flex flex-col gap-2 flex-1">
-            <h3 className="text-[#1E2125] text-[20px] font-bold leading-snug">{title}</h3>
-            <p className="text-[#6A7282] text-[16px] leading-relaxed">{description}</p>
-          </div>
-
-          {/* 버튼 — 오른쪽 하단 정렬 */}
-          <div className="flex justify-end">
-            <Link
-              href={href}
-              className={`inline-flex items-center justify-center px-6 py-2.5 rounded-lg text-[13.5px] font-semibold transition-colors duration-150 ${buttonStyle}`}
+      {FEATURE_CARDS.map(
+        ({ href, icon, iconBg, title, description, buttonLabel, buttonStyle, cardBg }) => (
+          <div key={href} className={`${cardBg} rounded-xl p-6 flex flex-col gap-4 min-h-55`}>
+            {/* 아이콘 — 원형 배경 */}
+            <div
+              className={`${iconBg} w-13 h-13 rounded-full flex items-center justify-center shrink-0`}
             >
-              {buttonLabel}
-            </Link>
+              <Image src={icon} alt="" width={24} height={24} />
+            </div>
+
+            {/* 텍스트 */}
+            <div className="flex flex-col gap-2 flex-1">
+              <h3 className="text-[#1E2125] text-[20px] font-bold leading-snug">{title}</h3>
+              <p className="text-[#6A7282] text-[16px] leading-relaxed">{description}</p>
+            </div>
+
+            {/* 버튼 — 오른쪽 하단 정렬 */}
+            <div className="flex justify-end">
+              <Link
+                href={href}
+                className={`inline-flex items-center justify-center px-6 py-2.5 rounded-lg text-[13.5px] font-semibold transition-colors duration-150 ${buttonStyle}`}
+              >
+                {buttonLabel}
+              </Link>
+            </div>
           </div>
-        </div>
-      ))}
+        ),
+      )}
     </div>
   );
 }

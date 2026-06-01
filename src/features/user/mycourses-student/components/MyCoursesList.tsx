@@ -6,8 +6,7 @@ interface Props {
   courses: StudentCourse[];
 }
 
-const progressColor = (completed: boolean) =>
-  completed ? 'bg-[#CFEE5D]' : 'bg-[#FF5E5E]';
+const progressColor = (completed: boolean) => (completed ? 'bg-[#CFEE5D]' : 'bg-[#FF5E5E]');
 
 export default function MyCoursesList({ courses }: Props) {
   return (

@@ -15,7 +15,6 @@ interface CourseDetailSidebarProps {
 }
 
 export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps) {
-
   const router = useRouter();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
@@ -34,7 +33,7 @@ export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps
   const handlePurchase = () => {
     setShowPurchaseModal(true);
   };
- 
+
   // 장바구니 담기
   const handleAddToCart = async () => {
     if (isAddingToCart) return;
@@ -44,12 +43,12 @@ export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps
       setShowCartModal(true);
     } catch (err) {
       const code = err instanceof Error ? err.message : '';
- 
+
       if (code === 'UNAUTHORIZED') {
         router.push('/login');
         return;
       }
- 
+
       if (code === 'CART_002') {
         setErrorMessage('이미 장바구니에 담긴 강의입니다.');
       } else if (code === 'ENROLLMENT_001') {
@@ -70,7 +69,9 @@ export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps
         <div className="w-full aspect-video rounded-xl bg-[#E5E7EB] overflow-hidden" />
 
         {/* 가격 */}
-        <p className="text-[#1E2125] text-[22px] font-bold">{course.price.toLocaleString()} 크레딧</p>
+        <p className="text-[#1E2125] text-[22px] font-bold">
+          {course.price.toLocaleString()} 크레딧
+        </p>
 
         {/* 구매하기 */}
         <Button
@@ -87,7 +88,7 @@ export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps
           onClick={handleAddToCart}
           disabled={isAddingToCart}
         >
-          <Image src="/header/cart.svg" width={17} height={17} alt=""/> 장바구니 담기
+          <Image src="/header/cart.svg" width={17} height={17} alt="" /> 장바구니 담기
         </Button>
 
         {/* 강의 정보 */}

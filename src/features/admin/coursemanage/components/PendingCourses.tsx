@@ -1,29 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import type { Category } from '@/features/categories/types';
 import { AdminCourse } from '../type';
 import { approveCourseAction, rejectCourseAction } from '../action';
 
 interface Props {
   courses: AdminCourse[];
   setCourses: React.Dispatch<React.SetStateAction<AdminCourse[]>>;
-  categories: Category[];
 }
 
-export default function PendingCourses({ courses, setCourses, categories }: Props) {
+export default function PendingCourses({ courses, setCourses }: Props) {
   const [rejectModal, setRejectModal] = useState<{ courseId: number; title: string } | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const getCategoryName = (categoryId: number) => {
-    for (const cat of categories) {
-      if (cat.mainCategoryId === categoryId) return cat.name;
-      const option = cat.options?.find((o) => o.id === categoryId);
-      if (option) return option.name;
-    }
-    return String(categoryId);
-  };
 
   const sorted = [...courses].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -43,7 +32,10 @@ export default function PendingCourses({ courses, setCourses, categories }: Prop
 
   const handleRejectConfirm = async () => {
     if (!rejectModal) return;
-    if (!rejectReason.trim()) { alert('반려 사유를 입력해주세요.'); return; }
+    if (!rejectReason.trim()) {
+      alert('반려 사유를 입력해주세요.');
+      return;
+    }
     try {
       setLoading(true);
       await rejectCourseAction(rejectModal.courseId, rejectReason);
@@ -74,14 +66,23 @@ export default function PendingCourses({ courses, setCourses, categories }: Prop
           <tbody>
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={4} className="py-16 text-center text-[#6A7282]">승인 대기 중인 강의가 없습니다.</td>
+                <td colSpan={4} className="py-16 text-center text-[#6A7282]">
+                  승인 대기 중인 강의가 없습니다.
+                </td>
               </tr>
             ) : (
               sorted.map((c) => (
-                <tr key={c.courseId} className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors">
+                <tr
+                  key={c.courseId}
+                  className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
+                >
                   <td className="py-3 px-6 text-left font-semibold text-[#1E2125]">{c.title}</td>
-                  <td className="py-3 text-center font-semibold text-[#1E2125]">{c.instructorName}</td>
-                  <td className="py-3 text-center text-[#6A7282]">{getCategoryName(c.categoryId)}</td>
+                  <td className="py-3 text-center font-semibold text-[#1E2125]">
+                    {c.instructorName}
+                  </td>
+                  <td className="py-3 text-center text-[#6A7282]">
+                    {c.categoryName}
+                  </td>
                   <td className="py-3 text-center text-[#6A7282]">{c.createdAt.slice(0, 10)}</td>
                   <td className="py-3 text-center">
                     <div className="flex items-center justify-center gap-2">
@@ -93,7 +94,10 @@ export default function PendingCourses({ courses, setCourses, categories }: Prop
                         승인
                       </button>
                       <button
-                        onClick={() => { setRejectModal({ courseId: c.courseId, title: c.title }); setRejectReason(''); }}
+                        onClick={() => {
+                          setRejectModal({ courseId: c.courseId, title: c.title });
+                          setRejectReason('');
+                        }}
                         disabled={loading}
                         className="px-6 py-1.5 rounded border-2 border-[#FF5E5E] text-[12px] font-semibold text-white bg-[#FF5E5E] hover:bg-[#D14848] hover:border-[#D14848] cursor-pointer transition-colors disabled:opacity-50"
                       >
