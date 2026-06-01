@@ -18,11 +18,8 @@ export async function fetchApprovedCourses(
       cache: 'no-store',
     });
 
-    console.log('fetchApprovedCourses status:', response.status);
-
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error('fetchApprovedCourses error:', errorBody);
       return [];
     }
 

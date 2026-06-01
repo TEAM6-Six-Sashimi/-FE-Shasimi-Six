@@ -46,9 +46,6 @@ export default function PopularCourseSlider() {
           }),
         );
 
-        console.log('API_URL:', process.env.NEXT_PUBLIC_API_URL);
-        console.log('courses:', detailedCourses);
-
         setCourses(detailedCourses);
       } catch (error) {
         console.error('인기 강의 페칭 실패:', error);

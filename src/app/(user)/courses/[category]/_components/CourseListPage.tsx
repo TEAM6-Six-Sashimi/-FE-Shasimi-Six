@@ -28,10 +28,7 @@ interface CourseListPageProps {
 }
 
 export default function CourseListPage({ categories, initialCourses }: CourseListPageProps) {
-  console.log(
-    'initialCourses:',
-    initialCourses.map((c) => c.courseId),
-  );
+
   const params = useParams();
   const searchParams = useSearchParams();
   const category = decodeURIComponent(params.category as string);
@@ -72,7 +69,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
     setCurrentPage(1);
   }, [category, sub, search, filters, sort]);
 
-  // 필터링 + 정렬 (프론트에서 처리, 추후 백엔드 페이지네이션으로 교체 예정)
+  // 필터링 + 정렬 (프론트 처리, 추후 백엔드 페이지네이션으로 교체 예정)
   const filteredCourses = useMemo(() => {
     let result = [...initialCourses];
     console.log(
@@ -111,14 +108,6 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
     currentPage * ITEMS_PER_PAGE,
   );
 
-  console.log(
-    'pagedCourses:',
-    pagedCourses.map((c) => c.courseId),
-  );
-  console.log(
-    'filteredCourses:',
-    filteredCourses.map((c) => c.courseId),
-  );
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-6 py-8">

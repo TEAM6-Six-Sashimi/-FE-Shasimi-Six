@@ -85,8 +85,6 @@ export default function SignupPage() {
       referralCode: finalReferralCode || null,
     };
 
-    console.log('백엔드로 보낼 최종 데이터:', finalPayload);
-
     try {
       const success = await registerUser(finalPayload);
       if (success) {
