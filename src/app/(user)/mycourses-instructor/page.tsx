@@ -1,13 +1,18 @@
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import Dashboard from '@/features/user/mycourses-instructor/components/Dashboard';
 import ApprovedCourse from '@/features/user/mycourses-instructor/components/ApprovedCourse';
 import PendingCourse from '@/features/user/mycourses-instructor/components/PendingCourse';
-import type { InstructorTab } from '@/constants/mockInstructorCourses';
+import { fetchCategories } from '@/services/categories.service';
+import { fetchApprovedCourses, fetchInProgressCourses } from '@/services/instructor.service';
+import { fetchUserMe } from '@/services/user.service';
+
+type InstructorTab = 'dashboard' | 'approved' | 'pending';
 
 const TABS: { id: InstructorTab; label: string }[] = [
   { id: 'dashboard', label: '대시보드' },
-  { id: 'approved',  label: '승인된 강의' },
-  { id: 'pending',   label: '대기/보관/반려' },
+  { id: 'approved', label: '승인된 강의' },
+  { id: 'pending', label: '대기/보관/반려' },
 ];
 
 interface PageProps {
@@ -16,15 +21,31 @@ interface PageProps {
 
 export default async function MyCoursesInstructorPage({ searchParams }: PageProps) {
   const { tab } = await searchParams;
-  const activeTab: InstructorTab =
-    tab === 'approved' || tab === 'pending' ? tab : 'dashboard';
+  const activeTab: InstructorTab = tab === 'approved' || tab === 'pending' ? tab : 'dashboard';
+
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+
+  const user = accessToken ? await fetchUserMe(accessToken) : null;
+  const userId = user ? String(user.id) : '';
+
+  const [approvedCourses, inProgressCourses, categories] =
+    accessToken && userId
+      ? await Promise.all([
+          activeTab === 'approved'
+            ? fetchApprovedCourses(accessToken, userId)
+            : Promise.resolve([]),
+          activeTab === 'pending'
+            ? fetchInProgressCourses(accessToken, userId)
+            : Promise.resolve([]),
+          fetchCategories(),
+        ])
+      : [[], [], []];
 
   return (
     <div className="max-w-275 container mx-auto px-6 py-8">
-      {/* 타이틀 */}
       <h1 className="text-[24px] font-bold text-[#1E2125] mb-5">내 강의</h1>
 
-      {/* 탭 */}
       <div className="flex items-center gap-0 border-b border-[#E5E7EB] mb-6">
         {TABS.map(({ id, label }) => (
           <Link
@@ -41,10 +62,13 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
         ))}
       </div>
 
-      {/* 탭 콘텐츠 */}
       {activeTab === 'dashboard' && <Dashboard />}
-      {activeTab === 'approved'  && <ApprovedCourse />}
-      {activeTab === 'pending'   && <PendingCourse />}
+      {activeTab === 'approved' && (
+        <ApprovedCourse courses={approvedCourses} categories={categories} />
+      )}
+      {activeTab === 'pending' && (
+        <PendingCourse courses={inProgressCourses} categories={categories} />
+      )}
     </div>
   );
 }

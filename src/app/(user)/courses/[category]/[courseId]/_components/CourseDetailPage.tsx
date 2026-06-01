@@ -1,7 +1,12 @@
 import CourseCurriculum from '@/features/user/courses/components/CourseCurriculum';
 import CourseReviews from '@/features/user/courses/components/CourseReviews';
 import CourseDetailSidebar from '@/features/user/courses/components/CourseDetailSidebar';
-import { MOCK_COURSE_DETAIL } from '@/constants/mockCourseDetail';
+import { CourseDetailFromAPI } from '@/features/user/courses/types';
+import { MOCK_COURSE_DETAIL, Review, RatingDistribution } from '@/constants/mockCourseDetail';
+
+interface CourseDetailPageProps {
+  course: CourseDetailFromAPI;
+}
 
 const CARD = 'bg-white rounded-xl shadow-md p-6 overflow-hidden';
 
@@ -18,9 +23,21 @@ const StarRating = ({ rating }: { rating: number }) => (
   </div>
 );
 
-export default function CourseDetailPage() {
-  const course = MOCK_COURSE_DETAIL;
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0 && m > 0) return `${h}시간 ${m}분`;
+  if (h > 0) return `${h}시간`;
+  return `${m}분`;
+}
 
+// 목 필드 (추후 교체)
+const MOCK_INSTRUCTOR = MOCK_COURSE_DETAIL.instructor;
+const MOCK_NCS = MOCK_COURSE_DETAIL.ncs;
+const MOCK_RATING_DISTRIBUTION: RatingDistribution[] = MOCK_COURSE_DETAIL.ratingDistribution;
+const MOCK_REVIEWS: Review[] = MOCK_COURSE_DETAIL.reviews;
+
+export default function CourseDetailPage({ course }: CourseDetailPageProps) {
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
       <div className="max-w-275 mx-auto py-6 px-6">
@@ -29,19 +46,16 @@ export default function CourseDetailPage() {
           <div className="flex flex-col flex-1 gap-4 min-w-0">
             {/* 첫번째 카드: 썸네일 + 브레드크럼 + 제목 + 평점 */}
             <div className={CARD + ' flex flex-col gap-4'}>
-              {/* 썸네일 */}
+              {/* 썸네일: 추후 이미지 URL로 교체 */}
               <div
                 className="rounded-t-xl -mx-6 -mt-6 bg-[#E5E7EB]"
                 style={{ width: 'calc(100% + 3rem)', height: '240px' }}
               />
 
-              {/* 브레드크럼 — 뱃지 스타일 */}
+              {/* 카테고리 뱃지 */}
               <div className="flex items-center gap-2">
                 <div className="px-2.5 py-1 rounded-full bg-[#FFEBEB] text-[#FF5E5E] text-[12px] font-medium">
-                  {course.category}
-                </div>
-                <div className="px-2.5 py-1 rounded-full bg-[#F9FBE7] text-[#827717] text-[12px] font-medium">
-                  {course.subCategory}
+                  {course.categoryName}
                 </div>
               </div>
 
@@ -55,9 +69,9 @@ export default function CourseDetailPage() {
 
               {/* 평점 */}
               <div className="flex items-center gap-1.5">
-                <StarRating rating={course.rating} />
+                <StarRating rating={course.ratingAvg} />
                 <span className="text-[#1E2125] text-[13.5px] font-semibold">
-                  {course.rating.toFixed(1)}
+                  {course.ratingAvg.toFixed(1)}
                 </span>
                 <span className="text-[#6A7282] text-[13px]">
                   ({course.reviewCount.toLocaleString()}개의 리뷰)
@@ -72,11 +86,7 @@ export default function CourseDetailPage() {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span>⏱</span>
-                  {course.duration}시간
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span>📅</span>
-                  {course.updatedAt}
+                  {formatDuration(course.totalDuration)}시간
                 </span>
               </div>
             </div>
@@ -85,7 +95,7 @@ export default function CourseDetailPage() {
             <section className={CARD}>
               <h2 className="text-[#1E2125] text-[17px] font-bold mb-3">NCS 정보</h2>
               <ul className="flex flex-col gap-1.5">
-                {[course.ncs.category, course.ncs.competency, course.ncs.code].map((item) => (
+                {[MOCK_NCS.category, MOCK_NCS.competency, MOCK_NCS.code].map((item) => (
                   <li key={item} className="flex items-start gap-2 text-[13px] text-[#1E2125]">
                     <span className="text-[#1E2125] mt-0.5">•</span>
                     {item}
@@ -96,7 +106,7 @@ export default function CourseDetailPage() {
 
             {/* 커리큘럼 */}
             <section className={CARD}>
-              <CourseCurriculum curriculum={course.curriculum} />
+              <CourseCurriculum sessions={course.sessions} />
             </section>
 
             {/* 강사 정보 */}
@@ -106,17 +116,17 @@ export default function CourseDetailPage() {
                 <div className="w-16 h-16 rounded-full bg-[#E5E7EB] shrink-0 overflow-hidden" />
                 <div className="flex flex-col gap-2">
                   <span className="text-[#1E2125] text-[15px] font-bold">
-                    {course.instructor.name}
+                    {course.instructorName}
                   </span>
                   <p className="text-[#6A7282] text-[13px] leading-relaxed">
-                    {course.instructor.bio}
+                    {MOCK_INSTRUCTOR.bio}
                   </p>
                   <div className="flex flex-col gap-1 mt-1">
                     <span className="text-[#1E2125] text-[13px] font-semibold">
                       보유 자격증 및 경력
                     </span>
                     <ul className="flex flex-col gap-0.5">
-                      {course.instructor.careers.map((career) => (
+                      {MOCK_INSTRUCTOR.careers.map((career) => (
                         <li key={career} className="text-[#6A7282] text-[13px]">
                           · {career}
                         </li>
@@ -130,10 +140,10 @@ export default function CourseDetailPage() {
             {/* 수강평 */}
             <section className={CARD}>
               <CourseReviews
-                rating={course.rating}
+                rating={course.ratingAvg}
                 reviewCount={course.reviewCount}
-                ratingDistribution={course.ratingDistribution}
-                reviews={course.reviews}
+                ratingDistribution={MOCK_RATING_DISTRIBUTION}
+                reviews={MOCK_REVIEWS}
                 isPurchased={false}
               />
             </section>

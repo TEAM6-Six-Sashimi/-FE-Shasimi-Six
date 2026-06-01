@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import type { UserInfo } from '@/lib/users';
+import { UserMe } from '@/features/auth/types';
 
 interface Step01Data {
   motivation: string;
@@ -11,7 +11,7 @@ interface Step01Data {
 }
 
 interface Step01IntroductionProps {
-  userInfo: UserInfo;
+  userInfo: UserMe;
   data: Step01Data;
   onNext: (data: Step01Data) => void;
 }
@@ -78,10 +78,10 @@ export default function Step01Introduction({ userInfo, data, onNext }: Step01Int
               <p className="text-[11.5px] text-[#6A7282]">생년월일</p>
               <p className="text-[13.5px] font-semibold text-[#1E2125]">{userInfo.birthDate}</p>
             </div>
-            <div>
+            {/* <div>
               <p className="text-[11.5px] text-[#6A7282]">전화번호</p>
               <p className="text-[13.5px] font-semibold text-[#1E2125]">{userInfo.phone}</p>
-            </div>
+            </div> */}
             <div>
               <p className="text-[11.5px] text-[#6A7282]">이메일</p>
               <p className="text-[13.5px] font-semibold text-[#1E2125]">{userInfo.email}</p>

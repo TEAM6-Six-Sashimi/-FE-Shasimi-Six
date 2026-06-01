@@ -35,16 +35,16 @@ export default function FilterDropdown({ open, onApply, onReset }: FilterDropdow
   if (!open) return null;
 
   return (
-    <div className="absolute top-full right-0 mt-2 w-81 bg-[#F9FAFB] border border-[#D1D5DB] rounded-xl shadow-lg z-40 p-5 flex flex-col gap-5">
+    <div className="absolute top-full right-0 mt-2 w-70 bg-[#F9FAFB] border border-[#D1D5DB] rounded-xl shadow-lg z-40 p-5 flex flex-col gap-5">
       {/* 난이도 */}
       <div className="flex flex-col gap-2">
         <label className="text-[#1E2125] text-[13px] font-semibold">난이도</label>
         <div className="flex gap-1.5 flex-wrap">
-          {['전체', '입문', '초급', '중급', '고급'].map((level) => (
+          {['전체', '초급', '중급', '고급'].map((level) => (
             <button
               key={level}
               onClick={() => setFilters((prev) => ({ ...prev, level }))}
-              className={`px-3 py-1.5 rounded-full text-[12.5px] font-medium border transition-colors duration-150 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-[12.5px] font-medium border transition-colors duration-150 cursor-pointer ${
                 filters.level === level
                   ? 'bg-[#1E2125] text-white border-[#1E2125]'
                   : 'bg-white text-[#6A7282] border-[#D1D5DB] hover:border-[#1E2125] hover:text-[#1E2125]'

@@ -5,7 +5,7 @@ import StepIndicator from './StepIndicator';
 import Step01Introduction from './Step01Introduction';
 import Step02Career from './Step02Career';
 import Step03Documents from './Step03Documents';
-import type { UserInfo } from '@/lib/users';
+import { UserMe } from '@/features/auth/types';
 
 const STEPS = [{ label: '자기소개' }, { label: '경력 및 전문성' }, { label: '서류 제출' }];
 
@@ -28,13 +28,14 @@ const DEFAULT_STEP02 = {
 
 const DEFAULT_STEP03 = {
   resumeFile: null as File | null,
-  portfolioFile: null as File | null,
+  // portfolioFile: null as File | null,
   curriculumFile: null as File | null,
+  portfolioUrl: '',
   sampleVideoLink: '',
 };
 
 interface InstructorApplicationClientProps {
-  userInfo: UserInfo;
+  userInfo: UserMe;
 }
 
 export default function InstructorApplicationClient({
@@ -55,10 +56,37 @@ export default function InstructorApplicationClient({
     setStep(3);
   };
 
-  const handleSubmit = (data: typeof DEFAULT_STEP03) => {
+  const handleSubmit = async (data: typeof DEFAULT_STEP03) => {
     setStep03Data(data);
-    console.log('제출 데이터:', { step01Data, step02Data, data });
-    // TODO: 강사 지원 API 연결
+
+    const certFiles = step02Data.certifications.map((c) => c.file);
+    if (certFiles.length === 0) {
+      alert('자격증 파일이 없습니다.');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('bio', step01Data.introduction);
+      formData.append('portfolioUrl', data.portfolioUrl);
+      certFiles.forEach((file) => {
+        formData.append('files', file);
+      });
+
+      const res = await fetch('/api/instructor-apply', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || '강사 지원에 실패했습니다.');
+      }
+
+      alert('강사 지원이 완료되었습니다!');
+    } catch (error: any) {
+      alert(error.message || '강사 지원에 실패했습니다.');
+    }
   };
 
   return (

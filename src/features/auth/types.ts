@@ -40,7 +40,7 @@ export interface UserMe {
   loginId: string;
   email: string;
   birthDate: string;
-  role: 'STUDENT' | 'INSTRUCTOR' | 'ADMIN';
+  role: 'STUDENT' | 'INSTRUCTOR' | 'ADMIN' | 'GUEST';
   status: string;
   emailVerified: boolean;
   referralCode: string;
