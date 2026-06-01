@@ -18,7 +18,13 @@ export default async function Header() {
   return (
     <div className="flex justify-between bg-white border-b border-[#E5E7EB] h-12 items-center p-5">
       <Link href="/">
-        <div className="bg-[#CFEE5D] h-9 w-30 rounded" />
+        <Image
+          src="/header/FitGyeok-logo.png"
+          alt="FitGyeok 로고"
+          width={120}
+          height={40}
+          className="object-contain"
+        />
       </Link>
 
       {user.role === 'GUEST' ? (
