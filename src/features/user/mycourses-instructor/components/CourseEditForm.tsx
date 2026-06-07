@@ -18,6 +18,7 @@ import type {
   UpdateCourseRequest,
 } from '@/features/user/mycourses-instructor/types';
 import { updateCourseAction } from '../actions';
+import Image from 'next/image';
 
 interface CourseEditFormProps {
   categories: Category[];
@@ -313,7 +314,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
                   : '강의 대표 이미지를 업로드하세요'}
             </button>
             {form.thumbnail && (
-              <img
+              <Image
                 src={form.thumbnail}
                 alt="썸네일 미리보기"
                 className="mt-2 w-full h-40 object-cover rounded-lg border border-[#E5E7EB]"
