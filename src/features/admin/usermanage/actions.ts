@@ -21,7 +21,7 @@ export async function approveInstructorAction(applicationId: number) {
   if (!res.ok) throw new Error('승인 처리에 실패했습니다.');
 }
 
-export async function rejectInstructorAction(applicationId: number) {
+export async function rejectInstructorAction(applicationId: number, rejectReason: string) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
@@ -29,7 +29,11 @@ export async function rejectInstructorAction(applicationId: number) {
     `${API_BASE_URL}/api/members/instructor-applications/${applicationId}/reject`,
     {
       method: 'PATCH',
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      // body: JSON.stringify({ rejectReason }),
     },
   );
 
