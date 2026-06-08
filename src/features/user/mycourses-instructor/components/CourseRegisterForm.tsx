@@ -68,6 +68,9 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
 
   const subCategories = categories.find((c) => c.name === form.category)?.options ?? [];
 
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  const thumbnailRef = useRef<HTMLInputElement>(null);
+
   // ── 기본정보 핸들러 ──────────────────────────────────────────
   const handleField = <K extends keyof CourseFormData>(key: K, value: CourseFormData[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -75,6 +78,24 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
 
   const handleCategoryChange = (value: string) => {
     setForm((prev) => ({ ...prev, category: value, subCategory: '' }));
+  };
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setThumbnailUploading(true);
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('업로드 실패');
+      const data = await res.json();
+      handleField('thumbnail', data.url);
+    } catch {
+      alert('이미지 업로드에 실패했습니다.');
+    } finally {
+      setThumbnailUploading(false);
+    }
   };
 
   // ── 세션 핸들러 ──────────────────────────────────────────────
@@ -156,6 +177,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
     try {
       setIsLoading(true);
       await createCourseAction(payload);
+      router.push('/mycourses-instructor?tab=pending');
     } catch (error: any) {
       alert(error.message || '강의 등록에 실패했습니다.');
     } finally {
@@ -289,13 +311,33 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
           <div>
             <label className={labelCls}>대표 이미지{requiredMark}</label>
             <input
-              type="text"
-              placeholder="썸네일 URL을 입력하세요"
-              value={form.thumbnail}
-              onChange={(e) => handleField('thumbnail', e.target.value)}
-              disabled={isLoading}
-              className={inputCls}
+              type="file"
+              accept="image/*"
+              ref={thumbnailRef}
+              onChange={handleThumbnailUpload}
+              className="hidden"
+              disabled={isLoading || thumbnailUploading}
             />
+            <button
+              type="button"
+              onClick={() => thumbnailRef.current?.click()}
+              disabled={isLoading || thumbnailUploading}
+              className="w-full h-12 rounded-lg border border-dashed border-[#D1D5DB] bg-[#F9FAFB] text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70"
+            >
+              <span>↑</span>
+              {thumbnailUploading
+                ? '업로드 중...'
+                : form.thumbnail
+                  ? '이미지 변경하기'
+                  : '강의 대표 이미지를 업로드하세요'}
+            </button>
+            {form.thumbnail && (
+              <img
+                src={form.thumbnail}
+                alt="썸네일 미리보기"
+                className="mt-2 w-full h-40 object-cover rounded-lg border border-[#E5E7EB]"
+              />
+            )}
           </div>
         </section>
 
@@ -327,7 +369,6 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
         </section>
 
         {/* ── 버튼 ── */}
-        {/* ── 버튼 ── */}
         <div className="flex items-center justify-between pt-2">
           <Button
             type="button"
@@ -357,26 +398,26 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
             </Button>
           </div>
         </div>
-
-        {/* ── 확인 모달 ── */}
-        {confirmModal && (
-          <TwoButtonModal
-            title={MODAL_CONFIG[confirmModal.type].title}
-            message={MODAL_CONFIG[confirmModal.type].message}
-            confirmLabel="확인"
-            cancelLabel="취소"
-            onConfirm={() => {
-              setConfirmModal(null);
-              if (confirmModal.type === 'cancel') {
-                router.back();
-              } else {
-                handleSubmit(confirmModal.type);
-              }
-            }}
-            onCancel={() => setConfirmModal(null)}
-          />
-        )}
       </div>
+      
+      {/* ── 확인 모달 ── */}
+      {confirmModal && (
+        <TwoButtonModal
+          title={MODAL_CONFIG[confirmModal.type].title}
+          message={MODAL_CONFIG[confirmModal.type].message}
+          confirmLabel="확인"
+          cancelLabel="취소"
+          onConfirm={() => {
+            setConfirmModal(null);
+            if (confirmModal.type === 'cancel') {
+              router.back();
+            } else {
+              handleSubmit(confirmModal.type);
+            }
+          }}
+          onCancel={() => setConfirmModal(null)}
+        />
+      )}
     </div>
   );
 }

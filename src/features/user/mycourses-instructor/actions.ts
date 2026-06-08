@@ -31,8 +31,6 @@ export async function createCourseAction(payload: CreateCourseRequest) {
     const errorBody = await res.json().catch(() => ({}));
     throw new Error(errorBody.message || '강의 등록에 실패했습니다.');
   }
-
-  redirect('/mycourses-instructor?tab=pending');
 }
 
 // 등록한 강의 수정

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Select,
@@ -55,6 +55,9 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
 
   const subCategories = categories.find((c) => c.name === form.category)?.options ?? [];
 
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  const thumbnailRef = useRef<HTMLInputElement>(null);
+
   const handleField = <K extends keyof CourseEditFormData>(
     key: K,
     value: CourseEditFormData[K],
@@ -64,6 +67,24 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
 
   const handleCategoryChange = (value: string) => {
     setForm((prev) => ({ ...prev, category: value, subCategory: '' }));
+  };
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setThumbnailUploading(true);
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('업로드 실패');
+      const data = await res.json();
+      handleField('thumbnail', data.url);
+    } catch {
+      alert('이미지 업로드에 실패했습니다.');
+    } finally {
+      setThumbnailUploading(false);
+    }
   };
 
   const updateSession = <K extends keyof Session>(id: number, key: K, value: Session[K]) => {
@@ -90,7 +111,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
 
   const handleSubmit = async (type: 'save' | 'submit') => {
     if (!form.title.trim()) {
-      alert('강의 제목을 입력해주세요.');
+      alert('강의 제목을 입력해주세요.'); // 추후 수정 예정
       return;
     }
     if (!form.description.trim()) {
@@ -267,16 +288,37 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
             </div>
           </div>
 
+          {/* 대표 이미지 */}
           <div>
             <label className={labelCls}>대표 이미지{requiredMark}</label>
             <input
-              type="text"
-              placeholder="썸네일 URL을 입력하세요"
-              value={form.thumbnail}
-              onChange={(e) => handleField('thumbnail', e.target.value)}
-              disabled={isLoading}
-              className={inputCls}
+              type="file"
+              accept="image/*"
+              ref={thumbnailRef}
+              onChange={handleThumbnailUpload}
+              className="hidden"
+              disabled={isLoading || thumbnailUploading}
             />
+            <button
+              type="button"
+              onClick={() => thumbnailRef.current?.click()}
+              disabled={isLoading || thumbnailUploading}
+              className="w-full h-12 rounded-lg border border-dashed border-[#D1D5DB] bg-[#F9FAFB] text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70"
+            >
+              <span>↑</span>
+              {thumbnailUploading
+                ? '업로드 중...'
+                : form.thumbnail
+                  ? '이미지 변경하기'
+                  : '강의 대표 이미지를 업로드하세요'}
+            </button>
+            {form.thumbnail && (
+              <img
+                src={form.thumbnail}
+                alt="썸네일 미리보기"
+                className="mt-2 w-full h-40 object-cover rounded-lg border border-[#E5E7EB]"
+              />
+            )}
           </div>
         </section>
 

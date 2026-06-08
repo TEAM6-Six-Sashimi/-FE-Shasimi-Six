@@ -65,7 +65,7 @@ export default function CourseCard({ course, category }: CourseCardProps) {
       <div className="flex flex-col bg-[#F9FAFB] rounded-xl overflow-hidden border border-[#D1D5DB] hover:shadow-lg transition-shadow duration-200">
         {/* 썸네일 */}
         <Link
-          href={`/courses/${encodeURIComponent(category)}/${course.courseId}`}
+          href={`/courses/${encodeURIComponent(category)}/${encodeURIComponent(course.title)}`}
           className="relative block shrink-0"
         >
           <div className="w-full aspect-video bg-[#E5E7EB]">
