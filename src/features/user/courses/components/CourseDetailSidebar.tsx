@@ -6,16 +6,24 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { CourseDetailFromAPI, DIFFICULTY_LABEL } from '../types';
 import { addCartItemAction } from '../../cart/actions';
-import type { CourseDetail } from '@/constants/mockCourseDetail';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import OneButtonModal from '@/components/modals/OneButtonModal';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface CourseDetailSidebarProps {
   course: CourseDetailFromAPI;
 }
 
+function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
+  if (!thumbnail) return null;
+  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
+}
+
 export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps) {
   const router = useRouter();
+  const thumbnailUrl = getThumbnailUrl(course.thumbnail);
+
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showCartModal, setShowCartModal] = useState(false);
@@ -66,7 +74,17 @@ export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps
     <>
       <div className="w-80 shrink-0 flex flex-col gap-3 bg-white rounded-xl shadow-md p-6">
         {/* 썸네일 */}
-        <div className="w-full aspect-video rounded-xl bg-[#E5E7EB] overflow-hidden" />
+        <div className="relative w-full aspect-video rounded-xl bg-[#E5E7EB] overflow-hidden">
+          {thumbnailUrl && (
+            <Image
+              src={thumbnailUrl}
+              alt={course.title}
+              fill
+              unoptimized
+              className="object-cover"
+            />
+          )}
+        </div>
 
         {/* 가격 */}
         <p className="text-[#1E2125] text-[22px] font-bold">

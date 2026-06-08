@@ -10,16 +10,22 @@ import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import Image from 'next/image';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 interface CourseCardProps {
   course: CourseFromAPI;
   category: string;
 }
 
+function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
+  if (!thumbnail) return null;
+  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
+}
+
 export default function CourseCard({ course, category }: CourseCardProps) {
   const router = useRouter();
-  const thumbnailUrl = course.thumbnail?.startsWith('http')
-    ? course.thumbnail
-    : `http://localhost:8080/${course.thumbnail}`;
+  const thumbnailUrl = getThumbnailUrl(course.thumbnail);
+
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showCartModal, setShowCartModal] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
@@ -65,12 +71,18 @@ export default function CourseCard({ course, category }: CourseCardProps) {
       <div className="flex flex-col bg-[#F9FAFB] rounded-xl overflow-hidden border border-[#D1D5DB] hover:shadow-lg transition-shadow duration-200">
         {/* 썸네일 */}
         <Link
-          href={`/courses/${encodeURIComponent(category)}/${encodeURIComponent(course.title)}`}
+          href={`/courses/${encodeURIComponent(category)}/${course.courseId}`}
           className="relative block shrink-0"
         >
           <div className="w-full aspect-video bg-[#E5E7EB]">
-            {course.thumbnail && (
-              <Image src={thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
+            {thumbnailUrl && (
+              <Image
+                src={thumbnailUrl}
+                alt={course.title}
+                fill
+                unoptimized
+                className="object-cover"
+              />
             )}
           </div>
         </Link>

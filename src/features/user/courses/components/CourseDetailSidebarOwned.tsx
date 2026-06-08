@@ -1,17 +1,26 @@
 'use client';
 
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { CourseDetailFromAPI, EnrollmentInfo, DIFFICULTY_LABEL } from '../types';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface CourseDetailSidebarOwnedProps {
   course: CourseDetailFromAPI;
   enrollmentInfo: EnrollmentInfo;
 }
 
+function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
+  if (!thumbnail) return null;
+  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
+}
+
 export default function CourseDetailSidebarOwned({
   course,
   enrollmentInfo,
 }: CourseDetailSidebarOwnedProps) {
+  const thumbnailUrl = getThumbnailUrl(course.thumbnail);
   const lectureCount = course.sessions.length;
   const durationHours = Math.ceil(course.totalDuration / 3600);
   const difficultyLabel = DIFFICULTY_LABEL[course.difficulty] ?? course.difficulty;
@@ -20,7 +29,17 @@ export default function CourseDetailSidebarOwned({
   return (
     <div className="w-80 shrink-0 flex flex-col gap-3 bg-white rounded-xl shadow-md p-6">
       {/* 썸네일 */}
-      <div className="w-full aspect-video rounded-xl bg-[#E5E7EB] overflow-hidden" />
+      <div className="relative w-full aspect-video rounded-xl bg-[#E5E7EB] overflow-hidden">
+        {thumbnailUrl && (
+          <Image
+            src={thumbnailUrl}
+            alt={course.title}
+            fill
+            unoptimized
+            className="object-cover"
+          />
+        )}
+      </div>
 
       {/* 이어보기 버튼 */}
       <Button
