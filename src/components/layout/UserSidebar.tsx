@@ -4,29 +4,37 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-// ---- 사이드바 메뉴 데이터------------------------------------------
-const SIDEBAR_MENUS = [
+const BASE_MENUS = [
   { label: '회원정보 조회', href: '/mypage', icon: 'mypage' },
-  { label: '나의 이력서', href: '/mypage/resume', icon: 'resume' },
   { label: '크레딧 충전 내역', href: '/mypage/payments', icon: 'payments' },
   { label: '강의 결제 내역', href: '/mypage/enrollments', icon: 'enrollments' },
   { label: '내 작성글', href: '/mypage/posts', icon: 'posts' },
 ] as const;
 
-// ---- 메인 컴포넌트 ------------------------------------------------
-export default function UserSidebar() {
+const STUDENT_MENU = { label: '나의 이력서', href: '/mypage/resume', icon: 'resume' };
+const INSTRUCTOR_MENU = { label: '강사 프로필', href: '/mypage/instructor-profile', icon: 'resume' };
+
+interface UserSidebarProps {
+  role?: string;
+}
+
+export default function UserSidebar({ role }: UserSidebarProps) {
   const pathname = usePathname();
+
+  const menus = [
+    BASE_MENUS[0],
+    role === 'INSTRUCTOR' ? INSTRUCTOR_MENU : STUDENT_MENU,
+    ...BASE_MENUS.slice(1),
+  ];
 
   return (
     <aside className="w-48 shrink-0 bg-[#1E2125] p-2">
-      {/* 타이틀 */}
       <div className="px-4 py-3 mb-1">
         <span className="text-[#CFEE5D] text-[17px] font-bold">마이페이지</span>
       </div>
 
-      {/* 메뉴 목록 */}
       <nav className="flex flex-col gap-2">
-        {SIDEBAR_MENUS.map(({ label, href, icon }) => {
+        {menus.map(({ label, href, icon }) => {
           const isActive = pathname === href;
           return (
             <Link
@@ -39,9 +47,7 @@ export default function UserSidebar() {
                 ${isActive ? 'bg-[#CFEE5D] text-[#1E2125] font-semibold' : 'text-[#F9FAFB] hover:bg-white/5'}
               `}
             >
-              {/* 아이콘 */}
               <span className="relative flex items-center shrink-0 w-5 h-5">
-                {/* 기본: 흰색 아이콘 */}
                 <Image
                   src={`/sidebar/${icon}-Icon-white.svg`}
                   alt=""
@@ -49,7 +55,6 @@ export default function UserSidebar() {
                   height={20}
                   className={`transition-opacity duration-150 ${isActive ? 'opacity-0' : 'opacity-100'}`}
                 />
-                {/* 활성: 검정 아이콘 */}
                 <Image
                   src={`/sidebar/${icon}-Icon.svg`}
                   alt=""
