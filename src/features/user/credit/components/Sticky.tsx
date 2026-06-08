@@ -12,7 +12,7 @@ interface StickyProps {
   onChargeSuccess: (newBalance: number) => void;
 }
 
-type ModalState = 'none' | 'invalid' | 'confirm' | 'success';
+type ModalState = 'none' | 'invalid' | 'confirm' | 'success' | 'error';
 
 export default function Sticky({
   currentCredit,
@@ -22,10 +22,11 @@ export default function Sticky({
 }: StickyProps) {
   const [modalState, setModalState] = useState<ModalState>('none');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // 충전하기 버튼 클릭
   const handleChargeClick = () => {
-    // 유효성 검사: 최소 10,000원, 1,000원 단위
+    // 유효성 검사: 최소 10000원, 1000원 단위
     if (chargeAmount < 10000 || chargeAmount % 1000 !== 0) {
       setModalState('invalid');
       return;
@@ -40,9 +41,10 @@ export default function Sticky({
       const result = await chargeCreditAction(chargeAmount);
       onChargeSuccess(result.balance);
       setModalState('success');
-    } catch (error) {
-      console.error('충전 실패:', error);
-      setModalState('invalid'); // 에러 시 안내
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '충전에 실패했습니다. 다시 시도해주세요.';
+      setErrorMessage(message);
+      setModalState('error');
     } finally {
       setIsLoading(false);
     }
@@ -122,6 +124,15 @@ export default function Sticky({
         <OneButtonModal
           title="충전 완료"
           message="충전이 완료되었습니다."
+          onConfirm={() => setModalState('none')}
+        />
+      )}
+
+      {/* 충전 실패 모달 */}
+      {modalState === 'error' && (
+        <OneButtonModal
+          title="충전 실패"
+          message={errorMessage}
           onConfirm={() => setModalState('none')}
         />
       )}

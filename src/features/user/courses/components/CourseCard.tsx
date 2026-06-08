@@ -8,6 +8,7 @@ import { CourseFromAPI } from '../types';
 import { addCartItemAction } from '../../cart/actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import OneButtonModal from '@/components/modals/OneButtonModal';
+import Image from 'next/image';
 
 interface CourseCardProps {
   course: CourseFromAPI;
@@ -70,7 +71,7 @@ export default function CourseCard({ course, category }: CourseCardProps) {
         >
           <div className="w-full aspect-video bg-[#E5E7EB]">
             {course.thumbnail && (
-              <img src={thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
+              <Image src={thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
             )}
           </div>
         </Link>

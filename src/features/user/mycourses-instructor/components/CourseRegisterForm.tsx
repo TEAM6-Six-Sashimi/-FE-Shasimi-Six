@@ -19,6 +19,7 @@ import type {
 } from '@/features/user/mycourses-instructor/types';
 import { createCourseAction } from '../actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
+import Image from 'next/image';
 
 // ── 타입 ────────────────────────────────────────────────────────
 interface CourseRegisterFormProps {
@@ -332,7 +333,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                   : '강의 대표 이미지를 업로드하세요'}
             </button>
             {form.thumbnail && (
-              <img
+              <Image
                 src={form.thumbnail}
                 alt="썸네일 미리보기"
                 className="mt-2 w-full h-40 object-cover rounded-lg border border-[#E5E7EB]"

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { StudentCourse } from '../types';
+import Image from 'next/image';
 
 interface Props {
   courses: StudentCourse[];
@@ -28,7 +29,7 @@ export default function MyCoursesList({ courses }: Props) {
                 {/* 썸네일 */}
                 <div className="w-44 shrink-0 bg-[#E5E7EB]">
                   {course.thumbnail && (
-                    <img
+                    <Image
                       src={course.thumbnail}
                       alt={course.title}
                       className="w-full h-full object-cover"
