@@ -33,7 +33,6 @@ export default function CourseCard({ course, category }: CourseCardProps) {
     setIsAddingToCart(true);
     try {
       await addCartItemAction(course.courseId);
-      router.push('/cart');
       setShowCartModal(true);
     } catch (err) {
       const code = err instanceof Error ? err.message : '';
@@ -154,7 +153,6 @@ export default function CourseCard({ course, category }: CourseCardProps) {
         />
       )}
 
-      {/* 에러 모달 - TODO: OneButtonModal 컴포넌트 생기면 교체 */}
       {showErrorModal && (
         <OneButtonModal
           title="알림"
