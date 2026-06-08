@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+// ---- 사이드바 메뉴 데이터------------------------------------------
 const BASE_MENUS = [
   { label: '회원정보 조회', href: '/mypage', icon: 'mypage' },
   { label: '크레딧 충전 내역', href: '/mypage/payments', icon: 'payments' },
@@ -11,6 +12,7 @@ const BASE_MENUS = [
   { label: '내 작성글', href: '/mypage/posts', icon: 'posts' },
 ] as const;
 
+// ---- 메인 컴포넌트 ------------------------------------------------
 const STUDENT_MENU = { label: '나의 이력서', href: '/mypage/resume', icon: 'resume' };
 const INSTRUCTOR_MENU = { label: '강사 프로필', href: '/mypage/instructor-profile', icon: 'resume' };
 
