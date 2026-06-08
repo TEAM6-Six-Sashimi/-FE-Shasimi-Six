@@ -44,6 +44,6 @@ export async function logoutAction(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete('accessToken');
   cookieStore.delete('refreshToken');
-  cookieStore.delete('role');  // role도 삭제
+  cookieStore.delete('role'); // role도 삭제
   redirect('/');
 }

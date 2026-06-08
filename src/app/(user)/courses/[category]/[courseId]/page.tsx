@@ -30,7 +30,9 @@ export default async function Page({ params }: PageProps) {
 
   const isPurchased = enrollmentInfo !== null;
 
-  return isPurchased
-    ? <CourseDetailPageOwned course={course} enrollmentInfo={enrollmentInfo!} />
-    : <CourseDetailPage course={course} />;
+  return isPurchased ? (
+    <CourseDetailPageOwned course={course} enrollmentInfo={enrollmentInfo!} />
+  ) : (
+    <CourseDetailPage course={course} />
+  );
 }

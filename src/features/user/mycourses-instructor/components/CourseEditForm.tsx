@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Select,
@@ -10,16 +10,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import type { Category } from '@/features/categories/types';
-
 import type {
   CourseEditFormData,
   Session,
   UpdateCourseRequest,
 } from '@/features/user/mycourses-instructor/types';
 import { updateCourseAction } from '../actions';
+import Image from 'next/image';
 
-// ── 타입 ───────────────────────────────────────────────────────
 interface CourseEditFormProps {
   categories: Category[];
   initialData: CourseEditFormData;
@@ -40,12 +40,24 @@ const DEFAULT_SESSION: Omit<Session, 'id'> = {
   preview: false,
 };
 
+const MODAL_CONFIG = {
+  save: { title: '수정 사항 임시 저장', message: '수정된 사항을 임시 저장하시겠습니까?' },
+  submit: { title: '승인 요청', message: '수정된 사항으로 승인 요청하시겠습니까?' },
+  cancel: { title: '취소', message: '작성을 취소하시겠습니까?\n작성된 내용이 사라집니다.' },
+};
+
 export default function CourseEditForm({ categories, initialData }: CourseEditFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState<CourseEditFormData>(initialData);
+  const [confirmModal, setConfirmModal] = useState<{
+    type: 'save' | 'submit' | 'cancel';
+  } | null>(null);
 
   const subCategories = categories.find((c) => c.name === form.category)?.options ?? [];
+
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  const thumbnailRef = useRef<HTMLInputElement>(null);
 
   const handleField = <K extends keyof CourseEditFormData>(
     key: K,
@@ -56,6 +68,24 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
 
   const handleCategoryChange = (value: string) => {
     setForm((prev) => ({ ...prev, category: value, subCategory: '' }));
+  };
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setThumbnailUploading(true);
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('업로드 실패');
+      const data = await res.json();
+      handleField('thumbnail', data.url);
+    } catch {
+      alert('이미지 업로드에 실패했습니다.');
+    } finally {
+      setThumbnailUploading(false);
+    }
   };
 
   const updateSession = <K extends keyof Session>(id: number, key: K, value: Session[K]) => {
@@ -82,7 +112,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
 
   const handleSubmit = async (type: 'save' | 'submit') => {
     if (!form.title.trim()) {
-      alert('강의 제목을 입력해주세요.');
+      alert('강의 제목을 입력해주세요.'); // 추후 수정 예정
       return;
     }
     if (!form.description.trim()) {
@@ -259,16 +289,37 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
             </div>
           </div>
 
+          {/* 대표 이미지 */}
           <div>
             <label className={labelCls}>대표 이미지{requiredMark}</label>
             <input
-              type="text"
-              placeholder="썸네일 URL을 입력하세요"
-              value={form.thumbnail}
-              onChange={(e) => handleField('thumbnail', e.target.value)}
-              disabled={isLoading}
-              className={inputCls}
+              type="file"
+              accept="image/*"
+              ref={thumbnailRef}
+              onChange={handleThumbnailUpload}
+              className="hidden"
+              disabled={isLoading || thumbnailUploading}
             />
+            <button
+              type="button"
+              onClick={() => thumbnailRef.current?.click()}
+              disabled={isLoading || thumbnailUploading}
+              className="w-full h-12 rounded-lg border border-dashed border-[#D1D5DB] bg-[#F9FAFB] text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70"
+            >
+              <span>↑</span>
+              {thumbnailUploading
+                ? '업로드 중...'
+                : form.thumbnail
+                  ? '이미지 변경하기'
+                  : '강의 대표 이미지를 업로드하세요'}
+            </button>
+            {form.thumbnail && (
+              <Image
+                src={form.thumbnail}
+                alt="썸네일 미리보기"
+                className="mt-2 w-full h-40 object-cover rounded-lg border border-[#E5E7EB]"
+              />
+            )}
           </div>
         </section>
 
@@ -298,10 +349,11 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
           </button>
         </section>
 
+        {/* ── 버튼 ── */}
         <div className="flex items-center justify-between pt-2">
           <Button
             type="button"
-            onClick={() => handleSubmit('save')}
+            onClick={() => setConfirmModal({ type: 'save' })}
             disabled={isLoading}
             className="h-11 px-7 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer disabled:opacity-70"
           >
@@ -310,7 +362,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
           <div className="flex gap-3">
             <Button
               type="button"
-              onClick={() => handleSubmit('submit')}
+              onClick={() => setConfirmModal({ type: 'submit' })}
               disabled={isLoading}
               className="h-11 px-7 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer disabled:opacity-70"
             >
@@ -319,7 +371,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.back()}
+              onClick={() => setConfirmModal({ type: 'cancel' })}
               disabled={isLoading}
               className="h-11 px-7 border-[#D1D5DB] text-[#1E2125] font-semibold text-[14px] hover:bg-[#F9FAFB] cursor-pointer"
             >
@@ -328,6 +380,25 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
           </div>
         </div>
       </div>
+
+      {/* ── 확인 모달 ── */}
+      {confirmModal && (
+        <TwoButtonModal
+          title={MODAL_CONFIG[confirmModal.type].title}
+          message={MODAL_CONFIG[confirmModal.type].message}
+          confirmLabel="확인"
+          cancelLabel="취소"
+          onConfirm={() => {
+            setConfirmModal(null);
+            if (confirmModal.type === 'cancel') {
+              router.back();
+            } else {
+              handleSubmit(confirmModal.type);
+            }
+          }}
+          onCancel={() => setConfirmModal(null)}
+        />
+      )}
     </div>
   );
 }

@@ -38,7 +38,6 @@ const MOCK_RATING_DISTRIBUTION: RatingDistribution[] = MOCK_COURSE_DETAIL.rating
 const MOCK_REVIEWS: Review[] = MOCK_COURSE_DETAIL.reviews;
 
 export default function CourseDetailPage({ course }: CourseDetailPageProps) {
-
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
       <div className="max-w-275 mx-auto py-6 px-6">

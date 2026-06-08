@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CourseDetail, CourseFromAPI } from '../../courses/types';
+import Image from 'next/image';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -45,9 +46,6 @@ export default function PopularCourseSlider() {
             };
           }),
         );
-
-        console.log('API_URL:', process.env.NEXT_PUBLIC_API_URL);
-        console.log('courses:', detailedCourses);
 
         setCourses(detailedCourses);
       } catch (error) {
@@ -110,7 +108,7 @@ export default function PopularCourseSlider() {
                     className="bg-white rounded-xl overflow-hidden border border-[#D1D5DB] hover:shadow-lg transition-shadow duration-200"
                   >
                     <div className="relative w-full aspect-video bg-[#E5E7EB]">
-                      <img
+                      <Image
                         src={
                           course.thumbnail?.startsWith('http')
                             ? course.thumbnail

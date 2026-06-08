@@ -100,4 +100,3 @@ export interface ApprovedCourse {
   ratingAvg: number;
   studentCount: number;
 }
-

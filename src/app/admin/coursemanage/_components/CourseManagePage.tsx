@@ -16,7 +16,12 @@ interface Props {
   categories: Category[];
 }
 
-export default function CourseManagePage({ allCourses, pendingCourses, rejectedCourses, categories }: Props) {
+export default function CourseManagePage({
+  allCourses,
+  pendingCourses,
+  rejectedCourses,
+  categories,
+}: Props) {
   const [tab, setTab] = useState<Tab>('all');
   const [pending, setPending] = useState<AdminCourse[]>(pendingCourses);
 
@@ -44,16 +49,8 @@ export default function CourseManagePage({ allCourses, pendingCourses, rejectedC
         ))}
       </div>
 
-      {tab === 'all' && (
-        <AllCourses courses={allCourses} categories={categories} />
-      )}
-      {tab === 'pending' && (
-        <PendingCourses
-          courses={pending}
-          setCourses={setPending}
-          categories={categories}
-        />
-      )}
+      {tab === 'all' && <AllCourses courses={allCourses} />}
+      {tab === 'pending' && <PendingCourses courses={pending} setCourses={setPending} />}
       {tab === 'rejected' && <RejectedCourses courses={rejectedCourses} />}
     </div>
   );

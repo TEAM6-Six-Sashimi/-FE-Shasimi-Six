@@ -13,10 +13,9 @@ export async function fetchCourses(
     const params = new URLSearchParams({ categoryName });
     if (subCategory) params.set('categoryId', subCategory);
 
-    const res = await fetch(
-      `${API_BASE_URL}/api/courses?${params.toString()}`,
-      { next: { revalidate: 60 } },
-    );
+    const res = await fetch(`${API_BASE_URL}/api/courses?${params.toString()}`, {
+      next: { revalidate: 60 },
+    });
 
     if (!res.ok) return [];
 
@@ -44,7 +43,7 @@ export async function fetchCourseDetail(
       },
       cache: 'no-store',
     });
- 
+
     if (!res.ok) return null;
     return res.json();
   } catch {
@@ -65,12 +64,12 @@ export async function fetchEnrollmentInfo(
       },
       cache: 'no-store',
     });
- 
+
     if (res.status === 404) return null;
     if (!res.ok) return null;
     return res.json();
   } catch {
-    return null;   // 미수강 null
+    return null; // 미수강 null
   }
 }
 

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import TwoButtonModal from '@/components/modals/TwoButtonModal';
 
 interface Step03Data {
   resumeFile: File | null;
@@ -22,6 +23,7 @@ const formatFileSize = (bytes: number) => `${(bytes / 1024).toFixed(2)} KB`;
 export default function Step03Documents({ data, onSubmit, onPrev }: Step03DocumentsProps) {
   const [form, setForm] = useState<Step03Data>(data);
   const [submitted, setSubmitted] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(false);
   const resumeRef = useRef<HTMLInputElement>(null);
   // const portfolioRef = useRef<HTMLInputElement>(null);
   const curriculumRef = useRef<HTMLInputElement>(null);
@@ -33,6 +35,11 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
   const handleSubmit = () => {
     setSubmitted(true);
     if (!isValid) return;
+    setConfirmModal(true);
+  };
+
+  const handleConfirm = () => {
+    setConfirmModal(false);
     onSubmit(form);
   };
 
@@ -202,6 +209,18 @@ export default function Step03Documents({ data, onSubmit, onPrev }: Step03Docume
           지원하기
         </Button>
       </div>
+
+      {/* 확인 모달 */}
+      {confirmModal && (
+        <TwoButtonModal
+          title="강사 지원"
+          message="강사 지원을 제출하시겠습니까?"
+          confirmLabel="지원하기"
+          cancelLabel="취소"
+          onConfirm={handleConfirm}
+          onCancel={() => setConfirmModal(false)}
+        />
+      )}
     </div>
   );
 }

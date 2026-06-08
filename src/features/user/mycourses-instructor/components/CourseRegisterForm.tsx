@@ -12,8 +12,14 @@ import {
 import { Button } from '@/components/ui/button';
 import type { Category } from '@/features/categories/types';
 
-import type { CourseFormData, CreateCourseRequest, Session } from '@/features/user/mycourses-instructor/types';
+import type {
+  CourseFormData,
+  CreateCourseRequest,
+  Session,
+} from '@/features/user/mycourses-instructor/types';
 import { createCourseAction } from '../actions';
+import TwoButtonModal from '@/components/modals/TwoButtonModal';
+import Image from 'next/image';
 
 // ── 타입 ────────────────────────────────────────────────────────
 interface CourseRegisterFormProps {
@@ -23,9 +29,9 @@ interface CourseRegisterFormProps {
 const LEVELS = ['초급', '중급', '고급'] as const;
 
 const DIFFICULTY_MAP: Record<string, 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'> = {
-  '초급': 'BEGINNER',
-  '중급': 'INTERMEDIATE',
-  '고급': 'ADVANCED',
+  초급: 'BEGINNER',
+  중급: 'INTERMEDIATE',
+  고급: 'ADVANCED',
 };
 
 const DEFAULT_SESSION: Omit<Session, 'id'> = {
@@ -51,7 +57,20 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
     sessions: [{ id: 1, ...DEFAULT_SESSION }],
   });
 
+  const [confirmModal, setConfirmModal] = useState<{
+    type: 'save' | 'submit' | 'cancel';
+  } | null>(null);
+
+  const MODAL_CONFIG = {
+    save: { title: '임시 저장', message: '임시 저장하시겠습니까?' },
+    submit: { title: '승인 요청', message: '승인 요청하시겠습니까?' },
+    cancel: { title: '취소', message: '작성을 취소하시겠습니까?\n작성된 내용이 사라집니다.' },
+  };
+
   const subCategories = categories.find((c) => c.name === form.category)?.options ?? [];
+
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  const thumbnailRef = useRef<HTMLInputElement>(null);
 
   // ── 기본정보 핸들러 ──────────────────────────────────────────
   const handleField = <K extends keyof CourseFormData>(key: K, value: CourseFormData[K]) => {
@@ -60,6 +79,24 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
 
   const handleCategoryChange = (value: string) => {
     setForm((prev) => ({ ...prev, category: value, subCategory: '' }));
+  };
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setThumbnailUploading(true);
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('업로드 실패');
+      const data = await res.json();
+      handleField('thumbnail', data.url);
+    } catch {
+      alert('이미지 업로드에 실패했습니다.');
+    } finally {
+      setThumbnailUploading(false);
+    }
   };
 
   // ── 세션 핸들러 ──────────────────────────────────────────────
@@ -87,12 +124,30 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
 
   // ── 제출 ────────────────────────────────────────────────────
   const handleSubmit = async (type: 'save' | 'submit') => {
-    if (!form.title.trim()) { alert('강의 제목을 입력해주세요.'); return; }
-    if (!form.description.trim()) { alert('강의 설명을 입력해주세요.'); return; }
-    if (!form.category) { alert('카테고리를 선택해주세요.'); return; }
-    if (!form.subCategory) { alert('세부 카테고리를 선택해주세요.'); return; }
-    if (form.price === '') { alert('가격을 입력해주세요.'); return; }
-    if (!form.level) { alert('난이도를 선택해주세요.'); return; }
+    if (!form.title.trim()) {
+      alert('강의 제목을 입력해주세요.');
+      return;
+    }
+    if (!form.description.trim()) {
+      alert('강의 설명을 입력해주세요.');
+      return;
+    }
+    if (!form.category) {
+      alert('카테고리를 선택해주세요.');
+      return;
+    }
+    if (!form.subCategory) {
+      alert('세부 카테고리를 선택해주세요.');
+      return;
+    }
+    if (form.price === '') {
+      alert('가격을 입력해주세요.');
+      return;
+    }
+    if (!form.level) {
+      alert('난이도를 선택해주세요.');
+      return;
+    }
     if (form.sessions.some((s) => !s.title.trim() || !s.videoUrl.trim())) {
       alert('모든 세션의 소제목과 영상 URL을 입력해주세요.');
       return;
@@ -100,7 +155,10 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
 
     const selectedCat = categories.find((c) => c.name === form.category);
     const selectedSub = selectedCat?.options.find((o) => String(o.id) === form.subCategory);
-    if (!selectedSub) { alert('세부 카테고리를 다시 선택해주세요.'); return; }
+    if (!selectedSub) {
+      alert('세부 카테고리를 다시 선택해주세요.');
+      return;
+    }
 
     const payload: CreateCourseRequest = {
       subCategoryName: selectedSub.name,
@@ -120,6 +178,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
     try {
       setIsLoading(true);
       await createCourseAction(payload);
+      router.push('/mycourses-instructor?tab=pending');
     } catch (error: any) {
       alert(error.message || '강의 등록에 실패했습니다.');
     } finally {
@@ -174,7 +233,11 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>카테고리{requiredMark}</label>
-              <Select value={form.category} onValueChange={handleCategoryChange} disabled={isLoading}>
+              <Select
+                value={form.category}
+                onValueChange={handleCategoryChange}
+                disabled={isLoading}
+              >
                 <SelectTrigger className="h-11! text-[13.5px] border-[#D1D5DB] text-[#1E2125]">
                   <SelectValue placeholder="셀렉트박스" />
                 </SelectTrigger>
@@ -226,7 +289,11 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
             </div>
             <div>
               <label className={labelCls}>난이도{requiredMark}</label>
-              <Select value={form.level} onValueChange={(v) => handleField('level', v)} disabled={isLoading}>
+              <Select
+                value={form.level}
+                onValueChange={(v) => handleField('level', v)}
+                disabled={isLoading}
+              >
                 <SelectTrigger className="h-11! text-[13.5px] border-[#D1D5DB] text-[#1E2125]">
                   <SelectValue placeholder="셀렉트박스" />
                 </SelectTrigger>
@@ -245,13 +312,33 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
           <div>
             <label className={labelCls}>대표 이미지{requiredMark}</label>
             <input
-              type="text"
-              placeholder="썸네일 URL을 입력하세요"
-              value={form.thumbnail}
-              onChange={(e) => handleField('thumbnail', e.target.value)}
-              disabled={isLoading}
-              className={inputCls}
+              type="file"
+              accept="image/*"
+              ref={thumbnailRef}
+              onChange={handleThumbnailUpload}
+              className="hidden"
+              disabled={isLoading || thumbnailUploading}
             />
+            <button
+              type="button"
+              onClick={() => thumbnailRef.current?.click()}
+              disabled={isLoading || thumbnailUploading}
+              className="w-full h-12 rounded-lg border border-dashed border-[#D1D5DB] bg-[#F9FAFB] text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70"
+            >
+              <span>↑</span>
+              {thumbnailUploading
+                ? '업로드 중...'
+                : form.thumbnail
+                  ? '이미지 변경하기'
+                  : '강의 대표 이미지를 업로드하세요'}
+            </button>
+            {form.thumbnail && (
+              <Image
+                src={form.thumbnail}
+                alt="썸네일 미리보기"
+                className="mt-2 w-full h-40 object-cover rounded-lg border border-[#E5E7EB]"
+              />
+            )}
           </div>
         </section>
 
@@ -286,7 +373,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
         <div className="flex items-center justify-between pt-2">
           <Button
             type="button"
-            onClick={() => handleSubmit('save')}
+            onClick={() => setConfirmModal({ type: 'save' })}
             disabled={isLoading}
             className="h-11 px-7 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer disabled:opacity-70"
           >
@@ -295,7 +382,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
           <div className="flex gap-3">
             <Button
               type="button"
-              onClick={() => handleSubmit('submit')}
+              onClick={() => setConfirmModal({ type: 'submit' })}
               disabled={isLoading}
               className="h-11 px-7 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer disabled:opacity-70"
             >
@@ -304,7 +391,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.back()}
+              onClick={() => setConfirmModal({ type: 'cancel' })}
               disabled={isLoading}
               className="h-11 px-7 border-[#D1D5DB] text-[#1E2125] font-semibold text-[14px] hover:bg-[#F9FAFB] cursor-pointer"
             >
@@ -313,6 +400,25 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
           </div>
         </div>
       </div>
+      
+      {/* ── 확인 모달 ── */}
+      {confirmModal && (
+        <TwoButtonModal
+          title={MODAL_CONFIG[confirmModal.type].title}
+          message={MODAL_CONFIG[confirmModal.type].message}
+          confirmLabel="확인"
+          cancelLabel="취소"
+          onConfirm={() => {
+            setConfirmModal(null);
+            if (confirmModal.type === 'cancel') {
+              router.back();
+            } else {
+              handleSubmit(confirmModal.type);
+            }
+          }}
+          onCancel={() => setConfirmModal(null)}
+        />
+      )}
     </div>
   );
 }
