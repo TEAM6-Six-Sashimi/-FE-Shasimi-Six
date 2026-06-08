@@ -2,7 +2,16 @@ import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer"
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8080',
+        pathname: '/uploads/**',
+      },
+    ],
+  },
 };
 
 // 번들 분석기 설정

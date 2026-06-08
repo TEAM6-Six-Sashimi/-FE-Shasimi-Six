@@ -2,54 +2,48 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CourseDetail, CourseFromAPI } from '../../courses/types';
 import Image from 'next/image';
+import { CourseFromAPI } from '../../courses/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+interface CourseWithCategory extends CourseFromAPI {
+  categoryName: string;
+}
+
+function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
+  if (!thumbnail) return null;
+  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
+}
+
 export default function PopularCourseSlider() {
-  const [courses, setCourses] = useState<CourseDetail[]>([]);
+  const [courses, setCourses] = useState<CourseWithCategory[]>([]);
   const [current, setCurrent] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPopularCourses = async () => {
       try {
-        // 전체 강의 조회
         const res = await fetch(`${API_BASE_URL}/api/courses`);
-
-        if (!res.ok) {
-          throw new Error('강의 목록 조회 실패');
-        }
+        if (!res.ok) throw new Error('강의 목록 조회 실패');
 
         const data: CourseFromAPI[] = await res.json();
+        const topCourses = [...data]
+          .sort((a, b) => b.studentCount - a.studentCount)
+          .slice(0, 9);
 
-        // 수강생 수 기준 상위 9개
-        const topCourses = [...data].sort((a, b) => b.studentCount - a.studentCount).slice(0, 9);
-
-        // 상세 조회 병렬 호출
         const detailedCourses = await Promise.all(
           topCourses.map(async (course) => {
             const detailRes = await fetch(`${API_BASE_URL}/api/courses/${course.courseId}`);
-
-            if (!detailRes.ok) {
-              throw new Error(`${course.courseId}번 강의 상세 조회 실패`);
-            }
-
+            if (!detailRes.ok) throw new Error(`${course.courseId}번 강의 상세 조회 실패`);
             const detail = await detailRes.json();
-
-            console.log('thumbnail:', detail.thumbnail);
-
-            return {
-              ...course,
-              categoryName: detail.categoryName,
-            };
+            return { ...course, categoryName: detail.categoryName };
           }),
         );
 
         setCourses(detailedCourses);
-      } catch (error) {
-        console.error('인기 강의 페칭 실패:', error);
+      } catch {
+        // 슬라이더 로딩 실패 시 빈 목록
       } finally {
         setLoading(false);
       }
@@ -96,70 +90,63 @@ export default function PopularCourseSlider() {
         <div className="overflow-hidden">
           <div
             className="flex transition-transform duration-500 ease-in-out"
-            style={{
-              transform: `translateX(-${current * 100}%)`,
-            }}
+            style={{ transform: `translateX(-${current * 100}%)` }}
           >
             {slides.map((group, gIdx) => (
               <div key={gIdx} className="min-w-full grid grid-cols-3 gap-5">
-                {group.map((course) => (
-                  <div
-                    key={course.courseId}
-                    className="bg-white rounded-xl overflow-hidden border border-[#D1D5DB] hover:shadow-lg transition-shadow duration-200"
-                  >
-                    <div className="relative w-full aspect-video bg-[#E5E7EB]">
-                      <Image
-                        src={
-                          course.thumbnail?.startsWith('http')
-                            ? course.thumbnail
-                            : `http://localhost:8080/uploads/${course.thumbnail}`
-                        }
-                        alt={course.title}
-                        className="w-full h-full object-cover"
-                      />
-
-                      <span className="absolute top-3 right-3 bg-[#FF5E5E] text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
-                        인기
-                      </span>
-                    </div>
-
-                    <div className="px-4 pt-3.5 pb-4 flex flex-col gap-1.5">
-                      <p className="text-[#1E2125] text-[14px] font-semibold leading-snug line-clamp-2">
-                        {course.title}
-                      </p>
-
-                      <p className="text-[#6A7282] text-[12px]">{course.instructorName}</p>
-
-                      <div className="flex items-center gap-1">
-                        <span className="text-[#FFD700] text-[12px]">★</span>
-
-                        <span className="text-[#1E2125] text-[12px] font-semibold">
-                          {course.ratingAvg.toFixed(1)}
-                        </span>
-
-                        <span className="text-[#6A7282] text-[11px]">
-                          ({course.studentCount.toLocaleString()}
-                          명)
+                {group.map((course) => {
+                  const thumbnailUrl = getThumbnailUrl(course.thumbnail);
+                  return (
+                    <div
+                      key={course.courseId}
+                      className="bg-white rounded-xl overflow-hidden border border-[#D1D5DB] hover:shadow-lg transition-shadow duration-200"
+                    >
+                      {/* 썸네일 */}
+                      <div className="relative w-full aspect-video bg-[#E5E7EB]">
+                        {thumbnailUrl && (
+                          <Image
+                            src={thumbnailUrl}
+                            alt={course.title}
+                            fill
+                            unoptimized
+                            className="object-cover"
+                          />
+                        )}
+                        <span className="absolute top-3 right-3 bg-[#FF5E5E] text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
+                          인기
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between mt-1">
-                        <p className="text-[#1E2125] text-[15px] font-bold">
-                          {course.price.toLocaleString()} 크레딧
+                      {/* 강의 정보 */}
+                      <div className="px-4 pt-3.5 pb-4 flex flex-col gap-1.5">
+                        <p className="text-[#1E2125] text-[14px] font-semibold leading-snug line-clamp-2">
+                          {course.title}
                         </p>
-
-                        <Link
-                          href={`/courses/${encodeURIComponent(
-                            course.categoryName,
-                          )}/${encodeURIComponent(course.title)}`}
-                          className="px-4 py-1.5 rounded-lg border-2 border-[#1E2125] text-[12px] font-semibold text-[#1E2125] hover:bg-[#1E2125] hover:text-white transition-colors"
-                        >
-                          상세 보기
-                        </Link>
+                        <p className="text-[#6A7282] text-[12px]">{course.instructorName}</p>
+                        <div className="flex items-center gap-1">
+                          <span className="text-[#FFD700] text-[12px]">★</span>
+                          <span className="text-[#1E2125] text-[12px] font-semibold">
+                            {course.ratingAvg.toFixed(1)}
+                          </span>
+                          <span className="text-[#6A7282] text-[11px]">
+                            ({course.studentCount.toLocaleString()}명)
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between mt-1">
+                          <p className="text-[#1E2125] text-[15px] font-bold">
+                            {course.price.toLocaleString()} 크레딧
+                          </p>
+                          <Link
+                            href={`/courses/${encodeURIComponent(course.categoryName)}/${course.courseId}`}
+                            className="px-4 py-1.5 rounded-lg border-2 border-[#1E2125] text-[12px] font-semibold text-[#1E2125] hover:bg-[#1E2125] hover:text-white transition-colors"
+                          >
+                            상세 보기
+                          </Link>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ))}
           </div>
@@ -172,7 +159,6 @@ export default function PopularCourseSlider() {
         >
           ‹
         </button>
-
         <button
           onClick={next}
           disabled={current === slides.length - 1}
