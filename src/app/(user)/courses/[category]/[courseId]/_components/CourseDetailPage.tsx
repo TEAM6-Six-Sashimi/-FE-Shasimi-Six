@@ -1,8 +1,11 @@
+import Image from 'next/image';
 import CourseCurriculum from '@/features/user/courses/components/CourseCurriculum';
 import CourseReviews from '@/features/user/courses/components/CourseReviews';
 import CourseDetailSidebar from '@/features/user/courses/components/CourseDetailSidebar';
 import { CourseDetailFromAPI } from '@/features/user/courses/types';
 import { MOCK_COURSE_DETAIL, Review, RatingDistribution } from '@/constants/mockCourseDetail';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface CourseDetailPageProps {
   course: CourseDetailFromAPI;
@@ -31,6 +34,11 @@ function formatDuration(seconds: number): string {
   return `${m}분`;
 }
 
+function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
+  if (!thumbnail) return null;
+  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
+}
+
 // 목 필드 (추후 교체)
 const MOCK_INSTRUCTOR = MOCK_COURSE_DETAIL.instructor;
 const MOCK_NCS = MOCK_COURSE_DETAIL.ncs;
@@ -38,6 +46,9 @@ const MOCK_RATING_DISTRIBUTION: RatingDistribution[] = MOCK_COURSE_DETAIL.rating
 const MOCK_REVIEWS: Review[] = MOCK_COURSE_DETAIL.reviews;
 
 export default function CourseDetailPage({ course }: CourseDetailPageProps) {
+  
+  const thumbnailUrl = getThumbnailUrl(course.thumbnail);
+
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
       <div className="max-w-275 mx-auto py-6 px-6">
@@ -48,9 +59,19 @@ export default function CourseDetailPage({ course }: CourseDetailPageProps) {
             <div className={CARD + ' flex flex-col gap-4'}>
               {/* 썸네일: 추후 이미지 URL로 교체 */}
               <div
-                className="rounded-t-xl -mx-6 -mt-6 bg-[#E5E7EB]"
+                className="relative rounded-t-xl -mx-6 -mt-6 bg-[#E5E7EB]"
                 style={{ width: 'calc(100% + 3rem)', height: '240px' }}
-              />
+              >
+                {thumbnailUrl && (
+                  <Image
+                    src={thumbnailUrl}
+                    alt={course.title}
+                    fill
+                    unoptimized
+                    className="object-cover rounded-t-xl"
+                  />
+                )}
+              </div>
 
               {/* 카테고리 뱃지 */}
               <div className="flex items-center gap-2">
