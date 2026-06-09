@@ -1,6 +1,9 @@
 'use client';
 
+import Image from 'next/image';
 import { CartCourseItem } from '../types';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface CartContentProps {
   items: CartCourseItem[];
@@ -8,6 +11,11 @@ interface CartContentProps {
   onToggleSelect: (id: number) => void;
   onToggleAll: () => void;
   onDeleteSelected: () => void;
+}
+
+function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
+  if (!thumbnail) return null;
+  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
 }
 
 export default function CartContent({
@@ -83,6 +91,7 @@ export default function CartContent({
         <div className="flex flex-col gap-3">
           {items.map((item) => {
             const isSelected = selectedIds.includes(item.courseId);
+            const thumbnailUrl = getThumbnailUrl(item.thumbnail);
             return (
               <div
                 key={item.courseId}
@@ -113,7 +122,17 @@ export default function CartContent({
                 </div>
 
                 {/* 썸네일 - TODO: 백엔드에서 완전한 URL 내려오면 next/image로 교체 */}
-                <div className="w-24 h-18 rounded-lg overflow-hidden shrink-0 bg-[#D1D5DB]" />
+               <div className="relative w-24 h-16 rounded-lg overflow-hidden shrink-0 bg-[#D1D5DB]">
+                  {thumbnailUrl && (
+                    <Image
+                      src={thumbnailUrl}
+                      alt={item.title}
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
+                  )}
+                </div>
 
                 {/* 강의 정보 */}
                 <div className="flex-1 min-w-0">
