@@ -250,7 +250,7 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
                     <a
                       href={detailModal.detail.portfolioUrl}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="text-[13px] text-[#5B8DEE] underline hover:text-[#3B66B9]"
                     >
                       {detailModal.detail.portfolioUrl}
