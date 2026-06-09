@@ -6,6 +6,7 @@ import { EnrollmentSummary } from '../types';
 import { paySingleCourseAction, payCartCheckoutAction } from '../actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import OneButtonModal from '@/components/modals/OneButtonModal';
+import { Button } from '@/components/ui/button';
 
 interface EnrollmentStickyProps {
   summary: EnrollmentSummary;
@@ -122,13 +123,13 @@ export function EnrollmentSticky({ summary }: EnrollmentStickyProps) {
           </div>
 
           {/* 결제 버튼 */}
-          <button
+          <Button
             onClick={handlePaymentClick}
             disabled={!canPurchase || isLoading}
-            className={`w-full py-4 rounded-xl text-white font-semibold text-base transition-all duration-200 cursor-pointer ${
+            className={`w-full py-4 h-auto rounded-xl text-white font-semibold text-base ${
               canPurchase && !isLoading
-                ? 'bg-[#FF5F5F] hover:bg-[#D14848] '
-                : 'bg-[#E5E7EB] text-gray-400 cursor-not-allowed'
+                ? 'bg-[#FF5F5F] hover:bg-[#D14848]'
+                : 'bg-[#E5E7EB] text-gray-400 hover:bg-[#E5E7EB] cursor-not-allowed'
             }`}
           >
             {isLoading ? (
@@ -153,7 +154,7 @@ export function EnrollmentSticky({ summary }: EnrollmentStickyProps) {
             ) : (
               '결 제'
             )}
-          </button>
+          </Button>
         </div>
       </div>
 

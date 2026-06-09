@@ -191,7 +191,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
               <SelectTrigger className="h-8 w-32 text-[12.5px] border-[#D1D5DB] text-[#1E2125]">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper" side="bottom">
                 {(['인기순', '최신순', '평점순'] as SortType[]).map((s) => (
                   <SelectItem key={s} value={s} className="text-[12.5px]">
                     {s}

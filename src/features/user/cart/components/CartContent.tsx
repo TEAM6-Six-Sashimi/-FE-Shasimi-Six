@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { CartCourseItem } from '../types';
+import { Button } from '@/components/ui/button';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -58,16 +59,15 @@ export default function CartContent({
           <span className="text-[14px] font-medium text-[#1E2125]">전체 선택</span>
         </label>
 
-        <button
+        <Button
           type="button"
           onClick={onDeleteSelected}
           disabled={selectedIds.length === 0}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-colors
-                        ${
-                          selectedIds.length > 0
-                            ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848] cursor-pointer'
-                            : 'bg-[#E5E7EB] text-[#6A7282] cursor-not-allowed'
-                        }`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 h-auto text-[13px] font-medium ${
+            selectedIds.length > 0
+              ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848]'
+              : 'bg-[#E5E7EB] text-[#6A7282] hover:bg-[#E5E7EB] cursor-not-allowed'
+          }`}
         >
           <svg width="13" height="14" viewBox="0 0 13 14" fill="none">
             <path
@@ -79,7 +79,7 @@ export default function CartContent({
             />
           </svg>
           선택 삭제
-        </button>
+        </Button>
       </div>
 
       {/* 장바구니 아이템 목록 */}

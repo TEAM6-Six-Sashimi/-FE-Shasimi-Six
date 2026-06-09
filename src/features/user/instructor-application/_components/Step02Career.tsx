@@ -105,7 +105,7 @@ export default function Step02Career({ data, onNext, onPrev }: Step02CareerProps
         <label className={labelCls}>온라인 강의 경험 여부 (선택)</label>
         <div className="grid grid-cols-2 gap-3">
           {[true, false].map((val) => (
-            <button
+            <Button
               key={String(val)}
               type="button"
               onClick={() =>
@@ -114,14 +114,14 @@ export default function Step02Career({ data, onNext, onPrev }: Step02CareerProps
                   hasOnlineExperience: prev.hasOnlineExperience === val ? null : val,
                 }))
               }
-              className={`h-11 rounded-lg text-[13.5px] font-semibold border transition-colors cursor-pointer ${
+              className={`h-11 rounded-lg text-[13.5px] font-semibold border transition-colors ${
                 form.hasOnlineExperience === val
-                  ? 'bg-[#FF5E5E] border-[#FF5E5E] text-white'
-                  : 'bg-white border-[#D1D5DB] text-[#1E2125] hover:border-[#1E2125]'
+                  ? 'bg-[#FF5E5E] border-[#FF5E5E] text-white hover:bg-[#FF5E5E]'
+                  : 'bg-white border-[#D1D5DB] text-[#1E2125] hover:border-[#1E2125] hover:bg-white hover:text-[#1E2125]'
               }`}
             >
               {val ? '있음' : '없음'}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -173,17 +173,17 @@ export default function Step02Career({ data, onNext, onPrev }: Step02CareerProps
           }}
           className="hidden"
         />
-        <button
+        <Button
           type="button"
           onClick={() => certFileRef.current?.click()}
-          className={`w-full h-11 rounded-lg border border-dashed text-[13px] transition-colors cursor-pointer flex items-center justify-center gap-2 ${
+          className={`w-full h-11 rounded-lg border border-dashed text-[13px] flex items-center justify-center gap-2 ${
             isError
-              ? 'border-[#FF5E5E] bg-[#FFEBEB] text-[#FF5E5E]'
-              : 'border-[#D1D5DB] bg-[#F9FAFB] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125]'
+              ? 'border-[#FF5E5E] bg-[#FFEBEB] text-[#FF5E5E] hover:bg-[#FFEBEB] hover:text-[#FF5E5E]'
+              : 'border-[#D1D5DB] bg-[#F9FAFB] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] hover:bg-[#F9FAFB]'
           }`}
         >
           <span>↑</span> 자격증 파일 첨부 (PDF, JPG, PNG · 여러 개 가능)
-        </button>
+        </Button>
 
         {isError && (
           <p className="text-[12px] text-[#FF5E5E] mt-1">자격증을 1개 이상 첨부해주세요.</p>

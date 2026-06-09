@@ -1,5 +1,7 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+
 interface ContentProps {
   selectedAmount: number | null;
   setSelectedAmount: (amount: number | null) => void;
@@ -20,7 +22,6 @@ export default function Content({
   customAmount,
   setCustomAmount,
 }: ContentProps) {
-  // 선택/취소 가능 버튼
   const handlePresetClick = (credit: number) => {
     if (selectedAmount === credit) {
       setSelectedAmount(null);
@@ -31,7 +32,7 @@ export default function Content({
   };
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/[^0-9]/g, ''); // 천 단위 콤마
+    const raw = e.target.value.replace(/[^0-9]/g, '');
     const formatted = raw ? parseInt(raw).toLocaleString() : '';
     setCustomAmount(formatted);
     setSelectedAmount(null);
@@ -46,16 +47,16 @@ export default function Content({
           {PRESET_OPTIONS.map((opt) => {
             const isSelected = selectedAmount === opt.credit;
             return (
-              <button
+              <Button
                 key={opt.credit}
                 type="button"
                 onClick={() => handlePresetClick(opt.credit)}
-                className={`flex flex-col items-center justify-center py-7 px-3 rounded-xl border-[1.5px] transition-all duration-100 cursor-pointer
-                                    ${
-                                      isSelected
-                                        ? 'bg-[#FF5F5F] text-white border-none'
-                                        : 'bg-white border-[#E5E7EB] text-[#1E2125] hover:bg-[#F9FAFB]'
-                                    }`}
+                className={`flex flex-col items-center justify-center py-7 px-3 h-auto rounded-xl border-[1.5px] transition-all duration-100
+                  ${
+                    isSelected
+                      ? 'bg-[#FF5F5F] text-white border-transparent hover:bg-[#FF5F5F]'
+                      : 'bg-white border-[#E5E7EB] text-[#1E2125] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
+                  }`}
               >
                 <span className="text-[15px] font-bold">{opt.label}</span>
                 <span
@@ -63,7 +64,7 @@ export default function Content({
                 >
                   {opt.credit.toLocaleString()} 크레딧
                 </span>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -73,7 +74,7 @@ export default function Content({
         <h2 className="text-[17px] font-semibold mb-3">직접 입력</h2>
         <div
           className={`flex items-center border rounded-xl px-4 py-3 transition-colors duration-150
-                    ${customAmount ? 'border-[#1E2125]' : 'border-[#D1D5DB]'} bg-white`}
+            ${customAmount ? 'border-[#1E2125]' : 'border-[#D1D5DB]'} bg-white`}
         >
           <input
             type="text"

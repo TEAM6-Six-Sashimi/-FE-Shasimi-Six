@@ -9,6 +9,7 @@ import {
   getApplicationDetailAction,
 } from '../actions';
 import InputModal from '@/components/modals/InputModal';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   applicants: InstructorApplication[];
@@ -23,7 +24,9 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
     detail: InstructorApplicationDetail | null;
   } | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [rejectModal, setRejectModal] = useState<{ applicationId: number; name: string } | null>(null);
+  const [rejectModal, setRejectModal] = useState<{ applicationId: number; name: string } | null>(
+    null,
+  );
   const [rejectReason, setRejectReason] = useState('');
 
   const filtered = (applicants ?? []).filter(
@@ -114,39 +117,43 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
               </tr>
             ) : (
               filtered.map((a) => (
-                <tr key={a.applicationId} className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors">
+                <tr
+                  key={a.applicationId}
+                  className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
+                >
                   <td className="py-3 text-center font-semibold text-[#1E2125]">{a.name}</td>
                   <td className="py-3 text-center text-[#6A7282]">{a.loginId}</td>
                   <td className="py-3 text-center text-[#6A7282]">{a.email}</td>
                   <td className="py-3 text-center text-[#6A7282]">{a.createdAt.slice(0, 10)}</td>
                   <td className="py-3 text-center">
-                    <button
+                    <Button
+                      variant="outline"
                       onClick={() => handleViewDetail(a)}
                       disabled={detailLoading}
-                      className="px-3 py-1.5 rounded border-2 border-[#D1D5DB] text-[12px] font-semibold text-[#1E2125] bg-white hover:border-[#6A7282] cursor-pointer transition-colors disabled:opacity-50"
+                      className="px-3 py-1.5 h-auto border-2 border-[#D1D5DB] text-[12px] font-semibold text-[#1E2125] hover:border-[#6A7282] hover:text-[#1E2125]"
                     >
                       서류 확인
-                    </button>
+                    </Button>
                   </td>
                   <td className="py-3 text-center">
                     <div className="flex items-center justify-center gap-2">
-                      <button
+                      <Button
                         onClick={() => handleApprove(a.applicationId)}
                         disabled={loading}
-                        className="px-4 py-1.5 rounded border-2 border-[#CFEE5D] text-[12px] font-semibold text-[#1E2125] bg-white hover:border-[#A8D014] hover:bg-[#F9FBE7] cursor-pointer transition-colors disabled:opacity-50"
+                        className="px-4 py-1.5 h-auto border-2 border-[#CFEE5D] text-[12px] font-semibold text-[#1E2125] bg-white hover:border-[#A8D014] hover:bg-[#F9FBE7]"
                       >
                         승인
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => {
                           setRejectModal({ applicationId: a.applicationId, name: a.name });
                           setRejectReason('');
                         }}
                         disabled={loading}
-                        className="px-4 py-1.5 rounded border-2 border-[#FF5E5E] text-[12px] font-semibold text-white bg-[#FF5E5E] hover:bg-[#D14848] hover:border-[#D14848] cursor-pointer transition-colors disabled:opacity-50"
+                        className="px-4 py-1.5 h-auto border-2 border-[#FF5E5E] text-[12px] font-semibold text-white bg-[#FF5E5E] hover:bg-[#D14848] hover:border-[#D14848]"
                       >
                         거절
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -158,12 +165,20 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
 
       {/* 서류 확인 모달 */}
       {detailModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setDetailModal(null)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+          onClick={() => setDetailModal(null)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-[18px] font-bold text-[#1E2125]">강사 신청 서류</h3>
-              <button onClick={() => setDetailModal(null)}
-                className="w-8 h-8 flex items-center justify-center rounded-full text-[#6A7282] hover:bg-[#F3F4F6] hover:text-[#1E2125] transition-colors cursor-pointer text-[18px]">
+              <button
+                onClick={() => setDetailModal(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-full text-[#6A7282] hover:bg-[#F3F4F6] hover:text-[#1E2125] transition-colors cursor-pointer text-[18px]"
+              >
                 ✕
               </button>
             </div>
@@ -171,19 +186,27 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
             <div className="bg-[#F9FAFB] rounded-xl p-4 mb-4 grid grid-cols-2 gap-3">
               <div>
                 <p className="text-[11.5px] text-[#6A7282] mb-0.5">이름</p>
-                <p className="text-[13.5px] font-semibold text-[#1E2125]">{detailModal.applicant.name}</p>
+                <p className="text-[13.5px] font-semibold text-[#1E2125]">
+                  {detailModal.applicant.name}
+                </p>
               </div>
               <div>
                 <p className="text-[11.5px] text-[#6A7282] mb-0.5">아이디</p>
-                <p className="text-[13.5px] font-semibold text-[#1E2125]">{detailModal.applicant.loginId}</p>
+                <p className="text-[13.5px] font-semibold text-[#1E2125]">
+                  {detailModal.applicant.loginId}
+                </p>
               </div>
               <div>
                 <p className="text-[11.5px] text-[#6A7282] mb-0.5">이메일</p>
-                <p className="text-[13.5px] font-semibold text-[#1E2125]">{detailModal.applicant.email}</p>
+                <p className="text-[13.5px] font-semibold text-[#1E2125]">
+                  {detailModal.applicant.email}
+                </p>
               </div>
               <div>
                 <p className="text-[11.5px] text-[#6A7282] mb-0.5">신청일</p>
-                <p className="text-[13.5px] font-semibold text-[#1E2125]">{detailModal.applicant.createdAt.slice(0, 10)}</p>
+                <p className="text-[13.5px] font-semibold text-[#1E2125]">
+                  {detailModal.applicant.createdAt.slice(0, 10)}
+                </p>
               </div>
             </div>
 
@@ -191,21 +214,30 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
               <div className="flex flex-col gap-3">
                 <div>
                   <p className="text-[11.5px] text-[#6A7282] mb-0.5">자기소개</p>
-                  <p className="text-[13.5px] text-[#1E2125] bg-[#F9FAFB] rounded-lg px-3 py-2">{detailModal.detail.bio || '-'}</p>
+                  <p className="text-[13.5px] text-[#1E2125] bg-[#F9FAFB] rounded-lg px-3 py-2">
+                    {detailModal.detail.bio || '-'}
+                  </p>
                 </div>
                 {detailModal.detail.certifications?.length > 0 && (
                   <div>
                     <p className="text-[11.5px] text-[#6A7282] mb-1.5">자격증</p>
                     <div className="flex flex-col gap-2">
                       {detailModal.detail.certifications.map((cert, idx) => (
-                        <div key={idx} className="bg-[#F9FAFB] rounded-lg px-3 py-2 grid grid-cols-2 gap-2">
+                        <div
+                          key={idx}
+                          className="bg-[#F9FAFB] rounded-lg px-3 py-2 grid grid-cols-2 gap-2"
+                        >
                           <div>
                             <p className="text-[11px] text-[#6A7282]">자격증명</p>
-                            <p className="text-[13px] font-semibold text-[#1E2125]">{cert.certificationName}</p>
+                            <p className="text-[13px] font-semibold text-[#1E2125]">
+                              {cert.certificationName}
+                            </p>
                           </div>
                           <div>
                             <p className="text-[11px] text-[#6A7282]">발급 기관</p>
-                            <p className="text-[13px] font-semibold text-[#1E2125]">{cert.issuedBy}</p>
+                            <p className="text-[13px] font-semibold text-[#1E2125]">
+                              {cert.issuedBy}
+                            </p>
                           </div>
                         </div>
                       ))}
@@ -215,36 +247,45 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
                 {detailModal.detail.portfolioUrl && (
                   <div>
                     <p className="text-[11.5px] text-[#6A7282] mb-0.5">포트폴리오</p>
-                    <a href={detailModal.detail.portfolioUrl} target="_blank" rel="noreferrer"
-                      className="text-[13px] text-[#5B8DEE] underline hover:text-[#3B66B9]">
+                    <a
+                      href={detailModal.detail.portfolioUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[13px] text-[#5B8DEE] underline hover:text-[#3B66B9]"
+                    >
                       {detailModal.detail.portfolioUrl}
                     </a>
                   </div>
                 )}
               </div>
             ) : (
-              <p className="text-center text-[#6A7282] text-[13px] py-4">서류 정보를 불러올 수 없습니다.</p>
+              <p className="text-center text-[#6A7282] text-[13px] py-4">
+                서류 정보를 불러올 수 없습니다.
+              </p>
             )}
 
             <div className="flex justify-end gap-2 mt-6">
-              <button
+              <Button
                 onClick={() => handleApprove(detailModal.applicant.applicationId)}
                 disabled={loading}
-                className="px-5 py-2 rounded border-2 border-[#CFEE5D] text-[13px] font-semibold text-[#1E2125] bg-white hover:border-[#A8D014] hover:bg-[#F9FBE7] cursor-pointer transition-colors disabled:opacity-50"
+                className="px-5 py-2 h-auto border-2 border-[#CFEE5D] text-[13px] font-semibold text-[#1E2125] bg-white hover:border-[#A8D014] hover:bg-[#F9FBE7]"
               >
                 승인
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => {
-                  setRejectModal({ applicationId: detailModal.applicant.applicationId, name: detailModal.applicant.name });
+                  setRejectModal({
+                    applicationId: detailModal.applicant.applicationId,
+                    name: detailModal.applicant.name,
+                  });
                   setRejectReason('');
                   setDetailModal(null);
                 }}
                 disabled={loading}
-                className="px-5 py-2 rounded border-2 border-[#FF5E5E] text-[13px] font-semibold text-white bg-[#FF5E5E] hover:bg-[#D14848] hover:border-[#D14848] cursor-pointer transition-colors disabled:opacity-50"
+                className="px-5 py-2 h-auto border-2 border-[#FF5E5E] text-[13px] font-semibold text-white bg-[#FF5E5E] hover:bg-[#D14848] hover:border-[#D14848]"
               >
                 거절
-              </button>
+              </Button>
             </div>
           </div>
         </div>

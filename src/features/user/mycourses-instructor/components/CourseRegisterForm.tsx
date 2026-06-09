@@ -319,11 +319,11 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
               className="hidden"
               disabled={isLoading || thumbnailUploading}
             />
-            <button
+            <Button
               type="button"
               onClick={() => thumbnailRef.current?.click()}
               disabled={isLoading || thumbnailUploading}
-              className="w-full h-12 rounded-lg border border-dashed border-[#D1D5DB] bg-[#F9FAFB] text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70"
+              className="w-full h-12 rounded-lg border border-dashed border-[#D1D5DB] bg-[#F9FAFB] text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] hover:bg-[#F9FAFB] flex items-center justify-center gap-2 disabled:opacity-70"
             >
               <span>↑</span>
               {thumbnailUploading
@@ -331,7 +331,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                 : form.thumbnail
                   ? '이미지 변경하기'
                   : '강의 대표 이미지를 업로드하세요'}
-            </button>
+            </Button>
             {form.thumbnail && (
               <Image
                 src={form.thumbnail}
@@ -359,14 +359,14 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
             />
           ))}
 
-          <button
+          <Button
             type="button"
             onClick={addSession}
             disabled={isLoading}
-            className="w-full h-11 rounded-lg border border-dashed border-[#D1D5DB] text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+            className="w-full h-11 rounded-lg border border-dashed border-[#D1D5DB] bg-transparent text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] hover:bg-transparent flex items-center justify-center gap-1.5"
           >
             <span className="text-[16px]">+</span> 세션 추가
-          </button>
+          </Button>
         </section>
 
         {/* ── 버튼 ── */}
@@ -400,7 +400,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
           </div>
         </div>
       </div>
-      
+
       {/* ── 확인 모달 ── */}
       {confirmModal && (
         <TwoButtonModal

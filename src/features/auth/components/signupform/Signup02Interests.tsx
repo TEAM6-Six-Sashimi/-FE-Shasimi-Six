@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { fetchCategories } from '@/services/categories.service';
 import { checkReferralCode } from '@/services/auth.service';
 import { Category } from '@/features/categories/types';
+import { Button } from '@/components/ui/button';
 
 interface InterestsProps {
   initialCategories: number[];
@@ -101,18 +102,18 @@ export default function Signup02Interests({
           {categories.map((cat) => {
             const isSelected = selectedCategoryIds.includes(cat.mainCategoryId);
             return (
-              <button
+              <Button
                 key={cat.name}
                 type="button"
                 onClick={() => handleCategoryToggle(cat.mainCategoryId)}
-                className={`py-2.5 px-4 rounded-full text-[15px] font-semibold border-[1.5px] transition-all duration-100 ${
+                className={`py-2.5 px-4 h-auto rounded-full text-[15px] font-semibold border-[1.5px] transition-all duration-100 ${
                   isSelected
-                    ? 'bg-[#F9FBE7] text-[#827717] border-none' // 활성화 상태
-                    : 'bg-white text-[#6A7282] border-[#D1D5DB] hover:bg-gray-50' // 비활성화 상태
+                    ? 'bg-[#F9FBE7] text-[#827717] border-transparent hover:bg-[#F9FBE7] hover:text-[#827717]'
+                    : 'bg-white text-[#6A7282] border-[#D1D5DB] hover:bg-gray-50 hover:text-[#6A7282]'
                 }`}
               >
                 {cat.name}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -131,18 +132,18 @@ export default function Signup02Interests({
             className={inputCls}
             disabled={isReferralChecked}
           />
-          <button
+          <Button
             type="button"
             onClick={handleReferralCheck}
             disabled={isReferralChecked}
-            className={`px-4 py-2 text-[12px] rounded-lg font-medium whitespace-nowrap min-w-23.75 transition-colors ${
+            className={`px-4 h-9 text-[12px] font-medium whitespace-nowrap min-w-23.75 ${
               isReferralChecked
-                ? 'bg-[#FFEBEB] text-[#FF5F5F] cursor-not-allowed'
-                : 'bg-[#FF5F5F] text-white hover:bg-[#D14848] cursor-pointer'
+                ? 'bg-[#FFEBEB] text-[#FF5F5F] hover:bg-[#FFEBEB] cursor-not-allowed'
+                : 'bg-[#FF5F5F] text-white hover:bg-[#D14848]'
             }`}
           >
             {isReferralChecked ? '확인 완료' : '추천인 확인'}
-          </button>
+          </Button>
         </div>
         {referralMessage && (
           <p
@@ -154,19 +155,20 @@ export default function Signup02Interests({
       </div>
 
       <div className="flex w-full gap-3 font-semibold">
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={() => onPrev(selectedCategoryIds, referral_code, isReferralChecked)}
-          className="flex-1 px-4 py-2 bg-white rounded-lg border border-[#6B7280] text-[#6B7280] hover:bg-[#F9FAFB] cursor-pointer"
+          className="flex-1 px-4 py-2 h-auto border border-[#6B7280] text-[#6B7280] hover:bg-[#F9FAFB] hover:text-[#6B7280]"
         >
           이전
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
-          className="flex-2 px-4 py-2 bg-[#FF5F5F] text-white rounded-lg hover:bg-[#D14848] cursor-pointer text-center"
+          className="flex-2 px-4 py-2 h-auto bg-[#FF5F5F] text-white hover:bg-[#D14848]"
         >
           회원가입 완료
-        </button>
+        </Button>
       </div>
     </form>
   );

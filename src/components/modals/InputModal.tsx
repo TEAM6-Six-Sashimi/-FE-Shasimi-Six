@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button';
+
 interface InputModalProps {
   title: string;
   subtitle?: string;
@@ -36,20 +38,21 @@ export default function InputModal({
           className="w-full px-4 py-3 rounded-lg border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors resize-none mb-4"
         />
         <div className="flex justify-end gap-2">
-          <button
+          <Button
+            variant="outline"
             onClick={onCancel}
             disabled={loading}
-            className="px-5 py-2 rounded border-2 border-[#D1D5DB] text-[13px] font-semibold text-[#1E2125] hover:bg-[#F9FAFB] cursor-pointer transition-colors disabled:opacity-50"
+            className="px-5 py-2 h-auto border-2 border-[#D1D5DB] text-[13px] font-semibold text-[#1E2125] hover:bg-[#F9FAFB] hover:text-[#1E2125]"
           >
             {cancelLabel}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onConfirm}
             disabled={loading}
-            className="px-5 py-2 rounded border-2 border-[#FF5E5E] bg-[#FF5E5E] text-[13px] font-semibold text-white hover:bg-[#D14848] hover:border-[#D14848] cursor-pointer transition-colors disabled:opacity-50"
+            className="px-5 py-2 h-auto border-2 border-[#FF5E5E] bg-[#FF5E5E] text-[13px] font-semibold text-white hover:bg-[#D14848] hover:border-[#D14848]"
           >
             {loading ? '처리 중...' : confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

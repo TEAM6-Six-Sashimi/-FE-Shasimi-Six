@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { AdminCourse } from '../type';
 import { approveCourseAction, rejectCourseAction } from '../action';
 import InputModal from '@/components/modals/InputModal';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   courses: AdminCourse[];
@@ -85,23 +86,23 @@ export default function PendingCourses({ courses, setCourses }: Props) {
                   <td className="py-3 text-center text-[#6A7282]">{c.createdAt.slice(0, 10)}</td>
                   <td className="py-3 text-center">
                     <div className="flex items-center justify-center gap-2">
-                      <button
+                      <Button
                         onClick={() => handleApprove(c.courseId)}
                         disabled={loading}
-                        className="px-6 py-1.5 rounded border-2 border-[#CFEE5D] text-[12px] font-semibold text-[#1E2125] bg-white hover:border-[#A8D014] hover:bg-[#F9FBE7] cursor-pointer transition-colors disabled:opacity-50"
+                        className="px-6 py-1.5 h-auto border-2 border-[#CFEE5D] text-[12px] font-semibold text-[#1E2125] bg-white hover:border-[#A8D014] hover:bg-[#F9FBE7]"
                       >
                         승인
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => {
                           setRejectModal({ courseId: c.courseId, title: c.title });
                           setRejectReason('');
                         }}
                         disabled={loading}
-                        className="px-6 py-1.5 rounded border-2 border-[#FF5E5E] text-[12px] font-semibold text-white bg-[#FF5E5E] hover:bg-[#D14848] hover:border-[#D14848] cursor-pointer transition-colors disabled:opacity-50"
+                        className="px-6 py-1.5 h-auto border-2 border-[#FF5E5E] text-[12px] font-semibold text-white bg-[#FF5E5E] hover:bg-[#D14848] hover:border-[#D14848]"
                       >
                         반려
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>

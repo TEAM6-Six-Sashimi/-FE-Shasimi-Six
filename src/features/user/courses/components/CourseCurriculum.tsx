@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CourseSession } from '@/features/user/courses/types';
+import { Button } from '@/components/ui/button';
 
 interface CourseCurriculumProps {
   sessions: CourseSession[];
@@ -43,16 +44,16 @@ export default function CourseCurriculum({ sessions }: CourseCurriculumProps) {
                 {formatSeconds(session.durationSeconds)}
               </span>
               {session.preview ? (
-                <button className="px-2.5 py-1 rounded-md bg-[#FF5E5E] text-white text-[11.5px] font-semibold cursor-pointer hover:bg-[#D14848] transition-colors">
+                <Button className="px-2.5 py-1 h-auto rounded-md bg-[#FF5E5E] text-white text-[11.5px] font-semibold hover:bg-[#D14848]">
                   미리보기
-                </button>
+                </Button>
               ) : (
-                <button
+                <Button
                   disabled
-                  className="px-2.5 py-1 rounded-md bg-[#E5E7EB] text-[#6A7282] text-[11.5px] font-semibold cursor-not-allowed"
+                  className="px-2.5 py-1 h-auto rounded-md bg-[#E5E7EB] text-[#6A7282] text-[11.5px] font-semibold hover:bg-[#E5E7EB] cursor-not-allowed"
                 >
                   재생
-                </button>
+                </Button>
               )}
             </div>
           </div>
