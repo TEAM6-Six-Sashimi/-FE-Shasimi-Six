@@ -1,8 +1,11 @@
+import Image from 'next/image';
 import CourseCurriculumOwned from '@/features/user/courses/components/CourseCurriculumOwned';
 import CourseReviews from '@/features/user/courses/components/CourseReviews';
 import CourseDetailSidebarOwned from '@/features/user/courses/components/CourseDetailSidebarOwned';
 import { CourseDetailFromAPI, EnrollmentInfo } from '@/features/user/courses/types';
 import { MOCK_COURSE_DETAIL, Review, RatingDistribution } from '@/constants/mockCourseDetail';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface CourseDetailPageOwnedProps {
   course: CourseDetailFromAPI;
@@ -32,6 +35,11 @@ function formatDuration(seconds: number): string {
   return `${m}분`;
 }
 
+function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
+  if (!thumbnail) return null;
+  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
+}
+
 // 목업 필드 (추후 교체)
 const MOCK_INSTRUCTOR = MOCK_COURSE_DETAIL.instructor;
 const MOCK_NCS = MOCK_COURSE_DETAIL.ncs;
@@ -42,6 +50,8 @@ export default function CourseDetailPageOwned({
   course,
   enrollmentInfo,
 }: CourseDetailPageOwnedProps) {
+  const thumbnailUrl = getThumbnailUrl(course.thumbnail);
+  
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
       <div className="max-w-275 mx-auto py-6 px-6">
@@ -52,9 +62,19 @@ export default function CourseDetailPageOwned({
             <div className={CARD + ' flex flex-col gap-4'}>
               {/* 썸네일 */}
               <div
-                className="rounded-t-xl -mx-6 -mt-6 bg-[#E5E7EB]"
+                className="relative rounded-t-xl -mx-6 -mt-6 bg-[#E5E7EB]"
                 style={{ width: 'calc(100% + 3rem)', height: '240px' }}
-              />
+              >
+                {thumbnailUrl && (
+                  <Image
+                    src={thumbnailUrl}
+                    alt={course.title}
+                    fill
+                    unoptimized
+                    className="object-cover rounded-t-xl"
+                  />
+                )}
+              </div>
 
               <div className="flex items-center gap-2">
                 <div className="px-2.5 py-1 rounded-full bg-[#FFEBEB] text-[#FF5E5E] text-[12px] font-medium">

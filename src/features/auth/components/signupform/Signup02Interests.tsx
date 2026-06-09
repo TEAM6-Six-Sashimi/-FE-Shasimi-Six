@@ -165,7 +165,7 @@ export default function Signup02Interests({
         </Button>
         <Button
           type="submit"
-          className="flex-[2] px-4 py-2 h-auto bg-[#FF5F5F] text-white hover:bg-[#D14848]"
+          className="flex-2 px-4 py-2 h-auto bg-[#FF5F5F] text-white hover:bg-[#D14848]"
         >
           회원가입 완료
         </Button>

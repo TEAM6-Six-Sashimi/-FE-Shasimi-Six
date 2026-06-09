@@ -1,9 +1,17 @@
 'use client';
 
+import Image from 'next/image';
 import { EnrollmentCourseItem } from '../types';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface EnrollmentContentProps {
   items: EnrollmentCourseItem[];
+}
+
+function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
+  if (!thumbnail) return null;
+  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
 }
 
 export default function EnrollmentContent({ items }: EnrollmentContentProps) {
@@ -21,10 +29,22 @@ export default function EnrollmentContent({ items }: EnrollmentContentProps) {
 }
 
 function CourseCard({ item }: { item: EnrollmentCourseItem }) {
+  const thumbnailUrl = getThumbnailUrl(item.thumbnail);
+
   return (
     <div className="flex items-center gap-4 p-4 rounded-xl border border-[#D1D5DB]">
       {/* 썸네일 */}
-      <div className="relative w-30 h-20 shrink-0 rounded-lg overflow-hidden bg-[#D1D5DB]" />
+      <div className="relative w-30 h-20 shrink-0 rounded-lg overflow-hidden bg-[#D1D5DB]">
+        {thumbnailUrl && (
+          <Image
+            src={thumbnailUrl}
+            alt={item.title}
+            fill
+            unoptimized
+            className="object-cover"
+          />
+        )}
+      </div>
 
       <div className="flex-1 min-w-0">
         <h3 className="text-[15px] font-semibold text-gray-900 line-clamp-2">{item.title}</h3>
