@@ -3,6 +3,7 @@ import CourseDetailSidebarInstructor from '@/features/user/mycourses-instructor/
 import CourseCurriculumOwned from '../../courses/components/CourseCurriculumOwned';
 import { CourseDetailFromAPI, DIFFICULTY_LABEL } from '@/features/user/courses/types';
 import { MOCK_COURSE_DETAIL, Review, RatingDistribution } from '@/constants/mockCourseDetail';
+import Image from 'next/image';
 
 const CARD = 'bg-white rounded-xl shadow-md p-6 overflow-hidden';
 
@@ -85,15 +86,15 @@ export default function CourseDetailInstructor({ course }: CourseDetailInstructo
               {/* 수강생 + 시간 + 업데이트 */}
               <div className="flex items-center gap-4 text-[13px] text-[#6A7282]">
                 <span className="flex items-center gap-1.5">
-                  <span>👤</span>
+                  <Image src="/coursedetail/people.svg" width={17} height={17} alt="" />
                   {course.studentCount.toLocaleString()}명 수강
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span>⏱</span>
+                  <Image src="/coursedetail/clock.svg" width={17} height={17} alt="" />
                   {formatDuration(course.totalDuration)}시간
                 </span>
                 {/* <span className="flex items-center gap-1.5">
-                  <span>📅</span>
+                  <Image src="/coursedetail/calander.svg" width={17} height={17} alt="" />
                   {course.updatedAt}
                 </span> */}
               </div>

@@ -28,16 +28,10 @@ export default function CourseDetailSidebarInstructor({
     <div className="w-80 shrink-0 flex flex-col gap-3 bg-white rounded-xl shadow-md p-6">
       {/* 썸네일 */}
       <div className="relative w-full aspect-video rounded-lg overflow-hidden shrink-0 bg-[#D1D5DB]">
-                        {thumbnailUrl && (
-                          <Image
-                            src={thumbnailUrl}
-                            alt={course.title}
-                            fill
-                            unoptimized
-                            className="object-cover"
-                          />
-                        )}
-                      </div>
+        {thumbnailUrl && (
+          <Image src={thumbnailUrl} alt={course.title} fill unoptimized className="object-cover" />
+        )}
+      </div>
 
       {/* 수정하기 버튼 */}
       <Link href={`/mycourses-instructor/${course.courseId}/edit`}>
