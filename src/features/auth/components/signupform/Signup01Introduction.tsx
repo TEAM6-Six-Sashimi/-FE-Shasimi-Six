@@ -6,6 +6,7 @@ import {
   sendEmailVerification,
   verifyEmailCode,
 } from '@/services/auth.service';
+import { Button } from '@/components/ui/button';
 
 interface FormData {
   name: string;
@@ -223,18 +224,18 @@ export default function Signup01Introduction({
               required
               className={inputCls}
             />
-            <button
+            <Button
               type="button"
               onClick={(e) => handleEmailSend(e)}
               disabled={email_verified}
-              className={`px-3 py-2 text-[12px] rounded-lg font-medium transition-colors whitespace-nowrap min-w-23.75 ${
+              className={`px-3 h-9 text-[12px] font-medium whitespace-nowrap min-w-23.75 ${
                 email_verified
-                  ? 'bg-[#FFEBEB] text-[#FF5F5F] cursor-not-allowed'
-                  : 'bg-[#FF5F5F] text-white hover:bg-[#D14848] cursor-pointer'
+                  ? 'bg-[#FFEBEB] text-[#FF5F5F] hover:bg-[#FFEBEB] cursor-not-allowed'
+                  : 'bg-[#FF5F5F] text-white hover:bg-[#D14848]'
               }`}
             >
               {email_verified ? '인증 완료' : '인증번호 발송'}
-            </button>
+            </Button>
           </div>
           {emailMessage && (
             <p className="text-xs mt-1 font-medium text-[#6A7282]">{emailMessage}</p>
@@ -249,18 +250,18 @@ export default function Signup01Introduction({
                 disabled={email_verified}
                 className={inputCls}
               />
-              <button
+              <Button
                 type="button"
                 onClick={(e) => handleEmailVerify(e)}
                 disabled={email_verified}
-                className={`px-4 py-2 text-[12px] rounded-lg font-medium transition-colors whitespace-nowrap min-w-23.75 ${
+                className={`px-4 h-9 text-[12px] font-medium whitespace-nowrap min-w-23.75 ${
                   email_verified
-                    ? 'bg-[#FFEBEB] text-[#FF5F5F] cursor-not-allowed'
-                    : 'bg-[#FF5F5F] text-white hover:bg-[#D14848] cursor-pointer'
+                    ? 'bg-[#FFEBEB] text-[#FF5F5F] hover:bg-[#FFEBEB] cursor-not-allowed'
+                    : 'bg-[#FF5F5F] text-white hover:bg-[#D14848]'
                 }`}
               >
                 {email_verified ? '인증 완료' : '인증 확인'}
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -278,18 +279,18 @@ export default function Signup01Introduction({
               onChange={handleChange}
               className={inputCls}
             />
-            <button
+            <Button
               type="button"
               onClick={(e) => handleIdCheck(e)}
               disabled={isIdChecked && isIdAvailable}
-              className={`px-4 py-2 text-[12px] rounded-lg font-medium whitespace-nowrap min-w-23.75 ${
+              className={`px-4 h-9 text-[12px] font-medium whitespace-nowrap min-w-23.75 ${
                 isIdChecked && isIdAvailable
-                  ? 'bg-[#FFEBEB] text-[#FF5F5F] cursor-not-allowed'
-                  : 'bg-[#FF5F5F] text-white hover:bg-[#D14848] cursor-pointer'
+                  ? 'bg-[#FFEBEB] text-[#FF5F5F] hover:bg-[#FFEBEB] cursor-not-allowed'
+                  : 'bg-[#FF5F5F] text-white hover:bg-[#D14848]'
               }`}
             >
               {isIdChecked && isIdAvailable ? '확인 완료' : '중복 확인'}
-            </button>
+            </Button>
           </div>
           <p className="text-[12px] text-[#6A7282] mt-0.5">6자 이상 20자 이하</p>
           {idCheckMessage && (
@@ -340,17 +341,17 @@ export default function Signup01Introduction({
           )}
         </div>
 
-        <button
+        <Button
           type="submit"
           disabled={!isFormValid}
-          className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`w-full px-4 py-2 h-auto font-medium transition-colors ${
             isFormValid
-              ? 'bg-[#FF5F5F] text-white hover:bg-[#D14848] cursor-pointer'
-              : 'bg-[#E5E7EB] text-[#6A7282]'
+              ? 'bg-[#FF5F5F] text-white hover:bg-[#D14848]'
+              : 'bg-[#E5E7EB] text-[#6A7282] hover:bg-[#E5E7EB]'
           }`}
         >
           다 음
-        </button>
+        </Button>
       </form>
     </div>
   );

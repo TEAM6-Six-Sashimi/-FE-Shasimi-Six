@@ -4,6 +4,7 @@ import { useState } from 'react';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { chargeCreditAction } from '@/features/user/credit/actions';
+import { Button } from '@/components/ui/button';
 
 interface StickyProps {
   currentCredit: number;
@@ -42,7 +43,8 @@ export default function Sticky({
       onChargeSuccess(result.balance);
       setModalState('success');
     } catch (err) {
-      const message = err instanceof Error ? err.message : '충전에 실패했습니다. 다시 시도해주세요.';
+      const message =
+        err instanceof Error ? err.message : '충전에 실패했습니다. 다시 시도해주세요.';
       setErrorMessage(message);
       setModalState('error');
     } finally {
@@ -85,19 +87,18 @@ export default function Sticky({
           </div>
         </div>
 
-        <button
+        <Button
           type="button"
           onClick={handleChargeClick}
           disabled={chargeAmount <= 0 || isLoading}
-          className={`w-full py-3 rounded-lg text-[15px] font-medium transition-colors duration-150
-                        ${
-                          chargeAmount > 0
-                            ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848] cursor-pointer'
-                            : 'bg-[#E5E7EB] text-[#6A7282]'
-                        }`}
+          className={`w-full py-3 h-auto rounded-lg text-[15px] font-medium ${
+            chargeAmount > 0
+              ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848]'
+              : 'bg-[#E5E7EB] text-[#6A7282] hover:bg-[#E5E7EB]'
+          }`}
         >
           충전하기
-        </button>
+        </Button>
       </div>
 
       {/* 유효성 실패 모달 */}

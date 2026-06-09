@@ -73,7 +73,7 @@ export default function AllCourses({ courses }: Props) {
           <SelectTrigger className="h-8 w-32 text-[12.5px] border-[#D1D5DB] text-[#1E2125]">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent side="bottom">
+          <SelectContent position="popper" side="bottom">
             {(['최신순', '인기순', '높은 평점순'] as SortOption[]).map((s) => (
               <SelectItem key={s} value={s} className="text-[12.5px]">
                 {s}
@@ -101,7 +101,7 @@ export default function AllCourses({ courses }: Props) {
                     </svg>
                   </button>
                   {categoryOpen && (
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white border border-[#E5E7EB] rounded-lg shadow-lg z-10 min-w-30">
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white border border-[#E5E7EB] rounded-lg shadow-lg z-10 min-w-50">
                       {categoryNames.map((cat) => (
                         <button
                           key={cat}
