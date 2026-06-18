@@ -1,5 +1,5 @@
-export default function Page() {
+export default function FindIDPage() {
     return (
-        <div></div>
+        <div>아이디 찾기</div>
     );
 }

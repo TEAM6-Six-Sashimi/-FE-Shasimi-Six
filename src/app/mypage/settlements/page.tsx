@@ -1,5 +1,5 @@
-export default function Page() {
+export default function SettlementsPage() {
     return (
-        <div></div>
+        <div>정산내역</div>
     );
 }

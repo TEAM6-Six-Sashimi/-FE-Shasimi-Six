@@ -1,5 +1,5 @@
-export default function Page() {
+export default function CreditManagePage() {
     return (
-        <div></div>
+        <div>크레딧 관리</div>
     );
 }

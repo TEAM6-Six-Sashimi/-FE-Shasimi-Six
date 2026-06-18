@@ -1,5 +1,5 @@
-export default function Page() {
+export default function InstructorApplicationDetailPage() {
     return (
-        <div></div>
+        <div>강사 지원 상세</div>
     );
 }
