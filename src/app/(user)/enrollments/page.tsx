@@ -1,3 +1,5 @@
+// payment로 용어 통일(크레딧 사용)
+
 import { Suspense } from 'react';
 import { cookies } from 'next/headers';
 import EnrollmentContent from '@/features/user/enrollments/components/EnrollmentContent';
