@@ -1,5 +1,5 @@
-export default function Page() {
+export default function AiSubscribePage() {
     return (
-        <div></div>
+        <div>ai 구독권</div>
     );
 }

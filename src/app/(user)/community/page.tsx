@@ -1,5 +1,5 @@
-export default function Page() {
+export default function CommunityPage() {
     return (
-        <div></div>
+        <div>커뮤니티</div>
     );
 }
