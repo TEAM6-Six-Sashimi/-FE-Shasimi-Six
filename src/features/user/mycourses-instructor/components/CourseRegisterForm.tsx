@@ -12,43 +12,39 @@ import {
 import { Button } from '@/components/ui/button';
 import type { Category } from '@/features/categories/types';
 
+import type {
+  CourseFormData,
+  CreateCourseRequest,
+  Session,
+} from '@/features/user/mycourses-instructor/types';
+import { createCourseAction } from '../actions';
+import TwoButtonModal from '@/components/modals/TwoButtonModal';
+import Image from 'next/image';
+
 // ── 타입 ────────────────────────────────────────────────────────
-interface Lecture {
-  id: number;
-  title: string;
-  videoUrl: string;
-  materialFile: File | null;
-  isFree: boolean;
-}
-
-interface CourseFormData {
-  title: string;
-  description: string;
-  category: string;
-  subCategory: string;
-  price: number | '';
-  level: string;
-  thumbnailFile: File | null;
-  lectures: Lecture[];
-}
-
 interface CourseRegisterFormProps {
   categories: Category[];
 }
 
-const LEVELS = ['입문', '초급', '중급', '고급'] as const;
+const LEVELS = ['초급', '중급', '고급'] as const;
 
-const DEFAULT_LECTURE: Omit<Lecture, 'id'> = {
+const DIFFICULTY_MAP: Record<string, 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'> = {
+  초급: 'BEGINNER',
+  중급: 'INTERMEDIATE',
+  고급: 'ADVANCED',
+};
+
+const DEFAULT_SESSION: Omit<Session, 'id'> = {
   title: '',
   videoUrl: '',
-  materialFile: null,
-  isFree: false,
+  materialFile: '',
+  preview: false,
 };
 
 // ── 메인 컴포넌트 ────────────────────────────────────────────────
 export default function CourseRegisterForm({ categories }: CourseRegisterFormProps) {
   const router = useRouter();
-  const thumbnailRef = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [form, setForm] = useState<CourseFormData>({
     title: '',
@@ -57,11 +53,24 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
     subCategory: '',
     price: '',
     level: '',
-    thumbnailFile: null,
-    lectures: [{ id: 1, ...DEFAULT_LECTURE }],
+    thumbnail: '',
+    sessions: [{ id: 1, ...DEFAULT_SESSION }],
   });
 
-  const subCategories = categories.find((c) => c.name === form.category)?.subCategories ?? [];
+  const [confirmModal, setConfirmModal] = useState<{
+    type: 'save' | 'submit' | 'cancel';
+  } | null>(null);
+
+  const MODAL_CONFIG = {
+    save: { title: '임시 저장', message: '임시 저장하시겠습니까?' },
+    submit: { title: '승인 요청', message: '승인 요청하시겠습니까?' },
+    cancel: { title: '취소', message: '작성을 취소하시겠습니까?\n작성된 내용이 사라집니다.' },
+  };
+
+  const subCategories = categories.find((c) => c.name === form.category)?.options ?? [];
+
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  const thumbnailRef = useRef<HTMLInputElement>(null);
 
   // ── 기본정보 핸들러 ──────────────────────────────────────────
   const handleField = <K extends keyof CourseFormData>(key: K, value: CourseFormData[K]) => {
@@ -72,38 +81,109 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
     setForm((prev) => ({ ...prev, category: value, subCategory: '' }));
   };
 
-  const handleThumbnail = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] ?? null;
-    handleField('thumbnailFile', file);
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setThumbnailUploading(true);
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('업로드 실패');
+      const data = await res.json();
+      handleField('thumbnail', data.url);
+    } catch {
+      alert('이미지 업로드에 실패했습니다.');
+    } finally {
+      setThumbnailUploading(false);
+    }
   };
 
-  // ── 커리큘럼 핸들러 ──────────────────────────────────────────
-  const updateLecture = <K extends keyof Lecture>(id: number, key: K, value: Lecture[K]) => {
+  // ── 세션 핸들러 ──────────────────────────────────────────────
+  const updateSession = <K extends keyof Session>(id: number, key: K, value: Session[K]) => {
     setForm((prev) => ({
       ...prev,
-      lectures: prev.lectures.map((l) => (l.id === id ? { ...l, [key]: value } : l)),
+      sessions: prev.sessions.map((s) => (s.id === id ? { ...s, [key]: value } : s)),
     }));
   };
 
-  const addLecture = () => {
+  const addSession = () => {
     setForm((prev) => ({
       ...prev,
-      lectures: [...prev.lectures, { id: Date.now(), ...DEFAULT_LECTURE }],
+      sessions: [...prev.sessions, { id: Date.now(), ...DEFAULT_SESSION }],
     }));
   };
 
-  const removeLecture = (id: number) => {
-    if (form.lectures.length <= 1) return; // 최소 1개
+  const removeSession = (id: number) => {
+    if (form.sessions.length <= 1) return;
     setForm((prev) => ({
       ...prev,
-      lectures: prev.lectures.filter((l) => l.id !== id),
+      sessions: prev.sessions.filter((s) => s.id !== id),
     }));
   };
 
   // ── 제출 ────────────────────────────────────────────────────
-  const handleSubmit = (type: 'save' | 'submit') => {
-    console.log(type, form);
-    // TODO: API 연결
+  const handleSubmit = async (type: 'save' | 'submit') => {
+    if (!form.title.trim()) {
+      alert('강의 제목을 입력해주세요.');
+      return;
+    }
+    if (!form.description.trim()) {
+      alert('강의 설명을 입력해주세요.');
+      return;
+    }
+    if (!form.category) {
+      alert('카테고리를 선택해주세요.');
+      return;
+    }
+    if (!form.subCategory) {
+      alert('세부 카테고리를 선택해주세요.');
+      return;
+    }
+    if (form.price === '') {
+      alert('가격을 입력해주세요.');
+      return;
+    }
+    if (!form.level) {
+      alert('난이도를 선택해주세요.');
+      return;
+    }
+    if (form.sessions.some((s) => !s.title.trim() || !s.videoUrl.trim())) {
+      alert('모든 세션의 소제목과 영상 URL을 입력해주세요.');
+      return;
+    }
+
+    const selectedCat = categories.find((c) => c.name === form.category);
+    const selectedSub = selectedCat?.options.find((o) => String(o.id) === form.subCategory);
+    if (!selectedSub) {
+      alert('세부 카테고리를 다시 선택해주세요.');
+      return;
+    }
+
+    const payload: CreateCourseRequest = {
+      subCategoryName: selectedSub.name,
+      title: form.title,
+      description: form.description,
+      price: form.price as number,
+      difficulty: DIFFICULTY_MAP[form.level],
+      thumbnail: form.thumbnail,
+      initialStatus: type === 'save' ? 'DRAFT' : 'PENDING',
+      sessions: form.sessions.map((s) => ({
+        title: s.title,
+        videoUrl: s.videoUrl,
+        preview: s.preview,
+      })),
+    };
+
+    try {
+      setIsLoading(true);
+      await createCourseAction(payload);
+      router.push('/mycourses-instructor?tab=pending');
+    } catch (error: any) {
+      alert(error.message || '강의 등록에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // ── 공통 인풋 스타일 ─────────────────────────────────────────
@@ -131,6 +211,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
               placeholder="강의 제목을 입력하세요"
               value={form.title}
               onChange={(e) => handleField('title', e.target.value)}
+              disabled={isLoading}
               className={inputCls}
             />
           </div>
@@ -143,6 +224,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
               value={form.description}
               onChange={(e) => handleField('description', e.target.value)}
               rows={5}
+              disabled={isLoading}
               className="w-full px-4 py-3 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors resize-none"
             />
           </div>
@@ -151,7 +233,11 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>카테고리{requiredMark}</label>
-              <Select value={form.category} onValueChange={handleCategoryChange}>
+              <Select
+                value={form.category}
+                onValueChange={handleCategoryChange}
+                disabled={isLoading}
+              >
                 <SelectTrigger className="h-11! text-[13.5px] border-[#D1D5DB] text-[#1E2125]">
                   <SelectValue placeholder="셀렉트박스" />
                 </SelectTrigger>
@@ -169,15 +255,15 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
               <Select
                 value={form.subCategory}
                 onValueChange={(v) => handleField('subCategory', v)}
-                disabled={!form.category}
+                disabled={!form.category || isLoading}
               >
                 <SelectTrigger className="h-11! text-[13.5px] border-[#D1D5DB] text-[#1E2125]">
                   <SelectValue placeholder="셀렉트박스" />
                 </SelectTrigger>
                 <SelectContent position="popper">
                   {subCategories.map((sub) => (
-                    <SelectItem key={sub} value={sub} className="text-[13px]">
-                      {sub}
+                    <SelectItem key={sub.id} value={String(sub.id)} className="text-[13px]">
+                      {sub.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -197,12 +283,17 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                   handleField('price', e.target.value === '' ? '' : Number(e.target.value))
                 }
                 min={0}
+                disabled={isLoading}
                 className={inputCls}
               />
             </div>
             <div>
               <label className={labelCls}>난이도{requiredMark}</label>
-              <Select value={form.level} onValueChange={(v) => handleField('level', v)}>
+              <Select
+                value={form.level}
+                onValueChange={(v) => handleField('level', v)}
+                disabled={isLoading}
+              >
                 <SelectTrigger className="h-11! text-[13.5px] border-[#D1D5DB] text-[#1E2125]">
                   <SelectValue placeholder="셀렉트박스" />
                 </SelectTrigger>
@@ -224,19 +315,30 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
               type="file"
               accept="image/*"
               ref={thumbnailRef}
-              onChange={handleThumbnail}
+              onChange={handleThumbnailUpload}
               className="hidden"
+              disabled={isLoading || thumbnailUploading}
             />
-            <button
+            <Button
               type="button"
               onClick={() => thumbnailRef.current?.click()}
-              className="w-full h-12 rounded-lg border border-dashed border-[#D1D5DB] bg-[#F9FAFB] text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] transition-colors cursor-pointer flex items-center justify-center gap-2"
+              disabled={isLoading || thumbnailUploading}
+              className="w-full h-12 rounded-lg border border-dashed border-[#D1D5DB] bg-[#F9FAFB] text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] hover:bg-[#F9FAFB] flex items-center justify-center gap-2 disabled:opacity-70"
             >
               <span>↑</span>
-              {form.thumbnailFile
-                ? form.thumbnailFile.name
-                : '강의 목록에 표시될 대표 이미지를 업로드하세요'}
-            </button>
+              {thumbnailUploading
+                ? '업로드 중...'
+                : form.thumbnail
+                  ? '이미지 변경하기'
+                  : '강의 대표 이미지를 업로드하세요'}
+            </Button>
+            {form.thumbnail && (
+              <Image
+                src={form.thumbnail}
+                alt="썸네일 미리보기"
+                className="mt-2 w-full h-40 object-cover rounded-lg border border-[#E5E7EB]"
+              />
+            )}
           </div>
         </section>
 
@@ -246,48 +348,51 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
             커리큘럼
           </h2>
 
-          {form.lectures.map((lecture, idx) => (
-            <LectureItem
-              key={lecture.id}
-              lecture={lecture}
+          {form.sessions.map((session, idx) => (
+            <SessionItem
+              key={session.id}
+              session={session}
               index={idx}
-              canRemove={form.lectures.length > 1}
-              onUpdate={updateLecture}
-              onRemove={removeLecture}
+              canRemove={form.sessions.length > 1}
+              onUpdate={updateSession}
+              onRemove={removeSession}
             />
           ))}
 
-          {/* 회차 추가 버튼 */}
-          <button
+          <Button
             type="button"
-            onClick={addLecture}
-            className="w-full h-11 rounded-lg border border-dashed border-[#D1D5DB] text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+            onClick={addSession}
+            disabled={isLoading}
+            className="w-full h-11 rounded-lg border border-dashed border-[#D1D5DB] bg-transparent text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] hover:bg-transparent flex items-center justify-center gap-1.5"
           >
-            <span className="text-[16px]">+</span> 회차 추가
-          </button>
+            <span className="text-[16px]">+</span> 세션 추가
+          </Button>
         </section>
 
         {/* ── 버튼 ── */}
         <div className="flex items-center justify-between pt-2">
           <Button
             type="button"
-            onClick={() => handleSubmit('save')}
-            className="h-11 px-7 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer"
+            onClick={() => setConfirmModal({ type: 'save' })}
+            disabled={isLoading}
+            className="h-11 px-7 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer disabled:opacity-70"
           >
-            임시 저장
+            {isLoading ? '저장 중...' : '임시 저장'}
           </Button>
           <div className="flex gap-3">
             <Button
               type="button"
-              onClick={() => handleSubmit('submit')}
-              className="h-11 px-7 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer"
+              onClick={() => setConfirmModal({ type: 'submit' })}
+              disabled={isLoading}
+              className="h-11 px-7 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer disabled:opacity-70"
             >
-              승인 요청
+              {isLoading ? '처리 중...' : '승인 요청'}
             </Button>
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.back()}
+              onClick={() => setConfirmModal({ type: 'cancel' })}
+              disabled={isLoading}
               className="h-11 px-7 border-[#D1D5DB] text-[#1E2125] font-semibold text-[14px] hover:bg-[#F9FAFB] cursor-pointer"
             >
               취소
@@ -295,36 +400,52 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
           </div>
         </div>
       </div>
+
+      {/* ── 확인 모달 ── */}
+      {confirmModal && (
+        <TwoButtonModal
+          title={MODAL_CONFIG[confirmModal.type].title}
+          message={MODAL_CONFIG[confirmModal.type].message}
+          confirmLabel="확인"
+          cancelLabel="취소"
+          onConfirm={() => {
+            setConfirmModal(null);
+            if (confirmModal.type === 'cancel') {
+              router.back();
+            } else {
+              handleSubmit(confirmModal.type);
+            }
+          }}
+          onCancel={() => setConfirmModal(null)}
+        />
+      )}
     </div>
   );
 }
 
-// ── 회차 아이템 ──────────────────────────────────────────────────
-interface LectureItemProps {
-  lecture: Lecture;
+// ── 세션 아이템 ──────────────────────────────────────────────────
+interface SessionItemProps {
+  session: Session;
   index: number;
   canRemove: boolean;
-  onUpdate: <K extends keyof Lecture>(id: number, key: K, value: Lecture[K]) => void;
+  onUpdate: <K extends keyof Session>(id: number, key: K, value: Session[K]) => void;
   onRemove: (id: number) => void;
 }
 
-function LectureItem({ lecture, index, canRemove, onUpdate, onRemove }: LectureItemProps) {
-  const materialRef = useRef<HTMLInputElement>(null);
-
+function SessionItem({ session, index, canRemove, onUpdate, onRemove }: SessionItemProps) {
   const inputCls =
     'w-full h-11 px-4 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors';
 
   return (
     <div className="flex flex-col gap-3 p-5 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB]">
-      {/* 회차 헤더 */}
       <div className="flex items-center justify-between">
         <span className="px-3 py-1 rounded-full bg-[#CFEE5D] text-[#1E2125] text-[12px] font-bold">
-          회차 {index + 1}
+          세션 {index + 1}
         </span>
         {canRemove && (
           <button
             type="button"
-            onClick={() => onRemove(lecture.id)}
+            onClick={() => onRemove(session.id)}
             className="text-[#6A7282] hover:text-[#FF5E5E] text-[13px] transition-colors cursor-pointer"
           >
             삭제
@@ -332,21 +453,19 @@ function LectureItem({ lecture, index, canRemove, onUpdate, onRemove }: LectureI
         )}
       </div>
 
-      {/* 소제목 */}
       <div>
         <label className="block text-[12.5px] font-semibold text-[#1E2125] mb-1.5">
           소제목 <span className="text-[#FF5E5E]">*</span>
         </label>
         <input
           type="text"
-          placeholder="강의 회차 제목을 입력하세요"
-          value={lecture.title}
-          onChange={(e) => onUpdate(lecture.id, 'title', e.target.value)}
+          placeholder="세션 제목을 입력하세요"
+          value={session.title}
+          onChange={(e) => onUpdate(session.id, 'title', e.target.value)}
           className={inputCls}
         />
       </div>
 
-      {/* 영상 URL + 자료 업로드 */}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-[12.5px] font-semibold text-[#1E2125] mb-1.5">
@@ -355,8 +474,8 @@ function LectureItem({ lecture, index, canRemove, onUpdate, onRemove }: LectureI
           <input
             type="url"
             placeholder="영상 URL을 입력하세요"
-            value={lecture.videoUrl}
-            onChange={(e) => onUpdate(lecture.id, 'videoUrl', e.target.value)}
+            value={session.videoUrl}
+            onChange={(e) => onUpdate(session.id, 'videoUrl', e.target.value)}
             className={inputCls}
           />
         </div>
@@ -365,30 +484,20 @@ function LectureItem({ lecture, index, canRemove, onUpdate, onRemove }: LectureI
             강의 자료 (선택)
           </label>
           <input
-            type="file"
-            ref={materialRef}
-            onChange={(e) => onUpdate(lecture.id, 'materialFile', e.target.files?.[0] ?? null)}
-            className="hidden"
+            type="text"
+            placeholder="자료 URL을 입력하세요"
+            value={session.materialFile}
+            onChange={(e) => onUpdate(session.id, 'materialFile', e.target.value)}
+            className={inputCls}
           />
-          <button
-            type="button"
-            onClick={() => materialRef.current?.click()}
-            className="w-full h-11 rounded-lg border border-dashed border-[#D1D5DB] bg-white text-[12.5px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] transition-colors cursor-pointer flex items-center justify-center gap-1.5 px-3"
-          >
-            <span>↑</span>
-            <span className="truncate">
-              {lecture.materialFile ? lecture.materialFile.name : '자료 업로드'}
-            </span>
-          </button>
         </div>
       </div>
 
-      {/* 무료 공개 체크박스 */}
       <label className="flex items-center gap-2 cursor-pointer w-fit">
         <input
           type="checkbox"
-          checked={lecture.isFree}
-          onChange={(e) => onUpdate(lecture.id, 'isFree', e.target.checked)}
+          checked={session.preview ?? false}
+          onChange={(e) => onUpdate(session.id, 'preview', e.target.checked)}
           className="w-4 h-4 accent-[#CFEE5D] cursor-pointer"
         />
         <span className="text-[13px] text-[#1E2125]">무료 공개</span>

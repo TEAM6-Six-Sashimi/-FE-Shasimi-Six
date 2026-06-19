@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -9,10 +9,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { MOCK_DASHBOARD_STATS, MOCK_COURSE_REVENUES } from '@/constants/mockInstructorCourses';
+import { Award, CalendarDays, DollarSign, TrendingUp } from 'lucide-react';
 
 type StatTab = '매출' | '수강생 수' | '완강률';
 
 const PERIOD_OPTIONS = ['이번 달', '최근 3개월', '직접 설정'] as const;
+
+interface SummaryCard {
+  icon: ReactNode;
+  iconBg: string;
+  label: string;
+  value: string;
+  sub: string;
+}
 
 export default function Dashboard() {
   const [period, setPeriod] = useState('이번 달');
@@ -20,30 +29,30 @@ export default function Dashboard() {
   const stats = MOCK_DASHBOARD_STATS;
   const revenues = MOCK_COURSE_REVENUES;
 
-  const SUMMARY_CARDS = [
+  const SUMMARY_CARDS: SummaryCard[] = [
     {
-      icon: '💰',
+      icon: <DollarSign size={20} className="text-[#DC2626]" />,
       iconBg: 'bg-[#FFEBEB]',
       label: '전체 매출',
       value: stats.totalRevenue.toLocaleString(),
       sub: '이번 달 총 매출',
     },
     {
-      icon: '📈',
+      icon: <TrendingUp size={20} className="text-[#3B66B9]" />,
       iconBg: 'bg-[#EEF4FF]',
       label: '수수료 30%',
       value: stats.platformFee.toLocaleString(),
       sub: '이번 달 플랫폼 수수료',
     },
     {
-      icon: '🏆',
+      icon: <Award size={20} className="text-[#827717]" />,
       iconBg: 'bg-[#F9FBE7]',
       label: '출금 가능',
       value: stats.withdrawable.toLocaleString(),
       sub: '정산 가능 금액',
     },
     {
-      icon: '📅',
+      icon: <CalendarDays size={20} className="text-[#6B7280]" />,
       iconBg: 'bg-[#F9FAFB]',
       label: '총 정산액',
       value: stats.totalSettled.toLocaleString(),

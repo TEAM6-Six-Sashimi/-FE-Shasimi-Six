@@ -1,17 +1,22 @@
-'use client';
-
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { MOCK_STUDENT_COURSES } from '@/constants/mockCourseDetail';
+import { StudentCourse } from '../types';
 
-const progressColor = (progress: number) => {
-  if (progress >= 100) return 'bg-[#CFEE5D]';
-  return 'bg-[#FF5E5E]';
-};
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function MyCoursesList() {
-  const courses = MOCK_STUDENT_COURSES;
+interface Props {
+  courses: StudentCourse[];
+}
 
+function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
+  if (!thumbnail) return null;
+  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
+}
+
+const progressColor = (completed: boolean) => (completed ? 'bg-[#CFEE5D]' : 'bg-[#FF5E5E]');
+
+export default function MyCoursesList({ courses }: Props) {
   return (
     <div className="max-w-275 mx-auto px-6 py-8">
       <h1 className="text-[24px] font-bold text-[#1E2125] mb-6">내 강의</h1>
@@ -19,25 +24,29 @@ export default function MyCoursesList() {
       <div className="flex flex-col gap-4">
         {courses.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-60 gap-3 text-[#6A7282]">
-            <span className="text-[40px]">📭</span>
-            <p className="text-[14px] font-medium">수강 중인 강의가 없습니다.</p>
-            <Link href="/courses">
-              <Button className="mt-1 h-10 px-5 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[13px] font-semibold cursor-pointer">
-                강의 둘러보기
-              </Button>
-            </Link>
+            <p className="text-[20px] font-medium">수강 중인 강의가 없습니다.</p>
           </div>
         ) : (
           courses.map((course) => {
-            const isCompleted = course.progress >= 100;
+            const thumbnailUrl = getThumbnailUrl(course.thumbnail);
             return (
               <div
-                key={course.id}
+                key={course.courseId}
                 className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden"
               >
                 <div className="flex">
                   {/* 썸네일 */}
-                  <div className="w-44 shrink-0 bg-[#E5E7EB]" />
+                  <div className="relative w-44 shrink-0 bg-[#E5E7EB]">
+                    {thumbnailUrl && (
+                      <Image
+                        src={thumbnailUrl}
+                        alt={course.title}
+                        fill
+                        unoptimized
+                        className="object-cover"
+                      />
+                    )}
+                  </div>
 
                   {/* 우측 전체 */}
                   <div className="flex-1 flex flex-col">
@@ -47,28 +56,29 @@ export default function MyCoursesList() {
                         <p className="text-[15px] font-bold text-[#1E2125] leading-snug">
                           {course.title}
                         </p>
-                        <p className="text-[12.5px] text-[#6A7282]">{course.instructor}</p>
+                        <p className="text-[12.5px] text-[#6A7282]">{course.instructorName}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-[11.5px] text-[#6A7282]">학습 진행률</span>
                           <span
                             className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                              isCompleted
+                              course.completed
                                 ? 'bg-[#F9FBE7] text-[#827717]'
                                 : 'bg-[#FFEBEB] text-[#FF5E5E]'
                             }`}
                           >
-                            {isCompleted ? '완강' : '수강중'}
+                            {course.completed ? '완강' : '수강중'}
                           </span>
                         </div>
                       </div>
+
                       {/* 버튼 */}
                       <div className="flex items-center gap-2 shrink-0 ml-4">
-                        <Link href={`/courses/detail/${course.id}`}>
+                        <Link href={`/courses/detail/${course.courseId}`}>
                           <Button
                             size="sm"
                             className="h-9 px-4 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[12.5px] font-semibold cursor-pointer"
                           >
-                            {isCompleted ? '다시보기 >' : '이어보기 >'}
+                            {course.completed ? '다시보기 >' : '이어보기 >'}
                           </Button>
                         </Link>
                         <Button
@@ -86,23 +96,18 @@ export default function MyCoursesList() {
                       <div className="flex items-center gap-2 mb-1">
                         <div className="flex-1 h-2 bg-[#E5E7EB] rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full ${progressColor(course.progress)}`}
-                            style={{ width: `${course.progress}%` }}
+                            className={`h-full rounded-full ${progressColor(course.completed)}`}
+                            style={{ width: `${course.progressRate}%` }}
                           />
                         </div>
                         <span
                           className={`text-[12px] font-semibold w-10 text-right shrink-0 ${
-                            isCompleted ? 'text-[#827717]' : 'text-[#FF5E5E]'
+                            course.completed ? 'text-[#827717]' : 'text-[#FF5E5E]'
                           }`}
                         >
-                          {course.progress}%
+                          {course.progressRate}%
                         </span>
                       </div>
-                      {!isCompleted && course.lastLecture && (
-                        <p className="text-[11.5px] text-[#6A7282]">
-                          마지막 학습: {course.lastLecture}
-                        </p>
-                      )}
                     </div>
                   </div>
                 </div>

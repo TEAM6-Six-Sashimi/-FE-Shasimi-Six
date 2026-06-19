@@ -30,10 +30,12 @@ export default function Menubar({ categories, role }: MenubarProps) {
   const myCoursesHref = role === 'INSTRUCTOR' ? '/mycourses-instructor' : '/mycourses-student';
 
   const NAV_LINKS = [
-    { id: 'ai', label: 'AI 추천', icon: 'recommendations', href: '/recommendations' },
-    { id: 'roadmap', label: '로드맵', icon: 'roadmap', href: '/roadmap' },
+    { id: 'ai-subscribe', label: 'AI 구독권', icon: 'subscribe', href: '/ai-subscribe' },
+    { id: 'ai-recommendation', label: 'AI 강의 추천', icon: 'recommendations', href: '/recommendations' },
+    { id: 'ai-resume', label: 'AI 이력서 평가', icon: 'resume', href: '/resume' },
+    { id: 'community', label: '커뮤니티', icon: 'community', href: '/community' },
     { id: 'mycourse', label: '내 강의', icon: 'mycourses', href: myCoursesHref },
-    { id: 'instructor', label: '강사지원', icon: 'instructor', href: '/instructor/application' },
+    { id: 'instructor', label: '강사지원', icon: 'instructor', href: '/instructor-application' },
   ];
 
   return (
@@ -121,22 +123,22 @@ export default function Menubar({ categories, role }: MenubarProps) {
               </div>
 
               {/* 서브 항목 */}
-              {['전체', ...cat.subCategories].map((item) => (
+              {[{ id: 0, name: '전체' }, ...cat.options].map((item) => (
                 <Link
-                  key={item}
+                  key={item.id}
                   href={
-                    item === '전체'
+                    item.name === '전체'
                       ? `/courses/${encodeURIComponent(cat.name)}`
-                      : `/courses/${encodeURIComponent(cat.name)}?sub=${encodeURIComponent(item)}`
+                      : `/courses/${encodeURIComponent(cat.name)}?sub=${item.id}`
                   }
                   onClick={() => setOpen(false)}
                   className={`
-                    block text-[12.5px] tracking-tight py-1.5 transition-colors duration-150
-                    text-[#F9FAFB] hover:text-[#CFEE5D]
-                    ${item === '전체' ? 'font-semibold mb-0.5' : 'font-normal'}
-                  `}
+      block text-[12.5px] tracking-tight py-1.5 transition-colors duration-150
+      text-[#F9FAFB] hover:text-[#CFEE5D]
+      ${item.name === '전체' ? 'font-semibold mb-0.5' : 'font-normal'}
+    `}
                 >
-                  {item}
+                  {item.name}
                 </Link>
               ))}
             </div>
