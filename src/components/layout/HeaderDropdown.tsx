@@ -17,17 +17,17 @@ export default function HeaderDropdown({ user }: HeaderDropdownProps) {
     STUDENT: [
       { label: '마이페이지', href: '/mypage' },
       { label: '나의 이력서', href: '/mypage/resume' },
-      { label: '고객센터', href: '/customer-service' },
+      { label: '1:1 문의', href: '/' },
     ],
     INSTRUCTOR: [
       { label: '마이페이지', href: '/mypage' },
-      { label: '강사프로필', href: '/mypage/instructor-profile' },
-      { label: '고객센터', href: '/customer-service' },
+      { label: '강사 프로필', href: '/mypage/instructor-profile' },
+      { label: '1:1 문의', href: '/' },
     ],
     ADMIN: [
       { label: '마이페이지', href: '/mypage' },
       { label: '나의 이력서', href: '/mypage/resume' },
-      { label: '고객센터', href: '/customer-service' },
+      { label: '1:1 문의', href: '/' },
     ],
     GUEST: [],
   };
@@ -48,16 +48,16 @@ export default function HeaderDropdown({ user }: HeaderDropdownProps) {
                     ${isOpen ? 'bg-[#E5E7EB]' : 'hover:bg-[#E5E7EB]'}
             `}
       >
-        <Image src="/sidebar/mypage-Icon.svg" width={17} height={17} alt="" />
-        <span className="text-[15px] font-medium h-8 w-16 flex items-center justify-center">
-          {user.name} 님
+        <Image src="/sidebar/mypage-Icon.svg" width={17} height={17} alt="프로필 이미지" />
+        <span className="text-[15px] font-medium h-8 flex items-center justify-center whitespace-nowrap px-1">
+          {displayName}
         </span>
         <Image
           src="/header/open.svg"
           width={15}
           height={15}
           className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-          alt=""
+          alt="드롭다운 열림/닫힘"
         />
       </div>
 

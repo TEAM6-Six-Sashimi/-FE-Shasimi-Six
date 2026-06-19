@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { cookies } from 'next/headers';
 import { fetchUserMe, GUEST_USER } from '@/services/user.service';
 import HeaderDropdown from './HeaderDropdown';
+import AdminModeToggle from './AdminMode';
 
 export default async function Header() {
   const cookieStore = await cookies();
@@ -44,51 +45,47 @@ export default async function Header() {
         <div className="flex flex-1 justify-end">
           {user.role === 'STUDENT' && (
             <div className="flex items-center gap-3">
-              <Link href="/credit" className="flex text-[15px] font-medium gap-1">
-                <Image src="/header/credit.svg" width={17} height={17} alt="" /> 크레딧 충전
+              <Link href="/credit" className="flex text-[15px] font-medium gap-1 items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]">
+                <Image src="/header/credit.svg" width={17} height={17} alt="크레딧 충전" /> 크레딧 충전
               </Link>
-              <Link href="/cart">
-                <Image src="/header/cart.svg" width={17} height={17} alt="" />
+              <Link href="/cart" className='flex items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]'>
+                <Image src="/header/cart.svg" width={17} height={17} alt="장바구니" />
               </Link>
-              <Link href="/alarm">
-                <Image src="/header/bell.svg" width={17} height={17} alt="" />
+              <Link href="/alarm" className='flex items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]'>
+                <Image src="/header/bell.svg" width={17} height={17} alt="알림" />
+                {/* 알림 드롭다운 */}
               </Link>
               <HeaderDropdown user={user} />
             </div>
           )}
 
           {user.role === 'INSTRUCTOR' && (
-            <div className="flex items-center gap-2.5">
-              <Link href="/credit" className="flex text-[15px] font-medium gap-1">
-                <Image src="/header/credit.svg" width={17} height={17} alt="" /> 크레딧 충전
+            <div className="flex items-center gap-3">
+              <Link href="/credit" className="flex text-[15px] font-medium gap-1 items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]">
+                <Image src="/header/credit.svg" width={17} height={17} alt="크레딧 충전" /> 크레딧 충전
               </Link>
-              <Link href="/cart">
-                <Image src="/header/cart.svg" width={17} height={17} alt="" />
+              <Link href="/cart" className='flex items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]'>
+                <Image src="/header/cart.svg" width={17} height={17} alt="장바구니" />
               </Link>
-              <Link href="/alarm">
-                <Image src="/header/bell.svg" width={17} height={17} alt="" />
+              <Link href="/alarm" className='flex items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]'>
+                <Image src="/header/bell.svg" width={17} height={17} alt="알림" />
+                {/* 알림 드롭다운 */}
               </Link>
               <HeaderDropdown user={user} />
             </div>
           )}
 
           {user.role === 'ADMIN' && (
-            <div className="flex items-center gap-2.5">
-              <Link
-                href="/admin"
-                className="flex items-center text-[15px] font-medium justify-center bg-[#CFEE5D] hover:bg-[#A8D014] h-8 w-30 rounded-sm gap-1"
-              >
-                <Image src="header/admin.svg" width={17} height={17} alt="" />
-                관리자 모드
+            <div className="flex items-center gap-3">
+              <AdminModeToggle />
+              <Link href="/credit" className="flex text-[15px] font-medium gap-1 items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]">
+                <Image src="/header/credit.svg" width={17} height={17} alt="크레딧 충전" /> 크레딧 충전
               </Link>
-              <Link href="/credit" className="flex text-[15px] font-medium gap-1">
-                <Image src="/header/credit.svg" width={17} height={17} alt="" /> 크레딧 충전
+              <Link href="/cart" className='flex items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]'>
+                <Image src="/header/cart.svg" width={17} height={17} alt="장바구니" />
               </Link>
-              <Link href="/cart">
-                <Image src="/header/cart.svg" width={17} height={17} alt="" />
-              </Link>
-              <Link href="/alarm">
-                <Image src="/header/bell.svg" width={17} height={17} alt="" />
+              <Link href="/alarm" className='flex items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]'>
+                <Image src="/header/bell.svg" width={17} height={17} alt="알림" />
                 {/* 알림 드롭다운 */}
               </Link>
               <HeaderDropdown user={user} />
