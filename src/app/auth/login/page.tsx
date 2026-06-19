@@ -2,7 +2,7 @@ import LoginForm from '@/features/auth/components/login/LoginForm';
 
 export default function LoginPage() {
   return (
-    <main className="flex flex-col justify-between items-center w-full min-h-[calc(100vh-48px)] py-16 px-4 bg-[#F9FAFB]">
+    <section className="flex flex-col justify-between items-center w-full min-h-[calc(100vh-48px)] py-16 px-4 bg-[#F9FAFB]">
       <article className="bg-white w-full max-w-lg rounded-2xl p-10 shadow-md min-h-120 flex flex-col justify-end">
         <h1 className="text-[29px] font-bold text-center mb-10">로그인</h1>
         <LoginForm />
@@ -13,6 +13,6 @@ export default function LoginPage() {
         <p className="mb-1">이용약관 | 개인정보처리방침 | 사업자정보</p>
         <p>관리자 문의 메일: fitgyeok_ask@gmail.com</p>
       </footer>
-    </main>
+    </section>
   );
 }
