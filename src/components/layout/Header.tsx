@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { fetchUserMe, GUEST_USER } from '@/services/user.service';
 import HeaderDropdown from './HeaderDropdown';
 import AdminModeToggle from './AdminMode';
+import TokenTimer from './TokenTimer';
 
 export default async function Header() {
   const cookieStore = await cookies();
@@ -27,6 +28,7 @@ export default async function Header() {
           className="object-contain"
         />
       </Link>
+      <TokenTimer />
 
       {user.role === 'GUEST' ? (
         <div className="flex gap-2 items-center">
