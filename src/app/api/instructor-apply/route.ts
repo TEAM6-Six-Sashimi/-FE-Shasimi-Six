@@ -14,13 +14,20 @@ export async function POST(req: NextRequest) {
   }
 
   const formData = await req.formData();
-  const files = formData.getAll('files') as File[];
+  const certFiles = formData.getAll('files') as File[];
+  const resume = formData.get('resume') as File | null;
+  const profileImage = formData.get('profileImage') as File | null;
 
   const newFormData = new FormData();
-  newFormData.append('bio', formData.get('bio') as string);
+  newFormData.append('introduction', formData.get('introduction') as string);
+  newFormData.append('motivation', formData.get('motivation') as string);
+  newFormData.append('categoryId', formData.get('categoryId') as string);
   newFormData.append('portfolioUrl', formData.get('portfolioUrl') as string);
-  files.forEach((file) => {
-    newFormData.append('files', file); // file → files
+
+  if (profileImage) newFormData.append('profileImage', profileImage);
+  if (resume) newFormData.append('resume', resume);
+  certFiles.forEach((file) => {
+    newFormData.append('files', file);
   });
 
   const res = await fetch(`${API_BASE_URL}/api/members/${user.id}/instructor-apply`, {
