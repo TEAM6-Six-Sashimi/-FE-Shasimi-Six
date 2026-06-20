@@ -77,7 +77,7 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
                   <Button
                     variant="outline"
                     onClick={() =>
-                      router.push(`/admin/usermanage/instructor-applications/${a.applicationId}`)
+                      router.push(`/admin/usermanage/instructor-applications/${a.applicationId}?from=approval`)
                     }
                     className="px-3 py-1.5 h-auto border-[1.5px] border-[#D1D5DB] text-[12px] font-semibold text-[#6A7282] hover:border-[#6A7282] hover:bg-white hover:text-[#6A7282] cursor-pointer"
                   >
