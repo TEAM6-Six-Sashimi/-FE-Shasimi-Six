@@ -3,17 +3,38 @@ export interface InstructorApplication {
   name: string;
   loginId: string;
   email: string;
+  mainCategoryName: string;
   createdAt: string;
 }
 
+export interface CertificationFile {
+  certificationName: string;
+  issuedBy: string;
+  fileName: string;
+  fileUrl: string;
+}
+
 export interface InstructorApplicationDetail {
-  bio: string;
-  portfolioUrl: string;
-  certifications: {
-    certificationName: string;
-    issuedBy: string;
-  }[];
-  approvalStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
-  approvedAt: string | null;
+  name: string;
+  loginId: string;
+  email: string;
+  phone: string;
   createdAt: string;
+  categoryName: string;
+
+  introduction: string;
+  motivation: string;
+
+  certifications: CertificationFile[];
+
+  resumeFileName: string;
+  resumeFileUrl: string;
+  careerHighlights: string[]; // 백엔드가 이력서에서 추출해 내려주는 주요 이력
+
+  portfolioUrls: string[];
+
+  agreePrivacy: boolean;
+  agreePublicProfile: boolean;
+
+  approvalStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
 }

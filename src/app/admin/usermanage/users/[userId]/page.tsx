@@ -4,7 +4,7 @@ import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { AdminUser } from '@/features/admin/usermanage/components/AllUsers';
 
-// TODO: 실제 API 연결 전까지 사용하는 임시 데이터 (AllUsers의 MOCK_USERS와 동일 출처여야 함)
+// TODO: 실제 API 연결 전까지 사용하는 임시 데이터
 const MOCK_USERS: (AdminUser & { phone: string })[] = [
   {
     id: 1,
@@ -56,7 +56,7 @@ export default function UserDetailPage({ params }: Props) {
   const fieldValueCls = 'text-[14.5px] font-semibold text-[#1E2125]';
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-8">
+    <div className="max-w-5xl mx-auto px-6 py-3">
       <button
         onClick={() => router.back()}
         className="flex items-center gap-1 text-[13px] text-[#6A7282] hover:text-[#1E2125] cursor-pointer mb-4"

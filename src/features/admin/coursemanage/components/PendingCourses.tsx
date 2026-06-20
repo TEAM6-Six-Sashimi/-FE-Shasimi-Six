@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { AdminCourse } from '../type';
 import { approveCourseAction, rejectCourseAction } from '../action';
-import InputModal from '@/components/modals/InputModal';
 import { Button } from '@/components/ui/button';
 
 interface Props {
@@ -111,20 +110,6 @@ export default function PendingCourses({ courses, setCourses }: Props) {
           </tbody>
         </table>
       </div>
-      {rejectModal && (
-        <InputModal
-          title="반려 사유 입력"
-          subtitle={rejectModal.title}
-          placeholder="반려 사유를 입력해주세요."
-          value={rejectReason}
-          onChange={setRejectReason}
-          confirmLabel="반려"
-          cancelLabel="취소"
-          onConfirm={handleRejectConfirm}
-          onCancel={() => setRejectModal(null)}
-          loading={loading}
-        />
-      )}
     </>
   );
 }
