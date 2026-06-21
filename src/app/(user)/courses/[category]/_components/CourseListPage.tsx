@@ -39,9 +39,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
   const [sort, setSort] = useState<SortType>('인기순');
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState<FilterValues>({
-    level: '전체',
     priceRange: [0, 100000000],
-    durationRange: [0, 1000],
     ratingRange: [0, 5],
   });
   const [currentPage, setCurrentPage] = useState(1);
@@ -72,10 +70,6 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
   // 필터링 + 정렬 (프론트 처리, 추후 백엔드 페이지네이션으로 교체 예정)
   const filteredCourses = useMemo(() => {
     let result = [...initialCourses];
-    console.log(
-      'before filter:',
-      result.map((c) => c.courseId),
-    );
 
     if (search)
       result = result.filter((c) => c.title.includes(search) || c.instructorName.includes(search));
@@ -84,14 +78,8 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
       (c) =>
         c.price >= filters.priceRange[0] &&
         c.price <= filters.priceRange[1] &&
-        c.totalDuration >= filters.durationRange[0] &&
-        c.totalDuration <= filters.durationRange[1] &&
         c.ratingAvg >= filters.ratingRange[0] &&
         c.ratingAvg <= filters.ratingRange[1],
-    );
-    console.log(
-      'after filter:',
-      result.map((c) => c.courseId),
     );
 
     if (sort === '인기순') result = result.sort((a, b) => b.studentCount - a.studentCount);
@@ -150,9 +138,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
                 }}
                 onReset={() =>
                   setFilters({
-                    level: '전체',
                     priceRange: [0, 100000000],
-                    durationRange: [0, 1000],
                     ratingRange: [0, 5],
                   })
                 }
@@ -204,7 +190,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
 
         {/* 강의 그리드 */}
         {pagedCourses.length > 0 ? (
-          <div className="grid grid-cols-4 gap-5 mb-10">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
             {pagedCourses.map((course, idx) => (
               <CourseCard key={idx} course={course} category={category} />
             ))}
@@ -231,8 +217,8 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
                 onClick={() => setCurrentPage(page)}
                 className={`w-8 h-8 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
                   currentPage === page
-                    ? 'bg-[#1E2125] text-white'
-                    : 'text-[#6A7282] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
+                    ? 'bg-[FF5E5E] text-white'
+                    : 'text-[#1E2125] hover:bg-[#F9FAFB]'
                 }`}
               >
                 {page}

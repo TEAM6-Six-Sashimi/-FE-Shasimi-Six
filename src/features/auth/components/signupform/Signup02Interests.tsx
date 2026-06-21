@@ -61,47 +61,43 @@ export default function Signup02Interests({
   const handleAgreementToggle = (key: keyof AgreementState) => {
     setAgreements((prev) => ({ ...prev, [key]: !prev[key] }));
   };
- 
+
   const handleFinalSubmit = (e: React.FormEvent) => {
     e.preventDefault();
- 
+
     if (referral_code && !isReferralChecked) {
       setSubmitMessage('추천인 코드 확인을 완료해 주세요.');
       return;
     }
- 
+
     onSubmit(selectedCategoryIds, referral_code);
   };
- 
+
   const isSubmitEnabled = agreements.privacy;
 
   if (isLoading)
     return <div className="text-center py-10 text-sm text-gray-500">카테고리를 불러오는 중...</div>;
 
   return (
-    <form onSubmit={handleFinalSubmit} >
+    <form onSubmit={handleFinalSubmit}>
       <CategorySelector
         categories={categories}
         selectedIds={selectedCategoryIds}
         onToggle={handleCategoryToggle}
       />
 
-      <div className="pt-6">
-        <ReferralCodeField
-          value={referral_code}
-          onChange={setReferralCode}
-          isChecked={isReferralChecked}
-          onCheckedChange={setIsReferralChecked}
-        />
-      </div>
+      <ReferralCodeField
+        value={referral_code}
+        onChange={setReferralCode}
+        isChecked={isReferralChecked}
+        onCheckedChange={setIsReferralChecked}
+      />
 
       <div className="pt-6">
         <AgreementSection agreements={agreements} onToggle={handleAgreementToggle} />
       </div>
 
-      {submitMessage && (
-        <p className="text-xs mt-2 font-medium text-red-500">{submitMessage}</p>
-      )}
+      {submitMessage && <p className="text-xs mt-2 font-medium text-red-500">{submitMessage}</p>}
 
       <div className="flex w-full gap-3 font-semibold pt-6">
         <Button
