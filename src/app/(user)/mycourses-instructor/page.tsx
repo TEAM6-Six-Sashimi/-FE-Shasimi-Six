@@ -49,7 +49,7 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
       : [[], [], []];
 
   return (
-    <div className="max-w-275 container mx-auto px-6 py-8">
+    <div className="max-w-275 min-h-[calc(100vh-95px)] container mx-auto px-6 py-8">
       <h1 className="text-[24px] font-bold text-[#1E2125] mb-5">내 강의</h1>
 
       <div className="flex items-center gap-0 border-b border-[#E5E7EB] mb-6">
