@@ -8,6 +8,7 @@ import type { InstructorInProgressCourse } from '../types';
 import type { Category } from '@/features/categories/types';
 import { deleteCourseAction } from '../actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
+import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
 
 type FilterType = '전체' | '대기' | '보관' | '반려';
 
@@ -28,10 +29,17 @@ interface Props {
   categories: Category[];
 }
 
+interface RejectionModalData {
+  courseTitle: string;
+  rejectedAt: string;
+  rejectCategory: string;
+  rejectReason: string;
+}
+
 export default function PendingCourse({ courses, categories }: Props) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterType>('전체');
-  const [rejectionModal, setRejectionModal] = useState<string | null>(null);
+  const [rejectionModal, setRejectionModal] = useState<RejectionModalData | null>(null);
   const [localCourses, setLocalCourses] = useState(courses);
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -124,6 +132,7 @@ export default function PendingCourse({ courses, categories }: Props) {
           filtered.map((course) => {
             const statusLabel = STATUS_LABEL[course.status] ?? course.status;
             const isPending = course.status === 'PENDING';
+            const isDeleteDisabled = isPending || deleteLoading;
             return (
               <div
                 key={course.courseId}
@@ -138,7 +147,14 @@ export default function PendingCourse({ courses, categories }: Props) {
                     </span>
                     {course.status === 'REJECTED' && course.rejectReason && (
                       <button
-                        onClick={() => setRejectionModal(course.rejectReason)}
+                        onClick={() =>
+                          setRejectionModal({
+                            courseTitle: course.title,
+                            rejectedAt: course.updatedAt ?? '',
+                            rejectCategory: course.rejectCategory ?? '',
+                            rejectReason: course.rejectReason ?? '',
+                          })
+                        }
                         className="text-[11.5px] text-[#FF5E5E] font-semibold underline cursor-pointer"
                       >
                         반려 사유 보기
@@ -161,7 +177,13 @@ export default function PendingCourse({ courses, categories }: Props) {
                         disabled
                         className="h-9 px-4 text-[12.5px] font-semibold text-[#6A7282] bg-[#E5E7EB] cursor-not-allowed"
                       >
-                        📝 수정
+                        <Image
+                          src='/edit-Icon-gray.svg'
+                          alt=""
+                          width={16}
+                          height={16}
+                        />{' '}
+                        수정
                       </Button>
                     ) : (
                       <Link href={`/mycourses-instructor/${course.courseId}/edit`}>
@@ -170,22 +192,34 @@ export default function PendingCourse({ courses, categories }: Props) {
                           size="sm"
                           className="h-9 px-4 border-[#D1D5DB] text-[#1E2125] text-[12.5px] font-semibold hover:bg-[#F9FAFB] cursor-pointer"
                         >
-                          📝 수정
+                          <Image
+                          src='/edit-Icon-black.svg'
+                          alt=""
+                          width={16}
+                          height={16}
+                          />{' '} 수정
                         </Button>
                       </Link>
                     )}
-                    <Button
-                      size="sm"
-                      disabled={isPending || deleteLoading}
-                      onClick={() => setDeleteTargetId(course.courseId)}
-                      className={`h-9 px-4 text-[12.5px] font-semibold transition-colors ${
-                        isPending
-                          ? 'text-[#6A7282] bg-[#E5E7EB] cursor-not-allowed'
-                          : 'bg-[#FF5E5E] hover:bg-[#D14848] text-white cursor-pointer'
-                      }`}
-                    >
-                      🗑 삭제
-                    </Button>
+                    {isDeleteDisabled ? (
+                      <Button
+                        size="sm"
+                        disabled
+                        className="h-9 px-4 text-[12.5px] font-semibold text-[#6A7282] bg-[#E5E7EB] cursor-not-allowed"
+                      >
+                        <Image src="/delete-Icon-gray.svg" alt="" width={16} height={16} />{' '}
+                        {deleteLoading ? <InlineDotsLoading label="삭제 중" /> : '삭제'}
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={() => setDeleteTargetId(course.courseId)}
+                        className="h-9 px-4 text-[12.5px] font-semibold bg-[#FF5E5E] hover:bg-[#D14848] text-white cursor-pointer"
+                      >
+                        <Image src="/delete-Icon-white.svg" alt="" width={16} height={16} />{' '}
+                        삭제
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -201,17 +235,50 @@ export default function PendingCourse({ courses, categories }: Props) {
           onClick={() => setRejectionModal(null)}
         >
           <div
-            className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 flex flex-col gap-4"
+            className="bg-white rounded-2xl p-7 w-full max-w-md shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-[16px] font-bold text-[#1E2125]">반려 사유</h3>
-            <p className="text-[13.5px] text-[#6A7282] leading-relaxed">{rejectionModal}</p>
-            <Button
-              onClick={() => setRejectionModal(null)}
-              className="w-full h-10 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold cursor-pointer"
-            >
-              확인
-            </Button>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-[19px] font-bold text-[#1E2125]">반려 사유 상세</h3>
+              <button
+                onClick={() => setRejectionModal(null)}
+                className="text-[#9CA3AF] hover:text-[#1E2125] transition-colors cursor-pointer text-[18px]"
+              >
+                ✕
+              </button>
+            </div>
+ 
+            {/* 강의명 / 반려일 */}
+            <div className="grid grid-cols-2 gap-x-10 bg-[#F9FAFB] rounded-xl px-4 py-3.5 mb-5">
+              <div>
+                <p className="text-[11.5px] text-[#9CA3AF] mb-0.5">강의명</p>
+                <p className="text-[14.5px] font-bold text-[#1E2125]">
+                  {rejectionModal.courseTitle}
+                </p>
+              </div>
+              <div>
+                <p className="text-[11.5px] text-[#9CA3AF] mb-0.5">반려일</p>
+                <p className="text-[14.5px] font-bold text-[#1E2125]">
+                  {rejectionModal.rejectedAt}
+                </p>
+              </div>
+            </div>
+ 
+            {/* 사유 카테고리 */}
+            <div className="mb-4">
+              <p className="text-[13px] text-[#6A7282] mb-1.5">사유 카테고리</p>
+              <span className="inline-block px-3 py-1.5 rounded-md text-[13px] font-semibold bg-[#FFEBEB] text-[#FF5E5E]">
+                {rejectionModal.rejectCategory}
+              </span>
+            </div>
+ 
+            {/* 상세 내용 */}
+            <div>
+              <p className="text-[13px] text-[#6A7282] mb-1.5">상세 내용</p>
+              <p className="text-[13.5px] text-[#1E2125] leading-relaxed border border-[#E5E7EB] rounded-lg px-4 py-3">
+                {rejectionModal.rejectReason}
+              </p>
+            </div>
           </div>
         </div>
       )}
