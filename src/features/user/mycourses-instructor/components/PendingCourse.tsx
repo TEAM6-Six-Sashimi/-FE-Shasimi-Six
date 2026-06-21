@@ -88,7 +88,7 @@ export default function PendingCourse({ courses, categories }: Props) {
         </div>
         <Link href="/mycourses-instructor/new">
           <Button className="h-11 px-5 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[13px] font-semibold cursor-pointer shrink-0">
-            + 강의 신청
+            + 신규 강의 신청
           </Button>
         </Link>
       </div>

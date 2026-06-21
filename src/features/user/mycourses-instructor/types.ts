@@ -96,7 +96,20 @@ export interface ApprovedCourse {
   courseId: number;
   categoryId: number;
   title: string;
+  // thumbnail: string; // 나중에 추가 필요
+  // approvedAt: number;
   price: number;
   ratingAvg: number;
   studentCount: number;
+}
+
+export interface PrivateCourse {
+  courseId: number;
+  categoryId: number;
+  title: string;
+  thumbnail: string;
+  price: number;
+  ratingAvg: number;
+  studentCount: number;
+  privatedAt: string; // 비공개 처리일
 }
