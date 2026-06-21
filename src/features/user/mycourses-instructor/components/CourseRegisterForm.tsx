@@ -19,6 +19,7 @@ import type {
 } from '@/features/user/mycourses-instructor/types';
 import { createCourseAction } from '../actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
+import FullScreenLoading from '@/components/ui/FullScreenLoading';
 import Image from 'next/image';
 
 // ── 타입 ────────────────────────────────────────────────────────
@@ -41,10 +42,23 @@ const DEFAULT_SESSION: Omit<Session, 'id'> = {
   preview: false,
 };
 
+interface FieldErrors {
+  title?: string;
+  description?: string;
+  category?: string;
+  subCategory?: string;
+  price?: string;
+  level?: string;
+  thumbnail?: string;
+  sessions?: string;
+  agreement?: string;
+}
+
 // ── 메인 컴포넌트 ────────────────────────────────────────────────
 export default function CourseRegisterForm({ categories }: CourseRegisterFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('처리 중입니다...');
 
   const [form, setForm] = useState<CourseFormData>({
     title: '',
@@ -57,14 +71,26 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
     sessions: [{ id: 1, ...DEFAULT_SESSION }],
   });
 
+  const [agreed, setAgreed] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
+
   const [confirmModal, setConfirmModal] = useState<{
     type: 'save' | 'submit' | 'cancel';
   } | null>(null);
 
   const MODAL_CONFIG = {
-    save: { title: '임시 저장', message: '임시 저장하시겠습니까?' },
-    submit: { title: '승인 요청', message: '승인 요청하시겠습니까?' },
-    cancel: { title: '취소', message: '작성을 취소하시겠습니까?\n작성된 내용이 사라집니다.' },
+    save: {
+      title: '강의를 임시 저장 하시겠습니까?',
+      message: '강의가 보관 상태로 저장되며 목록으로 돌아갑니다.',
+    },
+    submit: {
+      title: '강의 승인을 요청하시겠습니까?',
+      message: '승인 요청 후 관리자 검토를 거쳐 수강생에게 공개됩니다.',
+    },
+    cancel: {
+      title: '작성 중인 내용이 있습니다.\n페이지를 나가시겠습니까?',
+      message: '저장되지 않은 내용은 사라집니다.',
+    },
   };
 
   const subCategories = categories.find((c) => c.name === form.category)?.options ?? [];
@@ -93,7 +119,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
       const data = await res.json();
       handleField('thumbnail', data.url);
     } catch {
-      alert('이미지 업로드에 실패했습니다.');
+      setErrors((prev) => ({ ...prev, thumbnail: '이미지 업로드에 실패했습니다.' }));
     } finally {
       setThumbnailUploading(false);
     }
@@ -122,41 +148,35 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
     }));
   };
 
+  // ── 유효성 검사 ──────────────────────────────────────────────
+  const validate = (): FieldErrors => {
+    const next: FieldErrors = {};
+
+    if (!form.title.trim()) next.title = '강의 제목을 입력해주세요.';
+    if (!form.description.trim()) next.description = '강의 설명을 입력해주세요.';
+    if (!form.category) next.category = '카테고리를 선택해주세요.';
+    if (!form.subCategory) next.subCategory = '세부 카테고리를 선택해주세요.';
+    if (form.price === '') next.price = '가격을 입력해주세요.';
+    if (!form.level) next.level = '난이도를 선택해주세요.';
+    if (!form.thumbnail) next.thumbnail = '대표 이미지를 업로드해주세요.';
+    if (form.sessions.some((s) => !s.title.trim() || !s.videoUrl.trim())) {
+      next.sessions = '모든 회차의 소제목과 영상 URL을 입력해주세요.';
+    }
+    if (!agreed) next.agreement = '강의 판매 정책에 동의해주세요.';
+
+    return next;
+  };
+
   // ── 제출 ────────────────────────────────────────────────────
   const handleSubmit = async (type: 'save' | 'submit') => {
-    if (!form.title.trim()) {
-      alert('강의 제목을 입력해주세요.');
-      return;
-    }
-    if (!form.description.trim()) {
-      alert('강의 설명을 입력해주세요.');
-      return;
-    }
-    if (!form.category) {
-      alert('카테고리를 선택해주세요.');
-      return;
-    }
-    if (!form.subCategory) {
-      alert('세부 카테고리를 선택해주세요.');
-      return;
-    }
-    if (form.price === '') {
-      alert('가격을 입력해주세요.');
-      return;
-    }
-    if (!form.level) {
-      alert('난이도를 선택해주세요.');
-      return;
-    }
-    if (form.sessions.some((s) => !s.title.trim() || !s.videoUrl.trim())) {
-      alert('모든 세션의 소제목과 영상 URL을 입력해주세요.');
-      return;
-    }
+    const nextErrors = validate();
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
 
     const selectedCat = categories.find((c) => c.name === form.category);
     const selectedSub = selectedCat?.options.find((o) => String(o.id) === form.subCategory);
     if (!selectedSub) {
-      alert('세부 카테고리를 다시 선택해주세요.');
+      setErrors((prev) => ({ ...prev, subCategory: '세부 카테고리를 다시 선택해주세요.' }));
       return;
     }
 
@@ -176,24 +196,35 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
     };
 
     try {
+      setLoadingMessage(type === 'save' ? '임시 저장 중입니다...' : '승인 요청 중입니다...');
       setIsLoading(true);
       await createCourseAction(payload);
       router.push('/mycourses-instructor?tab=pending');
     } catch (error: any) {
-      alert(error.message || '강의 등록에 실패했습니다.');
+      setErrors((prev) => ({
+        ...prev,
+        sessions: error.message || '강의 등록에 실패했습니다.',
+      }));
     } finally {
       setIsLoading(false);
     }
   };
 
+  // 동의 체크 안 했으면 버튼 비활성화 (제출 버튼들만; 취소는 항상 가능)
+  const isSubmitDisabled = isLoading || !agreed;
+
   // ── 공통 인풋 스타일 ─────────────────────────────────────────
   const inputCls =
-    'w-full h-11 px-4 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors';
+    'w-full h-11 px-4 rounded-lg border bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors';
   const labelCls = 'block text-[13px] font-semibold text-[#1E2125] mb-1.5';
   const requiredMark = <span className="text-[#FF5E5E] ml-0.5">*</span>;
+  const fieldErrorCls = 'text-[12px] text-[#FF5E5E] mt-1';
+
+  const borderCls = (hasError?: string) => (hasError ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]');
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-6">
+      {isLoading && <FullScreenLoading message={loadingMessage} />}
       <div className="bg-white rounded-2xl shadow-md p-8 flex flex-col gap-8">
         <h1 className="text-[22px] font-bold text-[#1E2125]">새 강의 등록</h1>
 
@@ -212,8 +243,9 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
               value={form.title}
               onChange={(e) => handleField('title', e.target.value)}
               disabled={isLoading}
-              className={inputCls}
+              className={`${inputCls} ${borderCls(errors.title)}`}
             />
+            {errors.title && <p className={fieldErrorCls}>{errors.title}</p>}
           </div>
 
           {/* 강의 설명 */}
@@ -225,8 +257,9 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
               onChange={(e) => handleField('description', e.target.value)}
               rows={5}
               disabled={isLoading}
-              className="w-full px-4 py-3 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors resize-none"
+              className={`w-full px-4 py-3 rounded-lg border bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors resize-none ${borderCls(errors.description)}`}
             />
+            {errors.description && <p className={fieldErrorCls}>{errors.description}</p>}
           </div>
 
           {/* 카테고리 + 세부 카테고리 */}
@@ -238,7 +271,9 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                 onValueChange={handleCategoryChange}
                 disabled={isLoading}
               >
-                <SelectTrigger className="h-11! text-[13.5px] border-[#D1D5DB] text-[#1E2125]">
+                <SelectTrigger
+                  className={`h-11! text-[13.5px] text-[#1E2125] ${borderCls(errors.category)}`}
+                >
                   <SelectValue placeholder="셀렉트박스" />
                 </SelectTrigger>
                 <SelectContent position="popper">
@@ -249,6 +284,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                   ))}
                 </SelectContent>
               </Select>
+              {errors.category && <p className={fieldErrorCls}>{errors.category}</p>}
             </div>
             <div>
               <label className={labelCls}>세부 카테고리{requiredMark}</label>
@@ -257,7 +293,9 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                 onValueChange={(v) => handleField('subCategory', v)}
                 disabled={!form.category || isLoading}
               >
-                <SelectTrigger className="h-11! text-[13.5px] border-[#D1D5DB] text-[#1E2125]">
+                <SelectTrigger
+                  className={`h-11! text-[13.5px] text-[#1E2125] ${borderCls(errors.subCategory)}`}
+                >
                   <SelectValue placeholder="셀렉트박스" />
                 </SelectTrigger>
                 <SelectContent position="popper">
@@ -268,6 +306,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                   ))}
                 </SelectContent>
               </Select>
+              {errors.subCategory && <p className={fieldErrorCls}>{errors.subCategory}</p>}
             </div>
           </div>
 
@@ -284,8 +323,9 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                 }
                 min={0}
                 disabled={isLoading}
-                className={inputCls}
+                className={`${inputCls} ${borderCls(errors.price)}`}
               />
+              {errors.price && <p className={fieldErrorCls}>{errors.price}</p>}
             </div>
             <div>
               <label className={labelCls}>난이도{requiredMark}</label>
@@ -294,7 +334,9 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                 onValueChange={(v) => handleField('level', v)}
                 disabled={isLoading}
               >
-                <SelectTrigger className="h-11! text-[13.5px] border-[#D1D5DB] text-[#1E2125]">
+                <SelectTrigger
+                  className={`h-11! text-[13.5px] text-[#1E2125] ${borderCls(errors.level)}`}
+                >
                   <SelectValue placeholder="셀렉트박스" />
                 </SelectTrigger>
                 <SelectContent position="popper">
@@ -305,6 +347,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                   ))}
                 </SelectContent>
               </Select>
+              {errors.level && <p className={fieldErrorCls}>{errors.level}</p>}
             </div>
           </div>
 
@@ -323,7 +366,9 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
               type="button"
               onClick={() => thumbnailRef.current?.click()}
               disabled={isLoading || thumbnailUploading}
-              className="w-full h-12 rounded-lg border border-dashed border-[#D1D5DB] bg-[#F9FAFB] text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] hover:bg-[#F9FAFB] flex items-center justify-center gap-2 disabled:opacity-70"
+              className={`w-full h-12 rounded-lg border border-dashed bg-[#F9FAFB] text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] hover:bg-[#F9FAFB] flex items-center justify-center gap-2 disabled:opacity-70 ${
+                errors.thumbnail ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]'
+              }`}
             >
               <span>↑</span>
               {thumbnailUploading
@@ -332,12 +377,17 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                   ? '이미지 변경하기'
                   : '강의 대표 이미지를 업로드하세요'}
             </Button>
+            {errors.thumbnail && <p className={fieldErrorCls}>{errors.thumbnail}</p>}
             {form.thumbnail && (
-              <Image
-                src={form.thumbnail}
-                alt="썸네일 미리보기"
-                className="mt-2 w-full h-40 object-cover rounded-lg border border-[#E5E7EB]"
-              />
+              <div className="relative mt-2 w-full h-40 rounded-lg border border-[#E5E7EB] overflow-hidden">
+                <Image
+                  src={form.thumbnail}
+                  alt="썸네일 미리보기"
+                  fill
+                  unoptimized
+                  className="object-cover"
+                />
+              </div>
             )}
           </div>
         </section>
@@ -359,14 +409,43 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
             />
           ))}
 
+          {errors.sessions && <p className={fieldErrorCls}>{errors.sessions}</p>}
+
           <Button
             type="button"
             onClick={addSession}
             disabled={isLoading}
             className="w-full h-11 rounded-lg border border-dashed border-[#D1D5DB] bg-transparent text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] hover:bg-transparent flex items-center justify-center gap-1.5"
           >
-            <span className="text-[16px]">+</span> 세션 추가
+            <span className="text-[16px]">+</span> 회차 추가
           </Button>
+        </section>
+
+        {/* ── 동의 영역 ── */}
+        <section className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-5 py-4 flex flex-col gap-2">
+          <label className="flex items-center gap-2.5 cursor-pointer w-fit">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => {
+                setAgreed(e.target.checked);
+                if (e.target.checked) {
+                  setErrors((prev) => ({ ...prev, agreement: undefined }));
+                }
+              }}
+              disabled={isLoading}
+              className="w-4 h-4 accent-[#CFEE5D] cursor-pointer"
+            />
+            <span className="text-[13.5px] font-semibold text-[#1E2125]">
+              강의 판매 정책에 동의합니다. <span className="text-[#FF5E5E]">(필수)</span>
+            </span>
+          </label>
+          <ul className="text-[12px] text-[#6A7282] pl-1 flex flex-col gap-0.5">
+            <li>· 강의는 관리자 승인일로부터 2년 후 자동으로 비공개 처리됩니다.</li>
+            <li>· 비공개 처리 시 신규 수강 신청이 불가하며, 기존 수강생은 이후 2년간 수강할 수 있습니다.</li>
+            <li>· 비공개 전 강사에게 알림이 발송됩니다.</li>
+          </ul>
+          {errors.agreement && <p className={fieldErrorCls}>{errors.agreement}</p>}
         </section>
 
         {/* ── 버튼 ── */}
@@ -374,8 +453,12 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
           <Button
             type="button"
             onClick={() => setConfirmModal({ type: 'save' })}
-            disabled={isLoading}
-            className="h-11 px-7 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer disabled:opacity-70"
+            disabled={isSubmitDisabled}
+            className={`h-11 px-7 font-semibold text-[14px] transition-colors ${
+              isSubmitDisabled
+                ? 'bg-[#E5E7EB] text-[#6A7282] cursor-not-allowed hover:bg-[#E5E7EB]'
+                : 'bg-[#FF5E5E] hover:bg-[#D14848] text-white cursor-pointer'
+            }`}
           >
             {isLoading ? '저장 중...' : '임시 저장'}
           </Button>
@@ -383,8 +466,12 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
             <Button
               type="button"
               onClick={() => setConfirmModal({ type: 'submit' })}
-              disabled={isLoading}
-              className="h-11 px-7 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer disabled:opacity-70"
+              disabled={isSubmitDisabled}
+              className={`h-11 px-7 font-semibold text-[14px] transition-colors ${
+                isSubmitDisabled
+                  ? 'bg-[#E5E7EB] text-[#6A7282] cursor-not-allowed hover:bg-[#E5E7EB]'
+                  : 'bg-[#FF5E5E] hover:bg-[#D14848] text-white cursor-pointer'
+              }`}
             >
               {isLoading ? '처리 중...' : '승인 요청'}
             </Button>
@@ -440,7 +527,7 @@ function SessionItem({ session, index, canRemove, onUpdate, onRemove }: SessionI
     <div className="flex flex-col gap-3 p-5 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB]">
       <div className="flex items-center justify-between">
         <span className="px-3 py-1 rounded-full bg-[#CFEE5D] text-[#1E2125] text-[12px] font-bold">
-          세션 {index + 1}
+          회차 {index + 1}
         </span>
         {canRemove && (
           <button
@@ -459,7 +546,7 @@ function SessionItem({ session, index, canRemove, onUpdate, onRemove }: SessionI
         </label>
         <input
           type="text"
-          placeholder="세션 제목을 입력하세요"
+          placeholder="강의 회차 제목을 입력하세요"
           value={session.title}
           onChange={(e) => onUpdate(session.id, 'title', e.target.value)}
           className={inputCls}
