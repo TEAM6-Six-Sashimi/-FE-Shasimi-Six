@@ -21,6 +21,13 @@ interface Props {
   categories: Category[];
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
+  if (!thumbnail) return null;
+  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
+}
+
 export default function ApprovedCourse({ courses = [], categories = [] }: Props) {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortOption>('최신순');
@@ -79,7 +86,7 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
 
         <Link href="/mycourses-instructor/new">
           <Button className="h-11 px-5 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[13px] font-semibold cursor-pointer shrink-0">
-            + 강의 신청
+            + 신규 강의 신청
           </Button>
         </Link>
       </div>
@@ -91,49 +98,71 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
             {search ? '검색 결과가 없습니다.' : '승인된 강의가 없습니다.'}
           </div>
         ) : (
-          filtered.map((course) => (
-            <div
-              key={course.courseId}
-              className="bg-white rounded-xl border border-[#D1D5DB] px-5 py-4 flex items-center justify-between hover:shadow-sm transition-shadow"
-            >
-              <div className="flex flex-col gap-1">
-                <p className="text-[14.5px] font-semibold text-[#1E2125]">{course.title}</p>
-                <p className="text-[12px] text-[#6A7282]">{getCategoryName(course.categoryId)}</p>
-                <div className="flex items-center gap-2 text-[12px] text-[#6A7282]">
-                  <span className="text-[#FFD700]">★</span>
-                  <span>{course.ratingAvg?.toFixed(1) || '0.0'}</span>
-                  <span className="w-px h-2 bg-[#D1D5DB]" />
-                  <span>수강생 {course.studentCount?.toLocaleString() || 0}명</span>
-                </div>
-              </div>
+          filtered.map((course) => {
+            // const thumbnailUrl = getThumbnailUrl(course.thumbnail);
+            return (
+              <div
+                key={course.courseId}
+                className="bg-white rounded-xl border border-[#D1D5DB] px-5 py-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
+              >
+                {/* 썸네일 */}
+                {/* <div className="relative w-24 h-16 rounded-lg overflow-hidden bg-[#E5E7EB] shrink-0">
+                  {thumbnailUrl ? (
+                    <Image
+                      src={thumbnailUrl}
+                      alt={course.title}
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[#9CA3AF] text-[11px]">
+                      No Image
+                    </div>
+                  )}
+                </div> */}
 
-              <div className="flex flex-col items-end gap-2 shrink-0">
-                <span className="text-[15px] font-bold text-[#1E2125]">
-                  {course.price?.toLocaleString() || 0}{' '}
-                  <span className="text-[13px] font-normal text-[#6A7282]">크레딧</span>
-                </span>
-                <div className="flex items-center gap-2">
-                  <Link href={`/mycourses-instructor/${course.courseId}`}>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-9 px-4 border-[#D1D5DB] text-[#1E2125] text-[12.5px] font-semibold hover:bg-[#F9FAFB] cursor-pointer"
-                    >
-                      상세보기
-                    </Button>
-                  </Link>
-                  <Link href={`/mycourses-instructor/${course.courseId}/manage`}>
-                    <Button
-                      size="sm"
-                      className="h-9 px-4 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[12.5px] font-semibold cursor-pointer"
-                    >
-                      운영관리
-                    </Button>
-                  </Link>
+                <div className="flex flex-col gap-1 flex-1">
+                  <p className="text-[14.5px] font-semibold text-[#1E2125]">{course.title}</p>
+                  <p className="text-[12px] text-[#6A7282]">{getCategoryName(course.categoryId)}</p>
+                  <div className="flex items-center gap-2 text-[12px] text-[#6A7282]">
+                    <span className="text-[#FFD700]">★</span>
+                    <span>{course.ratingAvg?.toFixed(1) || '0.0'}</span>
+                    <span className="w-px h-2 bg-[#D1D5DB]" />
+                    <span>수강생 {course.studentCount?.toLocaleString() || 0}명</span>
+                    <span className="w-px h-2 bg-[#D1D5DB]" />
+                    {/* <span>등록일</span> */}{/* 등록일 type 추가 필요 */}
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-end gap-2 shrink-0">
+                  <span className="text-[15px] font-bold text-[#1E2125]">
+                    {course.price?.toLocaleString() || 0}{' '}
+                    <span className="text-[13px] font-normal text-[#6A7282]">크레딧</span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Link href={`/mycourses-instructor/${course.courseId}`}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 px-4 border-[#D1D5DB] text-[#1E2125] text-[12.5px] font-semibold hover:bg-[#F9FAFB] cursor-pointer"
+                      >
+                        상세보기
+                      </Button>
+                    </Link>
+                    <Link href={`/mycourses-instructor/${course.courseId}/manage`}>
+                      <Button
+                        size="sm"
+                        className="h-9 px-4 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[12.5px] font-semibold cursor-pointer"
+                      >
+                        운영관리
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

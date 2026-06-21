@@ -20,7 +20,7 @@ import { CourseFromAPI } from '@/features/user/courses/types';
 
 const ITEMS_PER_PAGE = 16;
 
-type SortType = '인기순' | '최신순' | '높은 평점순';
+type SortType = '인기순' | '최신순' | '평점순';
 
 interface CourseListPageProps {
   categories: Category[];
@@ -28,6 +28,7 @@ interface CourseListPageProps {
 }
 
 export default function CourseListPage({ categories, initialCourses }: CourseListPageProps) {
+
   const params = useParams();
   const searchParams = useSearchParams();
   const category = decodeURIComponent(params.category as string);
@@ -39,7 +40,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState<FilterValues>({
     level: '전체',
-    priceRange: [0, 100000],
+    priceRange: [0, 100000000],
     durationRange: [0, 1000],
     ratingRange: [0, 5],
   });
@@ -68,9 +69,13 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
     setCurrentPage(1);
   }, [category, sub, search, filters, sort]);
 
-  // 필터링 + 정렬 (프론트에서 처리, 추후 백엔드 페이지네이션으로 교체 예정)
+  // 필터링 + 정렬 (프론트 처리, 추후 백엔드 페이지네이션으로 교체 예정)
   const filteredCourses = useMemo(() => {
     let result = [...initialCourses];
+    console.log(
+      'before filter:',
+      result.map((c) => c.courseId),
+    );
 
     if (search)
       result = result.filter((c) => c.title.includes(search) || c.instructorName.includes(search));
@@ -84,10 +89,14 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
         c.ratingAvg >= filters.ratingRange[0] &&
         c.ratingAvg <= filters.ratingRange[1],
     );
+    console.log(
+      'after filter:',
+      result.map((c) => c.courseId),
+    );
 
     if (sort === '인기순') result = result.sort((a, b) => b.studentCount - a.studentCount);
-    if (sort === '최신순') result = result; // TODO: 백엔드에서 createdAt 필드 추가 후 정렬
-    if (sort === '높은 평점순') result = result.sort((a, b) => b.ratingAvg - a.ratingAvg);
+    if (sort === '최신순') result = result; 
+    if (sort === '평점순') result = result.sort((a, b) => b.ratingAvg - a.ratingAvg);
 
     return result;
   }, [initialCourses, search, filters, sort]);
@@ -142,7 +151,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
                 onReset={() =>
                   setFilters({
                     level: '전체',
-                    priceRange: [0, 100000],
+                    priceRange: [0, 100000000],
                     durationRange: [0, 1000],
                     ratingRange: [0, 5],
                   })
@@ -182,7 +191,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
               <SelectTrigger className="h-8 w-32 text-[12.5px] border-[#D1D5DB] text-[#1E2125]">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper" side="bottom">
                 {(['인기순', '최신순', '평점순'] as SortType[]).map((s) => (
                   <SelectItem key={s} value={s} className="text-[12.5px]">
                     {s}

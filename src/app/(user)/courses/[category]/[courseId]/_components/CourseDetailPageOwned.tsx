@@ -1,7 +1,16 @@
+import Image from 'next/image';
 import CourseCurriculumOwned from '@/features/user/courses/components/CourseCurriculumOwned';
 import CourseReviews from '@/features/user/courses/components/CourseReviews';
 import CourseDetailSidebarOwned from '@/features/user/courses/components/CourseDetailSidebarOwned';
-import { MOCK_COURSE_DETAIL } from '@/constants/mockCourseDetail';
+import { CourseDetailFromAPI, EnrollmentInfo } from '@/features/user/courses/types';
+import { MOCK_COURSE_DETAIL, Review, RatingDistribution } from '@/constants/mockCourseDetail';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+interface CourseDetailPageOwnedProps {
+  course: CourseDetailFromAPI;
+  enrollmentInfo: EnrollmentInfo;
+}
 
 const CARD = 'bg-white rounded-xl shadow-md p-6 overflow-hidden';
 
@@ -18,9 +27,31 @@ const StarRating = ({ rating }: { rating: number }) => (
   </div>
 );
 
-export default function CourseDetailPageOwned() {
-  const course = MOCK_COURSE_DETAIL;
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0 && m > 0) return `${h}시간 ${m}분`;
+  if (h > 0) return `${h}시간`;
+  return `${m}분`;
+}
 
+function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
+  if (!thumbnail) return null;
+  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
+}
+
+// 목업 필드 (추후 교체)
+const MOCK_INSTRUCTOR = MOCK_COURSE_DETAIL.instructor;
+const MOCK_NCS = MOCK_COURSE_DETAIL.ncs;
+const MOCK_RATING_DISTRIBUTION: RatingDistribution[] = MOCK_COURSE_DETAIL.ratingDistribution;
+const MOCK_REVIEWS: Review[] = MOCK_COURSE_DETAIL.reviews;
+
+export default function CourseDetailPageOwned({
+  course,
+  enrollmentInfo,
+}: CourseDetailPageOwnedProps) {
+  const thumbnailUrl = getThumbnailUrl(course.thumbnail);
+  
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
       <div className="max-w-275 mx-auto py-6 px-6">
@@ -31,17 +62,23 @@ export default function CourseDetailPageOwned() {
             <div className={CARD + ' flex flex-col gap-4'}>
               {/* 썸네일 */}
               <div
-                className="rounded-t-xl -mx-6 -mt-6 bg-[#E5E7EB]"
+                className="relative rounded-t-xl -mx-6 -mt-6 bg-[#E5E7EB]"
                 style={{ width: 'calc(100% + 3rem)', height: '240px' }}
-              />
+              >
+                {thumbnailUrl && (
+                  <Image
+                    src={thumbnailUrl}
+                    alt={course.title}
+                    fill
+                    unoptimized
+                    className="object-cover rounded-t-xl"
+                  />
+                )}
+              </div>
 
-              {/* 브레드크럼 — 뱃지 스타일 */}
               <div className="flex items-center gap-2">
                 <div className="px-2.5 py-1 rounded-full bg-[#FFEBEB] text-[#FF5E5E] text-[12px] font-medium">
-                  {course.category}
-                </div>
-                <div className="px-2.5 py-1 rounded-full bg-[#F9FBE7] text-[#827717] text-[12px] font-medium">
-                  {course.subCategory}
+                  {course.categoryName}
                 </div>
               </div>
 
@@ -55,9 +92,9 @@ export default function CourseDetailPageOwned() {
 
               {/* 평점 */}
               <div className="flex items-center gap-1.5">
-                <StarRating rating={course.rating} />
+                <StarRating rating={course.ratingAvg} />
                 <span className="text-[#1E2125] text-[13.5px] font-semibold">
-                  {course.rating.toFixed(1)}
+                  {course.ratingAvg.toFixed(1)}
                 </span>
                 <span className="text-[#6A7282] text-[13px]">
                   ({course.reviewCount.toLocaleString()}개의 리뷰)
@@ -67,16 +104,12 @@ export default function CourseDetailPageOwned() {
               {/* 수강생 + 시간 + 업데이트 */}
               <div className="flex items-center gap-4 text-[13px] text-[#6A7282]">
                 <span className="flex items-center gap-1.5">
-                  <span>👤</span>
+                  <Image src="/coursedetail/people.svg" width={17} height={17} alt="" />
                   {course.studentCount.toLocaleString()}명 수강
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span>⏱</span>
-                  {course.duration}시간
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span>📅</span>
-                  {course.updatedAt}
+                  <Image src="/coursedetail/clock.svg" width={17} height={17} alt="" />
+                  {formatDuration(course.totalDuration)}시간
                 </span>
               </div>
             </div>
@@ -85,7 +118,7 @@ export default function CourseDetailPageOwned() {
             <section className={CARD}>
               <h2 className="text-[#1E2125] text-[17px] font-bold mb-3">NCS 정보</h2>
               <ul className="flex flex-col gap-1.5">
-                {[course.ncs.category, course.ncs.competency, course.ncs.code].map((item) => (
+                {[MOCK_NCS.category, MOCK_NCS.competency, MOCK_NCS.code].map((item) => (
                   <li key={item} className="flex items-start gap-2 text-[13px] text-[#1E2125]">
                     <span className="text-[#1E2125] mt-0.5">•</span>
                     {item}
@@ -96,7 +129,10 @@ export default function CourseDetailPageOwned() {
 
             {/* 커리큘럼 (구매 후 - 재생 + 진행률) */}
             <section className={CARD}>
-              <CourseCurriculumOwned curriculum={course.curriculum} />
+              <CourseCurriculumOwned
+                sessions={course.sessions}
+                lastSessionId={enrollmentInfo.lastSessionId}
+              />
             </section>
 
             {/* 강사 정보 */}
@@ -106,17 +142,17 @@ export default function CourseDetailPageOwned() {
                 <div className="w-16 h-16 rounded-full bg-[#E5E7EB] shrink-0 overflow-hidden" />
                 <div className="flex flex-col gap-2">
                   <span className="text-[#1E2125] text-[15px] font-bold">
-                    {course.instructor.name}
+                    {course.instructorName}
                   </span>
                   <p className="text-[#6A7282] text-[13px] leading-relaxed">
-                    {course.instructor.bio}
+                    {MOCK_INSTRUCTOR.bio}
                   </p>
                   <div className="flex flex-col gap-1 mt-1">
                     <span className="text-[#1E2125] text-[13px] font-semibold">
                       보유 자격증 및 경력
                     </span>
                     <ul className="flex flex-col gap-0.5">
-                      {course.instructor.careers.map((career) => (
+                      {MOCK_INSTRUCTOR.careers.map((career) => (
                         <li key={career} className="text-[#6A7282] text-[13px]">
                           · {career}
                         </li>
@@ -130,10 +166,10 @@ export default function CourseDetailPageOwned() {
             {/* 수강평 + 수강평 작성하기 */}
             <section id="reviews" className={CARD}>
               <CourseReviews
-                rating={course.rating}
+                rating={course.ratingAvg}
                 reviewCount={course.reviewCount}
-                ratingDistribution={course.ratingDistribution}
-                reviews={course.reviews}
+                ratingDistribution={MOCK_RATING_DISTRIBUTION}
+                reviews={MOCK_REVIEWS}
                 isPurchased={true}
               />
             </section>
@@ -141,13 +177,7 @@ export default function CourseDetailPageOwned() {
 
           {/* ── 우측 사이드바 (구매 후) ── */}
           <div className="w-72 shrink-0 sticky top-4">
-            <CourseDetailSidebarOwned
-              course={{
-                lectureCount: course.lectureCount,
-                duration: course.duration,
-                level: course.level,
-              }}
-            />
+            <CourseDetailSidebarOwned course={course} enrollmentInfo={enrollmentInfo} />
           </div>
         </div>
       </div>

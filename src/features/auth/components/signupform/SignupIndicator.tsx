@@ -1,11 +1,10 @@
 interface SignupIndicatorProps {
-    currentStep: number;
-    steps: { label: string }[];
+  currentStep: number;
+  steps: { label: string }[];
 }
 
 export default function SignupIndicator({ currentStep, steps }: SignupIndicatorProps) {
-    
-    return (
+  return (
     <div className="flex items-center justify-center gap-0 mb-8">
       {steps.map((step, idx) => {
         const stepNum = idx + 1;

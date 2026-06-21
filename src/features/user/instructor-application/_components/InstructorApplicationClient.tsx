@@ -1,91 +1,136 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import StepIndicator from './StepIndicator';
-import Step01Introduction from './Step01Introduction';
-import Step02Career from './Step02Career';
-import Step03Documents from './Step03Documents';
-import type { UserInfo } from '@/lib/users';
+import Step01Introduction, { Step01Data } from './Step01Introduction';
+import Step02Documents, { Step02Data } from './Step02Documents';
+import { UserMe } from '@/features/auth/types';
+import { Category } from '@/features/categories/types';
+import OneButtonModal from '@/components/modals/OneButtonModal';
 
-const STEPS = [{ label: '자기소개' }, { label: '경력 및 전문성' }, { label: '서류 제출' }];
+const STEPS = [{ label: '강사 정보' }, { label: '서류 제출' }];
 
-const DEFAULT_STEP01 = {
-  motivation: '',
+const DEFAULT_STEP01: Step01Data = {
+  profileImage: null,
   introduction: '',
-  equipment: [] as string[],
+  motivation: '',
+  categoryId: null,
 };
 
-const DEFAULT_STEP02 = {
-  job: '',
-  yearsOfExperience: '',
-  hasOnlineExperience: null as boolean | null,
-  platformName: '',
-  studentCount: '',
-  reviewLink: '',
-  certifications: [] as { name: string; file: File }[],
-  channelLink: '',
-};
-
-const DEFAULT_STEP03 = {
-  resumeFile: null as File | null,
-  portfolioFile: null as File | null,
-  curriculumFile: null as File | null,
-  sampleVideoLink: '',
+const DEFAULT_STEP02: Step02Data = {
+  certifications: [],
+  resumeFile: null,
+  portfolioUrl: '',
+  agreePrivacy: false,
+  agreePublicProfile: false,
 };
 
 interface InstructorApplicationClientProps {
-  userInfo: UserInfo;
+  userInfo: UserMe;
+  categories: Category[];
 }
 
 export default function InstructorApplicationClient({
   userInfo,
+  categories,
 }: InstructorApplicationClientProps) {
+  const router = useRouter();
   const [step, setStep] = useState(1);
-  const [step01Data, setStep01Data] = useState(DEFAULT_STEP01);
-  const [step02Data, setStep02Data] = useState(DEFAULT_STEP02);
-  const [step03Data, setStep03Data] = useState(DEFAULT_STEP03);
+  const [step01Data, setStep01Data] = useState<Step01Data>(DEFAULT_STEP01);
+  const [step02Data, setStep02Data] = useState<Step02Data>(DEFAULT_STEP02);
+  const [resultModal, setResultModal] = useState<{
+    title: string;
+    message: string;
+    isSuccess: boolean;
+  } | null>(null);
 
-  const handleStep01Next = (data: typeof DEFAULT_STEP01) => {
+  const handleStep01Next = (data: Step01Data) => {
     setStep01Data(data);
     setStep(2);
   };
 
-  const handleStep02Next = (data: typeof DEFAULT_STEP02) => {
+  const handleSubmit = async (data: Step02Data) => {
     setStep02Data(data);
-    setStep(3);
-  };
 
-  const handleSubmit = (data: typeof DEFAULT_STEP03) => {
-    setStep03Data(data);
-    console.log('제출 데이터:', { step01Data, step02Data, data });
-    // TODO: 강사 지원 API 연결
+    try {
+      const formData = new FormData();
+      formData.append('introduction', step01Data.introduction);
+      formData.append('motivation', step01Data.motivation);
+      formData.append('categoryId', String(step01Data.categoryId));
+      if (step01Data.profileImage) {
+        formData.append('profileImage', step01Data.profileImage);
+      }
+      formData.append('portfolioUrl', data.portfolioUrl);
+      if (data.resumeFile) {
+        formData.append('resume', data.resumeFile);
+      }
+      data.certifications.forEach((c) => {
+        formData.append('files', c.file);
+      });
+
+      const res = await fetch('/api/instructor-apply', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || '강사 지원에 실패했습니다.');
+      }
+
+      setResultModal({
+        title: '강사 지원이 완료되었습니다!',
+        message:
+          '결과는 사내 평가 후 이메일을 통해\n일주일 이내에 발송됩니다.\n내역의 경우 마이페이지 강사 지원 내역 페이지에서\n확인 가능합니다',
+        isSuccess: true,
+      });
+    } catch (error: any) {
+      setResultModal({
+        title: '지원 실패',
+        message: error.message || '강사 지원에 실패했습니다.',
+        isSuccess: false,
+      });
+    }
   };
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
-      {/* 타이틀 */}
       <div className="mb-6">
-        <h1 className="text-[24px] font-bold text-[#1E2125]">강사 지원</h1>
-        <p className="text-[13.5px] text-[#6A7282] mt-1">
-          우리 플랫폼의 강사가 되어 여러분의 지식을 공유해주세요
+        <h1 className="text-[24px] font-bold text-[#1E2125] text-center">강사 지원</h1>
+        <p className="text-[13.5px] text-[#6A7282] text-center mt-1">
+          핏격의 강사가 되어 여러분의 지식을 공유해주세요
         </p>
       </div>
 
-      {/* 단계 표시기 */}
       <StepIndicator currentStep={step} steps={STEPS} />
 
-      {/* 폼 카드 */}
       <div className="bg-white rounded-2xl shadow-md p-8">
         {step === 1 && (
-          <Step01Introduction userInfo={userInfo} data={step01Data} onNext={handleStep01Next} />
+          <Step01Introduction
+            userInfo={userInfo}
+            categories={categories}
+            data={step01Data}
+            onNext={handleStep01Next}
+          />
         )}
         {step === 2 && (
-          <Step02Career data={step02Data} onNext={handleStep02Next} onPrev={() => setStep(1)} />
-        )}
-        {step === 3 && (
-          <Step03Documents data={step03Data} onSubmit={handleSubmit} onPrev={() => setStep(2)} />
+          <Step02Documents data={step02Data} onSubmit={handleSubmit} onPrev={() => setStep(1)} />
         )}
       </div>
+
+      {/* 결과 모달 */}
+      {resultModal && (
+        <OneButtonModal
+          title={resultModal.title}
+          message={resultModal.message}
+          confirmLabel="확인"
+          onConfirm={() => {
+            setResultModal(null);
+            if (resultModal.isSuccess) router.push('/');
+          }}
+        />
+      )}
     </div>
   );
 }

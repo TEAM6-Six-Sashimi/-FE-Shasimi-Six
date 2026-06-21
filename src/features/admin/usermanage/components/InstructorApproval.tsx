@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { InstructorApplication } from '../types';
-import { approveInstructorAction, rejectInstructorAction } from '../actions';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   applicants: InstructorApplication[];
@@ -11,41 +12,22 @@ interface Props {
 }
 
 export default function InstructorApproval({ applicants, setApplicants }: Props) {
+  const router = useRouter();
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  const filtered = applicants.filter((a) =>
-    String(a.userId).includes(search)
+  const filtered = (applicants ?? []).filter(
+    (a) => (a.name ?? '').includes(search) || (a.loginId ?? '').includes(search),
   );
-
-  const handleApprove = async (id: number) => {
-    try {
-      setLoading(true);
-      await approveInstructorAction(id);
-      setApplicants((prev) => prev.filter((a) => a.id !== id));
-    } catch {
-      alert('승인 처리에 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleReject = async (id: number) => {
-    try {
-      setLoading(true);
-      await rejectInstructorAction(id);
-      setApplicants((prev) => prev.filter((a) => a.id !== id));
-    } catch {
-      alert('반려 처리에 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="pl-3 text-[18px] font-extrabold text-[#1E2125]">강사 승인 대기</h2>
+        <div className="flex items-baseline gap-2">
+          <h2 className="text-[18px] font-extrabold text-[#1E2125]">강사 승인 대기</h2>
+          <span className="text-[12.5px] text-[#6A7282]">
+            현재 승인 대기 <span className="text-[#FF5E5E] font-semibold">{applicants.length}건</span>
+          </span>
+        </div>
         <div className="relative w-64">
           <input
             type="text"
@@ -60,49 +42,47 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
         </div>
       </div>
 
-      <table className="w-full text-[15px] table-fixed">
+      <table className="w-full text-[13px] table-fixed">
         <thead>
           <tr className="border-b border-[#E5E7EB]">
-            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">신청 ID</th>
-            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">유저 ID</th>
-            <th className="py-3 w-[20%] text-center font-semibold text-[#1E2125]">자격증</th>
-            <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">발급 기관</th>
-            <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">신청일</th>
-            <th className="py-3 w-[20%] text-center font-semibold text-[#1E2125]">관리</th>
+            <th className="py-3 w-[6%] text-center font-semibold text-[#1E2125]">#</th>
+            <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">이름</th>
+            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">회원 ID</th>
+            <th className="py-3 w-[22%] text-center font-semibold text-[#1E2125]">이메일</th>
+            <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125]">지원 카테고리명</th>
+            <th className="py-3 w-[14%] text-center font-semibold text-[#1E2125]">신청일</th>
+            <th className="py-3 w-[14%] text-center font-semibold text-[#1E2125]">서류</th>
           </tr>
         </thead>
         <tbody>
           {filtered.length === 0 ? (
             <tr>
-              <td colSpan={6} className="py-16 text-center text-[#6A7282]">
+              <td colSpan={7} className="py-16 text-center text-[#6A7282]">
                 승인 대기 중인 강사가 없습니다.
               </td>
             </tr>
           ) : (
-            filtered.map((a) => (
-              <tr key={a.id} className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors">
-                <td className="py-3 text-center text-[#6A7282]">{a.id}</td>
-                <td className="py-3 text-center text-[#6A7282]">{a.userId}</td>
-                <td className="py-3 text-center font-semibold text-[#1E2125]">{a.certificationName}</td>
-                <td className="py-3 text-center text-[#6A7282]">{a.issuedBy}</td>
+            filtered.map((a, idx) => (
+              <tr
+                key={a.applicationId}
+                className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
+              >
+                <td className="py-3 text-center text-[#6A7282]">{idx + 1}</td>
+                <td className="py-3 text-center font-semibold text-[#1E2125]">{a.name}</td>
+                <td className="py-3 text-center text-[#6A7282]">{a.loginId}</td>
+                <td className="py-3 text-center text-[#6A7282]">{a.email}</td>
+                <td className="py-3 text-center font-semibold text-[#1E2125]">{a.mainCategoryName}</td>
                 <td className="py-3 text-center text-[#6A7282]">{a.createdAt.slice(0, 10)}</td>
                 <td className="py-3 text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => handleApprove(a.id)}
-                      disabled={loading}
-                      className="px-6 py-1.5 rounded border-2 border-[#CFEE5D] text-[12px] font-semibold text-[#1E2125] bg-white hover:border-[#A8D014] hover:bg-[#F9FBE7] cursor-pointer transition-colors disabled:opacity-50"
-                    >
-                      승인
-                    </button>
-                    <button
-                      onClick={() => handleReject(a.id)}
-                      disabled={loading}
-                      className="px-6 py-1.5 rounded border-2 border-[#FF5E5E] text-[12px] font-semibold text-white bg-[#FF5E5E] hover:bg-[#D14848] hover:border-[#D14848] cursor-pointer transition-colors disabled:opacity-50"
-                    >
-                      거절
-                    </button>
-                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      router.push(`/admin/usermanage/instructor-applications/${a.applicationId}?from=approval`)
+                    }
+                    className="px-3 py-1.5 h-auto border-[1.5px] border-[#D1D5DB] text-[12px] font-semibold text-[#6A7282] hover:border-[#6A7282] hover:bg-white hover:text-[#6A7282] cursor-pointer"
+                  >
+                    서류 확인
+                  </Button>
                 </td>
               </tr>
             ))

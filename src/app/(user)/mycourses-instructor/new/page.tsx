@@ -5,7 +5,7 @@ export default async function NewCoursePage() {
   const categories = await fetchCategories();
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
-      <CourseRegisterForm categories={categories} />;
+      <CourseRegisterForm categories={categories} />
     </div>
   );
 }
