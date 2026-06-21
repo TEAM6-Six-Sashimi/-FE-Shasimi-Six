@@ -1,45 +1,83 @@
 'use client';
 
+import { useMemo } from 'react';
 import type { RejectedCourse } from '../type';
+import type { Category } from '@/features/categories/types';
 
 interface Props {
   courses: RejectedCourse[];
+  categories: Category[];
 }
 
-export default function RejectedCourses({ courses }: Props) {
+export default function RejectedCourses({ courses, categories }: Props) {
+  // 세부카테고리명 → 대카테고리명 매핑
+  const subToMainMap = useMemo(() => {
+    const map = new Map<string, string>();
+    categories.forEach((cat) => {
+      cat.options.forEach((opt) => {
+        map.set(opt.name, cat.name);
+      });
+    });
+    return map;
+  }, [categories]);
+
+  const getMainCategory = (categoryName: string) => subToMainMap.get(categoryName) ?? categoryName;
+
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
       <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-6">반려된 강의 목록</h2>
       <table className="w-full text-[13px] table-fixed">
         <thead>
           <tr className="border-b border-[#E5E7EB]">
-            <th className="py-3 w-[22%] text-center font-semibold text-[#1E2125]">강의명</th>
-            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">강사명</th>
-            <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">카테고리</th>
-            <th className="py-3 w-[13%] text-center font-semibold text-[#1E2125]">반려일</th>
-            <th className="py-3 w-[38%] text-center font-semibold text-[#1E2125]">반려 사유</th>
+            <th className="py-3 w-[6%] text-center font-semibold text-[#1E2125]">#</th>
+            <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125]">강의명</th>
+            <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">강사명</th>
+            <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">
+              카테고리 &gt; 세부카테고리
+            </th>
+            <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">반려일</th>
+            <th className="py-3 w-[14%] text-center font-semibold text-[#1E2125]">
+              반려 사유 카테고리
+            </th>
+            <th className="py-3 w-[26%] text-center font-semibold text-[#1E2125]">
+              반려 사유 내용
+            </th>
           </tr>
         </thead>
         <tbody>
           {courses.length === 0 ? (
             <tr>
-              <td colSpan={5} className="py-16 text-center text-[#6A7282]">
+              <td colSpan={7} className="py-16 text-center text-[#6A7282]">
                 반려된 강의가 없습니다.
               </td>
             </tr>
           ) : (
-            courses.map((c) => (
+            courses.map((c, idx) => (
               <tr
                 key={c.courseId}
                 className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
               >
-                <td className="px-6 py-3 text-left font-semibold text-[#1E2125]">{c.title}</td>
+                <td className="py-3 text-center text-[#6A7282]">{idx + 1}</td>
+                <td className="py-3 px-4 text-left font-semibold text-[#1E2125]">{c.title}</td>
                 <td className="py-3 text-center text-[#6A7282]">{c.instructorName}</td>
-                <td className="py-3 text-center text-[#6A7282]">{c.categoryName}</td>
+                <td className="py-3 text-center text-[#6A7282]">
+                  {getMainCategory(c.categoryName)} &gt; {c.categoryName}
+                </td>
                 <td className="py-3 text-center text-[#6A7282]">
                   {c.updatedAt?.slice(0, 10) ?? '-'}
                 </td>
-                <td className="py-3 text-[#6A7282] text-left px-4">{c.rejectReason}</td>
+                <td className="py-3 text-center">
+                  {c.rejectCategory ? (
+                    <span className="inline-block px-2.5 py-1 rounded-md text-[11.5px] font-semibold bg-[#FFEBEB] text-[#FF5E5E]">
+                      {c.rejectCategory}
+                    </span>
+                  ) : (
+                    <span className="text-[#9CA3AF]">-</span>
+                  )}
+                </td>
+                <td className="py-3 text-[#6A7282] text-left px-4 truncate" title={c.rejectReason}>
+                  {c.rejectReason}
+                </td>
               </tr>
             ))
           )}
