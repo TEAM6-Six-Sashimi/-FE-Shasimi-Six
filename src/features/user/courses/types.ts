@@ -8,6 +8,8 @@ export interface CourseFromAPI {
   totalDuration: number;
   ratingAvg: number;
   studentCount: number;
+  approvedAt: string;   // 등록일
+  label?: string | null;   // 인기, NEW 
 }
 
 // 강의 상세

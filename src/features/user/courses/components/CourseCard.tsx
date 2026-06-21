@@ -22,9 +22,22 @@ function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
   return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
 }
 
+// 등록일 형식 변환
+function formatApprovedDate(approvedAt: string | null | undefined): string | null {
+  if (!approvedAt) return null;
+  const date = new Date(approvedAt);
+  if (Number.isNaN(date.getTime())) return null;
+ 
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `등록일: ${yyyy}-${mm}-${dd}`;
+}
+
 export default function CourseCard({ course, category }: CourseCardProps) {
   const router = useRouter();
   const thumbnailUrl = getThumbnailUrl(course.thumbnail);
+  const approvedDateLabel = formatApprovedDate(course.approvedAt);
 
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showCartModal, setShowCartModal] = useState(false);
@@ -84,6 +97,13 @@ export default function CourseCard({ course, category }: CourseCardProps) {
                 className="object-cover"
               />
             )}
+
+            {/* 인기/NEW 라벨 */}
+            {course.label && (
+              <span className="absolute top-2 left-2 bg-[#FF5E5E] text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">
+                {course.label}
+              </span>
+            )}
           </div>
         </Link>
 
@@ -98,18 +118,22 @@ export default function CourseCard({ course, category }: CourseCardProps) {
           </p>
           {/* 강사 */}
           <p className="text-[#6A7282] text-[12px]">{course.instructorName}</p>
-          {/* 평점 */}
+          {/* 평점 + 수강생 */}
           <div className="flex items-center gap-1">
-            <span className="text-[#FFD700] text-[12px]">★</span>
-            <span className="text-[#1E2125] text-[12px] font-semibold">
+            <span className="text-[#FFD700] text-[13px]">★</span>
+            <span className="text-[#1E2125] text-[13px] font-semibold">
               {course.ratingAvg.toFixed(1)}
             </span>
-            <span className="text-[#6A7282] text-[11px]">
-              ({course.studentCount.toLocaleString()}명)
+            <span className="text-[#6A7282] text-[12px]">
+              · {course.studentCount.toLocaleString()}명
             </span>
           </div>
+          {/* 등록일 */}
+          {approvedDateLabel && (
+            <p className="text-[#6A7282] text-[12px]">{approvedDateLabel}</p>
+          )}
           {/* 가격 */}
-          <p className="text-[#1E2125] text-[14px] font-bold mt-auto">
+          <p className="text-[#1E2125] text-[18px] font-bold mt-auto">
             {course.price.toLocaleString()} 크레딧
           </p>
         </Link>
@@ -126,7 +150,7 @@ export default function CourseCard({ course, category }: CourseCardProps) {
           <Button
             size="sm"
             variant="outline"
-            className="flex-1 border-[#D1D5DB] text-[#1E2125] text-[12.5px] font-semibold h-8 hover:bg-[#E5E7EB] cursor-pointer"
+            className="flex-1 border-[#1E2125] text-[#1E2125] text-[12.5px] font-semibold h-8 hover:bg-[#F9FAFB] cursor-pointer"
             onClick={handleAddToCart}
             disabled={isAddingToCart}
           >
