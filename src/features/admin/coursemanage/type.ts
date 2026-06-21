@@ -24,5 +24,28 @@ export interface RejectedCourse {
   instructorName: string;
   categoryName: string;
   updatedAt: string | null;
+  rejectCategory: string | null;
   rejectReason: string;
+}
+ 
+// 승인 대기 강의
+export interface AdminPendingCourse {
+  courseId: number;
+  title: string;
+  instructorName: string;
+  instructorLoginId: string; // "강사 ID" 수정 필요
+  categoryName: string;
+  createdAt: string;
+}
+ 
+// 비공개 강의 (API 아직 없음, mock 사용)
+export interface AdminPrivateCourse {
+  courseId: number;
+  title: string;
+  instructorName: string; 
+  categoryName: string;
+  studentCount: number;
+  ratingAvg: number;
+  createdAt: string;
+  privatedAt: string;
 }
