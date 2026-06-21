@@ -70,12 +70,13 @@ export interface InstructorInProgressCourse {
   thumbnail: string;
   totalDuration: number;
   status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED';
+  rejectCategory: string | null;
   rejectReason: string | null;
   ratingAvg: number;
   reviewCount: number;
   studentCount: number;
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string; // REJECTED 상태일 때 반려일로도 사용
   approvedAt: string | null;
   sessions: {
     sessionId: number;
