@@ -21,7 +21,7 @@ export default function MyCoursesList({ courses }: Props) {
     <div className="max-w-275 mx-auto px-6 py-8">
       <h1 className="text-[24px] font-bold text-[#1E2125] mb-6">내 강의</h1>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5">
         {courses.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-60 gap-3 text-[#6A7282]">
             <p className="text-[20px] font-medium">수강 중인 강의가 없습니다.</p>
@@ -32,11 +32,11 @@ export default function MyCoursesList({ courses }: Props) {
             return (
               <div
                 key={course.courseId}
-                className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden"
+                className="bg-white rounded-xl border border-[#E5E7EB] p-5"
               >
-                <div className="flex">
-                  {/* 썸네일 */}
-                  <div className="relative w-44 shrink-0 bg-[#E5E7EB]">
+                <div className="flex gap-5">
+                  {/* 썸네일 - 카드 안쪽 여백 + 둥근 모서리 */}
+                  <div className="relative w-44 h-28 shrink-0 rounded-lg overflow-hidden bg-[#E5E7EB]">
                     {thumbnailUrl && (
                       <Image
                         src={thumbnailUrl}
@@ -51,24 +51,11 @@ export default function MyCoursesList({ courses }: Props) {
                   {/* 우측 전체 */}
                   <div className="flex-1 flex flex-col">
                     {/* 상단: 강의 정보 + 버튼 */}
-                    <div className="flex items-start justify-between px-5 pt-4 pb-2">
+                    <div className="flex items-start justify-between">
                       <div className="flex flex-col gap-1">
-                        <p className="text-[15px] font-bold text-[#1E2125] leading-snug">
+                        <p className="text-[16px] font-extrabold text-[#1E2125] leading-snug mt-2">
                           {course.title}
                         </p>
-                        <p className="text-[12.5px] text-[#6A7282]">{course.instructorName}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[11.5px] text-[#6A7282]">학습 진행률</span>
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                              course.completed
-                                ? 'bg-[#F9FBE7] text-[#827717]'
-                                : 'bg-[#FFEBEB] text-[#FF5E5E]'
-                            }`}
-                          >
-                            {course.completed ? '완강' : '수강중'}
-                          </span>
-                        </div>
                       </div>
 
                       {/* 버튼 */}
@@ -84,29 +71,42 @@ export default function MyCoursesList({ courses }: Props) {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-9 px-4 border-[#D1D5DB] text-[#1E2125] text-[12.5px] hover:bg-[#F9FAFB] cursor-pointer"
+                          className="h-9 px-4 border-[1.5px] border-[#1E2125] text-[#1E2125] text-[12.5px] font-semibold bg-white hover:bg-[#F9FAFB] cursor-pointer"
                         >
                           리뷰 작성
                         </Button>
                       </div>
                     </div>
-
-                    {/* 진행률 바 */}
-                    <div className="px-5 pb-3 mt-auto">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="flex-1 h-2 bg-[#E5E7EB] rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${progressColor(course.completed)}`}
-                            style={{ width: `${course.progressRate}%` }}
-                          />
+                    <div>
+                      <p className="text-[13.5px] font-bold text-[#6A7282]">{course.instructorName}</p>
+                    </div>
+                    {/* 학습 진행률 라벨 + 퍼센트 (같은 줄) */}
+                    <div className="flex-1 flex flex-col justify-end mt-3">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[12px] font-semibold text-[#6A7282]">학습 진행률</span>
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                              course.completed
+                                ? 'bg-[#F9FBE7] text-[#827717]'
+                                : 'bg-[#FFEBEB] text-[#FF5E5E]'
+                            }`}
+                          >
+                            {course.completed ? '완강' : '수강중'}
+                          </span>
                         </div>
                         <span
-                          className={`text-[12px] font-semibold w-10 text-right shrink-0 ${
-                            course.completed ? 'text-[#827717]' : 'text-[#FF5E5E]'
-                          }`}
+                          className="text-[13px] font-bold text-[#6A7282]"
                         >
                           {course.progressRate}%
                         </span>
+                      </div>
+                      {/* 진행률 바 */}
+                      <div className="h-2.5 bg-[#E5E7EB] rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${progressColor(course.completed)}`}
+                          style={{ width: `${course.progressRate}%` }}
+                        />
                       </div>
                     </div>
                   </div>
