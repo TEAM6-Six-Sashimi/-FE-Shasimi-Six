@@ -46,7 +46,7 @@ export default async function Header() {
       ) : (
         <div className="flex flex-1 justify-end">
           {user.role === 'STUDENT' && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Link href="/credit" className="flex text-[15px] font-medium gap-1 items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]">
                 <Image src="/header/credit.svg" width={17} height={17} alt="크레딧 충전" /> 크레딧 충전
               </Link>
@@ -62,7 +62,7 @@ export default async function Header() {
           )}
 
           {user.role === 'INSTRUCTOR' && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Link href="/credit" className="flex text-[15px] font-medium gap-1 items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]">
                 <Image src="/header/credit.svg" width={17} height={17} alt="크레딧 충전" /> 크레딧 충전
               </Link>
@@ -78,7 +78,7 @@ export default async function Header() {
           )}
 
           {user.role === 'ADMIN' && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <AdminModeToggle />
               <Link href="/credit" className="flex text-[15px] font-medium gap-1 items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]">
                 <Image src="/header/credit.svg" width={17} height={17} alt="크레딧 충전" /> 크레딧 충전
