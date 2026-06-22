@@ -20,15 +20,16 @@ export default function AiAgreementRequiredModal({ onCancel }: AiAgreementRequir
       onClick={onCancel}
     >
       <div
-        className="bg-white rounded-2xl p-7 w-full max-w-md shadow-xl"
+        className="bg-white rounded-2xl p-7 w-full max-w-100 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-[19px] font-bold text-[#1E2125] mb-4">AI 기능 활용 동의 필요</h3>
         <p className="text-[14px] text-[#6A7282] leading-relaxed mb-6">
-          AI 구독 플랜을 이용하기 위해서는 &apos;AI 기능 활용 동의&apos;가 필요합니다.
+          AI 구독 플랜 이용에는 &apos;AI 기능 활용 동의&apos;가 필요합니다.
           <br />
-          동의 여부는 마이페이지&gt;개인정보 조회&gt;수정하기에서 변경할 수 있습니다. 수정
-          페이지로 이동하시겠습니까?
+          마이페이지에서 동의 후 다시 시도해주세요.
+          <br />
+          수정 페이지로 이동하시겠습니까?
         </p>
 
         <div className="grid grid-cols-2 gap-3">
