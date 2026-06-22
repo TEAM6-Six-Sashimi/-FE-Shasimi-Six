@@ -1,6 +1,6 @@
 import { CourseFromAPI } from '@/features/user/courses/types';
 import { StudentCourse } from '@/features/user/mycourses-student/types';
-import { CourseDetailFromAPI, EnrollmentInfo } from '@/features/user/courses/types';
+import { CourseDetailFromAPI, EnrollmentInfo, StudentCourseDetail } from '@/features/user/courses/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -73,7 +73,7 @@ export async function fetchEnrollmentInfo(
   }
 }
 
-//수강생 내 강의
+// 수강생 내 강의 목록
 export async function fetchStudentCourses(
   accessToken: string,
   userId: string,
@@ -94,3 +94,27 @@ export async function fetchStudentCourses(
     return [];
   }
 }
+
+// 수강생 내 강의 상세 + 진행률 조회 (이어보기 진입)
+export async function fetchStudentCourseDetail(
+  courseId: string,
+  accessToken: string,
+  userId: string,
+): Promise<StudentCourseDetail | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/student/courses/${courseId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        'X-USER-ID': userId,
+      },
+      cache: 'no-store',
+    });
+ 
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+ 

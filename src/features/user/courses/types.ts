@@ -48,9 +48,16 @@ export interface EnrollmentInfo {
   enrollmentId: number;
   courseId: number;
   progress: number;
-  lastSessionId: number; // 마지막 수강 세션 id(이어보기용)
+  lastSessionId?: number; // 마지막 수강 세션 id(이어보기용)
   enrolledAt: string;
 }
+
+// 수강생용 강의 상세
+export interface StudentCourseDetail extends CourseDetailFromAPI {
+  progressRate: number;
+  completed: boolean;
+}
+ 
 
 // 난이도 한글 변환
 export const DIFFICULTY_LABEL: Record<string, string> = {

@@ -65,11 +65,8 @@ function ReviewForm() {
       </div>
 
       {/* 안내 문구 */}
-      <div className="flex items-center gap-2 bg-[#FFEBEB] rounded-lg px-3 py-2">
-        <span className="text-[#FF5E5E] text-[13px]">⚠</span>
-        <p className="text-[12.5px] text-[#FF5E5E]">
-          강의평은 한 번만 작성할 수 있으며, 작성 후 수정이 불가합니다.
-        </p>
+      <div className="bg-[#FFEBEB] rounded-lg px-4 py-4 font-medium text-[13px] text-[#FF5E5E]">
+        ⚠ 강의평은 한 번만 작성할 수 있으며, 작성 후 수정이 불가합니다.
       </div>
 
       {/* 텍스트 입력 */}
@@ -147,7 +144,7 @@ export default function CourseReviews({
       {isPurchased ? (
         <ReviewForm />
       ) : (
-        <div className="bg-[#F1FFC1] border border-[#CFEE5D] rounded-lg px-4 py-3 text-[13px] text-[#1E2125]">
+        <div className="bg-[#F9FAFB] rounded-lg px-4 py-4 font-medium text-[13px] text-[#6A7282]">
           강의 구매 후 리뷰를 작성할 수 있습니다.
         </div>
       )}
