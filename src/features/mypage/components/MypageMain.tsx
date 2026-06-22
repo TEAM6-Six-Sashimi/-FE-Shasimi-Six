@@ -2,6 +2,7 @@
 
 import { UserMe } from '@/features/auth/types';
 import { useToast } from '@/components/ui/ToastContext';
+import Image from 'next/image';
 
 interface MypageMainProps {
   user: UserMe;
@@ -41,22 +42,24 @@ export default function MypageMain({ user }: MypageMainProps) {
   return (
     <div>
       {/* 상단 프로필 */}
-      <div className="pb-5 border-b border-[#E5E7EB] mb-5">
+      <div className="pb-5 border-b border-[#E5E7EB]">
         <p className="text-[18px] font-bold text-[#1E2125]">{user.name}</p>
-        <p className="text-[14px] font-light text-[#6A7282]">{user.email}</p>
+        {/* <p className="text-[14px] font-light text-[#6A7282]">{user.email}</p> */}
       </div>
-    {/* 기본 정보 2열 */}
-      <div className="grid grid-cols-2 gap-x-10 gap-y-4 mb-6">
+
+      {/* 기본 정보 2열 - 각 행마다 구분선 */}
+      <div className="grid grid-cols-2 gap-x-10">
         <InfoRow label="이름" value={user.name} />
         <InfoRow label="아이디" value={user.loginId} />
         <InfoRow label="생년월일" value={user.birthDate} />
         <InfoRow label="가입일" value={joinedAt} />
-        <InfoRow label="전화번호" value="-" />   {/* 전화번호 응답 필드에 없음 */}
+        <InfoRow label="전화번호" value="-" /> {/* 전화번호 응답 필드에 없음 */}
         <InfoRow label="이메일" value={user.email} />
- 
         {/* 추천인 코드 */}
-        <div className="flex items-center justify-between">
-          <span className="text-[14px] text-[#6A7282] font-semibold">추천인 코드</span>
+        <div className="flex items-center gap-6 py-3.5 col-span-2">
+          <span className="w-20 shrink-0 text-[14px] text-[#6A7282] font-semibold">
+            추천인 코드
+          </span>
           <div className="flex items-center gap-2">
             <span className="text-[13.5px] font-semibold text-[#FF5E5E]">
               {user.referralCode || '-'}
@@ -66,24 +69,27 @@ export default function MypageMain({ user }: MypageMainProps) {
               onClick={handleCopyReferralCode}
               className="flex items-center gap-1 px-2 py-1 text-[12px] text-[#6A7282] border border-[#D1D5DB] rounded-md hover:bg-[#F9FAFB] cursor-pointer"
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <rect x="9" y="9" width="11" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
-                <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" strokeWidth="1.6" />
-              </svg>
+              <Image src="/copy-Icon.svg" alt="" width={11} height={11} />
               복사
             </button>
           </div>
         </div>
       </div>
- 
+
       {/* 동의 여부 */}
-      <div className="pt-5 mb-10 border-t border-[#E5E7EB]">
+      <div className="pt-5 mb-4 border-t border-[#E5E7EB]">
         <p className="text-[13px] text-[#9CA3AF] mb-3">동의 여부</p>
-        <div className="flex flex-col gap-3.5">
-          {AGREEMENT_ROWS.map(({ key, label }) => {
+        <div className="flex flex-col col-span-1 gap-x-10">
+          {AGREEMENT_ROWS.map(({ key, label }, idx) => {
             const agreed = MOCK_AGREEMENTS[key]; // 추후 user.agreements?.[key]로 교체
+            const isLast = idx === AGREEMENT_ROWS.length - 1;
             return (
-              <div key={key} className="flex items-center justify-between">
+              <div
+                key={key}
+                className={`flex items-center justify-between py-3.5 ${
+                  isLast ? '' : 'border-b border-[#F3F4F6]'
+                }`}
+              >
                 <span className="text-[14px] text-[#6A7282] font-semibold">{label}</span>
                 <span
                   className={`text-[13px] font-semibold ${
@@ -97,7 +103,6 @@ export default function MypageMain({ user }: MypageMainProps) {
           })}
         </div>
       </div>
- 
 
       <div className="flex items-center justify-between mt-6">
         <button
@@ -119,10 +124,10 @@ export default function MypageMain({ user }: MypageMainProps) {
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
   return (
-    <div className="flex items-center justify-between">
-      <span className="text-[14px] text-[#6A7282] font-semibold">{label}</span>
+    <div className={`flex items-center gap-6 py-3.5 ${last ? '' : 'border-b border-[#F3F4F6]'}`}>
+      <span className="w-20 shrink-0 text-[14px] text-[#6A7282] font-semibold">{label}</span>
       <span className="text-[14px] font-medium text-[#1E2125]">{value}</span>
     </div>
   );
