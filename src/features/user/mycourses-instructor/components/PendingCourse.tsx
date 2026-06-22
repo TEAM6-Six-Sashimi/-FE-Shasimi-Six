@@ -8,6 +8,7 @@ import type { InstructorInProgressCourse } from '../types';
 import type { Category } from '@/features/categories/types';
 import { deleteCourseAction } from '../actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
+import RejectDetailModal from '@/components/modals/RejectDetailModal';
 import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
 
 type FilterType = '전체' | '대기' | '보관' | '반려';
@@ -228,60 +229,19 @@ export default function PendingCourse({ courses, categories }: Props) {
         )}
       </div>
 
-      {/* 반려 사유 모달 */}
+      {/* 반려 사유 모달 (공용) */}
       {rejectionModal !== null && (
-        <div
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-          onClick={() => setRejectionModal(null)}
-        >
-          <div
-            className="bg-white rounded-2xl p-7 w-full max-w-md shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-[19px] font-bold text-[#1E2125]">반려 사유 상세</h3>
-              <button
-                onClick={() => setRejectionModal(null)}
-                className="text-[#9CA3AF] hover:text-[#1E2125] transition-colors cursor-pointer text-[18px]"
-              >
-                ✕
-              </button>
-            </div>
- 
-            {/* 강의명 / 반려일 */}
-            <div className="grid grid-cols-2 gap-x-10 bg-[#F9FAFB] rounded-xl px-4 py-3.5 mb-5">
-              <div>
-                <p className="text-[11.5px] text-[#9CA3AF] mb-0.5">강의명</p>
-                <p className="text-[14.5px] font-bold text-[#1E2125]">
-                  {rejectionModal.courseTitle}
-                </p>
-              </div>
-              <div>
-                <p className="text-[11.5px] text-[#9CA3AF] mb-0.5">반려일</p>
-                <p className="text-[14.5px] font-bold text-[#1E2125]">
-                  {rejectionModal.rejectedAt}
-                </p>
-              </div>
-            </div>
- 
-            {/* 사유 카테고리 */}
-            <div className="mb-4">
-              <p className="text-[13px] text-[#6A7282] mb-1.5">사유 카테고리</p>
-              <span className="inline-block px-3 py-1.5 rounded-md text-[13px] font-semibold bg-[#FFEBEB] text-[#FF5E5E]">
-                {rejectionModal.rejectCategory}
-              </span>
-            </div>
- 
-            {/* 상세 내용 */}
-            <div>
-              <p className="text-[13px] text-[#6A7282] mb-1.5">상세 내용</p>
-              <p className="text-[13.5px] text-[#1E2125] leading-relaxed border border-[#E5E7EB] rounded-lg px-4 py-3">
-                {rejectionModal.rejectReason}
-              </p>
-            </div>
-          </div>
-        </div>
+        <RejectDetailModal
+          fields={[
+            { label: '강의명', value: rejectionModal.courseTitle },
+            { label: '반려일', value: rejectionModal.rejectedAt },
+          ]}
+          category={rejectionModal.rejectCategory}
+          detail={rejectionModal.rejectReason}
+          onClose={() => setRejectionModal(null)}
+        />
       )}
+
       {deleteTargetId !== null && (
         <TwoButtonModal
           title="강의 삭제"
