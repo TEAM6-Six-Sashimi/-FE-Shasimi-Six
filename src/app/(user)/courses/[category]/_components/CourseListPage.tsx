@@ -20,7 +20,7 @@ import { CourseFromAPI } from '@/features/user/courses/types';
 
 const ITEMS_PER_PAGE = 16;
 
-type SortType = '인기순' | '최신순' | '높은 평점순';
+type SortType = '인기순' | '최신순' | '평점순';
 
 interface CourseListPageProps {
   categories: Category[];
@@ -28,6 +28,7 @@ interface CourseListPageProps {
 }
 
 export default function CourseListPage({ categories, initialCourses }: CourseListPageProps) {
+
   const params = useParams();
   const searchParams = useSearchParams();
   const category = decodeURIComponent(params.category as string);
@@ -38,9 +39,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
   const [sort, setSort] = useState<SortType>('인기순');
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState<FilterValues>({
-    level: '전체',
-    priceRange: [0, 100000],
-    durationRange: [0, 1000],
+    priceRange: [0, 100000000],
     ratingRange: [0, 5],
   });
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,7 +67,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
     setCurrentPage(1);
   }, [category, sub, search, filters, sort]);
 
-  // 필터링 + 정렬 (프론트에서 처리, 추후 백엔드 페이지네이션으로 교체 예정)
+  // 필터링 + 정렬 (프론트 처리, 추후 백엔드 페이지네이션으로 교체 예정)
   const filteredCourses = useMemo(() => {
     let result = [...initialCourses];
 
@@ -79,15 +78,13 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
       (c) =>
         c.price >= filters.priceRange[0] &&
         c.price <= filters.priceRange[1] &&
-        c.totalDuration >= filters.durationRange[0] &&
-        c.totalDuration <= filters.durationRange[1] &&
         c.ratingAvg >= filters.ratingRange[0] &&
         c.ratingAvg <= filters.ratingRange[1],
     );
 
     if (sort === '인기순') result = result.sort((a, b) => b.studentCount - a.studentCount);
-    if (sort === '최신순') result = result; // TODO: 백엔드에서 createdAt 필드 추가 후 정렬
-    if (sort === '높은 평점순') result = result.sort((a, b) => b.ratingAvg - a.ratingAvg);
+    if (sort === '최신순') result = result; 
+    if (sort === '평점순') result = result.sort((a, b) => b.ratingAvg - a.ratingAvg);
 
     return result;
   }, [initialCourses, search, filters, sort]);
@@ -141,9 +138,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
                 }}
                 onReset={() =>
                   setFilters({
-                    level: '전체',
-                    priceRange: [0, 100000],
-                    durationRange: [0, 1000],
+                    priceRange: [0, 100000000],
                     ratingRange: [0, 5],
                   })
                 }
@@ -182,7 +177,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
               <SelectTrigger className="h-8 w-32 text-[12.5px] border-[#D1D5DB] text-[#1E2125]">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper" side="bottom">
                 {(['인기순', '최신순', '평점순'] as SortType[]).map((s) => (
                   <SelectItem key={s} value={s} className="text-[12.5px]">
                     {s}
@@ -195,7 +190,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
 
         {/* 강의 그리드 */}
         {pagedCourses.length > 0 ? (
-          <div className="grid grid-cols-4 gap-5 mb-10">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
             {pagedCourses.map((course, idx) => (
               <CourseCard key={idx} course={course} category={category} />
             ))}
@@ -222,8 +217,8 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
                 onClick={() => setCurrentPage(page)}
                 className={`w-8 h-8 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
                   currentPage === page
-                    ? 'bg-[#1E2125] text-white'
-                    : 'text-[#6A7282] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
+                    ? 'bg-[FF5E5E] text-white'
+                    : 'text-[#1E2125] hover:bg-[#F9FAFB]'
                 }`}
               >
                 {page}

@@ -1,12 +1,21 @@
-export default function CartPage() {
-    return (
-        <div className="flex gap-6 bg-[#F9FAFB] items-start mx-auto py-10 px-4">
-            <div className="flex max-w-275 mx-auto gap-5">
-                <div className="flex-1 bg-white rounded-2xl p-8 shadow-md mb-20"></div>
-            </div>
-            <div className="w-72 shrink-0 sticky top-4">
+import { cookies } from 'next/headers';
+import { fetchCart } from '@/services/cart.service';
+import { CartCourseItem } from '@/features/user/cart/types';
+import CartClient from '@/features/user/cart/components/CartClient';
 
-            </div>
-        </div>
-    );
+export default async function CartPage() {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+
+  let initialItems: CartCourseItem[] = [];
+  if (accessToken) {
+    try {
+      const data = await fetchCart(accessToken);
+      initialItems = data.items;
+    } catch (e) {
+      initialItems = [];
+    }
+  }
+
+  return <CartClient initialItems={initialItems} />;
 }

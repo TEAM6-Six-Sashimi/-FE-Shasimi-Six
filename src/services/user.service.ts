@@ -21,17 +21,17 @@ export async function fetchUserMe(accessToken: string): Promise<UserMe> {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       cache: 'no-store',
     });
 
     if (!response.ok) {
       const errorBody = await response.text();
-      console.log('fetchUserMe error body:', errorBody);
+      // console.log('fetchUserMe error body:', errorBody);
       return GUEST_USER;
     }
- 
+
     return response.json();
   } catch (e) {
     console.log('fetchUserMe error:', e);

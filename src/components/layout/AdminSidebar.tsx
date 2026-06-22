@@ -11,7 +11,9 @@ const SIDEBAR_MENUS = [
   { label: '강의 관리', href: '/admin/coursemanage', icon: 'course' },
   { label: '신고 관리', href: '/admin/reportmanage', icon: 'report' },
   { label: '결제 관리', href: '/admin/paymentmanage', icon: 'payments' },
-  { label: '정산 관리', href: '/admin/settlementmanage', icon: 'settlement' },
+  { label: '정산 관리', href: '/admin/settlementmanage', icon: 'settlements' },
+  { label: '크레딧 관리', href: '/admin/creditmanage', icon: 'credits' },
+  { label: '커뮤니티 관리', href: '/admin/communitymanage', icon: 'communities' },
   { label: '프롬프트 관리', href: '/admin/promptmanage', icon: 'prompt' },
 ] as const;
 
@@ -46,7 +48,7 @@ export default function AdminSidebar() {
                 {/* 기본: 흰색 아이콘 */}
                 <Image
                   src={`/sidebar/${icon}-Icon-white.svg`}
-                  alt=""
+                  alt="기본: 흰색 아이콘"
                   width={20}
                   height={20}
                   className={`transition-opacity duration-150 ${isActive ? 'opacity-0' : 'opacity-100'}`}
@@ -54,7 +56,7 @@ export default function AdminSidebar() {
                 {/* 활성: 검정 아이콘 */}
                 <Image
                   src={`/sidebar/${icon}-Icon.svg`}
-                  alt=""
+                  alt="활성: 검정 아이콘"
                   width={20}
                   height={20}
                   className={`absolute transition-opacity duration-150 ${isActive ? 'opacity-100' : 'opacity-0'}`}

@@ -19,10 +19,5 @@ export default async function Page({ params, searchParams }: PageProps) {
     fetchCourses(decodedCategory, decodedSub),
   ]);
 
-  return (
-    <CourseListPage
-      categories={categories}
-      initialCourses={initialCourses}
-    />
-  );
+  return <CourseListPage categories={categories} initialCourses={initialCourses} />;
 }

@@ -1,39 +1,11 @@
 // 회원 서비스(로그인/회원가입)
-import {
-  LoginRequest,
-  LoginResponse,
-  ReissueResponse,
-} from '@/features/auth/types';
+import { LoginRequest, LoginResponse,
+  ReissueResponse, EmailVerifyResponseDto,
+  LoginIdCheckResponseDto, ReferralCodeCheckResponseDto,
+  SignupPayloadDto
+ } from '@/features/auth/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-interface EmailVerifyResponseDto {
-    targetEmail: string;
-    purpose: 'SIGNUP' | 'PASSWORD_RESET' | 'EMAIL_CHANGE';
-    verified: boolean;
-}
-
-interface LoginIdCheckResponseDto {
-    login_id: string;
-    available: boolean;
-}
-
-interface ReferralCodeCheckResponseDto {
-    referralCode: string;
-    available: boolean;
-}
-
-export interface SignupPayloadDto {
-  loginId: string;
-  password: string;
-  passwordConfirm: string;
-  email: string;
-  name: string;
-  phone: string;
-  birthDate: string;
-  interestCategoryIds: number[];
-  referralCode?: string | null;
-}
 
 // 회원가입 - 이메일 인증 요청
 export async function sendEmailVerification(email: string): Promise<void> {
@@ -79,27 +51,22 @@ export async function verifyEmailCode(email: string, code: string): Promise<bool
 
 // 회원가입 - 아이디 중복 검사
 export async function checkLoginIdDuplicate(loginId: string): Promise<boolean> {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/auth/login-id/check?loginId=${encodeURIComponent(loginId)}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+  const response = await fetch(
+    `${API_BASE_URL}/auth/login-id/check?loginId=${encodeURIComponent(loginId)}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    );
+    },
+  );
 
-    if (!response.ok) {
-      throw new Error('네트워크 응답에 문제가 발생했습니다.');
-    }
-
-    const data: LoginIdCheckResponseDto = await response.json();
-    return !data.available;
-  } catch (error) {
-    console.error('아이디 중복 확인 중 오류 발생:', error);
-    throw error;
+  if (!response.ok) {
+    throw new Error('네트워크 응답에 문제가 발생했습니다.');
   }
+
+  const data: LoginIdCheckResponseDto = await response.json();
+  return !data.available;
 }
 
 // 로그인
@@ -133,55 +100,38 @@ export async function reissueService(refreshToken: string): Promise<ReissueRespo
   }
 
   return response.json();
-    return response.json();
 }
 
 // 추천인 코드 확인
 export async function checkReferralCode(referralCode: string): Promise<boolean> {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/auth/referral-code/check?referralCode=${encodeURIComponent(referralCode)}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+  const response = await fetch(
+    `${API_BASE_URL}/auth/referral-code/check?referralCode=${encodeURIComponent(referralCode)}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
 
-    if (!response.ok) {
-      throw new Error("네트워크 응답에 문제가 발생했습니다.");
-    }
-
-    const data: ReferralCodeCheckResponseDto = await response.json();
-    return data.available;
-  } catch (error) {
-    console.error("추천인 코드 확인 중 오류 발생:", error);
-    throw error;
+  if (!response.ok) {
+    throw new Error('네트워크 응답에 문제가 발생했습니다.');
   }
+
+  const data: ReferralCodeCheckResponseDto = await response.json();
+  return data.available;
 }
 
 // 회원가입 요청
 export async function registerUser(payload: SignupPayloadDto): Promise<boolean> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+  const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
 
-    if (response.ok) {
-      return true;
-    } else {
-      const errorData = await response.json().catch(() => ({}));
-      console.error("회원가입 실패 원인:", errorData);
-      return false;
-    }
-  } catch (error) {
-    console.error("회원가입 통신 중 서버 에러:", error);
-    return false;
-  }
+  return (response.ok)
 }
