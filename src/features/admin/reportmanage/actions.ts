@@ -1,0 +1,60 @@
+'use server';
+
+import { cookies } from 'next/headers';
+import { ReviewReport, ReviewReportDetail } from './types';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+export async function fetchReviewReportsAction(): Promise<ReviewReport[]> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+
+  const res = await fetch(`${API_BASE_URL}/admin/reviews/reports`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function fetchReviewReportDetailAction(
+  reportId: number,
+): Promise<ReviewReportDetail | null> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+
+  const res = await fetch(`${API_BASE_URL}/admin/reviews/reports/${reportId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) return null;
+  return res.json();
+}
+
+// 신고된 수강평 삭제 처리
+export async function deleteReportedReviewAction(reportId: number) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+
+  const res = await fetch(`${API_BASE_URL}/admin/reviews/reports/${reportId}/delete`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) throw new Error('삭제 처리에 실패했습니다.');
+}
+
+// 신고된 수강평 반려 처리 (수강평 그대로 유지)
+export async function rejectReportedReviewAction(reportId: number) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+
+  const res = await fetch(`${API_BASE_URL}/admin/reviews/reports/${reportId}/reject`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) throw new Error('반려 처리에 실패했습니다.');
+}
