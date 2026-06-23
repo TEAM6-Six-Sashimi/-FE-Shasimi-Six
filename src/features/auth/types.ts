@@ -36,6 +36,7 @@ export interface LoginIdCheckResponseDto {
 export interface ReferralCodeCheckResponseDto {
   referralCode: string;
   available: boolean;
+  referrerName: string;
 }
 
 export interface SignupPayloadDto {

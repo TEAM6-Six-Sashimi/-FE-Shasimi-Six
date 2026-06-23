@@ -4,7 +4,10 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { checkLoginIdDuplicate } from "@/services/auth.service"
 
-const LOGIN_ID_REGEX = /^[a-zA-Z0-9]{6,20}$/;
+const LENGTH_REGEX = /^[a-zA-Z0-9]{6,20}$/;
+const HAS_UPPER = /[A-Z]/;
+const HAS_LOWER = /[a-z]/;
+const HAS_NUMBER = /[0-9]/;
 
 interface LoginIdFieldProps {
   value: string;
@@ -25,7 +28,12 @@ export default function LoginIdField({
 }: LoginIdFieldProps) {
   const [message, setMessage] = useState('');
  
-  const isFormatValid = LOGIN_ID_REGEX.test(value);
+  // 길이/허용문자 조건
+  const isLengthValid = LENGTH_REGEX.test(value);
+  // 영문 대소문자+숫자 모두 포함 조건
+  const hasAllTypes = HAS_UPPER.test(value) && HAS_LOWER.test(value) && HAS_NUMBER.test(value);
+  // 최종 형식 통과 여부
+  const isFormatValid = isLengthValid && hasAllTypes;
   const hasError = value !== '' && !isFormatValid;
  
   const inputCls = (error: boolean) =>
@@ -42,7 +50,15 @@ export default function LoginIdField({
   const handleCheck = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
  
-    if (!isFormatValid) {
+    // 글자 수 확인
+    if (!isLengthValid) {
+      setMessage('아이디 글자 수를 확인해주세요');
+      onAvailableChange(false);
+      return;
+    }
+ 
+    // 영문+숫자 포함 조건 확인
+    if (!hasAllTypes) {
       setMessage('아이디 형식을 확인해주세요');
       onAvailableChange(false);
       return;
@@ -95,7 +111,9 @@ export default function LoginIdField({
       </div>
       <p className="text-[12px] text-[#6A7282] mt-0.5">영문 대소문자, 숫자 포함 6자 이상 20자 이하</p>
       {hasError ? (
-        <p className="text-xs mt-1 font-medium text-[#DC2626]">아이디 형식을 확인해주세요</p>
+        <p className="text-xs mt-1 font-medium text-[#DC2626]">
+          {!isLengthValid ? '아이디 글자 수를 확인해주세요' : '아이디 형식을 확인해주세요'}
+        </p>
       ) : (
         message && (
           <p

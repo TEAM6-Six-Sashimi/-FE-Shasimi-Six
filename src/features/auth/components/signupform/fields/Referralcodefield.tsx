@@ -18,31 +18,40 @@ export default function ReferralCodeField({
   onCheckedChange,
 }: ReferralCodeFieldProps) {
   const [message, setMessage] = useState('');
+  const [hasError, setHasError] = useState(false);
 
-  const inputCls =
-    'w-full h-9 px-4 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors';
- 
+  const inputCls= (error: boolean) =>
+    `w-full h-9 px-4 rounded-lg border bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none transition-colors ${
+      error ? 'border-[#FF5F5F]' : 'border-[#D1D5DB] focus:border-[#1E2125]'
+    }`;
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
     onCheckedChange(false);
     setMessage('');
+    setHasError(false);
   };
  
   const handleCheck = async () => {
     if (!value) {
       setMessage('추천인 코드를 입력해주세요.');
+      setHasError(true);
       return;
     }
     try {
-      const isValid = await checkReferralCode(value);
-      if (isValid) {
+      const result = await checkReferralCode(value);
+      if (result.available) {
         onCheckedChange(true);
-        setMessage('유효한 추천인 코드입니다.');
+        setHasError(false);
+        setMessage('');
       } else {
         onCheckedChange(false);
+        setHasError(true);
         setMessage('사이트 회원 중 일치하는 추천인 코드가 없습니다. 코드를 다시 한번 확인해주세요');
       }
     } catch {
+      onCheckedChange(false);
+      setHasError(true);
       setMessage('추천인 확인 중 에러가 발생했습니다.');
     }
   };
@@ -58,7 +67,7 @@ export default function ReferralCodeField({
             value={value}
             onChange={handleChange}
             placeholder="추천인 코드를 입력해주세요"
-            className={inputCls}
+            className={inputCls(hasError)}
             disabled={isChecked}
           />
           <Button

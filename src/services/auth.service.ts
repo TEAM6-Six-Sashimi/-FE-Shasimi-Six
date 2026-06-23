@@ -103,7 +103,7 @@ export async function reissueService(refreshToken: string): Promise<ReissueRespo
 }
 
 // 추천인 코드 확인
-export async function checkReferralCode(referralCode: string): Promise<boolean> {
+export async function checkReferralCode(referralCode: string): Promise<ReferralCodeCheckResponseDto> {
   const response = await fetch(
     `${API_BASE_URL}/auth/referral-code/check?referralCode=${encodeURIComponent(referralCode)}`,
     {
@@ -118,8 +118,7 @@ export async function checkReferralCode(referralCode: string): Promise<boolean> 
     throw new Error('네트워크 응답에 문제가 발생했습니다.');
   }
 
-  const data: ReferralCodeCheckResponseDto = await response.json();
-  return data.available;
+  return response.json();
 }
 
 // 회원가입 요청
