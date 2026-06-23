@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { fetchCourseDetail, fetchEnrollmentInfo } from '@/services/course.service';
+import { fetchCourseDetail, fetchPaymentInfo } from '@/services/course.service';
 import { fetchCategories } from '@/services/categories.service';
 import CourseDetailPage from './_components/CourseDetailPage';
 import CourseDetailPageOwned from './_components/CourseDetailPageOwned';
@@ -15,9 +15,9 @@ export default async function Page({ params }: PageProps) {
   const accessToken = cookieStore.get('accessToken')?.value;
 
   // 강의 상세 + 수강 여부 조회
-  const [course, enrollmentInfo, categories] = await Promise.all([
+  const [course, paymentInfo, categories] = await Promise.all([
     fetchCourseDetail(courseId, accessToken),
-    accessToken ? fetchEnrollmentInfo(courseId, accessToken) : Promise.resolve(null),
+    accessToken ? fetchPaymentInfo(courseId, accessToken) : Promise.resolve(null),
     fetchCategories(),
   ]);
 
@@ -30,10 +30,10 @@ export default async function Page({ params }: PageProps) {
     );
   }
 
-  const isPurchased = enrollmentInfo !== null;
+  const isPurchased = paymentInfo !== null;
 
   return isPurchased ? (
-    <CourseDetailPageOwned course={course} categories={categories} enrollmentInfo={enrollmentInfo!} />
+    <CourseDetailPageOwned course={course} categories={categories} paymentInfo={paymentInfo!} />
   ) : (
     <CourseDetailPage course={course} categories={categories} />
   );

@@ -81,4 +81,7 @@ export interface UserMe {
   emailVerified: boolean;
   referralCode: string;
   interestCategoryIds: number[];
+  marketingConsent: boolean;
+  emailConsent: boolean;
+  aiConsent: boolean;
 }

@@ -2,17 +2,17 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { EnrollmentInfo } from '@/features/user/courses/types';
+import { PaymentInfo } from '@/features/user/courses/types';
 
 interface StudentOwnedButtonsProps {
   courseId: number;
-  enrollmentInfo: EnrollmentInfo;
+  paymentInfo: PaymentInfo;
 }
 
-export default function StudentOwnedButtons({ courseId, enrollmentInfo }: StudentOwnedButtonsProps) {
+export default function StudentOwnedButtons({ courseId, paymentInfo }: StudentOwnedButtonsProps) {
   // 이어보기 → 마지막 시청 세션으로 이동, 없으면 첫 세션으로 (lastSessionId null 대비)
-  const continueHref = enrollmentInfo.lastSessionId
-    ? `/courses/learn/${courseId}/${enrollmentInfo.lastSessionId}`
+  const continueHref = paymentInfo.lastSessionId
+    ? `/courses/learn/${courseId}/${paymentInfo.lastSessionId}`
     : `/courses/learn/${courseId}`;
 
   return (

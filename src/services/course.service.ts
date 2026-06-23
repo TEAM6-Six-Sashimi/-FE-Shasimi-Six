@@ -1,6 +1,6 @@
 import { CourseFromAPI } from '@/features/user/courses/types';
 import { StudentCourse } from '@/features/user/mycourses-student/types';
-import { CourseDetailFromAPI, EnrollmentInfo, StudentCourseDetail } from '@/features/user/courses/types';
+import { CourseDetailFromAPI, PaymentInfo, StudentCourseDetail } from '@/features/user/courses/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -52,12 +52,12 @@ export async function fetchCourseDetail(
 }
 
 // 수강 여부 조회
-export async function fetchEnrollmentInfo(
+export async function fetchPaymentInfo(
   courseId: string,
   accessToken: string,
-): Promise<EnrollmentInfo | null> {
+): Promise<PaymentInfo | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/enrollments?courseId=${courseId}`, {
+    const res = await fetch(`${API_BASE_URL}/payments?courseId=${courseId}`, {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,

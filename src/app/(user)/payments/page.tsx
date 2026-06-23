@@ -1,34 +1,64 @@
-// payment로 용어 통일(크레딧 사용)
-
 import { Suspense } from 'react';
 import { cookies } from 'next/headers';
-import EnrollmentContent from '@/features/user/enrollments/components/EnrollmentContent';
-import { EnrollmentSticky } from '@/features/user/enrollments/components/EnrollmentSticky';
-import { EnrollmentSummary, EnrollmentCourseItem } from '@/features/user/enrollments/types';
+import PaymentContent from '@/features/user/payments/components/PaymentContent';
+import { PaymentSticky } from '@/features/user/payments/components/PaymentSticky';
+import { fetchPlanPreviewAction } from '@/features/user/payments/actions';
+import { PaymentSummary, OrderLineItem } from '@/features/user/payments/types';
 
-interface EnrollmentPageProps {
-  searchParams: Promise<{ courseIds?: string | string[] }>;
+interface PaymentPageProps {
+  searchParams: Promise<{
+    courseIds?: string | string[];
+    type?: string; // "subscription"이면 AI 구독 결제
+    planCode?: string;
+  }>;
 }
 
-export default async function EnrollmentPage({ searchParams }: EnrollmentPageProps) {
-  const { courseIds: rawIds } = await searchParams;
-
-  const courseIds: number[] = rawIds
-    ? (Array.isArray(rawIds) ? rawIds : rawIds.split(',')).map(Number).filter((id) => !isNaN(id))
-    : [];
-
-  // 진입 경로
-  const source: 'single' | 'cart' = courseIds.length === 1 ? 'single' : 'cart';
+export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
+  const { courseIds: rawIds, type, planCode } = await searchParams;
 
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  let items: EnrollmentCourseItem[] = [];
+  // ── AI 구독 결제 ──────────────────────────────────────────
+  if (type === 'subscription' && planCode) {
+    const preview = accessToken ? await fetchPlanPreviewAction(planCode) : null;
+
+    const items: OrderLineItem[] = preview
+      ? [
+          {
+            id: preview.planCode,
+            title: preview.planName,
+            subtitle: `AI 구독권 ${preview.durationMonths}개월`,
+            price: preview.price,
+          },
+        ]
+      : [];
+
+    const summary: PaymentSummary = {
+      purchaseType: 'AI_SUBSCRIPTION',
+      items,
+      totalPrice: preview?.price ?? 0,
+      ownedCredits: preview?.creditBalance ?? 0,
+      remainingCredits: preview ? Math.max(0, preview.creditBalance - preview.price) : 0,
+      shortfallCredits: preview?.insufficientAmount ?? 0,
+      planCode,
+    };
+
+    return <PaymentPageLayout summary={summary} />;
+  }
+
+  // ── 강의 단일 / 장바구니 결제 ─────────────────────────────
+  const courseIds: number[] = rawIds
+    ? (Array.isArray(rawIds) ? rawIds : rawIds.split(',')).map(Number).filter((id) => !isNaN(id))
+    : [];
+
+  const purchaseType: 'COURSE' | 'CART' = courseIds.length === 1 ? 'COURSE' : 'CART';
+
+  let items: OrderLineItem[] = [];
   let totalPrice = 0;
   let ownedCredits = 0;
 
   if (accessToken && courseIds.length > 0) {
-    // 강의 정보 조회 + 크레딧 조회 병렬 처리
     const [courseResults, creditsResult] = await Promise.allSettled([
       Promise.all(
         courseIds.map((id) =>
@@ -46,10 +76,10 @@ export default async function EnrollmentPage({ searchParams }: EnrollmentPagePro
 
     if (courseResults.status === 'fulfilled') {
       items = courseResults.value.map((c) => ({
-        courseId: c.courseId,
+        id: String(c.courseId),
         title: c.title,
-        category: c.categoryName ?? '',
-        instructorName: c.instructorName,
+        subtitle: c.categoryName ?? '',
+        meta: c.instructorName,
         price: c.price,
         thumbnail: c.thumbnail ?? '',
       }));
@@ -65,31 +95,36 @@ export default async function EnrollmentPage({ searchParams }: EnrollmentPagePro
     }
   }
 
-  const summary: EnrollmentSummary = {
+  const summary: PaymentSummary = {
+    purchaseType,
     items,
     totalPrice,
     ownedCredits,
     remainingCredits: Math.max(0, ownedCredits - totalPrice),
     shortfallCredits: Math.max(0, totalPrice - ownedCredits),
-    source,
+    courseIds,
   };
 
+  return <PaymentPageLayout summary={summary} />;
+}
+
+function PaymentPageLayout({ summary }: { summary: PaymentSummary }) {
   return (
     <div className="min-h-screen bg-gray-50/60">
       <div className="max-w-5xl mx-auto px-4 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
-          <Suspense fallback={<EnerollmentContentSkeleton />}>
-            <EnrollmentContent items={summary.items} />
+          <Suspense fallback={<PaymentContentSkeleton />}>
+            <PaymentContent items={summary.items} />
           </Suspense>
 
-          <EnrollmentSticky summary={summary} />
+          <PaymentSticky summary={summary} />
         </div>
       </div>
     </div>
   );
 }
 
-function EnerollmentContentSkeleton() {
+function PaymentContentSkeleton() {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 animate-pulse">
       <div className="h-7 w-32 bg-gray-200 rounded mb-6" />

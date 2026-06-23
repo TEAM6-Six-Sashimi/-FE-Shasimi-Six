@@ -2,19 +2,19 @@
 import CourseDetailContent from '@/features/user/courses/components/CourseDetailContent';
 import CourseDetailSidebar from '@/features/user/courses/components/CourseDetailSidebar';
 import StudentOwnedButtons from '@/features/user/courses/components/sidebar-buttons/StudentOwnedButtons';
-import { CourseDetailFromAPI, EnrollmentInfo } from '@/features/user/courses/types';
+import { CourseDetailFromAPI, PaymentInfo } from '@/features/user/courses/types';
 import { Category } from '@/features/categories/types';
 
 interface CourseDetailPageOwnedProps {
   course: CourseDetailFromAPI;
   categories: Category[];
-  enrollmentInfo: EnrollmentInfo;
+  paymentInfo: PaymentInfo;
 }
 
 export default function CourseDetailPageOwned({
   course,
   categories,
-  enrollmentInfo,
+  paymentInfo,
 }: CourseDetailPageOwnedProps) {
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
@@ -26,14 +26,14 @@ export default function CourseDetailPageOwned({
             tabs={['curriculum', 'instructor', 'reviews']}
             showProgress={true}
             allSessionsPlayable={true}
-            enrollmentInfo={enrollmentInfo}
+            paymentInfo={paymentInfo}
             canWriteReview={true}
           />
           <div className="w-72 shrink-0 sticky top-4">
             <CourseDetailSidebar
               course={course}
               actionSlot={
-                <StudentOwnedButtons courseId={course.courseId} enrollmentInfo={enrollmentInfo} />
+                <StudentOwnedButtons courseId={course.courseId} paymentInfo={paymentInfo} />
               }
             />
           </div>
