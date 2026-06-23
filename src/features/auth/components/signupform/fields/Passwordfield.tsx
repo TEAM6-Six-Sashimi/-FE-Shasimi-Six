@@ -20,7 +20,6 @@ export default function PasswordFields({
   onPasswordConfirmChange,
   onMatchedChange,
 }: PasswordFieldsProps) {
-  const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState('');
   const [isMatched, setIsMatched] = useState(false);

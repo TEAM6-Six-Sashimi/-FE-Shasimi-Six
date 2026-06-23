@@ -16,7 +16,6 @@ const ALL_TABS: TabConfig[] = [
 ];
 
 interface CourseTabNavProps {
-  /** 노출할 탭만 배열로 전달. 예: ['curriculum', 'instructor'] → 수강평 탭 숨김 */
   tabs: CourseTabKey[];
 }
 
@@ -34,7 +33,6 @@ export default function CourseTabNav({ tabs }: CourseTabNavProps) {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        // 화면에 가장 많이 보이는 섹션을 활성 탭으로 설정
         const visible = entries
           .filter((entry) => entry.isIntersecting)
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
@@ -67,7 +65,7 @@ export default function CourseTabNav({ tabs }: CourseTabNavProps) {
   };
 
   return (
-    <div className="sticky top-4 z-10 flex bg-white rounded-xl shadow-md overflow-hidden">
+    <div className="sticky top-4 z-10 flex bg-white rounded-xl shadow-md border-[1.5px] border-[#D1D5DB] overflow-hidden">
       {visibleTabs.map((tab) => {
         const isActive = activeTab === tab.key;
         return (

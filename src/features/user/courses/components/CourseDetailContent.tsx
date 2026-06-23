@@ -1,8 +1,8 @@
 'use client';
 
 import { CourseDetailFromAPI, EnrollmentInfo } from '@/features/user/courses/types';
+import { Category } from '@/features/categories/types';
 import CourseHeaderSection from './sections/CourseHeaderSection';
-import CourseNcsSection, { NcsInfo } from './sections/CourseNcsSection';
 import CourseTabNav, { CourseTabKey, SECTION_ID } from './sections/CourseTabNav';
 import CourseCurriculumSection from './sections/CourseCurriculumSection';
 import CourseInstructorSection, { InstructorInfo } from './sections/CourseInstructorSection';
@@ -11,12 +11,13 @@ import { MOCK_COURSE_DETAIL, Review, RatingDistribution } from '@/constants/mock
 
 // 목업 (추후 API 연동 시 course 응답에서 교체)
 const MOCK_INSTRUCTOR: InstructorInfo = MOCK_COURSE_DETAIL.instructor;
-const MOCK_NCS: NcsInfo = MOCK_COURSE_DETAIL.ncs;
 const MOCK_RATING_DISTRIBUTION: RatingDistribution[] = MOCK_COURSE_DETAIL.ratingDistribution;
 const MOCK_REVIEWS: Review[] = MOCK_COURSE_DETAIL.reviews;
 
 interface CourseDetailContentProps {
   course: CourseDetailFromAPI;
+  /** 노출할 탭 목록. 수강평 탭을 빼고 싶으면 ['curriculum', 'instructor']만 전달 */
+  categories: Category[];
   /** 노출할 탭 목록. 수강평 탭을 빼고 싶으면 ['curriculum', 'instructor']만 전달 */
   tabs: CourseTabKey[];
   /** 커리큘럼 진행률바 표시 여부 - 구매한 학생만 true */
@@ -25,8 +26,6 @@ interface CourseDetailContentProps {
   allSessionsPlayable: boolean;
   /** 구매한 학생일 때 진행률 계산용 (선택) */
   enrollmentInfo?: EnrollmentInfo;
-  /** 강사/관리자 검수 화면에서 두 번째 뱃지(예: 서브카테고리) 표시용 */
-  extraBadge?: string;
   /** 수강평 작성 폼 노출 여부 - 구매한 학생만 true */
   canWriteReview: boolean;
 }
@@ -36,8 +35,8 @@ export default function CourseDetailContent({
   tabs,
   showProgress,
   allSessionsPlayable,
-  extraBadge,
   canWriteReview,
+  categories
 }: CourseDetailContentProps) {
 
   // 세션별 진행률 - 현재 백엔드는 전체 진행률(progress)만 제공.
@@ -46,9 +45,7 @@ export default function CourseDetailContent({
 
   return (
     <div className="flex flex-col flex-1 gap-4 min-w-0">
-      <CourseHeaderSection course={course} extraBadge={extraBadge} />
- 
-      <CourseNcsSection ncs={MOCK_NCS} />
+      <CourseHeaderSection course={course} categories={categories} />
  
       {/* 리모컨 - 클릭 시 아래 섹션들로 스크롤 이동 */}
       <CourseTabNav tabs={tabs} />
