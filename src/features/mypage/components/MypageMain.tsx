@@ -1,33 +1,42 @@
 'use client';
 
-import { UserMe } from '@/features/auth/types';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { UserMeWithAgreements } from '../types';
 import { useToast } from '@/components/ui/ToastContext';
 import Image from 'next/image';
+import { deleteMeAction } from '../actions';
+import PasswordConfirmModal from '@/components/modals/PasswordConfirmModal';
+import WithdrawAgreementModal from '@/components/modals/WithdrawAgreementModal';
 
 interface MypageMainProps {
-  user: UserMe;
+  user: UserMeWithAgreements;
 }
 
-// 동의 여부 - mock 데이터
-const MOCK_AGREEMENTS = {
-  privacy: true,
-  marketing: true,
-  emailNotice: false,
-  aiUsage: true,
-};
+const AGREEMENT_ROWS: { key: keyof NonNullable<UserMeWithAgreements['agreements']>; label: string }[] =
+  [
+    { key: 'marketing', label: '마케팅 수신' },
+    { key: 'emailNotice', label: '이메일 수신' },
+    { key: 'aiUsage', label: 'AI 사용' },
+  ];
 
-const AGREEMENT_ROWS: { key: keyof typeof MOCK_AGREEMENTS; label: string }[] = [
-  { key: 'privacy', label: '개인정보 수집 및 이용' },
-  { key: 'marketing', label: '마케팅 수신' },
-  { key: 'emailNotice', label: '이메일 수신' },
-  { key: 'aiUsage', label: 'AI 사용' },
-];
-
-// 가입일 없음
 const joinedAt = '-';
 
+type ModalMode = 'edit' | 'withdrawAgreement' | 'withdrawPassword' | null;
+
 export default function MypageMain({ user }: MypageMainProps) {
+  const router = useRouter();
   const { showToast } = useToast();
+  const [modalMode, setModalMode] = useState<ModalMode>(null);
+  const [passwordError, setPasswordError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const agreements = user.agreements ?? {
+    privacy: true,
+    marketing: false,
+    emailNotice: false,
+    aiUsage: false,
+  };
 
   const handleCopyReferralCode = async () => {
     if (!user.referralCode) return;
@@ -39,12 +48,45 @@ export default function MypageMain({ user }: MypageMainProps) {
     }
   };
 
+  const handleEditPasswordConfirm = (password: string) => {
+    setPasswordError('');
+    sessionStorage.setItem('mypage_current_password', password);
+    setModalMode(null);
+    router.push('/mypage/edit');
+  };
+
+  // 탈퇴하기 클릭 → 1단계: 동의 모달
+  const handleWithdrawClick = () => {
+    setModalMode('withdrawAgreement');
+  };
+
+  // 1단계 동의 → 2단계: 본인 확인(비밀번호) 모달
+  const handleWithdrawAgreementConfirmed = () => {
+    setPasswordError('');
+    setModalMode('withdrawPassword');
+  };
+
+  // 2단계 비밀번호 확인 → 즉시 deleteMeAction 호출, 틀리면 이 모달에서 바로 에러
+  const handleWithdrawPasswordConfirm = async (password: string) => {
+    setPasswordError('');
+    try {
+      setLoading(true);
+      await deleteMeAction(password);
+      showToast('성공적으로 탈퇴 되었습니다. 안녕히 가세요.');
+      setModalMode(null);
+      router.push('/');
+    } catch {
+      setPasswordError('비밀번호가 일치하지 않습니다. 다시 입력해주세요.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
       {/* 상단 프로필 */}
       <div className="pb-5 border-b border-[#E5E7EB]">
         <p className="text-[18px] font-bold text-[#1E2125]">{user.name}</p>
-        {/* <p className="text-[14px] font-light text-[#6A7282]">{user.email}</p> */}
       </div>
 
       {/* 기본 정보 2열 - 각 행마다 구분선 */}
@@ -53,9 +95,8 @@ export default function MypageMain({ user }: MypageMainProps) {
         <InfoRow label="아이디" value={user.loginId} />
         <InfoRow label="생년월일" value={user.birthDate} />
         <InfoRow label="가입일" value={joinedAt} />
-        <InfoRow label="전화번호" value="-" /> {/* 전화번호 응답 필드에 없음 */}
+        <InfoRow label="전화번호" value="-" />
         <InfoRow label="이메일" value={user.email} />
-        {/* 추천인 코드 */}
         <div className="flex items-center gap-6 py-3.5 col-span-2">
           <span className="w-20 shrink-0 text-[14px] text-[#6A7282] font-semibold">
             추천인 코드
@@ -80,8 +121,16 @@ export default function MypageMain({ user }: MypageMainProps) {
       <div className="pt-5 mb-4 border-t border-[#E5E7EB]">
         <p className="text-[13px] text-[#9CA3AF] mb-3">동의 여부</p>
         <div className="flex flex-col col-span-1 gap-x-10">
+          {/* 필수 항목 - 항상 동의 상태, 변경 불가 (하드코딩) */}
+          <div className="flex items-center justify-between py-3.5 border-b border-[#F3F4F6]">
+            <span className="text-[14px] text-[#6A7282] font-semibold">
+              개인정보 수집 및 이용 (필수)
+            </span>
+            <span className="text-[13px] font-semibold text-[#FF5E5E]">동의</span>
+          </div>
+
           {AGREEMENT_ROWS.map(({ key, label }, idx) => {
-            const agreed = MOCK_AGREEMENTS[key]; // 추후 user.agreements?.[key]로 교체
+            const agreed = agreements[key];
             const isLast = idx === AGREEMENT_ROWS.length - 1;
             return (
               <div
@@ -107,26 +156,59 @@ export default function MypageMain({ user }: MypageMainProps) {
       <div className="flex items-center justify-between mt-6">
         <button
           type="button"
+          onClick={handleWithdrawClick}
           className="text-[13px] text-[#9CA3AF] underline cursor-pointer hover:text-[#6A7282]"
-          // TODO: 탈퇴 기능 연동
         >
           탈퇴하기
         </button>
         <button
           type="button"
+          onClick={() => {
+            setPasswordError('');
+            setModalMode('edit');
+          }}
           className="px-4 py-2 rounded-lg bg-[#FF5E5E] text-white text-[12px] font-semibold hover:bg-[#D14848] cursor-pointer"
-          // TODO: 수정 기능 연동
         >
           수정하기
         </button>
       </div>
+
+      {/* 수정하기 비밀번호 확인 모달 */}
+      {modalMode === 'edit' && (
+        <PasswordConfirmModal
+          title="비밀번호를 입력해주세요."
+          description="개인정보 수정을 위해 현재 비밀번호를 입력해 주세요."
+          onConfirm={handleEditPasswordConfirm}
+          onCancel={() => setModalMode(null)}
+        />
+      )}
+
+      {/* 탈퇴 1단계: 동의 모달 */}
+      {modalMode === 'withdrawAgreement' && (
+        <WithdrawAgreementModal
+          onConfirm={handleWithdrawAgreementConfirmed}
+          onCancel={() => setModalMode(null)}
+        />
+      )}
+
+      {/* 탈퇴 2단계: 본인 확인 모달 (여기서 즉시 검증, 틀리면 바로 에러) */}
+      {modalMode === 'withdrawPassword' && (
+        <PasswordConfirmModal
+          title="본인 확인"
+          description={`회원 탈퇴를 위한 비밀번호를 입력하세요.\n비밀번호 확인이 완료되면 최종 탈퇴됩니다.`}
+          onConfirm={handleWithdrawPasswordConfirm}
+          onCancel={() => setModalMode(null)}
+          loading={loading}
+          errorMessage={passwordError}
+        />
+      )}
     </div>
   );
 }
 
-function InfoRow({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
+function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className={`flex items-center gap-6 py-3.5 ${last ? '' : 'border-b border-[#F3F4F6]'}`}>
+    <div className="flex items-center gap-6 py-3.5 border-b border-[#F3F4F6]">
       <span className="w-20 shrink-0 text-[14px] text-[#6A7282] font-semibold">{label}</span>
       <span className="text-[14px] font-medium text-[#1E2125]">{value}</span>
     </div>
