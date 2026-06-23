@@ -1,12 +1,14 @@
 import { cookies } from 'next/headers';
 import { fetchUserMe, GUEST_USER } from '@/services/user.service';
 import MypageMain from '@/features/mypage/components/MypageMain';
+import { withAgreements } from '@/features/mypage/types';
 
 export default async function UserMyPage() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  const user = accessToken ? await fetchUserMe(accessToken) : GUEST_USER;
+  const rawUser = accessToken ? await fetchUserMe(accessToken) : GUEST_USER;
+  const user = withAgreements(rawUser);
 
   return (
     <div className="max-w-5xl mx-auto">

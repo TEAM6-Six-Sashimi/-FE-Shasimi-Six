@@ -92,7 +92,7 @@ export default function LoginForm() {
               aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보이기'}
             >
               <Image
-                src={showPassword ? '/auth/openeye.svg' : '/auth/closeeye.svg'}
+                src={showPassword ? '/auth/closeeye.svg' : '/auth/openeye.svg'}
                 alt=""
                 width={20}
                 height={20}
