@@ -7,6 +7,7 @@ import Signup01Introduction from '@/features/auth/components/signupform/Signup01
 import Signup02Interests from '@/features/auth/components/signupform/Signup02Interests';
 import { registerUser } from '@/services/auth.service';
 import { SignupFormData, SignupStatusData, SignupPayloadDto } from '@/features/auth/types';
+import { AgreementState } from '@/features/auth/components/signupform/fields/Agreementsfield';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 
@@ -61,7 +62,11 @@ export default function SignupPage() {
   };
 
   // 회원가입 제출 버튼
-  const handleSignupSubmit = async (finalCategoryIds: number[], finalReferralCode: string) => {
+  const handleSignupSubmit = async (
+    finalCategoryIds: number[],
+    finalReferralCode: string,
+    agreements: AgreementState,
+  ) => {
     const finalPayload: SignupPayloadDto = {
       loginId: formData.login_id,
       password: formData.password,
@@ -72,6 +77,9 @@ export default function SignupPage() {
       birthDate: formData.birth_date,
       interestCategoryIds: finalCategoryIds,
       referralCode: finalReferralCode || null,
+      marketingConsent: agreements.marketing,
+      emailConsent: agreements.emailNotice,
+      aiConsent: agreements.aiUsage,
     };
 
     try {

@@ -48,6 +48,9 @@ export interface SignupPayloadDto {
   birthDate: string;
   interestCategoryIds: number[];
   referralCode?: string | null;
+  marketingConsent: boolean;
+  emailConsent: boolean;
+  aiConsent: boolean;
 }
 
 export interface SignupFormData {
