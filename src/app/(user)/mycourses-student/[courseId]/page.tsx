@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { fetchUserMe } from '@/services/user.service';
 import { fetchStudentCourseDetail } from '@/services/course.service';
+import { fetchCategories } from '@/services/categories.service';
 import CourseDetailPageOwned from '../../courses/[category]/[courseId]/_components/CourseDetailPageOwned';
 
 interface PageProps {
@@ -23,8 +24,10 @@ export default async function StudentCourseDetailPage({ params }: PageProps) {
 
   const user = await fetchUserMe(accessToken);
 
-  const course = await fetchStudentCourseDetail(courseId, accessToken, String(user.id));
- 
+  const [course, categories] = await Promise.all([
+    fetchStudentCourseDetail(courseId, accessToken, String(user.id)),
+    fetchCategories(),
+  ]);
 
   if (!course) {
     return (
@@ -41,5 +44,5 @@ export default async function StudentCourseDetailPage({ params }: PageProps) {
     enrolledAt: '',
   };
 
-  return <CourseDetailPageOwned course={course} enrollmentInfo={enrollmentInfo} />;
+  return <CourseDetailPageOwned course={course} categories={categories} enrollmentInfo={enrollmentInfo} />;
 }

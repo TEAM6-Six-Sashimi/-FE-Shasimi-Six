@@ -1,13 +1,13 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CourseDetailFromAPI } from '@/features/user/courses/types';
 import { addCartItemAction } from '../../../cart/actions';
-import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import OneButtonModal from '@/components/modals/OneButtonModal';
-import Image from 'next/image';
+import TwoButtonModal from '@/components/modals/TwoButtonModal';
 
 interface NotOwnedButtonsProps {
   course: CourseDetailFromAPI;
@@ -30,7 +30,7 @@ export default function NotOwnedButtons({ course }: NotOwnedButtonsProps) {
     } catch (err) {
       const code = err instanceof Error ? err.message : '';
       if (code === 'UNAUTHORIZED') {
-        router.push('/login');
+        router.push('/auth/login');
         return;
       }
       if (code === 'CART_002') {

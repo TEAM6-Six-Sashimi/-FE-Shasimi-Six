@@ -3,14 +3,17 @@ import CourseDetailContent from '@/features/user/courses/components/CourseDetail
 import CourseDetailSidebar from '@/features/user/courses/components/CourseDetailSidebar';
 import StudentOwnedButtons from '@/features/user/courses/components/sidebar-buttons/StudentOwnedButtons';
 import { CourseDetailFromAPI, EnrollmentInfo } from '@/features/user/courses/types';
+import { Category } from '@/features/categories/types';
 
 interface CourseDetailPageOwnedProps {
   course: CourseDetailFromAPI;
+  categories: Category[];
   enrollmentInfo: EnrollmentInfo;
 }
 
 export default function CourseDetailPageOwned({
   course,
+  categories,
   enrollmentInfo,
 }: CourseDetailPageOwnedProps) {
   return (
@@ -19,6 +22,7 @@ export default function CourseDetailPageOwned({
         <div className="flex gap-10 items-start">
           <CourseDetailContent
             course={course}
+            categories={categories}
             tabs={['curriculum', 'instructor', 'reviews']}
             showProgress={true}
             allSessionsPlayable={true}
