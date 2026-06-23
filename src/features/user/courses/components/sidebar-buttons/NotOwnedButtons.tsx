@@ -57,7 +57,7 @@ export default function NotOwnedButtons({ course }: NotOwnedButtonsProps) {
       <Button
         variant="outline"
         disabled={isAddingToCart}
-        className="w-full h-11 border-[#D1D5DB] text-[#1E2125] font-semibold text-[14px] hover:bg-[#F9FAFB] cursor-pointer"
+        className="w-full h-11 border-[1.5px] border-[#1E2125] text-[#1E2125] font-semibold text-[14px] hover:bg-[#F9FAFB] cursor-pointer"
         onClick={handleAddToCart}
       >
         <Image src="/header/cart.svg" width={17} height={17} alt="장바구니" /> 장바구니 담기
