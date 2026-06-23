@@ -94,10 +94,10 @@ export default function PasswordFields({
             type="button"
             onClick={() => setShowPasswordConfirm((prev) => !prev)}
             className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer "
-            aria-label={showPasswordConfirm ? '비밀번호 숨기기' : '비밀번호 보이기'}
+            aria-label={showPasswordConfirm ? '비밀번호 보이기' : '비밀번호 숨기기'}
           >
             <Image
-              src={showPasswordConfirm ? '/auth/openeye.svg' : '/auth/closeeye.svg'}
+              src={showPasswordConfirm ? '/auth/closeeye.svg' : '/auth/openeye.svg'}
               alt=""
               width={20}
               height={20}
