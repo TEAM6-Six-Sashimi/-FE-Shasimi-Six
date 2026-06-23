@@ -60,7 +60,7 @@ export default function MyCoursesList({ courses }: Props) {
 
                       {/* 버튼 */}
                       <div className="flex items-center gap-2 shrink-0 ml-4">
-                        <Link href={`/courses/detail/${course.courseId}`}>
+                        <Link href={`/mycourses-student/${course.courseId}`}>
                           <Button
                             size="sm"
                             className="h-9 px-4 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[12.5px] font-semibold cursor-pointer"
