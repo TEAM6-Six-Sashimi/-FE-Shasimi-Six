@@ -13,7 +13,7 @@ interface InterestsProps {
   initialReferralCode: string;
   initialReferralChecked: boolean;
   onPrev: (selectedCategories: number[], referral_code: string, isReferralChecked: boolean) => void;
-  onSubmit: (selectedCategories: number[], referral_code: string) => void;
+  onSubmit: (selectedCategories: number[], referral_code: string, agreements: AgreementState) => void;
 }
 
 export default function Signup02Interests({
@@ -70,7 +70,7 @@ export default function Signup02Interests({
       return;
     }
 
-    onSubmit(selectedCategoryIds, referral_code);
+    onSubmit(selectedCategoryIds, referral_code, agreements);
   };
 
   const isSubmitEnabled = agreements.privacy;
