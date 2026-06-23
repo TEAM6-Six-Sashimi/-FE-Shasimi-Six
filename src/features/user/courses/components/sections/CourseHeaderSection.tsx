@@ -42,10 +42,10 @@ export default function CourseHeaderSection({ course, categories }: CourseHeader
   const mainCategoryName = getMainCategoryName(categories, course.categoryName);
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 overflow-hidden flex flex-col gap-4">
+    <div className="bg-white rounded-xl shadow-md p-6 overflow-hidden flex flex-col">
       {/* 썸네일 */}
       <div
-        className="relative rounded-t-xl -mx-6 -mt-6 bg-[#E5E7EB]"
+        className="relative rounded-t-xl -mx-6 -mt-6 mb-5 bg-[#E5E7EB]"
         style={{ width: 'calc(100% + 3rem)', height: '240px' }}
       >
         {thumbnailUrl && (
@@ -60,12 +60,12 @@ export default function CourseHeaderSection({ course, categories }: CourseHeader
       </div>
  
       {/* 대카테고리 > 소카테고리 */}
-      <p className="text-[#FF5E5E] text-[13.5px] font-semibold">
+      <p className="text-[#FF5E5E] text-[13px] font-medium mb-1">
         {mainCategoryName ? `${mainCategoryName} > ${course.categoryName}` : course.categoryName}
       </p>
  
       {/* 제목 + 설명 */}
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1.5 mb-3">
         <h1 className="text-[#1E2125] text-[22px] font-bold leading-snug">{course.title}</h1>
         <p className="text-[#6A7282] text-[13.5px]">{course.description}</p>
       </div>
