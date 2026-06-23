@@ -44,14 +44,14 @@ export default function SidebarInfoBox({ course }: SidebarInfoBoxProps) {
   const difficultyLabel = DIFFICULTY_LABEL[course.difficulty] ?? course.difficulty;
 
   return (
-    <div className="border border-[#E5E7EB] rounded-xl p-4 flex flex-col gap-2.5 mt-1">
+    <div className="flex flex-col gap-2.5 mt-1">
       {[
         { label: '총 강의 수', value: `${lectureCount}강` },
         { label: '난이도', value: difficultyLabel },
       ].map(({ label, value }) => (
-        <div key={label} className="flex items-center justify-between">
-          <span className="text-[#6A7282] text-[13px]">{label}</span>
-          <span className="text-[#1E2125] text-[13px] font-semibold">{value}</span>
+        <div key={label} className="flex items-center justify-between px-2">
+          <span className="text-[#6A7282] text-[14px] mb-1">{label}</span>
+          <span className="text-[#1E2125] text-[14px] font-semibold">{value}</span>
         </div>
       ))}
     </div>
