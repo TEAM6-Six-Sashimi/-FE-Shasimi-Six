@@ -13,6 +13,9 @@ export const GUEST_USER: UserMe = {
   emailVerified: false,
   referralCode: '',
   interestCategoryIds: [],
+  marketingConsent: false,
+  emailConsent: false,
+  aiConsent: false,
 };
 
 export async function fetchUserMe(accessToken: string): Promise<UserMe> {
@@ -28,7 +31,7 @@ export async function fetchUserMe(accessToken: string): Promise<UserMe> {
 
     if (!response.ok) {
       const errorBody = await response.text();
-      // console.log('fetchUserMe error body:', errorBody);
+      console.log('fetchUserMe error body:', errorBody);
       return GUEST_USER;
     }
 

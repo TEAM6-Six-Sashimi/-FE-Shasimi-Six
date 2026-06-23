@@ -37,12 +37,12 @@ export default async function StudentCourseDetailPage({ params }: PageProps) {
     );
   }
 
-  const enrollmentInfo = {
-    enrollmentId: 0,
+  const paymentInfo = {
+    paymentId: 0,
     courseId: course.courseId,
     progress: course.progressRate,
     enrolledAt: '',
   };
 
-  return <CourseDetailPageOwned course={course} categories={categories} enrollmentInfo={enrollmentInfo} />;
+  return <CourseDetailPageOwned course={course} categories={categories} paymentInfo={paymentInfo} />;
 }

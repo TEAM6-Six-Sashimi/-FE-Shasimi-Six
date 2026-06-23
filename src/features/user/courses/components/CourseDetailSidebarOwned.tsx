@@ -2,13 +2,13 @@
 
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { CourseDetailFromAPI, EnrollmentInfo, DIFFICULTY_LABEL } from '../types';
+import { CourseDetailFromAPI, PaymentInfo, DIFFICULTY_LABEL } from '../types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface CourseDetailSidebarOwnedProps {
   course: CourseDetailFromAPI;
-  enrollmentInfo: EnrollmentInfo;
+  paymentInfo: PaymentInfo;
 }
 
 function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
@@ -18,13 +18,13 @@ function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
 
 export default function CourseDetailSidebarOwned({
   course,
-  enrollmentInfo,
+  paymentInfo,
 }: CourseDetailSidebarOwnedProps) {
   const thumbnailUrl = getThumbnailUrl(course.thumbnail);
   const lectureCount = course.sessions.length;
   const durationHours = Math.ceil(course.totalDuration / 3600);
   const difficultyLabel = DIFFICULTY_LABEL[course.difficulty] ?? course.difficulty;
-  const progress = enrollmentInfo.progress;
+  const progress = paymentInfo.progress;
 
   return (
     <div className="w-80 shrink-0 flex flex-col gap-3 bg-white rounded-xl shadow-md p-6">

@@ -35,7 +35,7 @@ export default function NotOwnedButtons({ course }: NotOwnedButtonsProps) {
       }
       if (code === 'CART_002') {
         setErrorMessage('이미 장바구니에 담긴 강의입니다.');
-      } else if (code === 'ENROLLMENT_001') {
+      } else if (code === 'PAYMENT_001') {
         setErrorMessage('이미 수강 중인 강의입니다.');
       } else {
         setErrorMessage('장바구니 추가에 실패했습니다. 다시 시도해주세요.');
@@ -71,7 +71,7 @@ export default function NotOwnedButtons({ course }: NotOwnedButtonsProps) {
           cancelLabel="취소"
           onConfirm={() => {
             setShowPurchaseModal(false);
-            router.push(`/enrollments?courseIds=${course.courseId}`);
+            router.push(`/payments?courseIds=${course.courseId}`);
           }}
           onCancel={() => setShowPurchaseModal(false)}
         />

@@ -44,8 +44,8 @@ export interface CourseSession {
 }
 
 // 수강 정보
-export interface EnrollmentInfo {
-  enrollmentId: number;
+export interface PaymentInfo {
+  paymentId: number;
   courseId: number;
   progress: number;
   lastSessionId?: number; // 마지막 수강 세션 id(이어보기용)

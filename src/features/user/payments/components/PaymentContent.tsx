@@ -1,12 +1,12 @@
 'use client';
 
 import Image from 'next/image';
-import { EnrollmentCourseItem } from '../types';
+import { OrderLineItem } from '../types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-interface EnrollmentContentProps {
-  items: EnrollmentCourseItem[];
+interface PaymentContentProps {
+  items: OrderLineItem[];
 }
 
 function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
@@ -14,21 +14,21 @@ function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
   return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
 }
 
-export default function EnrollmentContent({ items }: EnrollmentContentProps) {
+export default function PaymentContent({ items }: PaymentContentProps) {
   return (
     <div className="bg-white rounded-2xl shadow-md p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">주문 목록</h2>
 
       <div className="space-y-4">
         {items.map((item) => (
-          <CourseCard key={item.courseId} item={item} />
+          <OrderLineCard key={item.id} item={item} />
         ))}
       </div>
     </div>
   );
 }
 
-function CourseCard({ item }: { item: EnrollmentCourseItem }) {
+function OrderLineCard({ item }: { item: OrderLineItem }) {
   const thumbnailUrl = getThumbnailUrl(item.thumbnail);
 
   return (
@@ -36,23 +36,14 @@ function CourseCard({ item }: { item: EnrollmentCourseItem }) {
       {/* 썸네일 */}
       <div className="relative w-30 h-20 shrink-0 rounded-lg overflow-hidden bg-[#D1D5DB]">
         {thumbnailUrl && (
-          <Image
-            src={thumbnailUrl}
-            alt={item.title}
-            fill
-            unoptimized
-            className="object-cover"
-          />
+          <Image src={thumbnailUrl} alt={item.title} fill unoptimized className="object-cover" />
         )}
       </div>
 
       <div className="flex-1 min-w-0">
         <h3 className="text-[15px] font-semibold text-gray-900 line-clamp-2">{item.title}</h3>
-        <p className="text-xs text-[#FF5F5F] mb-1">{item.category}</p>
-        <div className="flex items-center gap-1.5 mt-1.5">
-          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#6A7282] text-white text-[10px] font-bold" />
-          <span className="text-sm text-gray-500">{item.instructorName}</span>
-        </div>
+        <p className="text-xs text-[#FF5F5F] mb-1">{item.subtitle}</p>
+        {item.meta && <p className="text-sm text-gray-500 mt-1.5">{item.meta}</p>}
       </div>
 
       {/* Price */}

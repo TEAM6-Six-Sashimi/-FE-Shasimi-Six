@@ -60,7 +60,7 @@ export default function CartClient({ initialItems }: CartClientProps) {
   // 구매하기 → 결제 페이지로 이동
   const handlePurchase = () => {
     const ids = selectedItems.map((i) => i.courseId).join(',');
-    router.push(`/enrollments?courseIds=${ids}`);
+    router.push(`/payments?courseIds=${ids}`);
   };
 
   const selectedItems = items.filter((i) => selectedIds.includes(i.courseId));

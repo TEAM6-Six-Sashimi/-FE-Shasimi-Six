@@ -1,6 +1,6 @@
 'use client';
 
-import { CourseDetailFromAPI, EnrollmentInfo } from '@/features/user/courses/types';
+import { CourseDetailFromAPI, PaymentInfo } from '@/features/user/courses/types';
 import { Category } from '@/features/categories/types';
 import CourseHeaderSection from './sections/CourseHeaderSection';
 import CourseTabNav, { CourseTabKey, SECTION_ID } from './sections/CourseTabNav';
@@ -25,7 +25,7 @@ interface CourseDetailContentProps {
   /** 커리큘럼 전체 세션 재생 가능 여부 - 미구매 일반 사용자만 false */
   allSessionsPlayable: boolean;
   /** 구매한 학생일 때 진행률 계산용 (선택) */
-  enrollmentInfo?: EnrollmentInfo;
+  paymentInfo?: PaymentInfo;
   /** 수강평 작성 폼 노출 여부 - 구매한 학생만 true */
   canWriteReview: boolean;
 }
