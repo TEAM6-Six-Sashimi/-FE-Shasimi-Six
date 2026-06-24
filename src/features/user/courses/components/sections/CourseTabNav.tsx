@@ -15,19 +15,14 @@ const ALL_TABS: TabConfig[] = [
   { key: 'reviews', label: '수강평' },
 ];
 
-interface CourseTabNavProps {
-  tabs: CourseTabKey[];
-}
-
 const SECTION_ID: Record<CourseTabKey, string> = {
   curriculum: 'course-curriculum',
   instructor: 'course-instructor',
   reviews: 'course-reviews',
 };
 
-export default function CourseTabNav({ tabs }: CourseTabNavProps) {
-  const visibleTabs = ALL_TABS.filter((tab) => tabs.includes(tab.key));
-  const [activeTab, setActiveTab] = useState<CourseTabKey>(visibleTabs[0]?.key);
+export default function CourseTabNav() {
+  const [activeTab, setActiveTab] = useState<CourseTabKey>(ALL_TABS[0].key);
 
   // 스크롤 위치에 따라 화면에 보이는 섹션을 감지해서 활성 탭 갱신
   useEffect(() => {
@@ -38,20 +33,20 @@ export default function CourseTabNav({ tabs }: CourseTabNavProps) {
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
 
         if (visible) {
-          const matched = visibleTabs.find((tab) => SECTION_ID[tab.key] === visible.target.id);
+          const matched = ALL_TABS.find((tab) => SECTION_ID[tab.key] === visible.target.id);
           if (matched) setActiveTab(matched.key);
         }
       },
       { rootMargin: '-100px 0px -60% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] },
     );
 
-    visibleTabs.forEach((tab) => {
+    ALL_TABS.forEach((tab) => {
       const el = document.getElementById(SECTION_ID[tab.key]);
       if (el) observer.observe(el);
     });
-
+ 
     return () => observer.disconnect();
-  }, [visibleTabs]);
+  }, []);
 
   // 클릭 시 해당 섹션으로 스크롤 이동
   const handleClick = (key: CourseTabKey) => {
@@ -66,7 +61,7 @@ export default function CourseTabNav({ tabs }: CourseTabNavProps) {
 
   return (
     <div className="sticky top-4 z-10 flex bg-white rounded-xl shadow-md border-[1.5px] border-[#D1D5DB] overflow-hidden">
-      {visibleTabs.map((tab) => {
+      {ALL_TABS.map((tab) => {
         const isActive = activeTab === tab.key;
         return (
           <button

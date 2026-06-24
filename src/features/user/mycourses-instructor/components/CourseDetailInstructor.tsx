@@ -18,10 +18,9 @@ export default function CourseDetailInstructor({ course, categories }: CourseDet
           <CourseDetailContent
             course={course}
             categories={categories}
-            tabs={['curriculum', 'instructor']}
             showProgress={false}
             allSessionsPlayable={true}
-            canWriteReview={false}
+            reviewMode='hidden-form'
           />
           <div className="w-72 shrink-0 sticky top-4">
             <CourseDetailSidebar
