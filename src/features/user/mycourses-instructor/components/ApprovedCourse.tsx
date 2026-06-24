@@ -21,13 +21,6 @@ interface Props {
   categories: Category[];
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
-  if (!thumbnail) return null;
-  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
-}
-
 export default function ApprovedCourse({ courses = [], categories = [] }: Props) {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortOption>('최신순');
@@ -99,28 +92,11 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
           </div>
         ) : (
           filtered.map((course) => {
-            // const thumbnailUrl = getThumbnailUrl(course.thumbnail);
             return (
               <div
                 key={course.courseId}
                 className="bg-white rounded-xl border border-[#D1D5DB] px-5 py-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
               >
-                {/* 썸네일 */}
-                {/* <div className="relative w-24 h-16 rounded-lg overflow-hidden bg-[#E5E7EB] shrink-0">
-                  {thumbnailUrl ? (
-                    <Image
-                      src={thumbnailUrl}
-                      alt={course.title}
-                      fill
-                      unoptimized
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#9CA3AF] text-[11px]">
-                      No Image
-                    </div>
-                  )}
-                </div> */}
 
                 <div className="flex flex-col gap-1 flex-1">
                   <p className="text-[14.5px] font-semibold text-[#1E2125]">{course.title}</p>
