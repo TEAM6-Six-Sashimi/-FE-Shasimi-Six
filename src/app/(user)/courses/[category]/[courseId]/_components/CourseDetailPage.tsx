@@ -17,10 +17,9 @@ export default function CourseDetailPage({ course, categories }: CourseDetailPag
           <CourseDetailContent
             course={course}
             categories={categories}
-            tabs={['curriculum', 'instructor', 'reviews']}
             showProgress={false}
             allSessionsPlayable={false}
-            canWriteReview={false}
+            reviewMode="readonly"
           />
           <div className="w-72 shrink-0 sticky top-4">
             <CourseDetailSidebar course={course} actionSlot={<NotOwnedButtons course={course} />} />
