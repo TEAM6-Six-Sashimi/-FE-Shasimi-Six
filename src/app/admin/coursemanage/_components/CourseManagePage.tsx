@@ -26,6 +26,7 @@ interface Props {
 
   courseCategories: Category[];
   adminCategories: AdminCategory[];
+  accessToken: string;
 }
 
 export default function CourseManagePage({
@@ -34,6 +35,7 @@ export default function CourseManagePage({
   rejectedCourses,
   courseCategories,
   adminCategories,
+  accessToken,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -103,7 +105,9 @@ export default function CourseManagePage({
         <RejectedCourses courses={rejectedCourses} categories={courseCategories} />
       )}
       {tab === 'private' && <PrivateCourses categories={courseCategories} />}
-      {tab === 'category' && <CategoryManage categories={adminCategories} />}
+      {tab === 'category' && (
+        <CategoryManage categories={adminCategories} accessToken={accessToken} />
+      )}
     </div>
   );
 }

@@ -80,26 +80,6 @@ export async function fetchAdminPendingCourses(accessToken: string) {
   }
 }
 
-export async function approveCourse(accessToken: string, courseId: number) {
-  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/approve`, {
-    method: 'PATCH',
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  if (!res.ok) throw new Error('승인 처리에 실패했습니다.');
-}
-
-export async function rejectCourse(accessToken: string, courseId: number, rejectReason: string) {
-  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/reject`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ rejectReason }),
-  });
-  if (!res.ok) throw new Error('반려 처리에 실패했습니다.');
-}
-
 export async function fetchAdminRejectedCourses(accessToken: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/admin/courses/rejected`, {
@@ -133,30 +113,4 @@ export async function fetchAdminCategories(
   }
 
   return response.json();
-}
-
-export interface CreateCategoryRequest {
-  name: string;
-  subCategory: string;
-}
-
-export async function createAdminCategory(
-  accessToken: string,
-  body: CreateCategoryRequest,
-) {
-  const response = await fetch(
-    `${API_BASE_URL}/admin/categories`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error('카테고리 등록 실패');
-  }
 }

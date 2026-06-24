@@ -27,6 +27,7 @@ export default async function Page() {
       rejectedCourses={rejectedCourses}
       courseCategories={courseCategories}
       adminCategories={adminCategories}
+      accessToken={accessToken}
     />
   );
 }

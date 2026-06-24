@@ -50,10 +50,25 @@ export interface AdminPrivateCourse {
   privatedAt: string;
 }
 
+
+// 카테고리 관리
 export interface AdminCategory {
   id: number;
   code: string;
   mainCategoryName: string;
   subCategory: string;
   active: boolean;
+}
+
+export interface CreateCategoryRequest {
+  name: string;
+  subCategory: string;
+}
+
+export class AdminApiError extends Error {
+  code?: string;
+  constructor(message: string, code?: string) {
+    super(message);
+    this.code = code;
+  }
 }
