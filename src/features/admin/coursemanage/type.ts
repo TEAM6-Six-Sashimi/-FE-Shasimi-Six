@@ -49,3 +49,11 @@ export interface AdminPrivateCourse {
   createdAt: string;
   privatedAt: string;
 }
+
+export interface AdminCategory {
+  id: number;
+  code: string;
+  mainCategoryName: string;
+  subCategory: string;
+  active: boolean;
+}

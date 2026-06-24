@@ -3,12 +3,17 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Category } from '@/features/categories/types';
-import { AdminCourse, RejectedCourse, AdminPendingCourse } from '@/features/admin/coursemanage/type';
+import {
+  AdminCourse,
+  RejectedCourse,
+  AdminPendingCourse,
+  AdminCategory,
+} from '@/features/admin/coursemanage/type';
 import AllCourses from '@/features/admin/coursemanage/components/AllCourses';
 import PendingCourses from '@/features/admin/coursemanage/components/PendingCourses';
 import RejectedCourses from '@/features/admin/coursemanage/components/RejectedCourses';
 import PrivateCourses from '@/features/admin/coursemanage/components/PrivateCourses';
-import CategoryManage from '@/features/admin/coursemanage/components/CategoryManage';
+import CategoryManage from '@/features/admin/coursemanage/components/category/CategoryManage';
 
 type Tab = 'all' | 'pending' | 'rejected' | 'private' | 'category';
 
@@ -18,14 +23,17 @@ interface Props {
   allCourses: AdminCourse[];
   pendingCourses: AdminPendingCourse[];
   rejectedCourses: RejectedCourse[];
-  categories: Category[];
+
+  courseCategories: Category[];
+  adminCategories: AdminCategory[];
 }
 
 export default function CourseManagePage({
   allCourses,
   pendingCourses,
   rejectedCourses,
-  categories,
+  courseCategories,
+  adminCategories,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -87,13 +95,15 @@ export default function CourseManagePage({
         ))}
       </div>
 
-      {tab === 'all' && <AllCourses courses={allCourses} categories={categories} />}
+      {tab === 'all' && <AllCourses courses={allCourses} categories={courseCategories} />}
       {tab === 'pending' && (
-        <PendingCourses courses={pending} setCourses={setPending} categories={categories} />
+        <PendingCourses courses={pending} setCourses={setPending} categories={courseCategories} />
       )}
-      {tab === 'rejected' && <RejectedCourses courses={rejectedCourses} categories={categories} />}
-      {tab === 'private' && <PrivateCourses categories={categories} />}
-      {tab === 'category' && <CategoryManage categories={categories} />}
+      {tab === 'rejected' && (
+        <RejectedCourses courses={rejectedCourses} categories={courseCategories} />
+      )}
+      {tab === 'private' && <PrivateCourses categories={courseCategories} />}
+      {tab === 'category' && <CategoryManage categories={adminCategories} />}
     </div>
   );
 }
