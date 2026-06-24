@@ -97,8 +97,14 @@ export default function PersonalInfoEditPage({ user }: Props) {
       sessionStorage.removeItem('mypage_current_password');
       router.push('/mypage');
       router.refresh(); // 새 토큰 기준으로 서버 컴포넌트 데이터 갱신
-    } catch {
-      showToast('수정에 실패했습니다.', 'negative');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '';
+      if (message === 'REQUIRES_LOGIN') {
+        showToast('비밀번호가 변경되었습니다. 다시 로그인해주세요.', 'negative');
+        router.push('/auth/login');
+        return;
+      }
+      showToast(message || '수정에 실패했습니다.', 'negative');
     } finally {
       setLoading(false);
     }

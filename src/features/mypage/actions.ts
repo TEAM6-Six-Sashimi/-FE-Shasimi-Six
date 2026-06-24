@@ -39,13 +39,13 @@ interface ChangePasswordPayload {
 interface ChangePasswordResponse {
   passwordChanged: boolean;
   requiresLogin: boolean;
-  accessToken: string;
-  refreshToken: string;
+  accessToken?: string;
+  refreshToken?: string;
 }
 
 export async function changePasswordAction(
   payload: ChangePasswordPayload,
-): Promise<ChangePasswordResponse> {
+): Promise<{ passwordChanged: boolean }> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
@@ -65,25 +65,37 @@ export async function changePasswordAction(
 
   const data: ChangePasswordResponse = await res.json();
 
-  // 비밀번호 변경으로 기존 토큰이 무효화되므로, 서버가 내려준 새 토큰으로 쿠키를 즉시 교체
-  if (data.accessToken) {
-    cookieStore.set('accessToken', data.accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-    });
-  }
-  if (data.refreshToken) {
-    cookieStore.set('refreshToken', data.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-    });
+  if (!data.passwordChanged) {
+    throw new Error('비밀번호 변경에 실패했습니다.');
   }
 
-  return data;
+  // requiresLogin이 true면 토큰을 재발급하지 않은 정상적인 "재로그인 필요" 흐름.
+  // 성공으로 처리하지 않고 에러로 던져, 호출부가 재로그인 페이지로 보내게 한다.
+  if (data.requiresLogin) {
+    throw new Error('REQUIRES_LOGIN');
+  }
+
+  // requiresLogin이 false인데 토큰 중 하나라도 빠져 있으면 응답이 불완전한 상태이므로
+  // 성공으로 처리하지 않고 명시적으로 실패시킨다. (한쪽 토큰만 갈아끼우는 상황 방지)
+  if (!data.accessToken || !data.refreshToken) {
+    throw new Error('비밀번호는 변경되었지만 세션 갱신에 실패했습니다. 다시 로그인해주세요.');
+  }
+
+  // 두 토큰이 모두 확인된 경우에만 쿠키 교체
+  cookieStore.set('accessToken', data.accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+  });
+  cookieStore.set('refreshToken', data.refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+  });
+
+  return { passwordChanged: true };
 }
 
 export async function deleteMeAction(currentPassword: string) {
