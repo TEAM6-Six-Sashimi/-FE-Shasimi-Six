@@ -28,8 +28,8 @@ export default function CourseNcsSection({ ncs }: CourseNcsSectionProps) {
         {rows.map((row) => (
           <li key={row.label} className="flex items-start gap-2 text-[13px] text-[#1E2125]">
             <Image src={row.icon} width={15} height={15} alt="" className="mt-0.5 shrink-0" />
-            <span className="font-medium">{row.label}</span>
-            <span className="text-[#6A7282]">{row.value}</span>
+            <span className="font-medium whitespace-nowrap w-25 shrink-0">{row.label}</span>
+            <span className="text-[#6A7282] pr-5">{row.value}</span>
           </li>
         ))}
       </ul>
