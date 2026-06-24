@@ -7,6 +7,8 @@ export const GUEST_USER: UserMe = {
   name: '',
   loginId: '',
   email: '',
+  phone: '',
+  createdAt: '',
   birthDate: '',
   role: 'GUEST',
   status: '',

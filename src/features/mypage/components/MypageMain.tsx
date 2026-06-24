@@ -13,14 +13,14 @@ interface MypageMainProps {
   user: UserMeWithAgreements;
 }
 
-const AGREEMENT_ROWS: { key: keyof NonNullable<UserMeWithAgreements['agreements']>; label: string }[] =
-  [
-    { key: 'marketing', label: '마케팅 수신' },
-    { key: 'emailNotice', label: '이메일 수신' },
-    { key: 'aiUsage', label: 'AI 사용' },
-  ];
-
-const joinedAt = '-';
+const AGREEMENT_ROWS: {
+  key: keyof NonNullable<UserMeWithAgreements['agreements']>;
+  label: string;
+}[] = [
+  { key: 'marketing', label: '마케팅 수신' },
+  { key: 'emailNotice', label: '이메일 수신' },
+  { key: 'aiUsage', label: 'AI 사용' },
+];
 
 type ModalMode = 'edit' | 'withdrawAgreement' | 'withdrawPassword' | null;
 
@@ -94,8 +94,8 @@ export default function MypageMain({ user }: MypageMainProps) {
         <InfoRow label="이름" value={user.name} />
         <InfoRow label="아이디" value={user.loginId} />
         <InfoRow label="생년월일" value={user.birthDate} />
-        <InfoRow label="가입일" value={joinedAt} />
-        <InfoRow label="전화번호" value="-" />
+        <InfoRow label="가입일" value={user.createdAt.slice(0, 10)} />
+        <InfoRow label="전화번호" value={user.phone} />
         <InfoRow label="이메일" value={user.email} />
         <div className="flex items-center gap-6 py-3.5 col-span-2">
           <span className="w-20 shrink-0 text-[14px] text-[#6A7282] font-semibold">

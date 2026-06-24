@@ -7,9 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { UserMeWithAgreements } from '@/features/mypage/types';
 import { changePasswordAction, updateMeAction } from '@/features/mypage/actions';
+import Image from 'next/image';
 
 interface Props {
   user: UserMeWithAgreements;
+}
+
+function formatPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
 }
 
 export default function PersonalInfoEditPage({ user }: Props) {
@@ -17,9 +25,14 @@ export default function PersonalInfoEditPage({ user }: Props) {
   const { showToast } = useToast();
 
   const [currentPassword, setCurrentPassword] = useState<string | null>(null);
+  const [phone, setPhone] = useState(user.phone ?? '');
   const [newPassword, setNewPassword] = useState('');
   const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhone(formatPhone(e.target.value));
+  };
 
   const agreements = user.agreements ?? {
     privacy: true,
@@ -61,11 +74,10 @@ export default function PersonalInfoEditPage({ user }: Props) {
     try {
       setLoading(true);
 
-      // 동의 항목 + 이름/이메일(변경 없음, 기존 값 그대로) 수정
+      // 전화번호 + 동의 항목 수정
       await updateMeAction({
         currentPassword,
-        name: user.name,
-        email: user.email,
+        phone,
         marketingConsent: marketing,
         emailConsent: emailNotice,
         aiConsent: aiUsage,
@@ -107,14 +119,19 @@ export default function PersonalInfoEditPage({ user }: Props) {
         <InfoRow label="이름" value={user.name} />
         <InfoRow label="아이디" value={user.loginId} />
         <InfoRow label="생년월일" value={user.birthDate} />
-        <InfoRow label="가입일" value="-" />
+        <InfoRow label="가입일" value={user.createdAt.slice(0, 10)} />
         <div className="flex items-center gap-6 py-3.5 border-b border-[#F3F4F6]">
-          <span className="w-20 shrink-0 text-[14px] text-[#6A7282] font-semibold">전화번호</span>
+          <label htmlFor="phone" className="w-20 shrink-0 text-[14px] text-[#6A7282] font-semibold">
+            전화번호
+          </label>
           <input
+            id="phone"
             type="text"
-            value="010-1234-5678"
-            disabled
-            className="flex-1 h-9 px-3 rounded-md border border-[#E5E7EB] bg-[#F9FAFB] text-[13.5px] text-[#9CA3AF] cursor-not-allowed"
+            value={phone}
+            onChange={handlePhoneChange}
+            placeholder="010-1234-5678"
+            disabled={loading}
+            className="flex-1 h-9 px-3 rounded-md border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors"
           />
         </div>
         <InfoRow label="이메일" value={user.email} />
@@ -136,19 +153,34 @@ export default function PersonalInfoEditPage({ user }: Props) {
         <div className="flex flex-col gap-3 mt-3">
           <div>
             <label className="block text-[12.5px] text-[#6A7282] mb-1.5">새 비밀번호</label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="대소문자+숫자+특수문자(!@#$%^_), 8~16자"
-              className="w-full h-11 px-4 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="대소문자+숫자+특수문자(!@#$%^_), 8~16자"
+                className="w-full h-11 px-4 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+                aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보이기'}
+              >
+                <Image
+                  src={showPassword ? '/auth/closeeye.svg' : '/auth/openeye.svg'}
+                  alt=""
+                  width={20}
+                  height={20}
+                />
+              </button>
+            </div>
           </div>
           <div>
             <label className="block text-[12.5px] text-[#6A7282] mb-1.5">새 비밀번호 확인</label>
             <div className="relative">
               <input
-                type={showConfirm ? 'text' : 'password'}
+                type="password"
                 value={newPasswordConfirm}
                 onChange={(e) => setNewPasswordConfirm(e.target.value)}
                 placeholder="새 비밀번호 확인"
@@ -156,13 +188,6 @@ export default function PersonalInfoEditPage({ user }: Props) {
                   passwordMismatch ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]'
                 }`}
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirm((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#6A7282]"
-              >
-                👁
-              </button>
             </div>
             {passwordMismatch && (
               <p className="text-[12px] text-[#FF5E5E] mt-1">비밀번호가 일치하지 않습니다.</p>

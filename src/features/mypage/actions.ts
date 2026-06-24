@@ -7,8 +7,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface UpdateMePayload {
   currentPassword: string;
-  name: string;
-  email: string;
+  phone: string;
   marketingConsent: boolean;
   emailConsent: boolean;
   aiConsent: boolean;

@@ -76,6 +76,8 @@ export interface UserMe {
   name: string;
   loginId: string;
   email: string;
+  phone: string;
+  createdAt: string;
   birthDate: string;
   role: 'STUDENT' | 'INSTRUCTOR' | 'ADMIN' | 'GUEST';
   status: string;
