@@ -47,7 +47,6 @@ export default function PersonalInfoEditPage({ user }: Props) {
   const [loading, setLoading] = useState(false);
   const [passwordMismatch, setPasswordMismatch] = useState(false);
 
-  // 개인정보 조회 페이지에서 확인한 현재 비밀번호를 가져옴. 없으면 다시 조회 페이지로
   useEffect(() => {
     const stored = sessionStorage.getItem('mypage_current_password');
     if (!stored) {
@@ -84,6 +83,8 @@ export default function PersonalInfoEditPage({ user }: Props) {
       });
 
       // 새 비밀번호를 입력했으면 비밀번호도 변경
+      // 서버가 새 accessToken/refreshToken을 내려주고 쿠키를 즉시 교체하므로
+      // 세션이 끊기지 않고 그대로 마이페이지로 돌아갈 수 있음
       if (newPassword) {
         await changePasswordAction({
           currentPassword,
@@ -95,6 +96,7 @@ export default function PersonalInfoEditPage({ user }: Props) {
       showToast('개인정보가 수정되었습니다.');
       sessionStorage.removeItem('mypage_current_password');
       router.push('/mypage');
+      router.refresh(); // 새 토큰 기준으로 서버 컴포넌트 데이터 갱신
     } catch {
       showToast('수정에 실패했습니다.', 'negative');
     } finally {

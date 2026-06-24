@@ -7,7 +7,7 @@ import Image from 'next/image';
 interface PasswordConfirmModalProps {
   title?: string;
   description?: string;
-  onConfirm: (password: string) => void;
+  onConfirm: (password: string) => void | Promise<void>;
   onCancel: () => void;
   loading?: boolean;
   errorMessage?: string;

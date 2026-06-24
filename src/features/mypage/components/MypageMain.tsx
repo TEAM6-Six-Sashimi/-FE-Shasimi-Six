@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { UserMeWithAgreements } from '../types';
 import { useToast } from '@/components/ui/ToastContext';
 import Image from 'next/image';
-import { deleteMeAction } from '../actions';
+import { deleteMeAction, updateMeAction } from '../actions';
 import PasswordConfirmModal from '@/components/modals/PasswordConfirmModal';
 import WithdrawAgreementModal from '@/components/modals/WithdrawAgreementModal';
 
@@ -48,11 +48,29 @@ export default function MypageMain({ user }: MypageMainProps) {
     }
   };
 
-  const handleEditPasswordConfirm = (password: string) => {
+  // 수정하기 클릭 → 비밀번호 입력 → 검증 전용 API가 없으므로
+  // PATCH /users/me를 "현재 값 그대로" 호출해 currentPassword만 검증 용도로 사용.
+  // 틀리면 서버가 에러를 던지므로 이 모달에서 바로 에러를 보여주고 다음 페이지로 넘어가지 않음.
+  const handleEditPasswordConfirm = async (password: string) => {
     setPasswordError('');
-    sessionStorage.setItem('mypage_current_password', password);
-    setModalMode(null);
-    router.push('/mypage/edit');
+    try {
+      setLoading(true);
+      await updateMeAction({
+        currentPassword: password,
+        phone: user.phone,
+        marketingConsent: agreements.marketing,
+        emailConsent: agreements.emailNotice,
+        aiConsent: agreements.aiUsage,
+      });
+
+      sessionStorage.setItem('mypage_current_password', password);
+      setModalMode(null);
+      router.push('/mypage/edit');
+    } catch {
+      setPasswordError('비밀번호가 일치하지 않습니다. 다시 입력해주세요.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 탈퇴하기 클릭 → 1단계: 동의 모달
@@ -173,13 +191,15 @@ export default function MypageMain({ user }: MypageMainProps) {
         </button>
       </div>
 
-      {/* 수정하기 비밀번호 확인 모달 */}
+      {/* 수정하기 비밀번호 확인 모달 (여기서 즉시 검증, 틀리면 바로 에러) */}
       {modalMode === 'edit' && (
         <PasswordConfirmModal
           title="비밀번호를 입력해주세요."
           description="개인정보 수정을 위해 현재 비밀번호를 입력해 주세요."
           onConfirm={handleEditPasswordConfirm}
           onCancel={() => setModalMode(null)}
+          loading={loading}
+          errorMessage={passwordError}
         />
       )}
 
