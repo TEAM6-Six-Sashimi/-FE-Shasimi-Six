@@ -3,6 +3,7 @@
 import { CourseDetailFromAPI, PaymentInfo } from '@/features/user/courses/types';
 import { Category } from '@/features/categories/types';
 import CourseHeaderSection from './sections/CourseHeaderSection';
+import CourseNcsSection from './sections/CourseNcsSection';
 import CourseTabNav, { CourseTabKey, SECTION_ID } from './sections/CourseTabNav';
 import CourseCurriculumSection from './sections/CourseCurriculumSection';
 import CourseInstructorSection, { InstructorInfo } from './sections/CourseInstructorSection';
@@ -46,6 +47,8 @@ export default function CourseDetailContent({
   return (
     <div className="flex flex-col flex-1 gap-4 min-w-0">
       <CourseHeaderSection course={course} categories={categories} />
+
+      <CourseNcsSection ncs={course.ncs} />
  
       {/* 리모컨 - 클릭 시 아래 섹션들로 스크롤 이동 */}
       <CourseTabNav tabs={tabs} />

@@ -12,6 +12,14 @@ export interface CourseFromAPI {
   label?: string | null;   // 인기, NEW 
 }
 
+// NCS 정보 (없으면 - null)
+export interface NcsInfo {
+  categoryPath: string;        // 분류
+  jobDescription: string;      // 직무 설명
+  abilityUnitNames: string[];  // 능력단위명
+  totalAbilityUnitCount: number;
+}
+
 // 강의 상세
 export interface CourseDetailFromAPI {
   courseId: number;
@@ -26,6 +34,8 @@ export interface CourseDetailFromAPI {
   studentCount: number;
   instructorName: string;
   categoryName: string;
+  ncs: NcsInfo 
+  | null;
   sessions: CourseSession[];
 }
 
