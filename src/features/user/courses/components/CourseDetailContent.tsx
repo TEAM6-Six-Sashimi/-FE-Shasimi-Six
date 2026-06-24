@@ -50,7 +50,7 @@ export default function CourseDetailContent({
 
       <CourseNcsSection ncs={course.ncs} />
  
-      {/* 리모컨 - 클릭 시 아래 섹션들로 스크롤 이동 */}
+      {/* 리모컨 */}
       <CourseTabNav tabs={tabs} />
  
       {/* 모든 섹션이 세로로 순서대로 펼쳐짐 */}

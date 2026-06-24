@@ -4,17 +4,9 @@ import NotOwnedButtons from '@/features/user/courses/components/sidebar-buttons/
 import { CourseDetailFromAPI } from '@/features/user/courses/types';
 import { Category } from '@/features/categories/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
 interface CourseDetailPageProps {
   course: CourseDetailFromAPI;
   categories: Category[];
-}
-
-
-function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
-  if (!thumbnail) return null;
-  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
 }
 
 export default function CourseDetailPage({ course, categories }: CourseDetailPageProps) {
