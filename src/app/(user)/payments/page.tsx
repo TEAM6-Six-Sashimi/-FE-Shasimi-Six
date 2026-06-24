@@ -4,6 +4,8 @@ import PaymentContent from '@/features/user/payments/components/PaymentContent';
 import { PaymentSticky } from '@/features/user/payments/components/PaymentSticky';
 import { fetchPlanPreviewAction } from '@/features/user/payments/actions';
 import { PaymentSummary, OrderLineItem } from '@/features/user/payments/types';
+import { fetchCategories } from '@/services/categories.service';
+import { Category } from '@/features/categories/types';
 
 interface PaymentPageProps {
   searchParams: Promise<{
@@ -15,14 +17,17 @@ interface PaymentPageProps {
 
 export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
   const { courseIds: rawIds, type, planCode } = await searchParams;
-
+ 
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
-
+ 
+  // categories는 강의/구독 어느 쪽이든 카테고리 표시에 필요하므로 공통으로 조회
+  const categories = await fetchCategories();
+ 
   // ── AI 구독 결제 ──────────────────────────────────────────
   if (type === 'subscription' && planCode) {
     const preview = accessToken ? await fetchPlanPreviewAction(planCode) : null;
-
+ 
     const items: OrderLineItem[] = preview
       ? [
           {
@@ -33,7 +38,7 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
           },
         ]
       : [];
-
+ 
     const summary: PaymentSummary = {
       purchaseType: 'AI_SUBSCRIPTION',
       items,
@@ -43,10 +48,9 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
       shortfallCredits: preview?.insufficientAmount ?? 0,
       planCode,
     };
-
-    return <PaymentPageLayout summary={summary} />;
+ 
+    return <PaymentPageLayout summary={summary} categories={categories} />;
   }
-
   // ── 강의 단일 / 장바구니 결제 ─────────────────────────────
   const courseIds: number[] = rawIds
     ? (Array.isArray(rawIds) ? rawIds : rawIds.split(',')).map(Number).filter((id) => !isNaN(id))
@@ -105,18 +109,25 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
     courseIds,
   };
 
-  return <PaymentPageLayout summary={summary} />;
+  return <PaymentPageLayout summary={summary} categories={categories} />;
 }
-
-function PaymentPageLayout({ summary }: { summary: PaymentSummary }) {
+ 
+// PaymentPageLayout에 categories prop 추가
+function PaymentPageLayout({
+  summary,
+  categories,
+}: {
+  summary: PaymentSummary;
+  categories: Category[];
+}) {
   return (
     <div className="min-h-screen bg-gray-50/60">
       <div className="max-w-5xl mx-auto px-4 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
           <Suspense fallback={<PaymentContentSkeleton />}>
-            <PaymentContent items={summary.items} />
+            <PaymentContent items={summary.items} categories={categories} />
           </Suspense>
-
+ 
           <PaymentSticky summary={summary} />
         </div>
       </div>
