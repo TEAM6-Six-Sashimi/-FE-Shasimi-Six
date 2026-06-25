@@ -1,10 +1,66 @@
 import { AdminCategory } from '@/features/admin/coursemanage/type';
 import {
+  AdminUser,
+  AdminUserDetail,
   InstructorApplication,
   InstructorApplicationDetail,
 } from '@/features/admin/usermanage/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// 회원 관리 - 전체 회원 조회
+export async function fetchAdminUsers(accessToken: string): Promise<AdminUser[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/users`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: 'no-store',
+    });
+ 
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      console.error(`[fetchAdminUsers] status=${res.status} body=${errorBody}`);
+      return [];
+    }
+ 
+    return res.json();
+  } catch (e) {
+    console.error('[fetchAdminUsers] fetch error:', e);
+    return [];
+  }
+}
+ 
+// 회원 관리 - 회원 상세 조회
+export async function fetchAdminUserDetail(
+  accessToken: string,
+  userId: number,
+): Promise<AdminUserDetail | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: 'no-store',
+    });
+ 
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      console.error(`[fetchAdminUserDetail] status=${res.status} body=${errorBody}`);
+      return null;
+    }
+ 
+    return res.json();
+  } catch (e) {
+    console.error('[fetchAdminUserDetail] fetch error:', e);
+    return null;
+  }
+}
+
 
 // 회원 관리 - 강사 승인
 export async function fetchInstructorApplications(

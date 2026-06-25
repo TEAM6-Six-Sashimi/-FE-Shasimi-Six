@@ -1,3 +1,25 @@
+export interface AdminUser {
+  id: number;
+  name: string;
+  loginId: string;
+  email: string;
+  role: 'STUDENT' | 'INSTRUCTOR';
+  createdAt: string; 
+  lastLoginAt: string | null;
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+}
+
+export interface AdminUserDetail {
+  name: string;
+  loginId: string;
+  email: string;
+  phone: string;
+  createdAt: string;
+  lastLoginAt: string | null;
+  role: 'STUDENT' | 'INSTRUCTOR';
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+}
+
 export interface InstructorApplication {
   applicationId: number;
   name: string;
