@@ -1,3 +1,4 @@
+import { AdminCategory } from '@/features/admin/coursemanage/type';
 import {
   InstructorApplication,
   InstructorApplicationDetail,
@@ -5,6 +6,7 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// 회원 관리 - 강사 승인
 export async function fetchInstructorApplications(
   accessToken: string,
 ): Promise<InstructorApplication[]> {
@@ -41,6 +43,8 @@ export async function fetchInstructorApplicationDetail(
   }
 }
 
+
+// 강의 관리 - 승인된 전체 강의
 export async function fetchAdminCourses(accessToken: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/admin/courses`, {
@@ -61,6 +65,8 @@ export async function fetchAdminCourses(accessToken: string) {
   }
 }
 
+
+// 강의 관리 - 승인/반려
 export async function fetchAdminPendingCourses(accessToken: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/admin/courses/pending`, {
@@ -74,26 +80,6 @@ export async function fetchAdminPendingCourses(accessToken: string) {
   }
 }
 
-export async function approveCourse(accessToken: string, courseId: number) {
-  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/approve`, {
-    method: 'PATCH',
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  if (!res.ok) throw new Error('승인 처리에 실패했습니다.');
-}
-
-export async function rejectCourse(accessToken: string, courseId: number, rejectReason: string) {
-  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/reject`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ rejectReason }),
-  });
-  if (!res.ok) throw new Error('반려 처리에 실패했습니다.');
-}
-
 export async function fetchAdminRejectedCourses(accessToken: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/admin/courses/rejected`, {
@@ -105,4 +91,26 @@ export async function fetchAdminRejectedCourses(accessToken: string) {
   } catch {
     return [];
   }
+}
+
+
+// 강의 관리 - 카테고리 관리
+export async function fetchAdminCategories(
+  accessToken: string,
+): Promise<AdminCategory[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/admin/categories`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: 'no-store',
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error('카테고리 조회 실패');
+  }
+
+  return response.json();
 }
