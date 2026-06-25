@@ -20,7 +20,17 @@ export async function checkoutAction(payload: CheckoutRequest): Promise<Checkout
 
   if (!accessToken) throw new Error('UNAUTHORIZED');
 
-  const res = await fetch(`${API_BASE_URL}/payments/checkout`, {
+  async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}, ms = 8000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ms);
+    try {
+      return await fetch(input, { ...init, signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  const res = await fetchWithTimeout(`${API_BASE_URL}/payments/checkout`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -71,10 +81,11 @@ export async function fetchSubscriptionPlansAction(): Promise<SubscriptionPlan[]
 }
 
 export async function fetchPlanPreviewAction(planCode: string): Promise<PlanPreview | null> {
+  const safePlanCode = encodeURIComponent(planCode);
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const res = await fetch(`${API_BASE_URL}/subscriptions/plans/${planCode}/preview`, {
+  const res = await fetch(`${API_BASE_URL}/subscriptions/plans/${safePlanCode}/preview`, {
     headers: { Authorization: `Bearer ${accessToken}` },
     cache: 'no-store',
   });
