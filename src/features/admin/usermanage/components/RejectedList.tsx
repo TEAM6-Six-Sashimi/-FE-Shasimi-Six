@@ -2,43 +2,21 @@
 
 import { useState } from 'react';
 import RejectDetailModal from '@/components/modals/RejectDetailModal';
+import { RejectedInstructorApplication } from '../types';
 
-export interface RejectedUser {
-  applicationId: number;
-  name: string;
-  loginId: string;
-  email: string;
-  rejectedAt: string;
-  rejectCategory: string;
-  rejectReason: string;
+const CATEGORY_LABEL_MAP: Record<string, string> = {
+  INSUFFICIENT_CAREER_PROOF: '경력/이력 증빙 부족',
+  INSUFFICIENT_BASIC_INFO: '기본 정보 미흡',
+  UNABLE_TO_VERIFY_IDENTITY: '신원 확인 불가',
+  INAPPROPRIATE_CAREER_INCLUDED: '부적절한 이력 포함',
+};
+
+interface Props {
+  rejected: RejectedInstructorApplication[];
 }
 
-// TODO: 실제 API 연결 전까지 사용하는 임시 데이터
-const MOCK_REJECTED_INSTRUCTORS: RejectedUser[] = [
-  {
-    applicationId: 1,
-    name: '홍길동',
-    loginId: 'hong01',
-    email: 'hong@email.com',
-    rejectedAt: '2026-05-12',
-    rejectCategory: '경력/이력 증빙 부족',
-    rejectReason: '경력 증빙 서류가 제출되지 않았습니다.',
-  },
-  {
-    applicationId: 2,
-    name: '이미래',
-    loginId: 'future02',
-    email: 'future@email.com',
-    rejectedAt: '2026-05-10',
-    rejectCategory: '기본 정보 미흡',
-    rejectReason: '제출된 기본 정보가 불완전합니다.',
-  },
-];
-
-export default function RejectedList() {
-  // TODO: 실제 API 연결 시 props로 받아오도록 변경
-  const rejected = MOCK_REJECTED_INSTRUCTORS;
-  const [detailModal, setDetailModal] = useState<RejectedUser | null>(null);
+export default function RejectedList({ rejected }: Props) {
+  const [detailModal, setDetailModal] = useState<RejectedInstructorApplication | null>(null);
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
@@ -76,18 +54,18 @@ export default function RejectedList() {
                 <td className="py-3 text-center font-semibold text-[#1E2125]">{r.name}</td>
                 <td className="py-3 text-center text-[#6A7282]">{r.loginId}</td>
                 <td className="py-3 text-center text-[#6A7282]">{r.email}</td>
-                <td className="py-3 text-center text-[#6A7282]">{r.rejectedAt}</td>
+                <td className="py-3 text-center text-[#6A7282]">{r.rejectedAt.slice(0, 10)}</td>
                 <td className="py-3 text-center">
                   <span className="inline-block px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-[#FFEBEB] text-[#FF5E5E]">
-                    {r.rejectCategory}
+                    {CATEGORY_LABEL_MAP[r.rejectionCategory] ?? r.rejectionCategory}
                   </span>
                 </td>
                 <td
                   onClick={() => setDetailModal(r)}
                   className="py-3 px-4 text-left text-[#6A7282] truncate cursor-pointer hover:text-[#1E2125] hover:underline transition-colors"
-                  title={r.rejectReason}
+                  title={r.rejectionReason}
                 >
-                  {r.rejectReason}
+                  {r.rejectionReason}
                 </td>
               </tr>
             ))
@@ -100,10 +78,12 @@ export default function RejectedList() {
         <RejectDetailModal
           fields={[
             { label: '이름', value: detailModal.name },
-            { label: '반려일', value: detailModal.rejectedAt },
+            { label: '반려일', value: detailModal.rejectedAt.slice(0, 10) },
           ]}
-          category={detailModal.rejectCategory}
-          detail={detailModal.rejectReason}
+          category={
+            CATEGORY_LABEL_MAP[detailModal.rejectionCategory] ?? detailModal.rejectionCategory
+          }
+          detail={detailModal.rejectionReason}
           onClose={() => setDetailModal(null)}
         />
       )}

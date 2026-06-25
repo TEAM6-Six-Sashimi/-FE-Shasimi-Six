@@ -2,48 +2,62 @@
 
 import { cookies } from 'next/headers';
 import { InstructorApplicationDetail } from './types';
-import { fetchInstructorApplicationDetail } from '@/services/admin.service';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import {
+  fetchInstructorApplicationDetail,
+  fetchInstructorApplications,
+  fetchRejectedInstructorApplications,
+  approveInstructor,
+  rejectInstructor,
+} from '@/services/admin.service';
 
 export async function approveInstructorAction(applicationId: number) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const res = await fetch(
-    `${API_BASE_URL}/api/members/instructor-applications/${applicationId}/approve`,
-    {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${accessToken}` },
-    },
-  );
-
-  if (!res.ok) throw new Error('승인 처리에 실패했습니다.');
+  await approveInstructor(accessToken, applicationId);
 }
 
-export async function rejectInstructorAction(applicationId: number, rejectReason: string) {
+export async function rejectInstructorAction(
+  applicationId: number,
+  rejectionCategory: string,
+  rejectionReason: string,
+) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const res = await fetch(
-    `${API_BASE_URL}/api/members/instructor-applications/${applicationId}/reject`,
-    {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      // body: JSON.stringify({ rejectReason }),
-    },
-  );
-
-  if (!res.ok) throw new Error('반려 처리에 실패했습니다.');
+  await rejectInstructor(accessToken, applicationId, { rejectionCategory, rejectionReason });
 }
 
+// 상세 조회 + 목록(대기/반려 이력)에서 이름·아이디·이메일을 보강
 export async function getApplicationDetailAction(
   applicationId: number,
 ): Promise<InstructorApplicationDetail | null> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
-  return fetchInstructorApplicationDetail(accessToken, applicationId);
+
+  const detail = await fetchInstructorApplicationDetail(accessToken, applicationId);
+
+  if (!detail) return null;
+
+  // 상세 응답에 name/loginId/email이 없으므로 목록에서 찾아 보강
+  const [pending, rejected] = await Promise.all([
+    fetchInstructorApplications(accessToken),
+    fetchRejectedInstructorApplications(accessToken),
+  ]);
+
+  const fromPending = pending.find((p) => p.applicationId === applicationId);
+  const fromRejected = rejected.find((r) => r.applicationId === applicationId);
+  const matched = fromPending ?? fromRejected;
+
+  const merged: InstructorApplicationDetail = {
+    ...detail,
+    mainCareers: detail.mainCareers ?? [],
+    certifications: detail.certifications ?? [],
+    name: matched?.name,
+    loginId: matched?.loginId,
+    email: matched?.email,
+    categoryName: fromPending?.categoryName ?? detail.categoryName,
+  };
+
+  return merged;
 }

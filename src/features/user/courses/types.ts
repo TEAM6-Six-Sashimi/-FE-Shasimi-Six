@@ -12,6 +12,14 @@ export interface CourseFromAPI {
   label?: string | null;   // 인기, NEW 
 }
 
+// NCS 정보 (없으면 - null)
+export interface NcsInfo {
+  categoryPath: string;        // 분류
+  jobDescription: string;      // 직무 설명
+  abilityUnitNames: string[];  // 능력단위명
+  totalAbilityUnitCount: number;
+}
+
 // 강의 상세
 export interface CourseDetailFromAPI {
   courseId: number;
@@ -26,6 +34,8 @@ export interface CourseDetailFromAPI {
   studentCount: number;
   instructorName: string;
   categoryName: string;
+  ncs: NcsInfo 
+  | null;
   sessions: CourseSession[];
 }
 
@@ -69,3 +79,9 @@ export const DIFFICULTY_LABEL: Record<string, string> = {
 export interface CourseDetail extends CourseFromAPI {
   categoryName: string;
 }
+
+// writable: (구매 후) 작성 가능 + 1번 작성가능 문구
+// readonly: (구매 전) 구매후 작성가능 문구
+// hidden-form: 입력폼x + 목록만
+// no-reviews: 등록된 수강평이 없습니다
+export type ReviewMode = 'writable' | 'readonly' | 'hidden-form' | 'no-reviews';

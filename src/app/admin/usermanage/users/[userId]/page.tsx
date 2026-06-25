@@ -1,48 +1,37 @@
-'use client';
+import { cookies } from 'next/headers';
+import Link from 'next/link';
+import { fetchAdminUserDetail } from '@/services/admin.service';
+import { AdminUserDetail } from '@/features/admin/usermanage/types';
 
-import { use } from 'react';
-import { useRouter } from 'next/navigation';
-import { AdminUser } from '@/features/admin/usermanage/components/AllUsers';
+interface PageProps {
+  params: Promise<{ userId: string }>;
+}
 
-// TODO: 실제 API 연결 전까지 사용하는 임시 데이터
-const MOCK_USERS: (AdminUser & { phone: string })[] = [
-  {
-    id: 1,
-    name: '김철수',
-    loginId: 'user1',
-    email: 'user1@example.com',
-    phone: '010-1234-5678',
-    role: 'INSTRUCTOR',
-    joinedAt: '2026-05-10',
-    lastLoginAt: '2026-06-13',
-    status: 'INACTIVE',
-  },
-  {
-    id: 2,
-    name: '이영희',
-    loginId: 'user2',
-    email: 'user2@example.com',
-    phone: '010-2345-6789',
-    role: 'STUDENT',
-    joinedAt: '2026-05-09',
-    lastLoginAt: '2026-06-12',
-    status: 'ACTIVE',
-  },
-];
-
-const ROLE_LABEL: Record<AdminUser['role'], string> = {
+const ROLE_LABEL: Record<AdminUserDetail['role'], string> = {
   STUDENT: '수강생',
   INSTRUCTOR: '강사',
 };
 
-interface Props {
-  params: Promise<{ userId: string }>;
-}
+const STATUS_LABEL: Record<AdminUserDetail['status'], string> = {
+  ACTIVE: '활성',
+  INACTIVE: '비활성',
+  SUSPENDED: '정지',
+};
 
-export default function UserDetailPage({ params }: Props) {
-  const router = useRouter();
-  const { userId } = use(params);
-  const user = MOCK_USERS.find((u) => u.id === Number(userId));
+const STATUS_BADGE_CLS: Record<AdminUserDetail['status'], string> = {
+  ACTIVE: 'bg-[#F9FBE7] text-[#827717]',
+  INACTIVE: 'bg-[#E5E7EB]/40 text-[#6A7282]',
+  SUSPENDED: 'bg-[#FEE2E2] text-[#B91C1C]',
+};
+
+const formatDate = (value: string | null) => (value ? value.slice(0, 10) : '-');
+
+export default async function UserDetailPage({ params }: PageProps) {
+  const { userId } = await params;
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+
+  const user = await fetchAdminUserDetail(accessToken, Number(userId));
 
   if (!user) {
     return (
@@ -57,12 +46,12 @@ export default function UserDetailPage({ params }: Props) {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-3">
-      <button
-        onClick={() => router.back()}
-        className="flex items-center gap-1 text-[13px] text-[#6A7282] hover:text-[#1E2125] cursor-pointer mb-4"
+      <Link
+        href="/admin/usermanage"
+        className="flex items-center gap-1 text-[13px] text-[#6A7282] hover:text-[#1E2125] cursor-pointer mb-4 w-fit"
       >
         &lt; 전체 회원 목록
-      </button>
+      </Link>
 
       <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-7">
         <h2 className="text-[16px] font-bold text-[#1E2125] mb-6">회원 기본 정보</h2>
@@ -86,11 +75,11 @@ export default function UserDetailPage({ params }: Props) {
           </div>
           <div>
             <p className={fieldLabelCls}>가입일</p>
-            <p className={fieldValueCls}>{user.joinedAt}</p>
+            <p className={fieldValueCls}>{formatDate(user.createdAt)}</p>
           </div>
           <div>
             <p className={fieldLabelCls}>최근 접속일</p>
-            <p className={fieldValueCls}>{user.lastLoginAt}</p>
+            <p className={fieldValueCls}>{formatDate(user.lastLoginAt)}</p>
           </div>
           <div>
             <p className={fieldLabelCls}>역할</p>
@@ -107,13 +96,9 @@ export default function UserDetailPage({ params }: Props) {
           <div>
             <p className={fieldLabelCls}>상태</p>
             <span
-              className={`inline-block px-3 py-1 rounded-md text-[12.5px] font-semibold ${
-                user.status === 'ACTIVE'
-                  ? 'bg-[#F9FBE7] text-[#827717]'
-                  : 'bg-[#E5E7EB]/40 text-[#6A7282]'
-              }`}
+              className={`inline-block px-3 py-1 rounded-md text-[12.5px] font-semibold ${STATUS_BADGE_CLS[user.status]}`}
             >
-              {user.status === 'ACTIVE' ? '활성' : '비활성'}
+              {STATUS_LABEL[user.status]}
             </span>
           </div>
         </div>

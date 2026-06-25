@@ -122,7 +122,7 @@ export default function CartContent({
                 </div>
 
                 {/* 썸네일 - TODO: 백엔드에서 완전한 URL 내려오면 next/image로 교체 */}
-               <div className="relative w-24 h-16 rounded-lg overflow-hidden shrink-0 bg-[#D1D5DB]">
+                <div className="relative w-24 h-16 rounded-lg overflow-hidden shrink-0 bg-[#D1D5DB]">
                   {thumbnailUrl && (
                     <Image
                       src={thumbnailUrl}
@@ -138,7 +138,6 @@ export default function CartContent({
                 <div className="flex-1 min-w-0">
                   <p className="text-[15px] font-semibold text-[#1E2125] truncate">{item.title}</p>
                   <div className="flex items-center gap-1 mt-1">
-                    <div className="w-5 h-5 rounded-full bg-[#6A7282] flex items-center justify-center text-[10px] font-bold text-[#1E2125]" />
                     <span className="text-[12px] text-[#6A7282]">{item.instructorName}</span>
                   </div>
                 </div>

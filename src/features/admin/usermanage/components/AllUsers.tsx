@@ -3,121 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-
-export interface AdminUser {
-  id: number;
-  name: string;
-  loginId: string;
-  email: string;
-  role: 'STUDENT' | 'INSTRUCTOR';
-  joinedAt: string;
-  lastLoginAt: string;
-  status: 'ACTIVE' | 'INACTIVE';
-}
-
-// TODO: 실제 API 연결 전까지 사용하는 임시 데이터
-const MOCK_USERS: AdminUser[] = [
-  {
-    id: 1,
-    name: '김철수',
-    loginId: 'user1',
-    email: 'user1@example.com',
-    role: 'INSTRUCTOR',
-    joinedAt: '2026-05-10',
-    lastLoginAt: '2026-06-13',
-    status: 'INACTIVE',
-  },
-  {
-    id: 2,
-    name: '이영희',
-    loginId: 'user2',
-    email: 'user2@example.com',
-    role: 'STUDENT',
-    joinedAt: '2026-05-09',
-    lastLoginAt: '2026-06-12',
-    status: 'ACTIVE',
-  },
-  {
-    id: 3,
-    name: '박민수',
-    loginId: 'user3',
-    email: 'user3@example.com',
-    role: 'STUDENT',
-    joinedAt: '2026-05-08',
-    lastLoginAt: '2026-06-11',
-    status: 'ACTIVE',
-  },
-  {
-    id: 4,
-    name: '최지훈',
-    loginId: 'user4',
-    email: 'user4@example.com',
-    role: 'INSTRUCTOR',
-    joinedAt: '2026-05-07',
-    lastLoginAt: '2026-06-10',
-    status: 'ACTIVE',
-  },
-  {
-    id: 5,
-    name: '정수진',
-    loginId: 'user5',
-    email: 'user5@example.com',
-    role: 'STUDENT',
-    joinedAt: '2026-05-06',
-    lastLoginAt: '2026-06-09',
-    status: 'INACTIVE',
-  },
-  {
-    id: 6,
-    name: '한지원',
-    loginId: 'user6',
-    email: 'user6@example.com',
-    role: 'STUDENT',
-    joinedAt: '2026-05-05',
-    lastLoginAt: '2026-06-08',
-    status: 'ACTIVE',
-  },
-  {
-    id: 7,
-    name: '윤성호',
-    loginId: 'user7',
-    email: 'user7@example.com',
-    role: 'INSTRUCTOR',
-    joinedAt: '2026-05-04',
-    lastLoginAt: '2026-06-07',
-    status: 'ACTIVE',
-  },
-  {
-    id: 8,
-    name: '강민정',
-    loginId: 'user8',
-    email: 'user8@example.com',
-    role: 'STUDENT',
-    joinedAt: '2026-05-03',
-    lastLoginAt: '2026-06-06',
-    status: 'ACTIVE',
-  },
-  {
-    id: 9,
-    name: '조현우',
-    loginId: 'user9',
-    email: 'user9@example.com',
-    role: 'STUDENT',
-    joinedAt: '2026-05-02',
-    lastLoginAt: '2026-06-05',
-    status: 'INACTIVE',
-  },
-  {
-    id: 10,
-    name: '임소연',
-    loginId: 'user10',
-    email: 'user10@example.com',
-    role: 'INSTRUCTOR',
-    joinedAt: '2026-05-01',
-    lastLoginAt: '2026-06-04',
-    status: 'ACTIVE',
-  },
-];
+import { AdminUser } from '../types';
 
 type RoleFilter = 'ALL' | 'STUDENT' | 'INSTRUCTOR';
 
@@ -126,9 +12,27 @@ const ROLE_LABEL: Record<AdminUser['role'], string> = {
   INSTRUCTOR: '강사',
 };
 
-export default function AllUsers() {
+const STATUS_LABEL: Record<AdminUser['status'], string> = {
+  ACTIVE: '활성',
+  INACTIVE: '비활성',
+  SUSPENDED: '정지',
+};
+
+const STATUS_BADGE_CLS: Record<AdminUser['status'], string> = {
+  ACTIVE: 'bg-[#F9FBE7] text-[#827717]',
+  INACTIVE: 'bg-[#E5E7EB]/40 text-[#6A7282]',
+  SUSPENDED: 'bg-[#FEE2E2] text-[#B91C1C]',
+};
+
+// YYYY-MM-DDTHH:mm:ss → YYYY-MM-DD 로 표시 (날짜만 필요한 컬럼용)
+const formatDate = (value: string | null) => (value ? value.slice(0, 10) : '-');
+
+interface Props {
+  users: AdminUser[];
+}
+
+export default function AllUsers({ users }: Props) {
   const router = useRouter();
-  const [users] = useState<AdminUser[]>(MOCK_USERS);
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('ALL');
   const [search, setSearch] = useState('');
 
@@ -220,17 +124,13 @@ export default function AllUsers() {
                     {ROLE_LABEL[u.role]}
                   </span>
                 </td>
-                <td className="py-3 text-center text-[#6A7282]">{u.joinedAt}</td>
-                <td className="py-3 text-center text-[#6A7282]">{u.lastLoginAt}</td>
+                <td className="py-3 text-center text-[#6A7282]">{formatDate(u.createdAt)}</td>
+                <td className="py-3 text-center text-[#6A7282]">{formatDate(u.lastLoginAt)}</td>
                 <td className="py-3 text-center">
                   <span
-                    className={`inline-block px-2.5 py-1 rounded-sm text-[11.5px] font-semibold ${
-                      u.status === 'ACTIVE'
-                        ? 'bg-[#F9FBE7] text-[#827717]'
-                        : 'bg-[#E5E7EB]/40 text-[#6A7282]'
-                    }`}
+                    className={`inline-block px-2.5 py-1 rounded-sm text-[11.5px] font-semibold ${STATUS_BADGE_CLS[u.status]}`}
                   >
-                    {u.status === 'ACTIVE' ? '활성' : '비활성'}
+                    {STATUS_LABEL[u.status]}
                   </span>
                 </td>
                 <td className="py-3 text-center">

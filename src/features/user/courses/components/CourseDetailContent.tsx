@@ -1,12 +1,13 @@
 'use client';
 
-import { CourseDetailFromAPI, PaymentInfo } from '@/features/user/courses/types';
+import { CourseDetailFromAPI, PaymentInfo, ReviewMode } from '@/features/user/courses/types';
 import { Category } from '@/features/categories/types';
 import CourseHeaderSection from './sections/CourseHeaderSection';
+import CourseNcsSection from './sections/CourseNcsSection';
 import CourseTabNav, { CourseTabKey, SECTION_ID } from './sections/CourseTabNav';
 import CourseCurriculumSection from './sections/CourseCurriculumSection';
 import CourseInstructorSection, { InstructorInfo } from './sections/CourseInstructorSection';
-import CourseReviewsSection from './sections/CourseReviews';
+import CourseReviewsSection from './sections/reviews/CourseReviews';
 import { MOCK_COURSE_DETAIL, Review, RatingDistribution } from '@/constants/mockCourseDetail';
 
 // 목업 (추후 API 연동 시 course 응답에서 교체)
@@ -18,24 +19,21 @@ interface CourseDetailContentProps {
   course: CourseDetailFromAPI;
   /** 노출할 탭 목록. 수강평 탭을 빼고 싶으면 ['curriculum', 'instructor']만 전달 */
   categories: Category[];
-  /** 노출할 탭 목록. 수강평 탭을 빼고 싶으면 ['curriculum', 'instructor']만 전달 */
-  tabs: CourseTabKey[];
   /** 커리큘럼 진행률바 표시 여부 - 구매한 학생만 true */
   showProgress: boolean;
   /** 커리큘럼 전체 세션 재생 가능 여부 - 미구매 일반 사용자만 false */
   allSessionsPlayable: boolean;
   /** 구매한 학생일 때 진행률 계산용 (선택) */
   paymentInfo?: PaymentInfo;
-  /** 수강평 작성 폼 노출 여부 - 구매한 학생만 true */
-  canWriteReview: boolean;
+  /** 수강평 모드 */
+  reviewMode: ReviewMode;
 }
 
 export default function CourseDetailContent({
   course,
-  tabs,
   showProgress,
   allSessionsPlayable,
-  canWriteReview,
+  reviewMode,
   categories
 }: CourseDetailContentProps) {
 
@@ -46,9 +44,11 @@ export default function CourseDetailContent({
   return (
     <div className="flex flex-col flex-1 gap-4 min-w-0">
       <CourseHeaderSection course={course} categories={categories} />
+
+      <CourseNcsSection ncs={course.ncs} />
  
-      {/* 리모컨 - 클릭 시 아래 섹션들로 스크롤 이동 */}
-      <CourseTabNav tabs={tabs} />
+      {/* 리모컨 */}
+      <CourseTabNav />
  
       {/* 모든 섹션이 세로로 순서대로 펼쳐짐 */}
       <section id={SECTION_ID.curriculum} className="bg-white rounded-xl shadow-md p-6">
@@ -69,17 +69,15 @@ export default function CourseDetailContent({
         />
       </section>
  
-      {tabs.includes('reviews') && (
         <section id={SECTION_ID.reviews} className="bg-white rounded-xl shadow-md p-6">
           <CourseReviewsSection
             rating={course.ratingAvg}
             reviewCount={course.reviewCount}
             ratingDistribution={MOCK_RATING_DISTRIBUTION}
             reviews={MOCK_REVIEWS}
-            isPurchased={canWriteReview}
+            reviewMode={reviewMode}
           />
         </section>
-      )}
     </div>
   );
 }

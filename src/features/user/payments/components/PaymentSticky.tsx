@@ -15,7 +15,7 @@ interface PaymentStickyProps {
 
 const ERROR_MAP: Record<string, string> = {
   CREDIT_INSUFFICIENT_BALANCE: '크레딧 잔액이 부족합니다.',
-  Payment_001: '이미 수강 중인 강의가 포함되어 있습니다.',
+  PAYMENT_001: '이미 수강 중인 강의가 포함되어 있습니다.',
   CART_003: '결제할 강의를 선택해주세요.',
   CART_004: '장바구니 선택 정보가 올바르지 않습니다.',
   PAYMENT_002: '결제할 강의가 없습니다.',

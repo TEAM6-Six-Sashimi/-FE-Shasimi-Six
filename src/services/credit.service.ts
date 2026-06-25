@@ -1,47 +1,67 @@
-// 결제 서비스(크래딧 충전/차감 등)
 import {
   CreditBalanceResponse,
-  CreditChargeRequest,
-  CreditChargeResponse,
+  CreditReadyRequest,
+  CreditReadyResponse,
+  CreditConfirmRequest,
+  CreditConfirmResponse,
 } from '@/features/user/credit/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// 현재 보유 크레딧 조회
+// 내 크레딧 잔액 조회
 export async function fetchCreditBalance(accessToken: string): Promise<CreditBalanceResponse> {
-  const response = await fetch(`${API_BASE_URL}/credits/me`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
+  const res = await fetch(`${API_BASE_URL}/credits/me`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
     cache: 'no-store',
   });
 
-  if (!response.ok) {
-    throw new Error('크레딧 조회에 실패했습니다.');
+  if (!res.ok) {
+    throw new Error('크레딧 잔액 조회에 실패했습니다.');
   }
 
-  return response.json();
+  return res.json();
 }
 
-// 크레딧 충전
-export async function chargeCredit(
+// 크레딧 충전 준비 (Toss 결제창 호출 전, 주문 정보 생성)
+export async function readyCreditCharge(
   accessToken: string,
-  payload: CreditChargeRequest,
-): Promise<CreditChargeResponse> {
-  const response = await fetch(`${API_BASE_URL}/credits/charge`, {
+  body: CreditReadyRequest,
+): Promise<CreditReadyResponse> {
+  const res = await fetch(`${API_BASE_URL}/credits/toss/ready`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${accessToken}`,
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
 
-  if (!response.ok) {
-    throw new Error('크레딧 충전에 실패했습니다.');
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(errorBody.message || '충전 준비에 실패했습니다.');
   }
 
-  return response.json();
+  return res.json();
+}
+
+// 크레딧 충전 승인 (Toss 결제 성공 후 호출)
+export async function confirmCreditCharge(
+  accessToken: string,
+  body: CreditConfirmRequest,
+): Promise<CreditConfirmResponse> {
+  const res = await fetch(`${API_BASE_URL}/credits/toss/confirm`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(errorBody.message || '충전 승인에 실패했습니다.');
+  }
+
+  return res.json();
 }

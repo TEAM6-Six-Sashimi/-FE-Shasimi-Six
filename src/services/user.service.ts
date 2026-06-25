@@ -7,6 +7,8 @@ export const GUEST_USER: UserMe = {
   name: '',
   loginId: '',
   email: '',
+  phone: '',
+  createdAt: '',
   birthDate: '',
   role: 'GUEST',
   status: '',
@@ -31,7 +33,7 @@ export async function fetchUserMe(accessToken: string): Promise<UserMe> {
 
     if (!response.ok) {
       const errorBody = await response.text();
-      console.log('fetchUserMe error body:', errorBody);
+      console.warn('fetchUserMe failed', { status: response.status });
       return GUEST_USER;
     }
 

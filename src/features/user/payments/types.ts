@@ -1,14 +1,5 @@
 export type PurchaseType = 'COURSE' | 'CART' | 'AI_SUBSCRIPTION';
 
-export interface PaymentCourseItem {
-  courseId: number;
-  title: string;
-  category: string;
-  instructorName: string;
-  price: number;
-  thumbnail: string;
-}
-
 // 결제 페이지- "주문 항목"
 export interface OrderLineItem {
   id: string; // courseId 또는 planCode
