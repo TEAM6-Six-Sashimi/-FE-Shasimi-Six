@@ -12,6 +12,8 @@ import {
   ReviewReportDetail,
   REPORT_CATEGORY_LABEL,
   REPORT_CATEGORY_STYLE,
+  REVIEW_STATUS_LABEL,
+  REVIEW_STATUS_STYLE,
 } from '../types';
 
 interface Props {
@@ -67,6 +69,8 @@ export default function ReviewReportDetailModal({ reportId, onClose, onProcessed
       setProcessing(false);
     }
   };
+
+  const isProcessed = detail?.reportStatus === 'PROCESSED';
 
   return (
     <div
@@ -138,23 +142,35 @@ export default function ReviewReportDetailModal({ reportId, onClose, onProcessed
               </p>
             </div>
 
-            <div className="flex gap-2 mt-2">
-              <Button
-                onClick={handleDelete}
-                disabled={processing}
-                className="flex-1 h-11 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer"
-              >
-                {processing ? '처리 중...' : '신고된 리뷰 삭제'}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleReject}
-                disabled={processing}
-                className="flex-1 h-11 border-[#D1D5DB] text-[#1E2125] font-semibold text-[14px] hover:bg-[#F9FAFB] cursor-pointer"
-              >
-                반려
-              </Button>
-            </div>
+            {isProcessed ? (
+              // 이미 처리된 신고: 중복 처리를 막기 위해 버튼 대신 현재 리뷰 상태만 표시
+              <div className="mt-2 bg-[#F9FAFB] rounded-lg px-3 py-3 flex items-center justify-between">
+                <p className="text-[12.5px] text-[#9CA3AF]">현재 리뷰 상태</p>
+                <span
+                  className={`inline-block px-2.5 py-1 rounded-md text-[12px] font-semibold ${REVIEW_STATUS_STYLE[detail.reviewStatus]}`}
+                >
+                  {REVIEW_STATUS_LABEL[detail.reviewStatus]}
+                </span>
+              </div>
+            ) : (
+              <div className="flex gap-2 mt-2">
+                <Button
+                  onClick={handleDelete}
+                  disabled={processing}
+                  className="flex-1 h-11 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer"
+                >
+                  {processing ? '처리 중...' : '신고된 리뷰 삭제'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleReject}
+                  disabled={processing}
+                  className="flex-1 h-11 border-[#D1D5DB] text-[#1E2125] font-semibold text-[14px] hover:bg-[#F9FAFB] cursor-pointer"
+                >
+                  반려
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
