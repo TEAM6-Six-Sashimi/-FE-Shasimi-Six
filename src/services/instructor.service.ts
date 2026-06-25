@@ -50,3 +50,32 @@ export async function fetchInProgressCourses(
     return [];
   }
 }
+
+// 강의 단건 조회 (수정 페이지 초기 데이터 로딩용)
+export async function fetchCourseDetail(
+  accessToken: string,
+  userId: string,
+  courseId: number,
+): Promise<InstructorInProgressCourse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/instructor/courses/${courseId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'X-USER-ID': userId,
+      },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      console.error(`[fetchCourseDetail] status=${res.status} body=${errorBody}`);
+      return null;
+    }
+
+    return res.json();
+  } catch (e) {
+    console.error('[fetchCourseDetail] fetch error:', e);
+    return null;
+  }
+}

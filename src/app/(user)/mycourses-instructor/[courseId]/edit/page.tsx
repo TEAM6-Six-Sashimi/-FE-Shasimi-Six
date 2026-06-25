@@ -2,7 +2,7 @@ import CourseEditForm from '@/features/user/mycourses-instructor/components/Cour
 import { fetchCategories } from '@/services/categories.service';
 import { cookies } from 'next/headers';
 import { fetchUserMe } from '@/services/user.service';
-import { fetchInProgressCourses } from '@/services/instructor.service';
+import { fetchCourseDetail } from '@/services/instructor.service';
 
 interface PageProps {
   params: Promise<{ courseId: string }>;
@@ -15,9 +15,10 @@ export default async function EditCoursePage({ params }: PageProps) {
 
   const [categories, user] = await Promise.all([fetchCategories(), fetchUserMe(accessToken)]);
 
-  // in-progress 목록에서 해당 강의 찾기
-  const courses = user ? await fetchInProgressCourses(accessToken, String(user.id)) : [];
-  const course = courses.find((c) => c.courseId === Number(courseId));
+  // 단건 조회 API로 해당 강의 정보 가져오기
+  const course = user
+    ? await fetchCourseDetail(accessToken, String(user.id), Number(courseId))
+    : null;
 
   const DIFFICULTY_REVERSE: Record<string, string> = {
     BEGINNER: '초급',
@@ -53,6 +54,9 @@ export default async function EditCoursePage({ params }: PageProps) {
       title: s.title,
       videoUrl: s.videoUrl,
       materialUrl: s.attachmentUrl ?? '',
+      materialName: s.attachmentName ?? '',
+      materialType: s.attachmentType ?? '',
+      materialSize: s.attachmentSize ?? 0,
       preview: s.preview,
     })) ?? [{ id: 1, title: '', videoUrl: '', materialUrl: '', preview: false }],
   };
