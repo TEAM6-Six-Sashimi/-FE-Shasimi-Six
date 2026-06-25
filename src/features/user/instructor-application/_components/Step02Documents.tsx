@@ -26,7 +26,8 @@ interface Step02DocumentsProps {
 
 const formatFileSize = (bytes: number) => `${(bytes / 1024).toFixed(2)} KB`;
 
-const RESUME_TEMPLATE_URL = '/resume-template.docx'; // TODO: 실제 양식 파일 경로로 교체 필요
+const ALLOWED_CERT_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+const ALLOWED_RESUME_TYPES = ['application/pdf'];
 
 function CheckboxItem({
   id,
@@ -50,7 +51,7 @@ function CheckboxItem({
           className="peer absolute inset-0 w-4 h-4 opacity-0 cursor-pointer"
         />
         <span
-          className={`absolute inset-0 rounded-sm border flex items-center justify-center transition-colors ${
+          className={`absolute inset-0 rounded border flex items-center justify-center transition-colors ${
             checked ? 'bg-[#CFEE5D] border-[#CFEE5D]' : 'bg-white border-[#D1D5DB]'
           }`}
         >
@@ -70,6 +71,9 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
   const [form, setForm] = useState<Step02Data>(data);
   const [submitted, setSubmitted] = useState(false);
   const [confirmModal, setConfirmModal] = useState(false);
+  const [certError, setCertError] = useState('');
+  const [resumeError, setResumeError] = useState('');
+  const [templateDownloading, setTemplateDownloading] = useState(false);
   const certFileRef = useRef<HTMLInputElement>(null);
   const resumeRef = useRef<HTMLInputElement>(null);
 
@@ -82,6 +86,13 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
   const isError = submitted && !isValid;
 
   const addCertificationFiles = (files: File[]) => {
+    const invalid = files.find((f) => !ALLOWED_CERT_TYPES.includes(f.type));
+    if (invalid) {
+      setCertError('PDF, JPG, PNG 파일만 첨부할 수 있습니다.');
+      if (certFileRef.current) certFileRef.current.value = '';
+      return;
+    }
+    setCertError('');
     setForm((prev) => ({
       ...prev,
       certifications: [
@@ -97,6 +108,42 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
       ...prev,
       certifications: prev.certifications.filter((_, i) => i !== idx),
     }));
+  };
+
+  const handleResumeChange = (file: File | null) => {
+    if (file && !ALLOWED_RESUME_TYPES.includes(file.type)) {
+      setResumeError('PDF 파일만 첨부할 수 있습니다.');
+      if (resumeRef.current) resumeRef.current.value = '';
+      return;
+    }
+    setResumeError('');
+    setForm((prev) => ({ ...prev, resumeFile: file }));
+  };
+
+  const handleTemplateDownload = async () => {
+    try {
+      setTemplateDownloading(true);
+      const res = await fetch('/api/resume-template');
+      if (!res.ok) throw new Error('다운로드 실패');
+
+      const blob = await res.blob();
+      const disposition = res.headers.get('content-disposition') ?? '';
+      const filenameMatch = disposition.match(/filename="?([^"]+)"?/);
+      const filename = filenameMatch?.[1] ?? 'resume-template.docx';
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('이력서 양식을 다운로드하지 못했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setTemplateDownloading(false);
+    }
   };
 
   const handleSubmit = () => {
@@ -146,7 +193,9 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
         />
         <div
           className={`flex items-center justify-between px-4 py-3 rounded-lg border border-dashed ${
-            isError && !isCertValid ? 'border-[#FF5E5E] bg-[#F9FAFB]' : 'border-[#D1D5DB] bg-[#F9FAFB]'
+            (isError && !isCertValid) || certError
+              ? 'border-[#FF5E5E] bg-[#F9FAFB]'
+              : 'border-[#D1D5DB] bg-[#F9FAFB]'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -166,7 +215,8 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
           </Button>
         </div>
 
-        {isError && !isCertValid && (
+        {certError && <p className={fieldErrorCls}>⚠ {certError}</p>}
+        {isError && !isCertValid && !certError && (
           <p className={fieldErrorCls}>⚠ 자격증을 1개 이상 첨부해주세요.</p>
         )}
 
@@ -202,13 +252,14 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
           이력서 <span className="text-[#FF5E5E]">*</span>
         </label>
         <div className="flex items-center gap-2 mb-2">
-          <a
-            href={RESUME_TEMPLATE_URL}
-            download
-            className="inline-flex items-center h-8 px-3 text-[12px] rounded-md border border-[#FF5E5E] text-[#FF5E5E] hover:bg-[#FFEBEB] transition-colors"
+          <button
+            type="button"
+            onClick={handleTemplateDownload}
+            disabled={templateDownloading}
+            className="inline-flex items-center h-8 px-3 text-[12px] rounded-md border border-[#FF5E5E] text-[#FF5E5E] hover:bg-[#FFEBEB] transition-colors disabled:opacity-60 cursor-pointer"
           >
-            이력서 양식 다운로드
-          </a>
+            {templateDownloading ? '다운로드 중...' : '이력서 양식 다운로드'}
+          </button>
           <span className="text-[11.5px] text-[#6A7282]">제공된 양식으로만 제출 가능합니다.</span>
         </div>
 
@@ -216,7 +267,7 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
           type="file"
           ref={resumeRef}
           accept=".pdf"
-          onChange={(e) => setForm((prev) => ({ ...prev, resumeFile: e.target.files?.[0] ?? null }))}
+          onChange={(e) => handleResumeChange(e.target.files?.[0] ?? null)}
           className="hidden"
         />
 
@@ -242,7 +293,7 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
         ) : (
           <div
             className={`flex items-center justify-between px-4 py-3 rounded-lg border border-dashed ${
-              isError && !isResumeValid
+              (isError && !isResumeValid) || resumeError
                 ? 'border-[#FF5E5E] bg-[#F9FAFB]'
                 : 'border-[#D1D5DB] bg-[#F9FAFB]'
             }`}
@@ -264,7 +315,10 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
             </Button>
           </div>
         )}
-        {isError && !isResumeValid && <p className={fieldErrorCls}>⚠ 이력서를 첨부해주세요.</p>}
+        {resumeError && <p className={fieldErrorCls}>⚠ {resumeError}</p>}
+        {isError && !isResumeValid && !resumeError && (
+          <p className={fieldErrorCls}>⚠ 이력서를 첨부해주세요.</p>
+        )}
       </div>
 
       {/* 포트폴리오 (필수) - shadcn Input */}
