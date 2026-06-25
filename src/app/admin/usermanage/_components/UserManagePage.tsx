@@ -4,7 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import InstructorApproval from '@/features/admin/usermanage/components/InstructorApproval';
 import RejectedList from '@/features/admin/usermanage/components/RejectedList';
-import { AdminUser, InstructorApplication } from '@/features/admin/usermanage/types';
+import {
+  AdminUser,
+  InstructorApplication,
+  RejectedInstructorApplication,
+} from '@/features/admin/usermanage/types';
 import AllUsers from '@/features/admin/usermanage/components/AllUsers';
 
 type Tab = 'all' | 'approval' | 'rejected';
@@ -12,11 +16,12 @@ type Tab = 'all' | 'approval' | 'rejected';
 interface Props {
   applications: InstructorApplication[];
   users: AdminUser[];
+  rejected: RejectedInstructorApplication[];
 }
 
 const VALID_TABS: Tab[] = ['all', 'approval', 'rejected'];
 
-export default function UserManagePage({ applications, users }: Props) {
+export default function UserManagePage({ applications, users, rejected }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -24,10 +29,10 @@ export default function UserManagePage({ applications, users }: Props) {
   const initialTab: Tab = VALID_TABS.includes(tabFromUrl as Tab) ? (tabFromUrl as Tab) : 'all';
 
   const [tab, setTab] = useState<Tab>(initialTab);
-  const [applicants, setApplicants] = useState<InstructorApplication[]>(applications);
+  const [applicants, setApplicants] = useState<InstructorApplication[]>(applications ?? []);
 
   useEffect(() => {
-    setApplicants(applications);
+    setApplicants(applications ?? []);
   }, [applications]);
 
   useEffect(() => {
@@ -84,11 +89,11 @@ export default function UserManagePage({ applications, users }: Props) {
         </button>
       </div>
 
-      {tab === 'all' && <AllUsers users={users} />}
+      {tab === 'all' && <AllUsers users={users ?? []} />}
       {tab === 'approval' && (
         <InstructorApproval applicants={applicants} setApplicants={setApplicants} />
       )}
-      {tab === 'rejected' && <RejectedList />}
+      {tab === 'rejected' && <RejectedList rejected={rejected ?? []} />}
     </div>
   );
 }

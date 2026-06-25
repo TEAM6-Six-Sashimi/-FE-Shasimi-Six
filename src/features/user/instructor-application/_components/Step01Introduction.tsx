@@ -28,6 +28,8 @@ interface Step01IntroductionProps {
   onNext: (data: Step01Data) => void;
 }
 
+const ALLOWED_PROFILE_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
+
 export default function Step01Introduction({
   userInfo,
   categories,
@@ -36,15 +38,18 @@ export default function Step01Introduction({
 }: Step01IntroductionProps) {
   const [form, setForm] = useState<Step01Data>(data);
   const [submitted, setSubmitted] = useState(false);
+  const [profileImageError, setProfileImageError] = useState('');
   const profileImageRef = useRef<HTMLInputElement>(null);
 
   const previewUrl = form.profileImage ? URL.createObjectURL(form.profileImage) : null;
 
+  const isProfileImageValid = !!form.profileImage;
   const isIntroductionValid = !!form.introduction.trim();
   const isMotivationValid = !!form.motivation.trim();
   const isCategoryValid = form.categoryId !== null;
 
-  const isValid = isIntroductionValid && isMotivationValid && isCategoryValid;
+  const isValid =
+    isProfileImageValid && isIntroductionValid && isMotivationValid && isCategoryValid;
   const isError = submitted && !isValid;
 
   const handleNext = () => {
@@ -54,11 +59,18 @@ export default function Step01Introduction({
   };
 
   const handleProfileImageChange = (file: File | null) => {
+    if (file && !ALLOWED_PROFILE_IMAGE_TYPES.includes(file.type)) {
+      setProfileImageError('jpg, jpeg, png 파일만 업로드할 수 있습니다.');
+      return;
+    }
+    setProfileImageError('');
     setForm((prev) => ({ ...prev, profileImage: file }));
   };
 
   const labelCls = 'block text-[13.5px] font-semibold text-[#1E2125] mb-1.5';
   const fieldErrorCls = 'text-[12px] text-[#FF5E5E] mt-1';
+
+  const showProfileImageError = (isError && !isProfileImageValid) || !!profileImageError;
 
   return (
     <div className="flex flex-col gap-6">
@@ -76,10 +88,14 @@ export default function Step01Introduction({
       </div>
 
       {/* 프로필 사진 + 로그인 정보 */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-start gap-6">
         {/* 프로필 사진 + 업로드 버튼 (박스 밖, 독립) */}
         <div className="flex flex-col items-center gap-2 shrink-0">
-          <div className="w-20 h-20 rounded-full bg-[#E5E7EB] overflow-hidden flex items-center justify-center text-[#6A7282]">
+          <div
+            className={`w-20 h-20 rounded-full bg-[#E5E7EB] overflow-hidden flex items-center justify-center text-[#6A7282] ${
+              showProfileImageError ? 'ring-2 ring-[#FF5E5E]' : ''
+            }`}
+          >
             {previewUrl ? (
               <Image
                 src={previewUrl}
@@ -108,8 +124,14 @@ export default function Step01Introduction({
             onClick={() => profileImageRef.current?.click()}
             className="flex items-center gap-1 px-2.5 py-1 rounded-md border border-[#FF5E5E] text-[#FF5E5E] text-[11.5px] font-medium hover:bg-[#FFEBEB] transition-colors cursor-pointer"
           >
-            <span className="text-[11px]">↑</span> 사진 업로드
+            <span className="text-[11px]">↑</span> 사진 업로드{' '}
+            <span className="text-[#FF5E5E]">*</span>
           </button>
+          {showProfileImageError && (
+            <p className="text-[11px] text-[#FF5E5E] text-center whitespace-nowrap">
+              {profileImageError || '프로필 사진을 등록해주세요.'}
+            </p>
+          )}
         </div>
 
         {/* 로그인 정보 (회색 박스로 감싸짐) */}
