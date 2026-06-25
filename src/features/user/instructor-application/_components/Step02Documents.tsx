@@ -27,7 +27,7 @@ interface Step02DocumentsProps {
 const formatFileSize = (bytes: number) => `${(bytes / 1024).toFixed(2)} KB`;
 
 const ALLOWED_CERT_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-const ALLOWED_RESUME_TYPES = ['application/pdf'];
+const ALLOWED_RESUME_TYPES = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
 function CheckboxItem({
   id,
@@ -112,7 +112,7 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
 
   const handleResumeChange = (file: File | null) => {
     if (file && !ALLOWED_RESUME_TYPES.includes(file.type)) {
-      setResumeError('PDF 파일만 첨부할 수 있습니다.');
+      setResumeError('docx 파일만 첨부할 수 있습니다.');
       if (resumeRef.current) resumeRef.current.value = '';
       return;
     }
@@ -266,7 +266,7 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
         <input
           type="file"
           ref={resumeRef}
-          accept=".pdf"
+          accept=".docx"
           onChange={(e) => handleResumeChange(e.target.files?.[0] ?? null)}
           className="hidden"
         />
@@ -302,7 +302,7 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
               <span className="text-[#6A7282]">↑</span>
               <div>
                 <p className="text-[13px] text-[#6A7282]">파일을 드래그하거나 선택하세요</p>
-                <p className="text-[11.5px] text-[#6A7282]">PDF</p>
+                <p className="text-[11.5px] text-[#6A7282]">DOCX</p>
               </div>
             </div>
             <Button
