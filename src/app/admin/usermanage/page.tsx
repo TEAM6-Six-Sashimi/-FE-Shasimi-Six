@@ -1,12 +1,15 @@
 import { cookies } from 'next/headers';
-import { fetchInstructorApplications } from '@/services/admin.service';
+import { fetchInstructorApplications, fetchAdminUsers } from '@/services/admin.service';
 import UserManagePage from './_components/UserManagePage';
 
 export default async function Page() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const applications = await fetchInstructorApplications(accessToken);
+  const [applications, users] = await Promise.all([
+    fetchInstructorApplications(accessToken),
+    fetchAdminUsers(accessToken),
+  ]);
 
-  return <UserManagePage applications={applications} />;
+  return <UserManagePage applications={applications} users={users} />;
 }

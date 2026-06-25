@@ -2,20 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import AllUsers from '@/features/admin/usermanage/components/AllUsers';
 import InstructorApproval from '@/features/admin/usermanage/components/InstructorApproval';
 import RejectedList from '@/features/admin/usermanage/components/RejectedList';
-import { InstructorApplication } from '@/features/admin/usermanage/types';
+import { AdminUser, InstructorApplication } from '@/features/admin/usermanage/types';
+import AllUsers from '@/features/admin/usermanage/components/AllUsers';
 
 type Tab = 'all' | 'approval' | 'rejected';
 
 interface Props {
   applications: InstructorApplication[];
+  users: AdminUser[];
 }
 
 const VALID_TABS: Tab[] = ['all', 'approval', 'rejected'];
 
-export default function UserManagePage({ applications }: Props) {
+export default function UserManagePage({ applications, users }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -83,7 +84,7 @@ export default function UserManagePage({ applications }: Props) {
         </button>
       </div>
 
-      {tab === 'all' && <AllUsers />}
+      {tab === 'all' && <AllUsers users={users} />}
       {tab === 'approval' && (
         <InstructorApproval applicants={applicants} setApplicants={setApplicants} />
       )}
