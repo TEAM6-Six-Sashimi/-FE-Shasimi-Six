@@ -134,5 +134,5 @@ export interface PrivateCourse {
   price: number;
   ratingAvg: number;
   studentCount: number;
-  privatedAt: string; // 비공개 처리일
+  privatedAt?: string; // 비공개 처리일
 }

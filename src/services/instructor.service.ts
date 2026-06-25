@@ -1,5 +1,8 @@
-import { ApprovedCourse } from '@/features/user/mycourses-instructor/types';
-import { InstructorInProgressCourse } from '@/features/user/mycourses-instructor/types';
+import {
+  ApprovedCourse,
+  InstructorInProgressCourse,
+  PrivateCourse,
+} from '@/features/user/mycourses-instructor/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -77,5 +80,36 @@ export async function fetchCourseDetail(
   } catch (e) {
     console.error('[fetchCourseDetail] fetch error:', e);
     return null;
+  }
+}
+
+// 비공개된 강의 조회
+export async function fetchClosedCourses(
+  accessToken: string,
+  userId: string,
+): Promise<PrivateCourse[]> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/instructor/courses/closed`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'X-USER-ID': userId,
+        },
+        cache: 'no-store',
+      },
+    );
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const result = await response.json();
+    return Array.isArray(result)
+      ? result
+      : (result.data ?? []);
+  } catch {
+    return [];
   }
 }
