@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import ReviewReports from '@/features/admin/reportmanage/components/CourseReviewReports';
+import CourseReviewReports from '@/features/admin/reportmanage/components/CourseReviewReports';
 import CommunityReports from '@/features/admin/reportmanage/components/CommunityReports';
 import { ReviewReport } from '@/features/admin/reportmanage/types';
 
@@ -72,7 +72,7 @@ export default function ReportManagePage({ initialReports }: Props) {
         ))}
       </div>
 
-      {tab === 'review' && <ReviewReports reports={reports} setReports={setReports} />}
+      {tab === 'review' && <CourseReviewReports reports={reports} setReports={setReports} />}
       {tab === 'community' && <CommunityReports />}
     </div>
   );
