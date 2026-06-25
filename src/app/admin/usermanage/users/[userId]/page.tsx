@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { fetchAdminUserDetail } from '@/services/admin.service';
-import type { AdminUserDetail } from '@/features/admin/usermanage/components/AllUsers';
+import { AdminUserDetail } from '@/features/admin/usermanage/types';
 
 interface PageProps {
   params: Promise<{ userId: string }>;

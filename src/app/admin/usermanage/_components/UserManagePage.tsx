@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import AllUsers, { AdminUser } from '@/features/admin/usermanage/components/AllUsers';
 import InstructorApproval from '@/features/admin/usermanage/components/InstructorApproval';
 import RejectedList from '@/features/admin/usermanage/components/RejectedList';
-import { InstructorApplication } from '@/features/admin/usermanage/types';
+import { AdminUser, InstructorApplication } from '@/features/admin/usermanage/types';
+import AllUsers from '@/features/admin/usermanage/components/AllUsers';
 
 type Tab = 'all' | 'approval' | 'rejected';
 
