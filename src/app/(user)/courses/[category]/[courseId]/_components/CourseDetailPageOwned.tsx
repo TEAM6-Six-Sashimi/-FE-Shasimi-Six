@@ -27,7 +27,7 @@ export default function CourseDetailPageOwned({
             showProgress={true}
             allSessionsPlayable={true}
             paymentInfo={paymentInfo}
-            reviewMode="writable"
+            canWriteReview={true}
           />
           <div className="w-72 shrink-0 sticky top-4">
             <CourseDetailSidebar
