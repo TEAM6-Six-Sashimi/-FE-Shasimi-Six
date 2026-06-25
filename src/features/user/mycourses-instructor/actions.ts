@@ -3,7 +3,6 @@
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { fetchUserMe } from '@/services/user.service';
-import { redirect } from 'next/navigation';
 import type { CreateCourseRequest } from '@/features/user/mycourses-instructor/types';
 import type { UpdateCourseRequest } from '@/features/user/mycourses-instructor/types';
 

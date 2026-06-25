@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Select,
@@ -35,10 +35,17 @@ const DIFFICULTY_MAP: Record<string, 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'> =
   고급: 'ADVANCED',
 };
 
+const TITLE_MAX = 50;
+const DESCRIPTION_MAX = 500;
+const SESSION_TITLE_MAX = 50;
+const SESSION_MAX_COUNT = 50;
+
 const DEFAULT_SESSION: Omit<Session, 'id'> = {
   title: '',
+  videoFile: null,
   videoUrl: '',
-  materialFile: '',
+  materialFile: null,
+  materialUrl: '',
   preview: false,
 };
 
@@ -68,6 +75,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
     price: '',
     level: '',
     thumbnail: '',
+    thumbnailFile: null,
     sessions: [{ id: 1, ...DEFAULT_SESSION }],
   });
 
@@ -98,6 +106,19 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
   const [thumbnailUploading, setThumbnailUploading] = useState(false);
   const thumbnailRef = useRef<HTMLInputElement>(null);
 
+  // 썸네일 미리보기 URL (object URL) — 파일 변경 시마다 갱신/해제
+  const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string>('');
+  const formatFileSizeKB = (bytes: number) => `${(bytes / 1024).toFixed(2)} KB`;
+
+  useEffect(() => {
+    if (!form.thumbnailFile) {
+      return;
+    }
+    const url = URL.createObjectURL(form.thumbnailFile);
+    setThumbnailPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [form.thumbnailFile]);
+
   // ── 기본정보 핸들러 ──────────────────────────────────────────
   const handleField = <K extends keyof CourseFormData>(key: K, value: CourseFormData[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -110,14 +131,17 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
   const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setErrors((prev) => ({ ...prev, thumbnail: '이미지 파일만 업로드할 수 있습니다.' }));
+      return;
+    }
+
     try {
       setThumbnailUploading(true);
-      const formData = new FormData();
-      formData.append('image', file);
-      const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
-      if (!res.ok) throw new Error('업로드 실패');
-      const data = await res.json();
-      handleField('thumbnail', data.url);
+      setErrors((prev) => ({ ...prev, thumbnail: undefined }));
+      // 실제 업로드 API 연동 전: 파일만 보관, 미리보기는 object URL로 즉시 표시
+      setForm((prev) => ({ ...prev, thumbnailFile: file }));
     } catch {
       setErrors((prev) => ({ ...prev, thumbnail: '이미지 업로드에 실패했습니다.' }));
     } finally {
@@ -134,6 +158,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
   };
 
   const addSession = () => {
+    if (form.sessions.length >= SESSION_MAX_COUNT) return;
     setForm((prev) => ({
       ...prev,
       sessions: [...prev.sessions, { id: Date.now(), ...DEFAULT_SESSION }],
@@ -153,15 +178,27 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
     const next: FieldErrors = {};
 
     if (!form.title.trim()) next.title = '강의 제목을 입력해주세요.';
+    else if (form.title.length > TITLE_MAX)
+      next.title = `강의 제목은 ${TITLE_MAX}자 이하로 입력해주세요.`;
+
     if (!form.description.trim()) next.description = '강의 설명을 입력해주세요.';
+    else if (form.description.length > DESCRIPTION_MAX)
+      next.description = `강의 설명은 ${DESCRIPTION_MAX}자 이하로 입력해주세요.`;
+
     if (!form.category) next.category = '카테고리를 선택해주세요.';
     if (!form.subCategory) next.subCategory = '세부 카테고리를 선택해주세요.';
     if (form.price === '') next.price = '가격을 입력해주세요.';
     if (!form.level) next.level = '난이도를 선택해주세요.';
-    if (!form.thumbnail) next.thumbnail = '대표 이미지를 업로드해주세요.';
-    if (form.sessions.some((s) => !s.title.trim() || !s.videoUrl.trim())) {
-      next.sessions = '모든 회차의 소제목과 영상 URL을 입력해주세요.';
+    if (!form.thumbnailFile && !form.thumbnail) next.thumbnail = '대표 이미지를 업로드해주세요.';
+
+    if (form.sessions.length === 0) {
+      next.sessions = '최소 1개 이상의 회차가 필요합니다.';
+    } else if (form.sessions.some((s) => !s.title.trim() || (!s.videoFile && !s.videoUrl))) {
+      next.sessions = '모든 회차의 소제목과 강의 영상을 입력해주세요.';
+    } else if (form.sessions.some((s) => s.title.length > SESSION_TITLE_MAX)) {
+      next.sessions = `회차 소제목은 ${SESSION_TITLE_MAX}자 이하로 입력해주세요.`;
     }
+
     if (!agreed) next.agreement = '강의 판매 정책에 동의해주세요.';
 
     return next;
@@ -180,6 +217,8 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
       return;
     }
 
+    // TODO: 실제 업로드 API 연동 시 thumbnailFile/videoFile/materialFile을 업로드하고
+    // 받은 URL을 아래 payload에 채워 넣어야 함. 현재는 파일 메타정보만 임시로 사용.
     const payload: CreateCourseRequest = {
       subCategoryName: selectedSub.name,
       title: form.title,
@@ -192,6 +231,10 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
         title: s.title,
         videoUrl: s.videoUrl,
         preview: s.preview,
+        attachmentName: s.materialFile?.name,
+        attachmentUrl: s.materialUrl,
+        attachmentType: s.materialFile?.type,
+        attachmentSize: s.materialFile?.size,
       })),
     };
 
@@ -236,12 +279,20 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
 
           {/* 강의 제목 */}
           <div>
-            <label className={labelCls}>강의 제목{requiredMark}</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[13px] font-semibold text-[#1E2125]">
+                강의 제목{requiredMark}
+              </label>
+              <span className="text-[12px] text-[#9CA3AF]">
+                {form.title.length}/{TITLE_MAX}
+              </span>
+            </div>
             <input
               type="text"
               placeholder="강의 제목을 입력하세요"
               value={form.title}
-              onChange={(e) => handleField('title', e.target.value)}
+              onChange={(e) => handleField('title', e.target.value.slice(0, TITLE_MAX))}
+              maxLength={TITLE_MAX}
               disabled={isLoading}
               className={`${inputCls} ${borderCls(errors.title)}`}
             />
@@ -250,11 +301,19 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
 
           {/* 강의 설명 */}
           <div>
-            <label className={labelCls}>강의 설명{requiredMark}</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[13px] font-semibold text-[#1E2125]">
+                강의 설명{requiredMark}
+              </label>
+              <span className="text-[12px] text-[#9CA3AF]">
+                {form.description.length}/{DESCRIPTION_MAX}
+              </span>
+            </div>
             <textarea
               placeholder="강의 설명을 입력하세요"
               value={form.description}
-              onChange={(e) => handleField('description', e.target.value)}
+              onChange={(e) => handleField('description', e.target.value.slice(0, DESCRIPTION_MAX))}
+              maxLength={DESCRIPTION_MAX}
               rows={5}
               disabled={isLoading}
               className={`w-full px-4 py-3 rounded-lg border bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors resize-none ${borderCls(errors.description)}`}
@@ -370,18 +429,22 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                 errors.thumbnail ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]'
               }`}
             >
-              <span>↑</span>
-              {thumbnailUploading
-                ? '업로드 중...'
-                : form.thumbnail
-                  ? '이미지 변경하기'
-                  : '강의 대표 이미지를 업로드하세요'}
+              {thumbnailUploading ? (
+                <LoadingDots />
+              ) : (
+                <>
+                  <span>↑</span>
+                  {form.thumbnailFile || form.thumbnail
+                    ? '이미지 변경하기'
+                    : '강의 대표 이미지를 업로드하세요'}
+                </>
+              )}
             </Button>
             {errors.thumbnail && <p className={fieldErrorCls}>{errors.thumbnail}</p>}
-            {form.thumbnail && (
-              <div className="relative mt-2 w-full h-40 rounded-lg border border-[#E5E7EB] overflow-hidden">
+            {(thumbnailPreviewUrl || form.thumbnail) && (
+              <div className="relative mt-2 w-full h-40 rounded-lg border border-[#E5E7EB] overflow-hidden bg-[#F3F4F6]">
                 <Image
-                  src={form.thumbnail}
+                  src={thumbnailPreviewUrl || form.thumbnail}
                   alt="썸네일 미리보기"
                   fill
                   unoptimized
@@ -394,9 +457,12 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
 
         {/* ── 커리큘럼 ── */}
         <section className="flex flex-col gap-4">
-          <h2 className="text-[16px] font-bold text-[#1E2125] pb-2 border-b border-[#E5E7EB]">
-            커리큘럼
-          </h2>
+          <div className="flex items-center justify-between pb-2 border-b border-[#E5E7EB]">
+            <h2 className="text-[16px] font-bold text-[#1E2125]">커리큘럼</h2>
+            <span className="text-[12px] text-[#9CA3AF]">
+              {form.sessions.length}/{SESSION_MAX_COUNT}
+            </span>
+          </div>
 
           {form.sessions.map((session, idx) => (
             <SessionItem
@@ -406,6 +472,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
               canRemove={form.sessions.length > 1}
               onUpdate={updateSession}
               onRemove={removeSession}
+              titleMax={SESSION_TITLE_MAX}
             />
           ))}
 
@@ -414,8 +481,8 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
           <Button
             type="button"
             onClick={addSession}
-            disabled={isLoading}
-            className="w-full h-11 rounded-lg border border-dashed border-[#D1D5DB] bg-transparent text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] hover:bg-transparent flex items-center justify-center gap-1.5"
+            disabled={isLoading || form.sessions.length >= SESSION_MAX_COUNT}
+            className="w-full h-11 rounded-lg border border-dashed border-[#D1D5DB] bg-transparent text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] hover:bg-transparent flex items-center justify-center gap-1.5 disabled:opacity-50"
           >
             <span className="text-[16px]">+</span> 회차 추가
           </Button>
@@ -442,7 +509,10 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
           </label>
           <ul className="text-[12px] text-[#6A7282] pl-1 flex flex-col gap-0.5">
             <li>· 강의는 관리자 승인일로부터 2년 후 자동으로 비공개 처리됩니다.</li>
-            <li>· 비공개 처리 시 신규 수강 신청이 불가하며, 기존 수강생은 이후 2년간 수강할 수 있습니다.</li>
+            <li>
+              · 비공개 처리 시 신규 수강 신청이 불가하며, 기존 수강생은 이후 2년간 수강할 수
+              있습니다.
+            </li>
             <li>· 비공개 전 강사에게 알림이 발송됩니다.</li>
           </ul>
           {errors.agreement && <p className={fieldErrorCls}>{errors.agreement}</p>}
@@ -460,7 +530,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                 : 'bg-[#FF5E5E] hover:bg-[#D14848] text-white cursor-pointer'
             }`}
           >
-            {isLoading ? '저장 중...' : '임시 저장'}
+            {isLoading ? <LoadingDots color="#6A7282" /> : '임시 저장'}
           </Button>
           <div className="flex gap-3">
             <Button
@@ -473,7 +543,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
                   : 'bg-[#FF5E5E] hover:bg-[#D14848] text-white cursor-pointer'
               }`}
             >
-              {isLoading ? '처리 중...' : '승인 요청'}
+              {isLoading ? <LoadingDots color="#6A7282" /> : '승인 요청'}
             </Button>
             <Button
               type="button"
@@ -510,6 +580,31 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
   );
 }
 
+// ── 로딩 도트 (인라인용) ──────────────────────────────────────────
+function LoadingDots({ color = '#1E2125' }: { color?: string }) {
+  return (
+    <span className="flex items-center gap-1">
+      {[0, 150, 300].map((delay, i) => (
+        <span
+          key={i}
+          className="w-1.5 h-1.5 rounded-full"
+          style={{
+            backgroundColor: color,
+            animation: 'inline-loading-bounce 0.6s ease-in-out infinite',
+            animationDelay: `${delay}ms`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes inline-loading-bounce {
+          0%, 100% { transform: translateY(0); opacity: 0.5; }
+          50% { transform: translateY(-3px); opacity: 1; }
+        }
+      `}</style>
+    </span>
+  );
+}
+
 // ── 세션 아이템 ──────────────────────────────────────────────────
 interface SessionItemProps {
   session: Session;
@@ -517,9 +612,78 @@ interface SessionItemProps {
   canRemove: boolean;
   onUpdate: <K extends keyof Session>(id: number, key: K, value: Session[K]) => void;
   onRemove: (id: number) => void;
+  titleMax: number;
 }
 
-function SessionItem({ session, index, canRemove, onUpdate, onRemove }: SessionItemProps) {
+const ALLOWED_MATERIAL_TYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+];
+
+function SessionItem({
+  session,
+  index,
+  canRemove,
+  onUpdate,
+  onRemove,
+  titleMax,
+}: SessionItemProps) {
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const materialInputRef = useRef<HTMLInputElement>(null);
+  const [videoError, setVideoError] = useState('');
+  const [materialError, setMaterialError] = useState('');
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState('');
+
+  const formatFileSizeKB = (bytes: number) => `${(bytes / 1024).toFixed(2)} KB`;
+  const formatFileSizeMB = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+
+  useEffect(() => {
+    if (!session.videoFile) {
+      setVideoPreviewUrl('');
+      return;
+    }
+    const url = URL.createObjectURL(session.videoFile);
+    setVideoPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [session.videoFile]);
+
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const isMp4 = file.type === 'video/mp4' || file.name.toLowerCase().endsWith('.mp4');
+    if (!isMp4) {
+      setVideoError('mp4 형식의 영상만 업로드할 수 있습니다.');
+      e.target.value = '';
+      return;
+    }
+    setVideoError('');
+    onUpdate(session.id, 'videoFile', file);
+  };
+
+  const handleMaterialChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const isAllowed =
+      ALLOWED_MATERIAL_TYPES.includes(file.type) ||
+      file.name.toLowerCase().endsWith('.pdf') ||
+      file.name.toLowerCase().endsWith('.docx');
+
+    if (!isAllowed) {
+      setMaterialError('pdf 또는 docx 파일만 업로드할 수 있습니다.');
+      e.target.value = '';
+      return;
+    }
+    setMaterialError('');
+    onUpdate(session.id, 'materialFile', file);
+  };
+
+  const removeMaterial = () => {
+    onUpdate(session.id, 'materialFile', null);
+    if (materialInputRef.current) materialInputRef.current.value = '';
+  };
+
   const inputCls =
     'w-full h-11 px-4 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors';
 
@@ -533,51 +697,106 @@ function SessionItem({ session, index, canRemove, onUpdate, onRemove }: SessionI
           <button
             type="button"
             onClick={() => onRemove(session.id)}
-            className="text-[#6A7282] hover:text-[#FF5E5E] text-[13px] transition-colors cursor-pointer"
+            className="text-[#6A7282] hover:text-[#FF5E5E] text-[17px] transition-colors cursor-pointer"
           >
-            삭제
+            ✕
           </button>
         )}
       </div>
 
       <div>
-        <label className="block text-[12.5px] font-semibold text-[#1E2125] mb-1.5">
-          소제목 <span className="text-[#FF5E5E]">*</span>
-        </label>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="text-[12.5px] font-semibold text-[#1E2125]">
+            소제목 <span className="text-[#FF5E5E]">*</span>
+          </label>
+          <span className="text-[11px] text-[#9CA3AF]">
+            {session.title.length}/{titleMax}
+          </span>
+        </div>
         <input
           type="text"
           placeholder="강의 회차 제목을 입력하세요"
           value={session.title}
-          onChange={(e) => onUpdate(session.id, 'title', e.target.value)}
+          onChange={(e) => onUpdate(session.id, 'title', e.target.value.slice(0, titleMax))}
+          maxLength={titleMax}
           className={inputCls}
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-[12.5px] font-semibold text-[#1E2125] mb-1.5">
-            강의 영상 <span className="text-[#FF5E5E]">*</span>
-          </label>
-          <input
-            type="url"
-            placeholder="영상 URL을 입력하세요"
-            value={session.videoUrl}
-            onChange={(e) => onUpdate(session.id, 'videoUrl', e.target.value)}
-            className={inputCls}
-          />
-        </div>
-        <div>
-          <label className="block text-[12.5px] font-semibold text-[#1E2125] mb-1.5">
-            강의 자료 (선택)
-          </label>
-          <input
-            type="text"
-            placeholder="자료 URL을 입력하세요"
-            value={session.materialFile}
-            onChange={(e) => onUpdate(session.id, 'materialFile', e.target.value)}
-            className={inputCls}
-          />
-        </div>
+      {/* 강의 영상 */}
+      <div>
+        <label className="block text-[12.5px] font-semibold text-[#1E2125] mb-1.5">
+          강의 영상 <span className="text-[#FF5E5E]">*</span>
+        </label>
+        <input
+          type="file"
+          accept="video/mp4,.mp4"
+          ref={videoInputRef}
+          onChange={handleVideoChange}
+          className="hidden"
+        />
+        <button
+          type="button"
+          onClick={() => videoInputRef.current?.click()}
+          className={`w-full h-11 rounded-lg border border-dashed bg-white text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] flex items-center justify-center gap-2 transition-colors cursor-pointer ${
+            videoError ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]'
+          }`}
+        >
+          <span>↑</span>
+          {session.videoFile ? `${session.videoFile.name} (${formatFileSizeMB(session.videoFile.size)})` : '영상 업로드'}
+        </button>
+        {videoError && <p className="text-[11px] text-[#FF5E5E] mt-1">{videoError}</p>}
+
+        {videoPreviewUrl && (
+          <div className="relative mt-2 w-full rounded-lg border border-[#E5E7EB] overflow-hidden bg-black">
+            <video src={videoPreviewUrl} controls className="w-full max-h-56" />
+          </div>
+        )}
+      </div>
+
+      {/* 강의 자료 */}
+      <div>
+        <label className="block text-[12.5px] font-semibold text-[#1E2125] mb-1.5">
+          강의 자료 (선택, pdf/docx 1개)
+        </label>
+        <input
+          type="file"
+          accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          ref={materialInputRef}
+          onChange={handleMaterialChange}
+          className="hidden"
+        />
+        {session.materialFile ? (
+          <div className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-dashed border-[#CFEE5D] bg-[#F1FFC1]">
+            <div className="flex items-center gap-4">
+              <span className="text-[#A8D014]">✓</span>
+              <div>
+                <p className="text-[13px] font-medium text-[#1E2125]">{session.materialFile.name}</p>
+                <p className="text-[11.5px] text-[#6A7282]">
+                  {formatFileSizeKB(session.materialFile.size)}
+                </p>
+              </div>
+            </div>
+              <button
+                type="button"
+                onClick={removeMaterial}
+                className="text-[#6A7282] hover:text-[#FF5E5E] text-[13px] cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => materialInputRef.current?.click()}
+            className={`w-full h-11 rounded-lg border border-dashed bg-white text-[13px] text-[#6A7282] hover:border-[#1E2125] hover:text-[#1E2125] flex items-center justify-center gap-2 transition-colors cursor-pointer ${
+              materialError ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]'
+            }`}
+          >
+            <span>↑</span> 자료 업로드
+          </button>
+        )}
+        {materialError && <p className="text-[11px] text-[#FF5E5E] mt-1">{materialError}</p>}
       </div>
 
       <label className="flex items-center gap-2 cursor-pointer w-fit">
