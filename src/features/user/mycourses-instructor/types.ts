@@ -1,3 +1,10 @@
+export interface SessionAttachment {
+  attachmentName: string;
+  attachmentUrl: string;
+  attachmentType: string;
+  attachmentSize: number;
+}
+
 export interface CreateCourseRequest {
   subCategoryName: string;
   title: string;
@@ -10,6 +17,10 @@ export interface CreateCourseRequest {
     title: string;
     videoUrl: string;
     preview: boolean;
+    attachmentName?: string;
+    attachmentUrl?: string;
+    attachmentType?: string;
+    attachmentSize?: number;
   }[];
 }
 
@@ -21,14 +32,20 @@ export interface CourseFormData {
   price: number | '';
   level: string;
   thumbnail: string;
+  thumbnailFile?: File | null;
   sessions: Session[];
 }
 
 export interface Session {
   id: number;
   title: string;
-  videoUrl: string;
-  materialFile?: string;
+  videoFile?: File | null;
+  videoUrl: string; // 업로드 후 채워짐 (혹은 기존 영상 URL, 수정 시)
+  materialFile?: File | null;
+  materialUrl?: string; // 업로드 후 채워짐 (혹은 기존 자료 URL, 수정 시)
+  materialName?: string;
+  materialType?: string;
+  materialSize?: number;
   preview: boolean;
 }
 
@@ -44,6 +61,10 @@ export interface UpdateCourseRequest {
     title: string;
     videoUrl: string;
     preview: boolean;
+    attachmentName?: string;
+    attachmentUrl?: string;
+    attachmentType?: string;
+    attachmentSize?: number;
   }[];
 }
 
@@ -57,6 +78,7 @@ export interface CourseEditFormData {
   price: number | '';
   level: string;
   thumbnail: string;
+  thumbnailFile?: File | null;
   sessions: Session[];
 }
 
