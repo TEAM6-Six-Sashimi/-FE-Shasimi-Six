@@ -44,6 +44,7 @@ const DEFAULT_SESSION: Omit<Session, 'id'> = {
   title: '',
   videoFile: null,
   videoUrl: '',
+  durationSeconds: 0,
   materialFile: null,
   materialUrl: '',
   preview: false,
@@ -198,7 +199,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
 
     if (form.sessions.length === 0) {
       next.sessions = '최소 1개 이상의 회차가 필요합니다.';
-    } else if (form.sessions.some((s) => !s.title.trim() || !s.videoUrl)) {
+    } else if (form.sessions.some((s) => !s.title.trim() || !s.videoUrl || s.durationSeconds <= 0)) {
       next.sessions =
         '모든 회차의 소제목과 강의 영상을 입력해주세요. (영상 업로드가 완료될 때까지 기다려주세요)';
     } else if (form.sessions.some((s) => s.title.length > SESSION_TITLE_MAX)) {
@@ -233,6 +234,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
       sessions: form.sessions.map((s) => ({
         title: s.title,
         videoUrl: s.videoUrl,
+        durationSeconds: s.durationSeconds,
         preview: s.preview,
         attachmentName: s.materialFile?.name ?? s.materialName,
         attachmentUrl: s.materialUrl,
@@ -311,9 +313,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
             <textarea
               placeholder="강의 설명을 입력하세요"
               value={form.description}
-              onChange={(e) =>
-                handleField('description', e.target.value.slice(0, DESCRIPTION_MAX))
-              }
+              onChange={(e) => handleField('description', e.target.value.slice(0, DESCRIPTION_MAX))}
               maxLength={DESCRIPTION_MAX}
               rows={5}
               disabled={isLoading}
@@ -508,7 +508,10 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
           </label>
           <ul className="text-[12px] text-[#6A7282] pl-1 flex flex-col gap-0.5">
             <li>· 강의는 관리자 승인일로부터 2년 후 자동으로 비공개 처리됩니다.</li>
-            <li>· 비공개 처리 시 신규 수강 신청이 불가하며, 기존 수강생은 이후 2년간 수강할 수 있습니다.</li>
+            <li>
+              · 비공개 처리 시 신규 수강 신청이 불가하며, 기존 수강생은 이후 2년간 수강할 수
+              있습니다.
+            </li>
             <li>· 비공개 전 강사에게 알림이 발송됩니다.</li>
           </ul>
           {errors.agreement && <p className={fieldErrorCls}>{errors.agreement}</p>}
@@ -614,7 +617,7 @@ function SessionItem({
 
   useEffect(() => {
     onUploadingChange(videoUploading || materialUploading);
-  }, [videoUploading, materialUploading]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [videoUploading, materialUploading, onUploadingChange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!session.videoFile) {
@@ -644,18 +647,46 @@ function SessionItem({
       return;
     }
     setVideoError('');
-    onUpdate(session.id, 'videoFile', file);
-    onUpdate(session.id, 'videoUrl', '');
+
+    const getVideoDuration = (file: File): Promise<number> => {
+      return new Promise((resolve, reject) => {
+        const video = document.createElement('video');
+
+        video.preload = 'metadata';
+
+        video.onloadedmetadata = () => {
+          URL.revokeObjectURL(video.src);
+          resolve(Math.floor(video.duration));
+        };
+
+        video.onerror = () => reject();
+
+        video.src = URL.createObjectURL(file);
+      });
+    };
 
     try {
+      const durationSeconds = await getVideoDuration(file);
+
+      onUpdate(session.id, 'videoFile', file);
+      onUpdate(session.id, 'videoUrl', '');
+      onUpdate(session.id, 'durationSeconds', durationSeconds);
+
       setVideoUploading(true);
+
       const formData = new FormData();
       formData.append('video', file);
+
       const res = await fetch('/api/upload/video', { method: 'POST', body: formData });
+
       if (!res.ok) throw new Error('업로드 실패');
+
       const data = await res.json();
+
       onUpdate(session.id, 'videoUrl', data.url);
     } catch {
+      onUpdate(session.id, 'videoUrl', '');
+      onUpdate(session.id, 'durationSeconds', 0);
       setVideoError('영상 업로드에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setVideoUploading(false);
@@ -780,11 +811,7 @@ function SessionItem({
 
         {(videoPreviewUrl || existingVideoUrl) && (
           <div className="relative mt-2 w-full rounded-lg border border-[#E5E7EB] overflow-hidden bg-black">
-            <video
-              src={videoPreviewUrl || existingVideoUrl}
-              controls
-              className="w-full max-h-56"
-            />
+            <video src={videoPreviewUrl || existingVideoUrl} controls className="w-full max-h-56" />
           </div>
         )}
       </div>

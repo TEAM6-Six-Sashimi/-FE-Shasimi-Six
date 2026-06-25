@@ -45,6 +45,7 @@ const DEFAULT_SESSION: Omit<Session, 'id'> = {
   title: '',
   videoFile: null,
   videoUrl: '',
+  durationSeconds: 0,
   materialFile: null,
   materialUrl: '',
   preview: false,
@@ -248,11 +249,12 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
       sessions: form.sessions.map((s) => ({
         title: s.title,
         videoUrl: s.videoUrl,
-        preview: s.preview,
+        durationSeconds: s.durationSeconds ?? 0,
         attachmentName: s.materialFile?.name,
         attachmentUrl: s.materialUrl,
         attachmentType: s.materialFile?.type,
         attachmentSize: s.materialFile?.size,
+        preview: s.preview,
       })),
     };
 
@@ -330,9 +332,7 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
             <textarea
               placeholder="강의 설명을 입력하세요"
               value={form.description}
-              onChange={(e) =>
-                handleField('description', e.target.value.slice(0, DESCRIPTION_MAX))
-              }
+              onChange={(e) => handleField('description', e.target.value.slice(0, DESCRIPTION_MAX))}
               maxLength={DESCRIPTION_MAX}
               rows={5}
               disabled={isLoading}
@@ -661,24 +661,52 @@ function SessionItem({
       return;
     }
     setVideoError('');
-    onUpdate(session.id, 'videoFile', file);
-    onUpdate(session.id, 'videoUrl', ''); // 새 파일 선택 시 기존 URL 초기화
+
+    const getVideoDuration = (file: File): Promise<number> => {
+      return new Promise((resolve, reject) => {
+        const video = document.createElement('video');
+
+        video.preload = 'metadata';
+
+        video.onloadedmetadata = () => {
+          URL.revokeObjectURL(video.src);
+          resolve(Math.floor(video.duration));
+        };
+
+        video.onerror = () => reject();
+
+        video.src = URL.createObjectURL(file);
+      });
+    };
 
     try {
+      const durationSeconds = await getVideoDuration(file);
+
+      onUpdate(session.id, 'videoFile', file);
+      onUpdate(session.id, 'videoUrl', '');
+      onUpdate(session.id, 'durationSeconds', durationSeconds);
+
       setVideoUploading(true);
+
       const formData = new FormData();
       formData.append('video', file);
-      const res = await fetch('/api/upload/video', { method: 'POST', body: formData });
+
+      const res = await fetch('/api/upload/video', {
+        method: 'POST',
+        body: formData,
+      });
+
       if (!res.ok) throw new Error('업로드 실패');
+
       const data = await res.json();
+
       onUpdate(session.id, 'videoUrl', data.url);
     } catch {
-      setVideoError('영상 업로드에 실패했습니다. 다시 시도해주세요.');
+      setVideoError('영상 업로드에 실패했습니다.');
     } finally {
       setVideoUploading(false);
     }
   };
-
   // 강의 자료: 즉시 업로드 API 호출 → session.materialUrl에 저장
   const handleMaterialChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

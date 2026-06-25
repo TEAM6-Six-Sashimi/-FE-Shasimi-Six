@@ -16,6 +16,7 @@ export interface CreateCourseRequest {
   sessions: {
     title: string;
     videoUrl: string;
+    durationSeconds: number;
     preview: boolean;
     attachmentName?: string;
     attachmentUrl?: string;
@@ -41,6 +42,7 @@ export interface Session {
   title: string;
   videoFile?: File | null;
   videoUrl: string; // 업로드 후 채워짐 (혹은 기존 영상 URL, 수정 시)
+  durationSeconds: number; // 영상 길이(초) — 업로드 시 클라이언트에서 측정
   materialFile?: File | null;
   materialUrl?: string; // 업로드 후 채워짐 (혹은 기존 자료 URL, 수정 시)
   materialName?: string;
