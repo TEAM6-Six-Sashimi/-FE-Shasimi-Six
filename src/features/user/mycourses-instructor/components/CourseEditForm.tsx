@@ -760,7 +760,7 @@ function SessionItem({
             <div className="flex items-center gap-4">
               <span className="text-[#A8D014] font-bold">✓</span>
               <div>
-                <p className="text-[13px] font-medium text-[#1E2125] truncate max-w-[450px]">
+                <p className="text-[13px] font-medium text-[#1E2125] truncate max-w-112.5">
                   {session.materialFile?.name ?? existingMaterialName}
                 </p>
                 {/* 용량 정보가 수치(bytes)로 존재할 때만 크기 표시 */}
