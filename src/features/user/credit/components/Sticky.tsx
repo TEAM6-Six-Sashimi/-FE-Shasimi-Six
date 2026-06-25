@@ -16,16 +16,19 @@ interface StickyProps {
 type ModalState = 'none' | 'invalid' | 'confirm' | 'error';
 
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? '';
+const MIN_AMOUNT = 10000;
+const UNIT_AMOUNT = 1000;
 
 export default function Sticky({ currentCredit, chargeAmount, afterCredit }: StickyProps) {
   const [modalState, setModalState] = useState<ModalState>('none');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  const isAmountInvalid = chargeAmount < MIN_AMOUNT || chargeAmount % UNIT_AMOUNT !== 0;
+
   // 충전하기 버튼 클릭
   const handleChargeClick = () => {
-    // 유효성 검사: 최소 10000원, 1000원 단위
-    if (chargeAmount < 10000 || chargeAmount % 1000 !== 0) {
+    if (isAmountInvalid) {
       setModalState('invalid');
       return;
     }
@@ -114,11 +117,11 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
         </Button>
       </div>
 
-      {/* 유효성 실패 모달 */}
+      {/* 유효성 실패 모달 (직접 입력 필드에 이미 에러가 표시되지만, 버튼을 누른 경우를 대비한 최종 방어선) */}
       {modalState === 'invalid' && (
         <OneButtonModal
           title="충전 금액 확인"
-          message="최소 10,000원 이상, 1,000원 단위로 입력해주세요."
+          message={`최소 ${MIN_AMOUNT.toLocaleString()}원 이상, ${UNIT_AMOUNT.toLocaleString()}원 단위로 입력해주세요.`}
           onConfirm={() => setModalState('none')}
         />
       )}
@@ -127,7 +130,7 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
       {modalState === 'confirm' && (
         <TwoButtonModal
           title="크레딧 충전"
-          message={`크레딧을 충전하시겠습니까?\n 확인 시 Toss 결제창으로 이동합니다.`}
+          message="크레딧을 충전하시겠습니까? 확인 시 Toss 결제창으로 이동합니다."
           onConfirm={handleConfirm}
           onCancel={() => setModalState('none')}
         />
