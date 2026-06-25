@@ -15,7 +15,9 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
   const router = useRouter();
   const [search, setSearch] = useState('');
 
-  const filtered = (applicants ?? []).filter(
+  const safeApplicants = applicants ?? [];
+
+  const filtered = safeApplicants.filter(
     (a) => (a.name ?? '').includes(search) || (a.loginId ?? '').includes(search),
   );
 
@@ -25,7 +27,8 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
         <div className="flex items-baseline gap-2">
           <h2 className="text-[18px] font-extrabold text-[#1E2125]">강사 승인 대기</h2>
           <span className="text-[12.5px] text-[#6A7282]">
-            현재 승인 대기 <span className="text-[#FF5E5E] font-semibold">{applicants.length}건</span>
+            현재 승인 대기{' '}
+            <span className="text-[#FF5E5E] font-semibold">{safeApplicants.length}건</span>
           </span>
         </div>
         <div className="relative w-64">
@@ -71,14 +74,21 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
                 <td className="py-3 text-center font-semibold text-[#1E2125]">{a.name}</td>
                 <td className="py-3 text-center text-[#6A7282]">{a.loginId}</td>
                 <td className="py-3 text-center text-[#6A7282]">{a.email}</td>
-                <td className="py-3 text-center font-semibold text-[#1E2125]">{a.mainCategoryName}</td>
-                <td className="py-3 text-center text-[#6A7282]">{a.createdAt.slice(0, 10)}</td>
+                <td className="py-3 text-center font-semibold text-[#1E2125]">{a.categoryName}</td>
+                <td className="py-3 text-center text-[#6A7282]">{a.createdAt?.slice(0, 10)}</td>
                 <td className="py-3 text-center">
                   <Button
                     variant="outline"
-                    onClick={() =>
-                      router.push(`/admin/usermanage/instructor-applications/${a.applicationId}?from=approval`)
-                    }
+                    onClick={() => {
+                      const q = new URLSearchParams({
+                        from: 'approval',
+                        name: a.name ?? '',
+                        loginId: a.loginId ?? '',
+                        email: a.email ?? '',
+                        catName: a.categoryName ?? '',
+                      }).toString();
+                      router.push(`/admin/usermanage/instructor-applications/${a.applicationId}?${q}`);
+                    }}
                     className="px-3 py-1.5 h-auto border-[1.5px] border-[#D1D5DB] text-[12px] font-semibold text-[#6A7282] hover:border-[#6A7282] hover:bg-white hover:text-[#6A7282] cursor-pointer"
                   >
                     서류 확인
