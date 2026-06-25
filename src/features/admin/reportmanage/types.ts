@@ -1,5 +1,5 @@
 export type ReportStatus = 'PENDING' | 'PROCESSED';
-
+export type ReviewStatus = 'ACTIVE' | 'DELETED';
 export type ReportCategory = 'ABUSE' | 'SPAM' | 'FALSE_INFO' | 'OTHER';
 
 export const REPORT_CATEGORY_LABEL: Record<ReportCategory, string> = {
@@ -35,4 +35,21 @@ export interface ReviewReportDetail {
   reportedAt: string;
   category: ReportCategory;
   reason: string;
+  reviewStatus: ReviewStatus; 
+  reportStatus: ReportStatus; 
 }
+
+export const REPORT_STATUS_LABEL: Record<ReportStatus, string> = {
+  PENDING: '처리 대기',
+  PROCESSED: '처리 완료',
+};
+
+export const REVIEW_STATUS_LABEL: Record<ReviewStatus, string> = {
+  ACTIVE: '리뷰 유지됨 (반려)',
+  DELETED: '리뷰 삭제됨',
+};
+
+export const REVIEW_STATUS_STYLE: Record<ReviewStatus, string> = {
+  ACTIVE: 'bg-[#F1FFC1] text-[#5C7A00]',
+  DELETED: 'bg-[#FFEBEB] text-[#FF5E5E]',
+};
