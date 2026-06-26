@@ -12,6 +12,7 @@ import {
   rejectInstructorAction,
   getApplicationDetailAction,
 } from '@/features/admin/usermanage/actions';
+import { buildDownloadHref } from '@/lib/file-url';
 
 const INSTRUCTOR_REJECT_CATEGORIES: RejectCategoryOption[] = [
   { value: 'INSUFFICIENT_CAREER_PROOF', label: '경력/이력 증빙 부족' },
@@ -90,7 +91,7 @@ export default function InstructorApplicationDetailPage({ params }: Props) {
   const handleReject = async (categoryLabel: string, detailText: string) => {
     try {
       setLoading(true);
-      // RejectModal이 onConfirm으로 카테고리 "label"을 넘기므로, 백엔드가 기대하는 enum "value"로 변환
+      // RejectModal이 onConfirm으로 카테고리 "label"을 넘기므로, enum "value"로 변환
       const categoryValue = CATEGORY_VALUE_MAP[categoryLabel] ?? categoryLabel;
       await rejectInstructorAction(Number(applicationId), categoryValue, detailText);
       setRejectModalOpen(false);
@@ -203,7 +204,7 @@ export default function InstructorApplicationDetailPage({ params }: Props) {
                   >
                     <span>{cert.issuedBy}</span>
                     <a
-                      href={`/api/files/download?key=${encodeURIComponent(cert.fileUrl)}`}
+                      href={buildDownloadHref(cert.fileUrl)}
                       className="text-[12px] text-[#5B8DEE] hover:underline"
                     >
                       다운로드
@@ -225,7 +226,7 @@ export default function InstructorApplicationDetailPage({ params }: Props) {
             <p className="text-[13px] font-medium text-[#1E2125]">이력서 파일</p>
           </div>
           <a
-            href={`/api/files/download?key=${encodeURIComponent(detail.resumeFileUrl)}`}
+            href={buildDownloadHref(detail.resumeFileUrl)}
             className="px-3 py-1.5 rounded-md border border-[#D1D5DB] text-[12px] font-medium text-[#1E2125] hover:bg-white transition-colors"
           >
             다운로드
@@ -252,7 +253,7 @@ export default function InstructorApplicationDetailPage({ params }: Props) {
         <div className={sectionCls}>
           <h2 className={sectionTitleCls}>프로필 사진</h2>
           <img
-            src={detail.profileImageUrl}
+            src={buildDownloadHref(detail.profileImageUrl)}
             alt="프로필 사진"
             className="w-20 h-20 rounded-full object-cover"
           />
