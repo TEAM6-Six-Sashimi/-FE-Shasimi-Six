@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { PaymentSummary } from '../types';
 import { checkoutAction } from '../actions';
@@ -19,6 +19,7 @@ const ERROR_MAP: Record<string, string> = {
   CART_003: '결제할 강의를 선택해주세요.',
   CART_004: '장바구니 선택 정보가 올바르지 않습니다.',
   PAYMENT_002: '결제할 강의가 없습니다.',
+  SUBSCRIPTION_002: '이미 활성화된 구독권이 있습니다.',
 };
 
 export function PaymentSticky({ summary }: PaymentStickyProps) {
@@ -32,12 +33,19 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
   const [errorMessage, setErrorMessage] = useState('');
   const [showErrorModal, setShowErrorModal] = useState(false);
 
+  const idempotencyKeyRef = useRef('');
+
+  const generateIdempotencyKey = () => {
+    idempotencyKeyRef.current = crypto.randomUUID();
+  };
+
   const isSubscription = summary.purchaseType === 'AI_SUBSCRIPTION';
 
   const canPurchase = agreedToTerms && agreedToRefund && summary.shortfallCredits === 0;
 
   const handlePaymentClick = () => {
     if (!canPurchase) return;
+    generateIdempotencyKey();
     setShowConfirmModal(true);
   };
 
@@ -46,23 +54,32 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
     setIsLoading(true);
     try {
       if (summary.purchaseType === 'AI_SUBSCRIPTION') {
-        await checkoutAction({
-          purchaseType: 'AI_SUBSCRIPTION',
-          planCode: summary.planCode,
-          agreed: true,
-        });
+        await checkoutAction(
+          {
+            purchaseType: 'AI_SUBSCRIPTION',
+            planCode: summary.planCode,
+            agreed: true,
+          },
+          idempotencyKeyRef.current,
+        );
       } else if (summary.purchaseType === 'COURSE') {
-        await checkoutAction({
-          purchaseType: 'COURSE',
-          courseId: summary.courseIds?.[0],
-          agreed: true,
-        });
+        await checkoutAction(
+          {
+            purchaseType: 'COURSE',
+            courseId: summary.courseIds?.[0],
+            agreed: true,
+          },
+          idempotencyKeyRef.current,
+        );
       } else {
-        await checkoutAction({
-          purchaseType: 'CART',
-          courseIds: summary.courseIds,
-          agreed: true,
-        });
+        await checkoutAction(
+          {
+            purchaseType: 'CART',
+            courseIds: summary.courseIds,
+            agreed: true,
+          },
+          idempotencyKeyRef.current,
+        );
       }
 
       setShowCompleteModal(true);
