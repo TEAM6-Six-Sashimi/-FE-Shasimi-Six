@@ -1,5 +1,5 @@
-export default function RecommendationPage() {
-    return (
-        <div>AI 맞춤 강의 추천</div>
-    );
+import RecommendationClient from "./components/RecommendationClientPage";
+
+export default function JobRecommendationPage() {
+  return <RecommendationClient />;
 }
