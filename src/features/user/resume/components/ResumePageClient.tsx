@@ -6,12 +6,14 @@ import ResumeMain from './ResumeMain';
 import ResumeSidebar from './ResumeSidebar';
 import { fetchSubscriptionPlan, SavedResume } from '@/services/ai.service';
 import { SubscriptionPlanResponse } from '../types';
+import { MySubscription } from '../../payments/types';
 
 interface ResumePageClientProps {
   userName: string;
   userPhone: string;
   userEmail: string;
   savedResume: SavedResume | null;
+  mySubscription: MySubscription | null;
 }
 
 export default function ResumePageClient({
@@ -19,44 +21,15 @@ export default function ResumePageClient({
   userPhone,
   userEmail,
   savedResume,
+  mySubscription
 }: ResumePageClientProps) {
   const [isSaved, setIsSaved] = useState(!!savedResume);
   const [resumeId, setResumeId] = useState<number | null>(savedResume?.resumeId ?? null);
 
-  const [subscription, setSubscription] =
-  useState<SubscriptionPlanResponse | null>(null);
-  const [subscriptionText, setSubscriptionText] = useState('');
-
-  useEffect(() => {
-  const loadSubscription = async () => {
-    const accessToken = localStorage.getItem('accessToken');
-
-    if (!accessToken) {
-      setSubscriptionText('보유한 구독권이 없습니다.');
-      return;
-    }
-
-    const result = await fetchSubscriptionPlan(accessToken);
-
-    if (!result || !result.subscribed) {
-      setSubscription(result);
-      setSubscriptionText('보유한 구독권이 없습니다.');
-      return;
-    }
-
-    setSubscription(result);
-
-    const renewDate = result.nextBillingAt
-      ? result.nextBillingAt.split('T')[0]
-      : '-';
-
-    setSubscriptionText(
-      `${result.planName} / 갱신일 : ${renewDate}`,
-    );
-  };
-
-  loadSubscription();
-}, []);
+  const subscriptionText =
+  mySubscription?.subscribed
+    ? `${mySubscription.planName} / 갱신일 : ${mySubscription.nextBillingAt.slice(0, 10)}`
+    : '보유한 구독권이 없습니다.';
 
   return (
     <div className="bg-[#F9FAFB]">
