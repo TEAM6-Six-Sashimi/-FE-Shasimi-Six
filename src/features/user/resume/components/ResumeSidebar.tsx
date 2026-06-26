@@ -1,20 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import { RadialBar, RadialBarChart, PolarAngleAxis } from 'recharts';
 import OneButtonModal from '@/components/modals/OneButtonModal';
+import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { requestAiReviewAction } from '../actions';
 import { AiReviewResult, getGradeColor } from '../types';
-import { RadialBar, RadialBarChart, PolarAngleAxis } from 'recharts';
 
 interface ResumeSidebarProps {
-  /** 이력서 이후 수정 여부 */
   isSaved: boolean;
   resumeId: number | null;
 }
 
-// 원형 점수 그래프
 function ScoreCircle({ score }: { score: number }) {
   const data = [{ value: score, fill: '#5B8DEE' }];
 
@@ -46,13 +46,13 @@ function ScoreCircle({ score }: { score: number }) {
 }
 
 export default function ResumeSidebar({ isSaved, resumeId }: ResumeSidebarProps) {
-  //   이력서 평가부 상태
+  const router = useRouter();
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluationResult, setEvaluationResult] = useState<AiReviewResult | null>(null);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [showSubscribeModal, setShowSubscribeModal] = useState(false);
 
   const handleEvaluate = async () => {
-    // 저장되지 않았거나(또는 저장 후 수정됨) 평가 시작 불가 → 안내 모달
     if (!isSaved || resumeId === null) {
       setShowUnsavedModal(true);
       return;
@@ -63,13 +63,19 @@ export default function ResumeSidebar({ isSaved, resumeId }: ResumeSidebarProps)
 
     try {
       const result = await requestAiReviewAction(resumeId);
-      setEvaluationResult(result);
+
+      if (result.success) {
+        setEvaluationResult(result.data);
+      } else if (result.error.errorCode === 'SUBSCRIPTION_007') {
+        // 구독 플랜 필요 - 안내 모달
+        setShowSubscribeModal(true);
+      }
+      // 그 외 에러는 우선 조용히 처리 (필요 시 별도 토스트/모달 추가 가능)
     } finally {
       setIsEvaluating(false);
     }
   };
 
-  // 보완이 필요한 항목만 노출 (IMPROVEMENT 타입)
   const improvementFeedbacks =
     evaluationResult?.feedbacks.filter((fb) => fb.type === 'IMPROVEMENT') ?? [];
 
@@ -88,7 +94,6 @@ export default function ResumeSidebar({ isSaved, resumeId }: ResumeSidebarProps)
             </p>
           ) : (
             <div className="flex flex-col gap-5">
-              {/* 원형 종합 점수 */}
               <div>
                 <ScoreCircle score={evaluationResult.overallScore} />
                 <p className="text-center text-[14px] font-bold text-[#1E2125] mt-3">
@@ -96,7 +101,6 @@ export default function ResumeSidebar({ isSaved, resumeId }: ResumeSidebarProps)
                 </p>
               </div>
 
-              {/* 항목별 평가 결과 */}
               <div>
                 <h3 className="text-[14px] font-bold text-[#1E2125] mb-2.5">항목별 평가 결과</h3>
                 <div className="flex flex-col gap-2">
@@ -124,7 +128,6 @@ export default function ResumeSidebar({ isSaved, resumeId }: ResumeSidebarProps)
                 </div>
               </div>
 
-              {/* 보완이 필요한 항목 */}
               {improvementFeedbacks.length > 0 && (
                 <div>
                   <h3 className="text-[14px] font-bold text-[#1E2125] mb-2.5">
@@ -136,14 +139,10 @@ export default function ResumeSidebar({ isSaved, resumeId }: ResumeSidebarProps)
                         key={idx}
                         className="flex items-start gap-2 px-3 py-2.5 bg-[#FEF3C7] rounded-lg"
                       >
-                        <Image
-                          src="/ai-resume/caution.svg"
-                          alt="보완 필요 항목"
-                          className='mt-0.5'
-                          width={18}
-                          height={18}
-                        />
-                        <p className="text-[12.5px] text-[#92400E] leading-relaxed">{fb.message}</p>
+                        <span className="text-[#92400E] text-[13px] mt-0.5">⚠</span>
+                        <p className="text-[12.5px] text-[#1E2125] leading-relaxed">
+                          {fb.message}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -168,6 +167,23 @@ export default function ResumeSidebar({ isSaved, resumeId }: ResumeSidebarProps)
           title="알림"
           message="변경된 이력서 내용이 저장되지 않았습니다. 이력서를 저장해주세요."
           onConfirm={() => setShowUnsavedModal(false)}
+        />
+      )}
+
+      {/* 구독 플랜 필요 모달 */}
+      {showSubscribeModal && (
+        <TwoButtonModal
+          title="AI 구독 플랜 필요"
+          message={
+            "해당 기능은 핏격 AI 구독 플랜 이용자만 사용할 수 있는 기능입니다.\n구독 플랜 구매는 사이트 상단의 'AI 구독권'에서 가능합니다.\n구독 플랜 페이지로 이동하시겠습니까?"
+          }
+          confirmLabel="확인"
+          cancelLabel="취소"
+          onConfirm={() => {
+            setShowSubscribeModal(false);
+            router.push('/ai-subscribe');
+          }}
+          onCancel={() => setShowSubscribeModal(false)}
         />
       )}
     </>

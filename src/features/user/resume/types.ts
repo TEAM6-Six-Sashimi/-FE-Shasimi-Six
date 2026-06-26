@@ -1,3 +1,17 @@
+export interface SubscriptionPlanResponse {
+  subscribed: boolean;
+  subscriptionId: number | null;
+  planCode: string | null;
+  planName: string | null;
+  status: string | null;
+  startedAt: string | null;
+  expiresAt: string | null;
+  nextBillingAt: string | null;
+  cancelScheduled: boolean;
+  cancellable: boolean;
+  aiAvailable: boolean;
+}
+
 export type DegreeType = 'HIGH_SCHOOL' | 'ASSOCIATE' | 'BACHELOR' | 'MASTER' | 'DOCTOR';
 
 export const DEGREE_LABEL: Record<DegreeType, string> = {

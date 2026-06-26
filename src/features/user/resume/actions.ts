@@ -1,7 +1,7 @@
 'use server';
 
 import { cookies } from "next/headers";
-import { saveResume, fetchMyResume, requestAiReview } from "@/services/ai.service";
+import { saveResume, updateResume, fetchMyResume, requestAiReview, SavedResume } from "@/services/ai.service";
 import { ResumePayload } from "./types";
 
 export async function saveResumeAction(
@@ -18,7 +18,21 @@ export async function saveResumeAction(
   return { success: true, resumeId: result.resumeId };
 }
  
-export async function fetchMyResumeAction(): Promise<ResumePayload | null> {
+// 기존에 저장된 이력서가 있으면 수정(PATCH), 없으면 신규 작성(POST)
+export async function updateResumeAction(
+  resumeId: number,
+  payload: ResumePayload,
+): Promise<{ success: boolean }> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+ 
+  if (!accessToken) return { success: false };
+ 
+  const success = await updateResume(accessToken, resumeId, payload);
+  return { success };
+}
+ 
+export async function fetchMyResumeAction(): Promise<SavedResume | null> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
  
@@ -31,7 +45,9 @@ export async function requestAiReviewAction(resumeId: number) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
  
-  if (!accessToken) return null;
+  if (!accessToken) {
+    return { success: false as const, error: { errorCode: 'NO_TOKEN', message: '로그인이 필요합니다.' } };
+  }
  
   return requestAiReview(accessToken, resumeId);
 }
