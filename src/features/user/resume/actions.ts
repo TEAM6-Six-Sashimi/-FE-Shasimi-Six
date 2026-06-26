@@ -1,14 +1,37 @@
-// src/features/user/resume/actions.ts
 'use server';
 
-// TODO: API 연동 단계에서 실제 구현
-// import { ResumeFormData } from './types';
-// import { saveResume, evaluateResume } from '@/services/resume.service';
+import { cookies } from "next/headers";
+import { saveResume, fetchMyResume, requestAiReview } from "@/services/ai.service";
+import { ResumePayload } from "./types";
 
-// export async function saveResumeAction(payload: ResumeFormData) {
-//   return saveResume(payload);
-// }
-
-// export async function evaluateResumeAction() {
-//   return evaluateResume();
-// }
+export async function saveResumeAction(
+  payload: ResumePayload,
+): Promise<{ success: boolean; resumeId?: number }> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+ 
+  if (!accessToken) return { success: false };
+ 
+  const result = await saveResume(accessToken, payload);
+  if (!result) return { success: false };
+ 
+  return { success: true, resumeId: result.resumeId };
+}
+ 
+export async function fetchMyResumeAction(): Promise<ResumePayload | null> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+ 
+  if (!accessToken) return null;
+ 
+  return fetchMyResume(accessToken);
+}
+ 
+export async function requestAiReviewAction(resumeId: number) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+ 
+  if (!accessToken) return null;
+ 
+  return requestAiReview(accessToken, resumeId);
+}

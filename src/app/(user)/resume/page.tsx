@@ -1,16 +1,12 @@
-import FeatureHeader from '@/components/layout/FeatureHeader';
-import ResumeBody from './components/resumeBody';
+import { cookies } from 'next/headers';
+import { fetchUserMe, GUEST_USER } from '@/services/user.service';
+import ResumePageClient from '@/features/user/resume/components/ResumePageClient';
 
-export default function ResumePage() {
-  return (
-    <div className='bg-[#F9FAFB]'>
-      <FeatureHeader
-        icon="ai"
-        title="AI 이력서 작성 & 평가"
-        description="템플릿으로 이력서를 작성하고 AI가 점수와 개선 방향까지 알려드립니다."
-        right="1개월 플랜 / 갱신일 : 2026-07-12" // 연동해야됨
-      />
-          <ResumeBody />
-    </div>
-  );
+export default async function ResumePage() {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+
+  const user = accessToken ? await fetchUserMe(accessToken) : GUEST_USER;
+
+  return <ResumePageClient userName={user.name} userPhone={user.phone} userEmail={user.email} />;
 }
