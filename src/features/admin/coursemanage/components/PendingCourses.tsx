@@ -38,10 +38,10 @@ export default function PendingCourses({ courses, categories }: Props) {
         <thead>
           <tr className="border-b border-[#E5E7EB]">
             <th className="py-3 w-[6%] text-center font-semibold text-[#1E2125]">#</th>
-            <th className="py-3 w-[22%] text-center font-semibold text-[#1E2125]">강의명</th>
-            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">강사명</th>
-            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">강사 ID</th>
-            <th className="py-3 w-[32%] text-center font-semibold text-[#1E2125]">
+            <th className="py-3 w-[25%] text-center font-semibold text-[#1E2125]">강의명</th>
+            <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">강사명</th>
+            <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">강사 ID</th>
+            <th className="py-3 w-[22%] text-center font-semibold text-[#1E2125]">
               카테고리 &gt; 세부카테고리
             </th>
             <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125]">승인 요청일</th>

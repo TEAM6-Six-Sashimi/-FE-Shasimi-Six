@@ -8,7 +8,7 @@ export interface AdminCourse {
   difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
   thumbnail: string;
   totalDuration: number;
-  status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'CLOSED';
   rejectReason: string | null;
   ratingAvg: number;
   reviewCount: number;
@@ -27,7 +27,7 @@ export interface RejectedCourse {
   rejectCategory: string | null;
   rejectReason: string;
 }
- 
+
 // 승인 대기 강의
 export interface AdminPendingCourse {
   courseId: number;
@@ -37,19 +37,18 @@ export interface AdminPendingCourse {
   categoryName: string;
   createdAt: string;
 }
- 
-// 비공개 강의 (API 아직 없음, mock 사용)
+
+// 비공개된 강의
 export interface AdminPrivateCourse {
   courseId: number;
   title: string;
-  instructorName: string; 
   categoryName: string;
+  instructorName: string;
   studentCount: number;
   ratingAvg: number;
-  createdAt: string;
-  privatedAt: string;
+  status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'CLOSED';
+  approvedAt: string;
 }
-
 
 // 카테고리 관리
 export interface AdminCategory {

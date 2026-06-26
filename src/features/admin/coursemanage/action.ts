@@ -34,6 +34,25 @@ export async function rejectCourseAction(courseId: number, rejectReason: string)
   if (!res.ok) throw new Error('반려 처리에 실패했습니다.');
 }
 
+// 비공개 강의 목록 조회
+export async function getClosedCoursesAction() {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+
+  const res = await fetch(`${API_BASE_URL}/admin/courses/closed`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    throw new Error('비공개 강의 목록 조회에 실패했습니다.');
+  }
+
+  return res.json();
+}
+
 // 카테고리 CRUD
 export async function createAdminCategory(accessToken: string, body: CreateCategoryRequest) {
   const response = await fetch(`${API_BASE_URL}/admin/categories`, {

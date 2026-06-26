@@ -5,47 +5,11 @@ import type { AdminPrivateCourse } from '../type';
 import type { Category } from '@/features/categories/types';
 
 interface Props {
+  courses: AdminPrivateCourse[];
   categories: Category[];
 }
 
-// TODO: 실제 API 연결 전까지 사용하는 임시 데이터
-const MOCK_PRIVATE_COURSES: AdminPrivateCourse[] = [
-  {
-    courseId: 1,
-    title: 'AWS 클라우드 기초',
-    instructorName: '정민수',
-    categoryName: 'AdsP',
-    studentCount: 450,
-    ratingAvg: 4.5,
-    createdAt: '2026-05-01',
-    privatedAt: '2028-05-15',
-  },
-  {
-    courseId: 2,
-    title: 'CSS 스타일링 완벽 가이드',
-    instructorName: '송강사',
-    categoryName: '웹디자인기능사',
-    studentCount: 230,
-    ratingAvg: 4.2,
-    createdAt: '2026-04-10',
-    privatedAt: '2028-05-10',
-  },
-  {
-    courseId: 3,
-    title: 'JavaScript 기초 입문',
-    instructorName: '한강사',
-    categoryName: 'SQLD',
-    studentCount: 120,
-    ratingAvg: 4,
-    createdAt: '2026-03-20',
-    privatedAt: '2028-04-25',
-  },
-];
-
-export default function PrivateCourses({ categories }: Props) {
-  // TODO: 실제 API 연결 시 props로 courses를 받아오도록 변경
-  const courses = MOCK_PRIVATE_COURSES;
-
+export default function PrivateCourses({ courses, categories }: Props) {
   // 세부카테고리명 → 대카테고리명 매핑
   const subToMainMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -65,16 +29,16 @@ export default function PrivateCourses({ categories }: Props) {
       <table className="w-full text-[13px] table-fixed">
         <thead>
           <tr className="border-b border-[#E5E7EB]">
-            <th className="py-3 w-[6%] text-center font-semibold text-[#1E2125]">#</th>
-            <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">강의명</th>
+            <th className="py-3 w-[5%] text-center font-semibold text-[#1E2125]">#</th>
+            <th className="py-3 w-[25%] text-center font-semibold text-[#1E2125]">강의명</th>
             <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">강사명</th>
             <th className="py-3 w-[22%] text-center font-semibold text-[#1E2125]">
               카테고리 &gt; 세부카테고리
             </th>
-            <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">수강생 수</th>
+            <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">수강생 수</th>
             <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">평점</th>
-            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">등록일</th>
-            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">비공개일</th>
+            <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">승인일</th>
+            <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">비공개일</th>
           </tr>
         </thead>
         <tbody>
@@ -105,8 +69,8 @@ export default function PrivateCourses({ categories }: Props) {
                     {c.ratingAvg.toFixed(1)}
                   </span>
                 </td>
-                <td className="py-3 text-center text-[#6A7282]">{c.createdAt}</td>
-                <td className="py-3 text-center text-[#6A7282]">{c.privatedAt}</td>
+                <td className="py-3 text-center text-[#6A7282]">{c.approvedAt}</td>
+                <td className="py-3 text-center text-[#6A7282]">{c.approvedAt}</td>
               </tr>
             ))
           )}

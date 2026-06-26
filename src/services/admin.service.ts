@@ -1,4 +1,4 @@
-import { AdminCategory } from '@/features/admin/coursemanage/type';
+import { AdminCategory, AdminPrivateCourse } from '@/features/admin/coursemanage/type';
 import {
   AdminUser,
   AdminUserDetail,
@@ -73,7 +73,6 @@ export async function fetchInstructorApplications(
     });
 
     if (!res.ok) {
-      // 디버그: 이전에는 에러를 그냥 삼키고 빈 배열만 반환했음 (확인 후 삭제 가능)
       const errorBody = await res.text().catch(() => '');
       console.error(
         `[fetchInstructorApplications] status=${res.status} body=${errorBody} token=${accessToken ? '있음' : '없음(빈 문자열)'}`,
@@ -105,9 +104,7 @@ export async function fetchInstructorApplicationDetail(
     );
     if (!res.ok) {
       const errorBody = await res.text().catch(() => '');
-      console.error(
-        `[fetchInstructorApplicationDetail] status=${res.status} body=${errorBody}`,
-      );
+      console.error(`[fetchInstructorApplicationDetail] status=${res.status} body=${errorBody}`);
       return null;
     }
     const data = await res.json();
@@ -172,9 +169,7 @@ export async function fetchRejectedInstructorApplications(
 
     if (!res.ok) {
       const errorBody = await res.text().catch(() => '');
-      console.error(
-        `[fetchRejectedInstructorApplications] status=${res.status} body=${errorBody}`,
-      );
+      console.error(`[fetchRejectedInstructorApplications] status=${res.status} body=${errorBody}`);
       return [];
     }
 
@@ -230,6 +225,53 @@ export async function fetchAdminRejectedCourses(accessToken: string) {
     if (!res.ok) return [];
     return res.json();
   } catch {
+    return [];
+  }
+}
+
+// 강의 관리 - 반려 이력
+
+
+// 강의 관리 - 비공개된 강의
+export async function fetchAdminPrivateCourses(accessToken: string): Promise<AdminPrivateCourse[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/courses/closed`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      console.error(`[fetchAdminPrivateCourses] status=${res.status} body=${errorBody}`);
+      return [];
+    }
+
+    const data = await res.json();
+
+    return data.map((course: any) => {
+      const approvedAt = new Date(course.approvedAt);
+
+      const privateDate = new Date(approvedAt);
+      privateDate.setFullYear(privateDate.getFullYear() + 2);
+
+      const formatDate = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+      };
+
+      return {
+        ...course,
+        approvedAt: formatDate(approvedAt),
+        privatedAt: formatDate(privateDate),
+      };
+    });
+  } catch (e) {
+    console.error('[fetchAdminPrivateCourses]', e);
     return [];
   }
 }
