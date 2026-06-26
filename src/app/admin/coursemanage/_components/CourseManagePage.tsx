@@ -7,6 +7,7 @@ import {
   AdminCourse,
   RejectedCourse,
   AdminPendingCourse,
+  AdminPrivateCourse,
   AdminCategory,
 } from '@/features/admin/coursemanage/type';
 import AllCourses from '@/features/admin/coursemanage/components/AllCourses';
@@ -23,7 +24,7 @@ interface Props {
   allCourses: AdminCourse[];
   pendingCourses: AdminPendingCourse[];
   rejectedCourses: RejectedCourse[];
-
+  privateCourses: AdminPrivateCourse[];
   courseCategories: Category[];
   adminCategories: AdminCategory[];
   accessToken: string;
@@ -33,6 +34,7 @@ export default function CourseManagePage({
   allCourses,
   pendingCourses,
   rejectedCourses,
+  privateCourses,
   courseCategories,
   adminCategories,
   accessToken,
@@ -104,7 +106,7 @@ export default function CourseManagePage({
       {tab === 'rejected' && (
         <RejectedCourses courses={rejectedCourses} categories={courseCategories} />
       )}
-      {tab === 'private' && <PrivateCourses categories={courseCategories} />}
+      {tab === 'private' && <PrivateCourses courses={privateCourses} categories={courseCategories} />}
       {tab === 'category' && (
         <CategoryManage categories={adminCategories} accessToken={accessToken} />
       )}

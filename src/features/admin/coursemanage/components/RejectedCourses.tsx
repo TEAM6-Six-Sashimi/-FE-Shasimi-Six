@@ -33,16 +33,16 @@ export default function RejectedCourses({ courses, categories }: Props) {
         <thead>
           <tr className="border-b border-[#E5E7EB]">
             <th className="py-3 w-[6%] text-center font-semibold text-[#1E2125]">#</th>
-            <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125]">강의명</th>
-            <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">강사명</th>
+            <th className="py-3 w-[20%] text-center font-semibold text-[#1E2125]">강의명</th>
+            <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">강사명</th>
             <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">
               카테고리 &gt; 세부카테고리
             </th>
             <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">반려일</th>
-            <th className="py-3 w-[14%] text-center font-semibold text-[#1E2125]">
+            <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">
               반려 사유 카테고리
             </th>
-            <th className="py-3 w-[26%] text-center font-semibold text-[#1E2125]">
+            <th className="py-3 w-[25%] text-center font-semibold text-[#1E2125]">
               반려 사유 내용
             </th>
           </tr>
