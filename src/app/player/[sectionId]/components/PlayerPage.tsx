@@ -1,63 +1,42 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { StudentCourseDetail, CourseSession } from '@/features/user/courses/types';
+import { saveSessionProgressAction } from '@/features/user/courses/actions';
 
-interface SessionItem {
-  sessionId: number;
-  order: number;
-  title: string;
-  durationLabel: string; // "15:32"
-  completed: boolean;
-}
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface PlayerPageProps {
-  sectionId: string;
+  course: StudentCourseDetail;
+  courseId: number;
+  sessionId: number;
 }
 
-// TODO: 실제 API 연결 전까지 사용하는 임시 데이터
-const MOCK_COURSE_TITLE = '[2026 최신판!] 정보처리기사 필기 완전정복';
-const MOCK_SESSION_TITLE = '1-2. DDL 명령어 완전 정복';
-const MOCK_VIDEO_URL = '/mock-videos/sample.mp4';
-const MOCK_ATTACHMENT_URL = '#';
+function resolveAssetUrl(url: string | null | undefined): string {
+  if (!url) return '';
+  return url.startsWith('http') ? url : `${API_BASE_URL}/${url}`;
+}
 
-const MOCK_CURRICULUM: SessionItem[] = [
-  {
-    sessionId: 1,
-    order: 1,
-    title: '데이터베이스 기초 이론',
-    durationLabel: '15:32',
-    completed: false,
-  },
-  {
-    sessionId: 2,
-    order: 2,
-    title: 'DDL 명령어 완전 정복',
-    durationLabel: '22:45',
-    completed: false,
-  },
-  { sessionId: 3, order: 3, title: 'DML 활용 실습', durationLabel: '18:20', completed: false },
-  {
-    sessionId: 4,
-    order: 4,
-    title: '소프트웨어 생명 주기',
-    durationLabel: '20:15',
-    completed: false,
-  },
-  { sessionId: 5, order: 5, title: '요구사항 분석 기법', durationLabel: '25:30', completed: true },
-  { sessionId: 6, order: 6, title: '프로세스 관리', durationLabel: '19:40', completed: true },
-  { sessionId: 7, order: 7, title: '메모리 관리 전략', durationLabel: '21:20', completed: false },
-];
+function formatDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
 
-const CURRENT_SESSION_ID = 2; // 현재 재생 중인 세션(빨간 테두리로 표시)
-
-export default function PlayerPage({ sectionId }: PlayerPageProps) {
+export default function PlayerPage({ course, courseId, sessionId }: PlayerPageProps) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
+
+  const sortedSessions = [...course.sessions].sort((a, b) => a.sessionOrder - b.sessionOrder);
+  const currentSession: CourseSession | undefined = sortedSessions.find(
+    (s) => s.sessionId === sessionId,
+  );
 
   const formatTime = (seconds: number) => {
     if (!Number.isFinite(seconds)) return '0:00';
@@ -90,6 +69,54 @@ export default function PlayerPage({ sectionId }: PlayerPageProps) {
     setCurrentTime(time);
   };
 
+  // 현재 재생 위치를 백엔드에 저장
+  const saveProgress = useCallback(
+    async (positionSeconds: number) => {
+      try {
+        await saveSessionProgressAction(courseId, sessionId, Math.floor(positionSeconds));
+      } catch {
+        // 진행률 저장 실패는 학습 흐름을 막지 않도록 조용히 무시
+      }
+    },
+    [courseId, sessionId],
+  );
+
+  // 일정 주기로 진행률 자동 저장 (10초마다)
+  useEffect(() => {
+    if (!isPlaying) return;
+    const interval = setInterval(() => {
+      saveProgress(videoRef.current?.currentTime ?? 0);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [isPlaying, saveProgress]);
+
+  // 페이지를 떠날 때도 마지막 위치 저장
+  useEffect(() => {
+    return () => {
+      if (videoRef.current) {
+        saveProgress(videoRef.current.currentTime);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleEndLearning = async () => {
+    setIsEnding(true);
+    await saveProgress(videoRef.current?.currentTime ?? currentTime);
+    router.back();
+  };
+
+  if (!currentSession) {
+    return (
+      <div className="flex items-center justify-center h-full text-[#6A7282]">
+        해당 회차를 찾을 수 없습니다.
+      </div>
+    );
+  }
+
+  const videoUrl = resolveAssetUrl(currentSession.videoUrl);
+  const attachmentUrl = resolveAssetUrl(currentSession.attachmentUrl);
+
   return (
     <div className="lg:h-full lg:overflow-hidden flex flex-col">
       {/* 상단 바 */}
@@ -102,10 +129,11 @@ export default function PlayerPage({ sectionId }: PlayerPageProps) {
             <span>←</span> 뒤로가기
           </button>
           <Button
-            onClick={() => router.back()}
-            className="h-9 px-6 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[13.5px] font-semibold cursor-pointer"
+            onClick={handleEndLearning}
+            disabled={isEnding}
+            className="h-9 px-6 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[13.5px] font-semibold cursor-pointer disabled:opacity-70"
           >
-            학습 종료
+            {isEnding ? '저장 중...' : '학습 종료'}
           </Button>
         </div>
       </div>
@@ -117,12 +145,13 @@ export default function PlayerPage({ sectionId }: PlayerPageProps) {
           <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden">
             <video
               ref={videoRef}
-              src={MOCK_VIDEO_URL}
+              src={videoUrl}
               className="w-full h-full"
               onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
               onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
+              onEnded={() => saveProgress(videoRef.current?.duration ?? currentTime)}
               onClick={togglePlay}
             />
 
@@ -182,16 +211,18 @@ export default function PlayerPage({ sectionId }: PlayerPageProps) {
           {/* 세션 제목 + 강의명 + 자료 다운로드 */}
           <div className="flex items-center justify-between mt-5">
             <div>
-              <h1 className="text-[18px] font-bold text-[#1E2125]">{MOCK_SESSION_TITLE}</h1>
-              <p className="text-[13px] text-[#6A7282] mt-1">{MOCK_COURSE_TITLE}</p>
+              <h1 className="text-[18px] font-bold text-[#1E2125]">{currentSession.title}</h1>
+              <p className="text-[13px] text-[#6A7282] mt-1">{course.title}</p>
             </div>
-            <a
-              href={MOCK_ATTACHMENT_URL}
-              download
-              className="px-4 py-2.5 rounded-lg border border-[#FF5E5E] text-[#FF5E5E] text-[13px] font-semibold hover:bg-[#FFEBEB] transition-colors whitespace-nowrap"
-            >
-              강의 자료 다운로드
-            </a>
+            {currentSession.attachmentUrl && (
+              <a
+                href={attachmentUrl}
+                download={currentSession.attachmentName || undefined}
+                className="px-4 py-2.5 rounded-lg border border-[#FF5E5E] text-[#FF5E5E] text-[13px] font-semibold hover:bg-[#FFEBEB] transition-colors whitespace-nowrap"
+              >
+                강의 자료 다운로드
+              </a>
+            )}
           </div>
         </div>
 
@@ -199,12 +230,14 @@ export default function PlayerPage({ sectionId }: PlayerPageProps) {
         <div className="w-full lg:w-80 shrink-0 bg-white rounded-2xl shadow-sm p-5 flex flex-col lg:min-h-0 lg:overflow-y-auto">
           <h2 className="text-[16px] font-bold text-[#1E2125] mb-4">커리큘럼</h2>
           <div className="flex flex-col gap-2">
-            {MOCK_CURRICULUM.map((session) => {
-              const isCurrent = session.sessionId === CURRENT_SESSION_ID;
+            {sortedSessions.map((session, idx) => {
+              const isCurrent = session.sessionId === sessionId;
               return (
                 <button
                   key={session.sessionId}
-                  onClick={() => router.push(`/player/${session.sessionId}`)}
+                  onClick={() =>
+                    router.push(`/player/${session.sessionId}?courseId=${courseId}`)
+                  }
                   className={`flex items-center justify-between px-3.5 py-3 rounded-lg text-left transition-colors cursor-pointer ${
                     isCurrent
                       ? 'border border-[#FF5E5E] bg-[#FFEBEB]'
@@ -216,19 +249,14 @@ export default function PlayerPage({ sectionId }: PlayerPageProps) {
                       isCurrent ? 'text-[#FF5E5E] font-extrabold' : 'text-[#1E2125]'
                     }`}
                   >
-                    {session.order}. {session.title}
-                    {session.completed && (
-                      <span className="text-[11.5px] text-[#9CA3AF] font-normal ml-1">
-                        (학습 완료)
-                      </span>
-                    )}
+                    {idx + 1}. {session.title}
                   </span>
                   <span
                     className={`text-[12.5px] shrink-0 ml-2 ${
                       isCurrent ? 'text-[#FF5E5E] font-bold' : 'text-[#6A7282]'
                     }`}
                   >
-                    {session.durationLabel}
+                    {formatDuration(session.durationSeconds)}
                   </span>
                 </button>
               );
