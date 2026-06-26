@@ -17,44 +17,11 @@ import type { Category } from '@/features/categories/types';
 type SortOption = '최신순' | '인기순' | '평점순';
 
 interface Props {
+  courses: PrivateCourseType[];
   categories?: Category[];
 }
 
-// const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-// function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
-//   if (!thumbnail) return null;
-//   return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
-// }
-
-// TODO: 실제 API 연결 전까지 사용하는 임시 데이터
-const MOCK_PRIVATE_COURSES: PrivateCourseType[] = [
-  {
-    courseId: 101,
-    categoryId: 1,
-    title: 'React 완벽 가이드',
-    thumbnail: '',
-    price: 15900,
-    ratingAvg: 4.8,
-    studentCount: 1234,
-    privatedAt: '2026-04-30',
-  },
-  {
-    courseId: 102,
-    categoryId: 1,
-    title: 'TypeScript 마스터 클래스',
-    thumbnail: '',
-    price: 12900,
-    ratingAvg: 4.8,
-    studentCount: 1234,
-    privatedAt: '2026-04-30',
-  },
-];
-
-export default function PrivateCourse({ categories = [] }: Props) {
-  // TODO: 실제 API 연결 시 props로 courses를 받아오도록 변경
-  const courses = MOCK_PRIVATE_COURSES;
-
+export default function PrivateCourse({ courses = [], categories = [] }: Props) {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortOption>('최신순');
 
@@ -143,9 +110,9 @@ export default function PrivateCourse({ categories = [] }: Props) {
                 <div className="flex flex-col gap-1 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="text-[14.5px] font-semibold text-[#1E2125]">{course.title}</p>
-                    <span className="text-[11.5px] text-[#9CA3AF]">
+                    {/* <span className="text-[11.5px] text-[#9CA3AF]">
                       비공개 처리일: {course.privatedAt}
-                    </span>
+                    </span> */}
                   </div>
                   <p className="text-[12px] text-[#6A7282]">{getCategoryName(course.categoryId)}</p>
                   <div className="flex items-center gap-2 text-[12px] text-[#6A7282]">

@@ -20,6 +20,7 @@ import type {
 } from '@/features/user/mycourses-instructor/types';
 import { updateCourseAction } from '../actions';
 import Image from 'next/image';
+import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
 
 interface CourseEditFormProps {
   categories: Category[];
@@ -43,6 +44,7 @@ const DEFAULT_SESSION: Omit<Session, 'id'> = {
   title: '',
   videoFile: null,
   videoUrl: '',
+  durationSeconds: 0,
   materialFile: null,
   materialUrl: '',
   preview: false,
@@ -86,6 +88,13 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
     type: 'save' | 'submit' | 'cancel';
   } | null>(null);
 
+  // 회차별 업로드 진행 상태(영상/자료)를 부모에서 추적 — 제출 버튼 비활성화에 사용
+  const [uploadingMap, setUploadingMap] = useState<Record<number, boolean>>({});
+  const setSessionUploading = (id: number, value: boolean) => {
+    setUploadingMap((prev) => ({ ...prev, [id]: value }));
+  };
+  const isAnySessionUploading = Object.values(uploadingMap).some(Boolean);
+
   const subCategories = categories.find((c) => c.name === form.category)?.options ?? [];
 
   const [thumbnailUploading, setThumbnailUploading] = useState(false);
@@ -115,6 +124,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
     setForm((prev) => ({ ...prev, category: value, subCategory: '' }));
   };
 
+  // 썸네일: object URL 미리보기 + 실제 업로드 API 호출 → form.thumbnail에 URL 저장
   const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -124,10 +134,17 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
       return;
     }
 
+    setForm((prev) => ({ ...prev, thumbnailFile: file }));
+    setErrors((prev) => ({ ...prev, thumbnail: undefined }));
+
     try {
       setThumbnailUploading(true);
-      setErrors((prev) => ({ ...prev, thumbnail: undefined }));
-      setForm((prev) => ({ ...prev, thumbnailFile: file }));
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('업로드 실패');
+      const data = await res.json();
+      handleField('thumbnail', data.url);
     } catch {
       setErrors((prev) => ({ ...prev, thumbnail: '이미지 업로드에 실패했습니다.' }));
     } finally {
@@ -156,6 +173,11 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
       ...prev,
       sessions: prev.sessions.filter((s) => s.id !== id),
     }));
+    setUploadingMap((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const validate = (): FieldErrors => {
@@ -173,12 +195,13 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
     if (!form.subCategory) next.subCategory = '세부 카테고리를 선택해주세요.';
     if (form.price === '') next.price = '가격을 입력해주세요.';
     if (!form.level) next.level = '난이도를 선택해주세요.';
-    if (!form.thumbnailFile && !form.thumbnail) next.thumbnail = '대표 이미지를 업로드해주세요.';
+    if (!form.thumbnail) next.thumbnail = '대표 이미지를 업로드해주세요.';
 
     if (form.sessions.length === 0) {
       next.sessions = '최소 1개 이상의 회차가 필요합니다.';
-    } else if (form.sessions.some((s) => !s.title.trim() || (!s.videoFile && !s.videoUrl))) {
-      next.sessions = '모든 회차의 소제목과 강의 영상을 입력해주세요.';
+    } else if (form.sessions.some((s) => !s.title.trim() || !s.videoUrl || s.durationSeconds <= 0)) {
+      next.sessions =
+        '모든 회차의 소제목과 강의 영상을 입력해주세요. (영상 업로드가 완료될 때까지 기다려주세요)';
     } else if (form.sessions.some((s) => s.title.length > SESSION_TITLE_MAX)) {
       next.sessions = `회차 소제목은 ${SESSION_TITLE_MAX}자 이하로 입력해주세요.`;
     }
@@ -211,6 +234,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
       sessions: form.sessions.map((s) => ({
         title: s.title,
         videoUrl: s.videoUrl,
+        durationSeconds: s.durationSeconds,
         preview: s.preview,
         attachmentName: s.materialFile?.name ?? s.materialName,
         attachmentUrl: s.materialUrl,
@@ -234,7 +258,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
     }
   };
 
-  const isSubmitDisabled = isLoading || !agreed;
+  const isSubmitDisabled = isLoading || !agreed || thumbnailUploading || isAnySessionUploading;
 
   const inputCls =
     'w-full h-11 px-4 rounded-lg border bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors';
@@ -289,9 +313,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
             <textarea
               placeholder="강의 설명을 입력하세요"
               value={form.description}
-              onChange={(e) =>
-                handleField('description', e.target.value.slice(0, DESCRIPTION_MAX))
-              }
+              onChange={(e) => handleField('description', e.target.value.slice(0, DESCRIPTION_MAX))}
               maxLength={DESCRIPTION_MAX}
               rows={5}
               disabled={isLoading}
@@ -406,19 +428,17 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
               }`}
             >
               {thumbnailUploading ? (
-                <LoadingDots />
+                <InlineDotsLoading />
               ) : (
                 <>
                   <span>↑</span>
-                  {form.thumbnailFile || form.thumbnail
-                    ? '이미지 변경하기'
-                    : '강의 대표 이미지를 업로드하세요'}
+                  {form.thumbnail ? '이미지 변경하기' : '강의 대표 이미지를 업로드하세요'}
                 </>
               )}
             </Button>
             {errors.thumbnail && <p className={fieldErrorCls}>{errors.thumbnail}</p>}
-            
-            {/* 💡 썸네일 노출: 새 파일(thumbnailPreviewUrl)이 있으면 우선 노출, 없으면 기존 원본 URL(form.thumbnail)을 상시 유지 */}
+
+            {/* 새 파일(thumbnailPreviewUrl)이 있으면 우선 노출, 없으면 기존 원본 URL(form.thumbnail)을 상시 유지 */}
             {(thumbnailPreviewUrl || form.thumbnail) && (
               <div className="relative mt-2 w-full h-40 rounded-lg border border-[#E5E7EB] overflow-hidden bg-[#F3F4F6]">
                 <Image
@@ -451,6 +471,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
               onUpdate={updateSession}
               onRemove={removeSession}
               titleMax={SESSION_TITLE_MAX}
+              onUploadingChange={(value) => setSessionUploading(session.id, value)}
             />
           ))}
 
@@ -487,7 +508,10 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
           </label>
           <ul className="text-[12px] text-[#6A7282] pl-1 flex flex-col gap-0.5">
             <li>· 강의는 관리자 승인일로부터 2년 후 자동으로 비공개 처리됩니다.</li>
-            <li>· 비공개 처리 시 신규 수강 신청이 불가하며, 기존 수강생은 이후 2년간 수강할 수 있습니다.</li>
+            <li>
+              · 비공개 처리 시 신규 수강 신청이 불가하며, 기존 수강생은 이후 2년간 수강할 수
+              있습니다.
+            </li>
             <li>· 비공개 전 강사에게 알림이 발송됩니다.</li>
           </ul>
           {errors.agreement && <p className={fieldErrorCls}>{errors.agreement}</p>}
@@ -505,7 +529,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
                 : 'bg-[#FF5E5E] hover:bg-[#D14848] text-white cursor-pointer'
             }`}
           >
-            {isLoading ? <LoadingDots color="#6A7282" /> : '수정 완료'}
+            {isLoading ? <InlineDotsLoading /> : '수정 완료'}
           </Button>
           <div className="flex gap-3">
             <Button
@@ -518,7 +542,7 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
                   : 'bg-[#FF5E5E] hover:bg-[#D14848] text-white cursor-pointer'
               }`}
             >
-              {isLoading ? <LoadingDots color="#6A7282" /> : '승인 요청'}
+              {isLoading ? <InlineDotsLoading /> : '승인 요청'}
             </Button>
             <Button
               type="button"
@@ -555,30 +579,6 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
   );
 }
 
-function LoadingDots({ color = '#1E2125' }: { color?: string }) {
-  return (
-    <span className="flex items-center gap-1">
-      {[0, 150, 300].map((delay, i) => (
-        <span
-          key={i}
-          className="w-1.5 h-1.5 rounded-full"
-          style={{
-            backgroundColor: color,
-            animation: 'inline-loading-bounce 0.6s ease-in-out infinite',
-            animationDelay: `${delay}ms`,
-          }}
-        />
-      ))}
-      <style>{`
-        @keyframes inline-loading-bounce {
-          0%, 100% { transform: translateY(0); opacity: 0.5; }
-          50% { transform: translateY(-3px); opacity: 1; }
-        }
-      `}</style>
-    </span>
-  );
-}
-
 // ── 세션 아이템 (커리큘럼 단일 회차 요소) ──────────────────────────────────
 interface SessionItemProps {
   session: Session;
@@ -587,6 +587,7 @@ interface SessionItemProps {
   onUpdate: <K extends keyof Session>(id: number, key: K, value: Session[K]) => void;
   onRemove: (id: number) => void;
   titleMax: number;
+  onUploadingChange: (value: boolean) => void;
 }
 
 const ALLOWED_MATERIAL_TYPES = [
@@ -601,15 +602,22 @@ function SessionItem({
   onUpdate,
   onRemove,
   titleMax,
+  onUploadingChange,
 }: SessionItemProps) {
   const videoInputRef = useRef<HTMLInputElement>(null);
   const materialInputRef = useRef<HTMLInputElement>(null);
   const [videoError, setVideoError] = useState('');
   const [materialError, setMaterialError] = useState('');
   const [videoPreviewUrl, setVideoPreviewUrl] = useState('');
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [materialUploading, setMaterialUploading] = useState(false);
 
   const formatFileSizeKB = (bytes: number) => `${(bytes / 1024).toFixed(2)} KB`;
   const formatFileSizeMB = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+
+  useEffect(() => {
+    onUploadingChange(videoUploading || materialUploading);
+  }, [videoUploading, materialUploading, onUploadingChange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!session.videoFile) {
@@ -621,12 +629,14 @@ function SessionItem({
     return () => URL.revokeObjectURL(url);
   }, [session.videoFile]);
 
-  // 기존 파일 데이터 수납 처리
+  // 기존 파일 데이터 (수정 시 이미 등록된 회차) — 새 파일을 고르지 않았으면 이걸로 표시
   const existingVideoUrl = !session.videoFile && session.videoUrl ? session.videoUrl : '';
-  const existingMaterialName = !session.materialFile && session.materialName ? session.materialName : '';
-  const existingMaterialSize = !session.materialFile && session.materialSize ? session.materialSize : 0;
+  const existingMaterialName =
+    !session.materialFile && session.materialName ? session.materialName : '';
+  const existingMaterialSize =
+    !session.materialFile && session.materialSize ? session.materialSize : 0;
 
-  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -637,10 +647,53 @@ function SessionItem({
       return;
     }
     setVideoError('');
-    onUpdate(session.id, 'videoFile', file);
+
+    const getVideoDuration = (file: File): Promise<number> => {
+      return new Promise((resolve, reject) => {
+        const video = document.createElement('video');
+
+        video.preload = 'metadata';
+
+        video.onloadedmetadata = () => {
+          URL.revokeObjectURL(video.src);
+          resolve(Math.floor(video.duration));
+        };
+
+        video.onerror = () => reject();
+
+        video.src = URL.createObjectURL(file);
+      });
+    };
+
+    try {
+      const durationSeconds = await getVideoDuration(file);
+
+      onUpdate(session.id, 'videoFile', file);
+      onUpdate(session.id, 'videoUrl', '');
+      onUpdate(session.id, 'durationSeconds', durationSeconds);
+
+      setVideoUploading(true);
+
+      const formData = new FormData();
+      formData.append('video', file);
+
+      const res = await fetch('/api/upload/video', { method: 'POST', body: formData });
+
+      if (!res.ok) throw new Error('업로드 실패');
+
+      const data = await res.json();
+
+      onUpdate(session.id, 'videoUrl', data.url);
+    } catch {
+      onUpdate(session.id, 'videoUrl', '');
+      onUpdate(session.id, 'durationSeconds', 0);
+      setVideoError('영상 업로드에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setVideoUploading(false);
+    }
   };
 
-  const handleMaterialChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMaterialChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -656,6 +709,22 @@ function SessionItem({
     }
     setMaterialError('');
     onUpdate(session.id, 'materialFile', file);
+    onUpdate(session.id, 'materialUrl', '');
+    onUpdate(session.id, 'materialName', '');
+
+    try {
+      setMaterialUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload/attachment', { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('업로드 실패');
+      const data = await res.json();
+      onUpdate(session.id, 'materialUrl', data.url);
+    } catch {
+      setMaterialError('자료 업로드에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setMaterialUploading(false);
+    }
   };
 
   const removeMaterial = () => {
@@ -715,25 +784,31 @@ function SessionItem({
           ref={videoInputRef}
           onChange={handleVideoChange}
           className="hidden"
+          disabled={videoUploading}
         />
         <button
           type="button"
           onClick={() => videoInputRef.current?.click()}
-          className={`w-full h-11 rounded-lg border border-dashed bg-white text-[13px] text-[#1E2125] hover:border-[#1E2125] flex items-center justify-center gap-2 transition-colors cursor-pointer ${
+          disabled={videoUploading}
+          className={`w-full h-11 rounded-lg border border-dashed bg-white text-[13px] text-[#1E2125] hover:border-[#1E2125] flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-70 ${
             videoError ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]'
           }`}
         >
-          <span>↑</span>
-          {/* 영상 데이터 상시 표시: 파일이 교체되면 파일명+MB용량, 교체 전 상태면 원본 영상 식별 텍스트 출력 */}
-          {session.videoFile
-            ? `${session.videoFile.name} (${formatFileSizeMB(session.videoFile.size)})`
-            : existingVideoUrl
-              ? `등록된 영상 있음 (변경하려면 클릭)`
-              : '영상 업로드'}
+          {videoUploading ? (
+            <InlineDotsLoading />
+          ) : (
+            <>
+              <span>↑</span>
+              {session.videoFile
+                ? `${session.videoFile.name} (${formatFileSizeMB(session.videoFile.size)})`
+                : existingVideoUrl
+                  ? '등록된 영상 있음 (변경하려면 클릭)'
+                  : '영상 업로드'}
+            </>
+          )}
         </button>
         {videoError && <p className="text-[11px] text-[#FF5E5E] mt-1">{videoError}</p>}
 
-        {/* 비디오 엘리먼트 상시 유지: 새로 넣은 blob 주소 또는 기존 URL 중 존재하는 것을 재생 */}
         {(videoPreviewUrl || existingVideoUrl) && (
           <div className="relative mt-2 w-full rounded-lg border border-[#E5E7EB] overflow-hidden bg-black">
             <video src={videoPreviewUrl || existingVideoUrl} controls className="w-full max-h-56" />
@@ -752,10 +827,14 @@ function SessionItem({
           ref={materialInputRef}
           onChange={handleMaterialChange}
           className="hidden"
+          disabled={materialUploading}
         />
-        
-        {/* 자료 데이터 상시 유지: 파일 객체가 존재하거나, 혹은 기존에 넘어온 파일명 정보가 존재하는 경우 연두색 박스로 고정 */}
-        {session.materialFile || existingMaterialName ? (
+
+        {materialUploading ? (
+          <div className="w-full h-11 rounded-lg border border-dashed border-[#D1D5DB] bg-white flex items-center justify-center">
+            <InlineDotsLoading />
+          </div>
+        ) : session.materialFile || existingMaterialName ? (
           <div className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-dashed border-[#CFEE5D] bg-[#F1FFC1]">
             <div className="flex items-center gap-4">
               <span className="text-[#A8D014] font-bold">✓</span>
@@ -763,11 +842,10 @@ function SessionItem({
                 <p className="text-[13px] font-medium text-[#1E2125] truncate max-w-112.5">
                   {session.materialFile?.name ?? existingMaterialName}
                 </p>
-                {/* 용량 정보가 수치(bytes)로 존재할 때만 크기 표시 */}
                 {(session.materialFile?.size || existingMaterialSize > 0) && (
                   <p className="text-[11.5px] text-[#6A7282]">
-                    {session.materialFile 
-                      ? formatFileSizeKB(session.materialFile.size) 
+                    {session.materialFile
+                      ? formatFileSizeKB(session.materialFile.size)
                       : formatFileSizeKB(existingMaterialSize)}
                   </p>
                 )}
