@@ -1,7 +1,8 @@
 import { CourseReview, ReviewMode } from '@/features/user/courses/types';
-import ReviewSummary from './ReviewSummary';
-import ReviewForm from './ReviewForm';
-import ReviewList from './ReviewList';
+import ReviewForm from '@/features/user/review/components/ReviewForm';
+import ReviewList from '@/features/user/review/components/ReviewList';
+import ReviewSummary from '@/features/user/review/components/ReviewSummary';
+
 
 interface CourseReviewsSectionProps {
   courseId: number;
@@ -9,6 +10,8 @@ interface CourseReviewsSectionProps {
   reviewCount: number;
   reviews: CourseReview[];
   reviewMode: ReviewMode;
+  /** 현재 로그인한 사용자의 loginId - 본인 글 판별(삭제 버튼/정렬)에 사용 */
+  currentUserLoginId?: string | null;
 }
 
 export default function CourseReviewsSection({
@@ -17,6 +20,7 @@ export default function CourseReviewsSection({
   reviewCount,
   reviews,
   reviewMode,
+  currentUserLoginId,
 }: CourseReviewsSectionProps) {
   return (
     <section className="flex flex-col gap-4">
@@ -38,7 +42,12 @@ export default function CourseReviewsSection({
       {/* hidden-form: 폼/안내문구 없음 (강사 본인 강의, 관리자) */}
       {/* no-reviews: 안내문구 없이 바로 목록 영역에서 "등록된 수강평이 없습니다" 처리 */}
 
-      <ReviewList reviews={reviews} isEmpty={reviewMode === 'no-reviews' || reviews.length === 0} />
+      <ReviewList
+        courseId={courseId}
+        reviews={reviews}
+        isEmpty={reviewMode === 'no-reviews' || reviews.length === 0}
+        currentUserLoginId={currentUserLoginId}
+      />
     </section>
   );
 }

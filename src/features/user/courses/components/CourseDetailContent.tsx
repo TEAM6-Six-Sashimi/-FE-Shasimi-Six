@@ -7,7 +7,7 @@ import CourseNcsSection from './sections/CourseNcsSection';
 import CourseTabNav, { SECTION_ID } from './sections/CourseTabNav';
 import CourseCurriculumSection from './sections/CourseCurriculumSection';
 import CourseInstructorSection from './sections/CourseInstructorSection';
-import CourseReviewsSection from './sections/reviews/CourseReviews';
+import CourseReviewsSection from './sections/CourseReviews';
 
 interface CourseDetailContentProps {
   course: CourseDetailFromAPI;
@@ -18,6 +18,8 @@ interface CourseDetailContentProps {
   allSessionsPlayable: boolean;
   /** 수강평 모드 */
   reviewMode: ReviewMode;
+  /** 현재 로그인한 사용자의 loginId - 본인 리뷰 판별용 */
+  currentUserLoginId?: string | null;
 }
 
 export default function CourseDetailContent({
@@ -26,11 +28,8 @@ export default function CourseDetailContent({
   allSessionsPlayable,
   reviewMode,
   categories,
+  currentUserLoginId,
 }: CourseDetailContentProps) {
-  // 세션별 진행률 - 현재 백엔드는 전체 진행률(progressRate)만 제공.
-  // 세션별 진행률 API가 추가되면 이 부분을 실제 맵으로 교체.
-  const progressMap = {};
-
   return (
     <div className="flex flex-col flex-1 gap-4 min-w-0">
       <CourseHeaderSection course={course} categories={categories} />
@@ -46,7 +45,6 @@ export default function CourseDetailContent({
           courseId={course.courseId}
           sessions={course.sessions}
           showProgress={showProgress}
-          progressMap={progressMap}
           allSessionsPlayable={allSessionsPlayable}
         />
       </section>
@@ -66,6 +64,7 @@ export default function CourseDetailContent({
           reviewCount={course.reviewCount}
           reviews={course.reviews}
           reviewMode={reviewMode}
+          currentUserLoginId={currentUserLoginId}
         />
       </section>
     </div>

@@ -5,13 +5,18 @@ import { Category } from '@/features/categories/types';
 import { resolveCourseViewOptions } from '@/lib/course-view-options';
 import CourseActionSlot from '@/features/user/courses/components/CourseActionSlot';
 
-
 interface CourseDetailPageProps {
   course: CourseDetailFromAPI;
   categories: Category[];
+  /** 현재 로그인한 사용자의 loginId - 본인 리뷰 판별(삭제 버튼/정렬)에 사용 */
+  currentUserLoginId?: string | null;
 }
 
-export default function CourseDetailPage({ course, categories }: CourseDetailPageProps) {
+export default function CourseDetailPage({
+  course,
+  categories,
+  currentUserLoginId,
+}: CourseDetailPageProps) {
   const { showProgress, allSessionsPlayable, reviewMode, actionType } =
     resolveCourseViewOptions(course);
 
@@ -25,6 +30,7 @@ export default function CourseDetailPage({ course, categories }: CourseDetailPag
             showProgress={showProgress}
             allSessionsPlayable={allSessionsPlayable}
             reviewMode={reviewMode}
+            currentUserLoginId={currentUserLoginId}
           />
           <div className="w-72 shrink-0 sticky top-4">
             <CourseDetailSidebar
