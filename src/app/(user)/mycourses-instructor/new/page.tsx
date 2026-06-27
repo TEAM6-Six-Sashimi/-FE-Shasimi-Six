@@ -1,4 +1,4 @@
-import CourseRegisterForm from '@/features/user/mycourses-instructor/components/CourseRegisterForm';
+import CourseRegisterForm from '@/features/user/mycourses-instructor/components/new-course/CourseRegisterForm';
 import { fetchCategories } from '@/services/categories.service';
 
 export default async function NewCoursePage() {
