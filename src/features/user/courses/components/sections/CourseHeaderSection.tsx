@@ -78,11 +78,11 @@ export default function CourseHeaderSection({ course, categories }: CourseHeader
           <Image src="/coursedetail/people.svg" width={17} height={17} alt="" />
           {course.studentCount.toLocaleString()}명
         </span>
-        {/* TODO 승인일 */}
-        {/* <span className="flex items-center gap-1.5 text-[#6A7282]">
-          <Image src="/coursedetail/calendar.svg" width={17} height={17} alt="" />
-          등록일 {course.approvedAt}
-        </span> */}
+        {/* 승인일 */}
+        <span className="flex items-center gap-1.5 text-[#6A7282]">
+          <Image src="/coursedetail/calander.svg" width={17} height={17} alt="" />
+          등록일 {course.approvedAt?.slice(0, 10) ?? '-'}
+        </span>
       </div>
     </div>
   );

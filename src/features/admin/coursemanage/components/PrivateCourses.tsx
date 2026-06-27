@@ -26,6 +26,18 @@ export default function PrivateCourses({ courses, categories }: Props) {
 
   const getMainCategory = (categoryName: string) => subToMainMap.get(categoryName) ?? categoryName;
 
+  const getPrivateDate = (approvedAtString: string) => {
+    if (!approvedAtString) return '-';
+
+    const date = new Date(approvedAtString);
+    date.setFullYear(date.getFullYear() + 2);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  };
+
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
       <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-6">비공개 강의 목록</h2>
@@ -74,7 +86,7 @@ export default function PrivateCourses({ courses, categories }: Props) {
                   </span>
                 </td>
                 <td className="py-3 text-center text-[#6A7282]">{c.approvedAt}</td>
-                <td className="py-3 text-center text-[#6A7282]">{c.approvedAt}</td>
+                <td className="py-3 text-center text-[#6A7282]">{getPrivateDate(c.approvedAt)}</td>
               </tr>
             ))
           )}
