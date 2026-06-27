@@ -1,4 +1,8 @@
-import { ResumePayload, AiReviewResult, SubscriptionPlanResponse } from "@/features/user/resume/types";
+import {
+  ResumePayload,
+  AiReviewResult,
+  SubscriptionPlanResponse,
+} from '@/features/user/resume/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -14,6 +18,7 @@ export async function saveResume(
   payload: ResumePayload,
 ): Promise<{ resumeId: number } | null> {
   try {
+
     const res = await fetch(`${API_BASE_URL}/resumes`, {
       method: 'POST',
       headers: {
@@ -22,10 +27,16 @@ export async function saveResume(
       },
       body: JSON.stringify(payload),
     });
- 
-    if (!res.ok) return null;
-    return res.json();
-  } catch {
+
+    if (!res.ok) {
+      const text = await res.text();
+      return null;
+    }
+
+    const data = await res.json();
+
+    return data;
+  } catch (e) {
     return null;
   }
 }
@@ -45,7 +56,7 @@ export async function updateResume(
       },
       body: JSON.stringify(payload),
     });
- 
+
     return res.ok;
   } catch {
     return false;
@@ -63,10 +74,11 @@ export async function fetchMyResume(accessToken: string): Promise<SavedResume | 
       },
       cache: 'no-store',
     });
- 
+
     if (!res.ok) return null;
-    const data: SavedResume[] = await res.json();
-    return data[0] ?? null;
+
+    const data: SavedResume = await res.json();
+    return data;
   } catch {
     return null;
   }
@@ -94,7 +106,7 @@ export async function requestAiReview(
         Authorization: `Bearer ${accessToken}`,
       },
     });
- 
+
     if (!res.ok) {
       const errorBody = await res.json().catch(() => ({}));
       return {
@@ -105,7 +117,7 @@ export async function requestAiReview(
         },
       };
     }
- 
+
     const data: AiReviewResult = await res.json();
     return { success: true, data };
   } catch {
