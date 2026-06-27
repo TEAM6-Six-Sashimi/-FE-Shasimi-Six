@@ -168,16 +168,6 @@ export default function ResumeMain({
   // 저장하기 버튼 활성화 조건: 새로 작성됐거나(아직 저장 안 됨) 수정이 감지된 경우
   const canSave = !isSaved || isDirty;
 
-  // 임시 디버깅 - 원인 확인 후 제거
-  useEffect(() => {
-    console.log('=== 디버깅 ===');
-    console.log('resumeId:', resumeId);
-    console.log('isSaved:', isSaved);
-    console.log('isDirty:', isDirty);
-    console.log('initialSnapshot:', initialSnapshot);
-    console.log('currentSnapshot:', currentSnapshot);
-  }, []);
-
   // 섹션별 필수 입력 검증 에러 메시지
   const [educationError, setEducationError] = useState('');
   const [careerError, setCareerError] = useState('');
@@ -365,6 +355,7 @@ export default function ResumeMain({
 
   //   저장 (신규 작성 → POST, 기존 이력서 있음 → PATCH)
   const handleSave = async () => {
+
     if (!canSave || isSaving) return;
 
     // 저장 전 필수 입력 검증 - 실패 시 각 섹션 아래 안내문구만 표시, 토스트는 띄우지 않음
@@ -420,6 +411,7 @@ export default function ResumeMain({
         }
       } else {
         const result = await saveResumeAction(payload);
+
         if (result.success) {
           setResumeId(result.resumeId ?? null);
           setLastSavedSnapshot(currentSnapshot);
