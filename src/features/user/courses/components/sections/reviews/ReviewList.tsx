@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import type { Review } from '@/constants/mockCourseDetail';
-import { StarRating } from './ReviewSummary'
+import { CourseReview } from '@/features/user/courses/types';
+import { StarRating } from './ReviewSummary';
 
 interface ReviewListProps {
-  reviews: Review[];
+  reviews: CourseReview[];
   isEmpty?: boolean;
 }
 
@@ -23,13 +23,15 @@ export default function ReviewList({ reviews, isEmpty }: ReviewListProps) {
   }
 
   const sortedReviews = [...reviews].sort((a, b) => {
-    if (sort === '최신순') return new Date(b.date).getTime() - new Date(a.date).getTime();
+    if (sort === '최신순') {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
     return b.rating - a.rating;
   });
 
   return (
     <>
-        {/* 정렬 탭 */}
+      {/* 정렬 탭 */}
       <div className="flex items-center gap-0 border-b border-[#E5E7EB]">
         {(['최신순', '추천순'] as SortType[]).map((s) => (
           <button
@@ -50,7 +52,7 @@ export default function ReviewList({ reviews, isEmpty }: ReviewListProps) {
       <div className="flex flex-col gap-4">
         {sortedReviews.map((review) => (
           <div
-            key={review.id}
+            key={review.reviewId}
             className="flex flex-col gap-1.5 pb-4 border-b border-[#E5E7EB] last:border-none"
           >
             <div className="flex items-start justify-between gap-2">
@@ -62,10 +64,12 @@ export default function ReviewList({ reviews, isEmpty }: ReviewListProps) {
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-2">
                     <span className="text-[#1E2125] text-[13.5px] font-semibold">
-                      {review.author}
+                      {review.writerLoginId}
                     </span>
                     <StarRating rating={review.rating} size={12} />
-                    <span className="text-[#6A7282] text-[12px]">{review.date}</span>
+                    <span className="text-[#6A7282] text-[12px]">
+                      {review.createdAt.slice(0, 10)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -85,5 +89,5 @@ export default function ReviewList({ reviews, isEmpty }: ReviewListProps) {
         </button>
       )}
     </>
-  )
+  );
 }

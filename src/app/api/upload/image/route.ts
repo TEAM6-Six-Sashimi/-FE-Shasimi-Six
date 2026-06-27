@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   const res = await fetch(`${API_BASE_URL}/instructor/files/upload`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'X-USER-ID': String(user.id),
     },
     body: newFormData,
@@ -35,5 +35,9 @@ export async function POST(req: NextRequest) {
   }
 
   const data = await res.json();
+
+  // 디버그: 백엔드가 실제로 내려주는 원본 응답을 그대로 확인 (확인 후 삭제 가능)
+  console.log('[instructor/files/upload] raw response =', JSON.stringify(data));
+
   return NextResponse.json({ url: data.url });
 }

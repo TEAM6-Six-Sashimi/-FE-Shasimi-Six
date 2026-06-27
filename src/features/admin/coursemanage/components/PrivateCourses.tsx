@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import type { AdminPrivateCourse } from '../type';
 import type { Category } from '@/features/categories/types';
 
@@ -10,6 +11,8 @@ interface Props {
 }
 
 export default function PrivateCourses({ courses, categories }: Props) {
+  const router = useRouter();
+
   // 세부카테고리명 → 대카테고리명 매핑
   const subToMainMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -52,7 +55,8 @@ export default function PrivateCourses({ courses, categories }: Props) {
             courses.map((c, idx) => (
               <tr
                 key={c.courseId}
-                className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
+                className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors cursor-pointer"
+                onClick={() => router.push(`/admin/coursemanage/${c.courseId}?from=private`)}
               >
                 <td className="py-3 text-center text-[#6A7282]">{idx + 1}</td>
                 <td className="py-3 px-4 text-left font-semibold text-[#1E2125]">{c.title}</td>

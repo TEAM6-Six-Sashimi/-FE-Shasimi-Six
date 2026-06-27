@@ -1,8 +1,7 @@
 import Image from 'next/image';
 import { CourseDetailFromAPI } from '../../types';
 import { Category } from '@/features/categories/types';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { getThumbnailUrl } from '@/lib/thumbnail';
 
 interface CourseHeaderSectionProps {
   course: CourseDetailFromAPI;
@@ -22,11 +21,6 @@ const StarRating = ({ rating }: { rating: number }) => (
     ))}
   </div>
 );
- 
-function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
-  if (!thumbnail) return null;
-  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
-}
 
 // 대카테고리 > 소카테고리 (대카테고리 역추적)
 function getMainCategoryName(categories: Category[], subCategoryName: string): string | null {
@@ -48,7 +42,7 @@ export default function CourseHeaderSection({ course, categories }: CourseHeader
         className="relative rounded-t-xl -mx-6 -mt-6 mb-5 bg-[#E5E7EB]"
         style={{ width: 'calc(100% + 3rem)', height: '240px' }}
       >
-        {thumbnailUrl && (
+        {thumbnailUrl ? (
           <Image
             src={thumbnailUrl}
             alt={course.title}
@@ -56,20 +50,24 @@ export default function CourseHeaderSection({ course, categories }: CourseHeader
             unoptimized
             className="object-cover rounded-t-xl"
           />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-[#9CA3AF] text-[14px]">
+            썸네일을 불러올 수 없습니다.
+          </div>
         )}
       </div>
- 
+
       {/* 대카테고리 > 소카테고리 */}
       <p className="text-[#FF5E5E] text-[13px] font-medium mb-1">
         {mainCategoryName ? `${mainCategoryName} > ${course.categoryName}` : course.categoryName}
       </p>
- 
+
       {/* 제목 + 설명 */}
       <div className="flex flex-col gap-1.5 mb-3">
         <h1 className="text-[#1E2125] text-[22px] font-bold leading-snug">{course.title}</h1>
         <p className="text-[#6A7282] text-[13.5px]">{course.description}</p>
       </div>
- 
+
       {/* 평점 + 수강생 수 + 등록일 (한 줄) */}
       <div className="flex items-center gap-4 text-[13.5px]">
         <div className="flex items-center gap-1.5">
@@ -80,12 +78,12 @@ export default function CourseHeaderSection({ course, categories }: CourseHeader
           <Image src="/coursedetail/people.svg" width={17} height={17} alt="" />
           {course.studentCount.toLocaleString()}명
         </span>
-        {/* TODO 등록일 */}
+        {/* TODO 승인일 */}
         {/* <span className="flex items-center gap-1.5 text-[#6A7282]">
           <Image src="/coursedetail/calendar.svg" width={17} height={17} alt="" />
-          등록일 {course.createdAt}
+          등록일 {course.approvedAt}
         </span> */}
       </div>
     </div>
-  )
+  );
 }

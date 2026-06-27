@@ -34,7 +34,8 @@ export default function CourseCurriculumSection({
       <h2 className="text-[#1E2125] text-[17px] font-bold mb-4">커리큘럼</h2>
       <ul className="flex flex-col gap-3">
         {sorted.map((session, idx) => {
-          const canPlay = allSessionsPlayable || session.preview;
+          // videoUrl이 null이면 백엔드가 재생 권한 자체를 안 준 것이므로(PUBLIC + non-preview 등) 우선 체크
+          const canPlay = (allSessionsPlayable || session.preview) && !!session.videoUrl;
           const progress = progressMap[session.sessionId] ?? 0;
 
           return (
@@ -61,7 +62,7 @@ export default function CourseCurriculumSection({
                   </span>
                   {canPlay ? (
                     <Link
-                      href={`/courses/learn/${courseId}/${session.sessionId}`}
+                      href={`/player/${session.sessionId}?courseId=${courseId}`}
                       className="px-3 py-1 rounded-md bg-[#FF5E5E] text-white text-[12px] font-semibold hover:bg-[#D14848] transition-colors"
                     >
                       재생
