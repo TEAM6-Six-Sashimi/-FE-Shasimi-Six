@@ -1,18 +1,20 @@
 import { cookies } from 'next/headers';
 import { fetchCourseDetail } from '@/services/course.service';
 import { fetchCategories } from '@/services/categories.service';
-import PendingCourseDetail from '@/features/admin/coursemanage/components/PendingCourseDetail';
+import AdminCourseDetail from './components/AdminCourseDetailPage';
+
 
 interface PageProps {
   params: Promise<{ courseId: string }>;
 }
 
-export default async function PendingCourseDetailPage({ params }: PageProps) {
+export default async function AdminCourseDetailPage({ params }: PageProps) {
   const { courseId } = await params;
 
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
+  // 강의 상세 조회 (viewerType=ADMIN, status로 PENDING/APPROVED/CLOSED/REJECTED 구분)
   const [course, categories] = await Promise.all([
     fetchCourseDetail(courseId, accessToken),
     fetchCategories(),
@@ -26,5 +28,5 @@ export default async function PendingCourseDetailPage({ params }: PageProps) {
     );
   }
 
-  return <PendingCourseDetail course={course} categories={categories} />;
+  return <AdminCourseDetail course={course} categories={categories} />;
 }

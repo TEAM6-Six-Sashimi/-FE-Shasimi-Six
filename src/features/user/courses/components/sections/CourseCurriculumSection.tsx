@@ -6,10 +6,8 @@ import { CourseSession } from '@/features/user/courses/types';
 interface CourseCurriculumSectionProps {
   courseId: number;
   sessions: CourseSession[];
-  /** 진행률바 표시 여부 - 구매한 학생만 true */
+  /** 진행률바 표시 여부 - 구매한 학생(ENROLLED)만 true */
   showProgress: boolean;
-  /** 세션별 진행률(%) - showProgress가 true일 때 사용. 키는 sessionId */
-  progressMap?: Record<number, number>;
   /** 모든 세션 재생 가능 여부 - 강사/관리자/구매자는 true, 미구매자는 preview만 가능 */
   allSessionsPlayable: boolean;
 }
@@ -24,7 +22,6 @@ export default function CourseCurriculumSection({
   courseId,
   sessions,
   showProgress,
-  progressMap = {},
   allSessionsPlayable,
 }: CourseCurriculumSectionProps) {
   const sorted = [...sessions].sort((a, b) => a.sessionOrder - b.sessionOrder);
@@ -34,8 +31,14 @@ export default function CourseCurriculumSection({
       <h2 className="text-[#1E2125] text-[17px] font-bold mb-4">커리큘럼</h2>
       <ul className="flex flex-col gap-3">
         {sorted.map((session, idx) => {
-          const canPlay = allSessionsPlayable || session.preview;
-          const progress = progressMap[session.sessionId] ?? 0;
+          // videoUrl이 null이면 백엔드가 재생 권한 자체를 안 준 것이므로(PUBLIC + non-preview 등) 우선 체크
+          const canPlay = (allSessionsPlayable || session.preview) && !!session.videoUrl;
+          const progress = session.sessionProgressRate ?? 0;
+          // 이어보기: 마지막 시청 지점이 있으면 그 위치를 쿼리로 전달해 player에서 이어서 시작
+          const playerHref =
+            session.lastPositionSeconds && session.lastPositionSeconds > 0
+              ? `/player/${session.sessionId}?courseId=${courseId}&t=${session.lastPositionSeconds}`
+              : `/player/${session.sessionId}?courseId=${courseId}`;
 
           return (
             <li key={session.sessionId} className="flex flex-col gap-1.5">
@@ -45,6 +48,11 @@ export default function CourseCurriculumSection({
                   <div className="flex flex-col">
                     <span className="text-[#1E2125] text-[13.5px] font-medium">
                       {session.title}
+                      {session.sessionCompleted && (
+                        <span className="text-[11.5px] text-[#9CA3AF] font-normal ml-1">
+                          (학습 완료)
+                        </span>
+                      )}
                     </span>
                     {/* 미구매자에게 일부 세션만 미리보기 가능함을 안내 */}
                     {!allSessionsPlayable && session.preview && (
@@ -61,10 +69,10 @@ export default function CourseCurriculumSection({
                   </span>
                   {canPlay ? (
                     <Link
-                      href={`/courses/learn/${courseId}/${session.sessionId}`}
+                      href={playerHref}
                       className="px-3 py-1 rounded-md bg-[#FF5E5E] text-white text-[12px] font-semibold hover:bg-[#D14848] transition-colors"
                     >
-                      재생
+                      {showProgress && session.lastPositionSeconds ? '이어보기' : '재생'}
                     </Link>
                   ) : (
                     <span className="px-3 py-1 rounded-md bg-[#E5E7EB] text-[#9CA3AF] text-[12px] font-semibold">
@@ -74,7 +82,7 @@ export default function CourseCurriculumSection({
                 </div>
               </div>
 
-              {/* 진행률바 - 구매한 학생만 표시 */}
+              {/* 진행률바 - 구매한 학생(ENROLLED)만 표시, 세션별 실제 진행률 사용 */}
               {showProgress && (
                 <div className="flex items-center gap-2 pl-8">
                   <div className="flex-1 h-1.5 bg-[#E5E7EB] rounded-full overflow-hidden">

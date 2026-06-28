@@ -1,16 +1,15 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { fetchStudentCourseDetail } from '@/services/course.service';
-import { fetchUserMe } from '@/services/user.service';
+import { fetchCourseDetail } from '@/services/course.service';
 import PlayerPage from './components/PlayerPage';
 
 interface Props {
-  params: Promise<{ sectionId: string }>;
+  params: Promise<{ sessionId: string }>;
   searchParams: Promise<{ courseId?: string }>;
 }
 
 export default async function Page({ params, searchParams }: Props) {
-  const { sectionId } = await params;
+  const { sessionId } = await params;
   const { courseId } = await searchParams;
 
   if (!courseId) {
@@ -19,14 +18,10 @@ export default async function Page({ params, searchParams }: Props) {
   }
 
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+  const accessToken = cookieStore.get('accessToken')?.value;
 
-  const user = await fetchUserMe(accessToken);
-  if (!user || user.role === 'GUEST') {
-    redirect('/login');
-  }
-
-  const course = await fetchStudentCourseDetail(courseId, accessToken, String(user.id));
+  // 강의 상세 조회 (viewerType=ENROLLED 기대 - 비로그인/미구매자는 영상 재생 페이지 접근 의미 없음)
+  const course = await fetchCourseDetail(courseId, accessToken);
 
   if (!course) {
     return (
@@ -38,7 +33,7 @@ export default async function Page({ params, searchParams }: Props) {
 
   return (
     <div className="min-h-[calc(100vh-3rem)] bg-[#F9FAFB]">
-      <PlayerPage course={course} courseId={Number(courseId)} sessionId={Number(sectionId)} />
+      <PlayerPage course={course} courseId={Number(courseId)} sessionId={Number(sessionId)} />
     </div>
   );
 }
