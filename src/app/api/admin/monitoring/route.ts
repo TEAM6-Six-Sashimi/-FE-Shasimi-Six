@@ -28,9 +28,5 @@ export async function GET() {
   }
 
   const data = await res.json();
-
-  // 디버그: 백엔드 원본 응답 확인 (확인 후 삭제 가능)
-  console.log('[admin/monitoring] raw response =', JSON.stringify(data));
-
   return NextResponse.json({ grafanaUrl: data.grafanaUrl });
 }

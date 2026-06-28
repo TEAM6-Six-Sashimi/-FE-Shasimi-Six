@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/ToastContext';
+import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
 
 export default function MonitoringCard() {
   const { showToast } = useToast();
@@ -15,9 +16,6 @@ export default function MonitoringCard() {
       const res = await fetch('/api/admin/monitoring');
       if (!res.ok) throw new Error('모니터링 정보를 불러오지 못했습니다.');
       const { grafanaUrl } = await res.json();
-
-      // 디버그: 실제로 받은 grafanaUrl 값 확인 (확인 후 삭제 가능)
-      console.log('[MonitoringCard] grafanaUrl =', grafanaUrl);
 
       if (!grafanaUrl) throw new Error('대시보드 주소를 찾을 수 없습니다.');
 
@@ -41,7 +39,7 @@ export default function MonitoringCard() {
         disabled={isLoading}
         className="h-9 px-4 border-[#D1D5DB] text-[#1E2125] text-[13px] font-semibold hover:bg-[#F9FAFB] cursor-pointer disabled:opacity-60"
       >
-        {isLoading ? '불러오는 중...' : '상세보기'}
+        {isLoading ? <InlineDotsLoading /> : '바로가기'}
       </Button>
     </div>
   );
