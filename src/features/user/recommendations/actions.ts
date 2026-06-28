@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { postJobPostingRecommendation, checkUrlReachable, fetchJobPostingRecommendation } from '@/services/recommendation.service';
-
+import { fetchCoursesByIds } from '@/services/course.service';
 import {
   JobPostingRecommendationRequest, AnalyzeResult
 } from './types';
@@ -23,7 +23,7 @@ export async function analyzeJobPostingAction(
   return postJobPostingRecommendation(accessToken, body);
 }
  
-// URL 탭에서 분석하기를 누르기 전, 접속 가능한 URL인지만 확인
+// 접속 가능한 URL인지 확인
 export async function validateUrlAction(url: string): Promise<{ valid: boolean }> {
   const valid = await checkUrlReachable(url);
   return { valid };
@@ -37,4 +37,9 @@ export async function fetchJobPostingRecommendationAction(recommendationId: numb
   if (!accessToken) return null;
  
   return fetchJobPostingRecommendation(accessToken, recommendationId);
+}
+
+// 추천 결과의 추천 강의 상세 정보 한 번에 조회
+export async function fetchCourseDetailsAction(courseIds: number[]) {
+  return fetchCoursesByIds(courseIds);
 }

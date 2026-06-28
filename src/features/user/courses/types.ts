@@ -10,6 +10,7 @@ export interface CourseFromAPI {
   studentCount: number;
   approvedAt: string; // 등록일
   label?: string | null; // 인기, NEW
+  categoryName: string;
 }
 
 // NCS 정보 (없으면 null)

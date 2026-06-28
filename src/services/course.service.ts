@@ -97,3 +97,19 @@ export async function fetchStudentCourses(
 // fetchCourseDetail(/api/courses/{courseId})의 viewerType=ENROLLED 분기로 통합됨.
 // 기존 fetchStudentCourseDetail은 제거. 상세 페이지 라우팅도 /courses/{courseId} 등
 // 통합 상세 페이지 경로로 연결해야 함.
+
+// 강의 다건 조회(채용 공고 분석 결과용)
+export async function fetchCoursesByIds(courseIds: number[]): Promise<CourseFromAPI[]> {
+  if (courseIds.length === 0) return [];
+ 
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/courses?ids=${courseIds.join(',')}`, {
+      cache: 'no-store',
+    });
+ 
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
+}
