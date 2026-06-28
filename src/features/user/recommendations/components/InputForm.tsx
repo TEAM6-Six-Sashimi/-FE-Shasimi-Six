@@ -17,10 +17,11 @@ const TABS: { key: RecommendationInputType; label: string; iconActive: string; i
 interface InputFormProps {
   resumeId: number | null;
   hasSubscription: boolean;
+  isLoggedIn: boolean;
   onAnalyzeSuccess: (recommendationId: number) => void;
 }
  
-export default function InputForm({ resumeId, hasSubscription, onAnalyzeSuccess }: InputFormProps) {
+export default function InputForm({ resumeId, hasSubscription, isLoggedIn, onAnalyzeSuccess }: InputFormProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<RecommendationInputType>('URL');
   const [url, setUrl] = useState('');
@@ -29,6 +30,7 @@ export default function InputForm({ resumeId, hasSubscription, onAnalyzeSuccess 
   const [errorMessage, setErrorMessage] = useState('');
   const [showInvalidUrlModal, setShowInvalidUrlModal] = useState(false);
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
+  const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
  
   const isInputFilled = activeTab === 'URL' ? !!url.trim() : !!text.trim();
   const isAnalyzeDisabled = !isInputFilled || isAnalyzing;
@@ -41,13 +43,19 @@ export default function InputForm({ resumeId, hasSubscription, onAnalyzeSuccess 
   const handleAnalyze = async () => {
     if (isAnalyzeDisabled) return;
  
-    // 1. 구독권 보유 여부 확인
+    // 1. 로그인 여부 우선 확인
+    if (!isLoggedIn) {
+      setShowLoginRequiredModal(true);
+      return;
+    }
+ 
+    // 2. 구독권 보유 여부 확인
     if (!hasSubscription) {
       setShowSubscribeModal(true);
       return;
     }
  
-    // 2. URL 탭이면 접속 가능 여부 확인
+    // 3. URL 탭이면 접속 가능 여부 확인
     if (activeTab === 'URL') {
       const { valid } = await validateUrlAction(url.trim());
       if (!valid) {
@@ -174,6 +182,21 @@ export default function InputForm({ resumeId, hasSubscription, onAnalyzeSuccess 
           title="알림"
           message="입력하신 URL에 접속할 수 없습니다. URL을 다시 확인해주세요."
           onConfirm={() => setShowInvalidUrlModal(false)}
+        />
+      )}
+
+      {/* 로그인 필요 모달 */}
+      {showLoginRequiredModal && (
+        <TwoButtonModal
+          title="로그인이 필요합니다"
+          message="해당 기능은 로그인 후 이용 가능합니다.\n로그인 페이지로 이동하시겠습니까?"
+          confirmLabel="확인"
+          cancelLabel="취소"
+          onConfirm={() => {
+            setShowLoginRequiredModal(false);
+            router.push('/auth/login');
+          }}
+          onCancel={() => setShowLoginRequiredModal(false)}
         />
       )}
  

@@ -5,9 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { JobPostingRecommendationResult, FitCategoryResult, FitStatus } from '../types';
+import { CourseFromAPI } from '../../courses/types';
 
 interface RecomResultProps {
   result: JobPostingRecommendationResult;
+  courseDetails: CourseFromAPI[];
 }
 
 // 적합도 상태 → 뱃지 색상/라벨
@@ -79,11 +81,11 @@ function FitCategoryCard({ result }: { result: FitCategoryResult }) {
   );
 }
 
-export default function RecomResult({ result }: RecomResultProps) {
+export default function RecomResult({ result, courseDetails }: RecomResultProps) {
   const { summary, fitAnalysis, certificates, courses, resumeBased } = result;
 
-//   console.log('certificates:', certificates);
-//   console.log('courses:', courses);
+  // courseId 기준으로 courseDetails에서 빠르게 찾기 위한 맵
+  const courseDetailMap = new Map(courseDetails.map((c) => [c.courseId, c]));
 
   return (
     <div className="flex flex-col gap-6 mt-6">
@@ -119,7 +121,7 @@ export default function RecomResult({ result }: RecomResultProps) {
           <div className="flex flex-col gap-4 border-l border-[#E5E7EB] pl-8">
             <div>
               <p className="flex items-center gap-1.5 text-[13.5px] font-bold text-[#1E2125] mb-2">
-                <p className='text-[#FFD700]'>★</p> 필수사항
+                <span className="text-[#FFD700]">★</span> 필수사항
               </p>
               <ul className="flex flex-col gap-1">
                 {summary.requiredQualifications.map((q) => (
@@ -135,7 +137,7 @@ export default function RecomResult({ result }: RecomResultProps) {
 
             <div>
               <p className="flex items-center gap-1.5 text-[13.5px] font-bold text-[#1E2125] mb-2">
-                <p className='text-[#FFD700]'>☆</p> 우대사항
+                <span className="text-[#FFD700]">☆</span> 우대사항
               </p>
               <ul className="flex flex-col gap-1">
                 {summary.preferredQualifications.map((q) => (
@@ -153,7 +155,8 @@ export default function RecomResult({ result }: RecomResultProps) {
       {/* ===================== 2. 공고 적합도 분석 ===================== */}
       <div className="bg-white rounded-2xl shadow-md p-8">
         <h2 className="flex items-center gap-2 text-[17px] font-bold text-[#1E2125] mb-5">
-          <Image src="/ai-recommendation/goodness-active.svg" alt="" width={18} height={18} /> 공고 적합도 분석
+          <Image src="/ai-recommendation/goodness-active.svg" alt="" width={18} height={18} /> 공고
+          적합도 분석
         </h2>
 
         {!resumeBased || !fitAnalysis ? (
@@ -186,11 +189,13 @@ export default function RecomResult({ result }: RecomResultProps) {
                     className="flex items-start gap-2 text-[13px] text-[#1E2125] leading-relaxed"
                   >
                     <span>
-                      {idx === 0
-                        ? <Image src="/ai-recommendation/fit.svg" alt="" width={18} height={18} />
-                        : idx === fitAnalysis.overallComments.length - 1
-                          ? <Image src="/ai-recommendation/prefer.svg" alt="" width={18} height={18} />
-                          : <Image src="/ai-recommendation/lack.svg" alt="" width={18} height={18} />}
+                      {idx === 0 ? (
+                        <Image src="/ai-recommendation/fit.svg" alt="" width={18} height={18} />
+                      ) : idx === fitAnalysis.overallComments.length - 1 ? (
+                        <Image src="/ai-recommendation/prefer.svg" alt="" width={18} height={18} />
+                      ) : (
+                        <Image src="/ai-recommendation/lack.svg" alt="" width={18} height={18} />
+                      )}
                     </span>
                     {comment}
                   </p>
@@ -204,7 +209,8 @@ export default function RecomResult({ result }: RecomResultProps) {
       {/* ===================== 3. 추천 자격증 ===================== */}
       <div className="bg-white rounded-2xl shadow-md p-8">
         <h2 className="flex items-center gap-2 text-[17px] font-bold text-[#1E2125] mb-1">
-          <Image src="/ai-recommendation/certification-active.svg" alt="" width={18} height={18} /> 추천 자격증
+          <Image src="/ai-recommendation/certification-active.svg" alt="" width={18} height={18} />{' '}
+          추천 자격증
         </h2>
         <p className="text-[12px] text-[#9CA3AF] mb-5">
           !! 다음 시험일은 자격증 시험의 필기 시험일 기준입니다 !!
@@ -238,39 +244,61 @@ export default function RecomResult({ result }: RecomResultProps) {
       {/* ===================== 4. 추천 자격증 기반 강의 정보 ===================== */}
       <div className="bg-white rounded-2xl shadow-md p-8">
         <h2 className="flex items-center gap-2 text-[17px] font-bold text-[#1E2125] mb-5">
-          <Image src="/ai-recommendation/lectureinfo-active.svg" alt="" width={18} height={18} /> 추천 자격증 기반 강의 정보
+          <Image src="/ai-recommendation/lectureinfo-active.svg" alt="" width={18} height={18} />{' '}
+          추천 자격증 기반 강의 정보
         </h2>
 
         <div className="flex flex-col gap-3">
-          {courses.map((course) => (
-            <div
-              key={course.courseId}
-              className="flex items-center gap-4 border border-[#E5E7EB] rounded-xl p-4"
-            >
-              <div className="relative w-24 h-16 rounded-lg overflow-hidden bg-[#E5E7EB] shrink-0">
-                {/* 강의 썸네일 - 추후 course.thumbnail 등 연동 시 Image 추가 */}
-              </div>
+          {courses.map((course) => {
+            const detail = courseDetailMap.get(course.courseId);
 
-              <div className="flex-1 min-w-0">
-                <p className="text-[14.5px] font-bold text-[#1E2125] truncate">{course.title}</p>
-                {course.instructor && (
-                  <p className="text-[12.5px] text-[#6A7282] mt-0.5">{course.instructor}</p>
-                )}
-                <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-[#FFEBEB] text-[#FF5E5E] text-[11.5px] font-medium">
-                  {course.matchedSkill}
-                </span>
-              </div>
+            return (
+              <div
+                key={course.courseId}
+                className="flex items-center gap-4 border border-[#E5E7EB] rounded-xl p-4"
+              >
+                <div className="relative w-30 h-20 rounded-lg overflow-hidden bg-[#E5E7EB] shrink-0">
+                  {detail?.thumbnail && (
+                    <Image
+                      src={detail.thumbnail}
+                      alt={course.title}
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
+                  )}
+                </div>
 
-              <Link href={`/courses/${course.courseId}`}>
-                <Button
-                  variant="outline"
-                  className="py-4 px-4 border-[#FF5E5E] text-[#FF5E5E] text-[12px] font-semibold hover:bg-[#FFEBEB] hover:text-[#FF5E5E] cursor-pointer shrink-0"
-                >
-                  강의 바로가기
-                </Button>
-              </Link>
-            </div>
-          ))}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14.5px] font-bold text-[#1E2125] truncate">{course.title}</p>
+                  {detail?.instructorName && (
+                    <p className="text-[12.5px] text-[#6A7282] mt-0.5">{detail.instructorName}</p>
+                  )}
+                  {detail?.categoryName && (
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-[#FFEBEB] text-[#FF5E5E] text-[11.5px] font-medium">
+                      {detail.categoryName}
+                    </span>
+                  )}
+                </div>
+                <div className='pt-9'>
+                  <Link
+                    href={
+                      detail?.categoryName
+                        ? `/courses/${encodeURIComponent(detail.categoryName)}/${course.courseId}`
+                        : `/courses/${course.courseId}`
+                    }
+                  >
+                    <Button
+                      variant="outline"
+                      className="py-4 px-4 border-[#FF5E5E] text-[#FF5E5E] text-[12px] font-semibold hover:bg-[#FFEBEB] hover:text-[#FF5E5E] cursor-pointer shrink-0"
+                    >
+                      강의 바로가기
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
