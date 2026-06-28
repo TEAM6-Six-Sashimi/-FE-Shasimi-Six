@@ -19,8 +19,8 @@ import {
   CERTIFICATION_TYPE_LABEL,
 } from '../types';
 import { saveResumeAction, updateResumeAction } from '../actions';
-import { SavedResume } from '@/services/ai.service';
-import { formatYearMonth, formatYearMonthDay } from '@/lib/utils'; 
+import { SavedResume } from '../types';
+import { formatYearMonth, formatYearMonthDay } from '@/lib/utils';
 
 // 임시 id 생성용
 function generateTempId() {
@@ -180,7 +180,13 @@ export default function ResumeMain({
       return false;
     }
     const hasEmpty = educations.some(
-      (e) => !e.schoolName || !e.startYearMonth || !e.endYearMonth || !e.graduationStatus || !e.major || !e.degree,
+      (e) =>
+        !e.schoolName ||
+        !e.startYearMonth ||
+        !e.endYearMonth ||
+        !e.graduationStatus ||
+        !e.major ||
+        !e.degree,
     );
     if (hasEmpty) {
       setEducationError('학력 사항의 필수 항목을 모두 입력해주세요.');
@@ -355,7 +361,6 @@ export default function ResumeMain({
 
   //   저장 (신규 작성 → POST, 기존 이력서 있음 → PATCH)
   const handleSave = async () => {
-
     if (!canSave || isSaving) return;
 
     // 저장 전 필수 입력 검증 - 실패 시 각 섹션 아래 안내문구만 표시, 토스트는 띄우지 않음
@@ -522,9 +527,7 @@ export default function ResumeMain({
                   </label>
                   <select
                     value={edu.graduationStatus}
-                    onChange={(e) =>
-                      updateEducation(edu.id, 'graduationStatus', e.target.value)
-                    }
+                    onChange={(e) => updateEducation(edu.id, 'graduationStatus', e.target.value)}
                     className={inputCls}
                   >
                     <option value="" disabled>

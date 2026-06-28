@@ -182,4 +182,18 @@ export interface AiReviewResult {
   sectionScores: SectionScore[];
   feedbacks: ReviewFeedback[];
 }
- 
+
+export interface SavedResume extends ResumePayload {
+  resumeId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AiReviewError {
+  errorCode: string;
+  message: string;
+}
+
+export type AiReviewResponse =
+  | { success: true; data: AiReviewResult }
+  | { success: false; error: AiReviewError };

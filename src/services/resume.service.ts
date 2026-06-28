@@ -1,16 +1,11 @@
 import {
   ResumePayload,
   AiReviewResult,
-  SubscriptionPlanResponse,
+  SavedResume,
+  AiReviewResponse
 } from '@/features/user/resume/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-export interface SavedResume extends ResumePayload {
-  resumeId: number;
-  createdAt: string;
-  updatedAt: string;
-}
 
 // 이력서 신규 작성
 export async function saveResume(
@@ -63,7 +58,7 @@ export async function updateResume(
   }
 }
 
-// 내 이력서 조회 *첫번째 항목*
+// 내 이력서 조회
 export async function fetchMyResume(accessToken: string): Promise<SavedResume | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/resumes`, {
@@ -85,15 +80,6 @@ export async function fetchMyResume(accessToken: string): Promise<SavedResume | 
 }
 
 // AI 이력서 평가 요청
-export interface AiReviewError {
-  errorCode: string;
-  message: string;
-}
-
-export type AiReviewResponse =
-  | { success: true; data: AiReviewResult }
-  | { success: false; error: AiReviewError };
-
 export async function requestAiReview(
   accessToken: string,
   resumeId: number,
@@ -125,27 +111,5 @@ export async function requestAiReview(
       success: false,
       error: { errorCode: 'NETWORK_ERROR', message: '네트워크 오류가 발생했습니다.' },
     };
-  }
-}
-
-// 구독 플랜 조회
-export async function fetchSubscriptionPlan(
-  accessToken: string,
-): Promise<SubscriptionPlanResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/subscriptions/plans`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-      cache: 'no-store',
-    });
-
-    if (!res.ok) return null;
-
-    return await res.json();
-  } catch {
-    return null;
   }
 }

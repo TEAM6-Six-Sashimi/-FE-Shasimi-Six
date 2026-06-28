@@ -1,12 +1,83 @@
 export type RecommendationInputType = 'URL' | 'TEXT';
 
 export interface JobPostingRecommendationRequest {
+  resumeId?: number;
   inputType: RecommendationInputType;
-  sourceUrl?: string;
-  rawContent?: string;
+  sourceUrl?: string | null;
+  rawContent?: string | null;
 }
 
-// TODO: 실제 응답 스키마 확인 후 보강
+// ===== GET /recommendations/job-posting/{recommendationId} 응답 =====
+ 
+export type AnalysisStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
+ 
+export interface JobPostingSummary {
+  jobRole: string;
+  requiredQualifications: string[];
+  preferredQualifications: string[];
+  experienceRequirement: string;
+  mainTaskSummary: string;
+}
+ 
+export type FitStatus = 'SATISFIED' | 'PARTIALLY_SATISFIED' | 'NOT_SATISFIED';
+ 
+export interface FitCategoryResult {
+  category: 'EDUCATION' | 'CAREER' | 'CERTIFICATION';
+  status: FitStatus;
+  requiredCondition: string;
+  userCondition: string;
+  comment: string;
+  missingItems: string[];
+}
+ 
+export interface FitAnalysis {
+  education: FitCategoryResult;
+  career: FitCategoryResult;
+  certification: FitCategoryResult;
+  overallComments: string[];
+}
+ 
+export interface RecommendedCertificate {
+  certificationId: number | null;
+  name: string;
+  reason: string;
+  relatedSkills: string[];
+  difficulty: string;
+  nextExamDate: string;
+  applicationStartDate: string;
+  applicationEndDate: string;
+}
+ 
+export interface RecommendedCourse {
+  courseId: number;
+  title: string;
+  instructor: string | null;
+  matchedSkill: string;
+  reason: string;
+}
+ 
+export interface JobPostingRecommendationResult {
+  recommendationId: number;
+  analysisStatus: AnalysisStatus;
+  resumeBased: boolean;
+  summary: JobPostingSummary;
+  fitAnalysis: FitAnalysis | null; // resumeBased가 false면 null
+  certificates: RecommendedCertificate[];
+  courses: RecommendedCourse[];
+  createdAt: string;
+}
+ 
+// POST 분석 요청 직후 받는 응답 (recommendationId만 있으면 GET으로 상세 조회)
 export interface JobPostingRecommendationResponse {
+  recommendationId: number;
   [key: string]: unknown;
 }
+ 
+export interface RecommendationApiErrorBody {
+  errorCode: string;
+  message: string;
+}
+ 
+export type AnalyzeResult =
+  | { success: true; data: JobPostingRecommendationResponse }
+  | { success: false; error: RecommendationApiErrorBody };
