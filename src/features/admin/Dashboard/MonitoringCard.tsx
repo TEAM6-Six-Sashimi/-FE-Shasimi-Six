@@ -37,7 +37,7 @@ export default function MonitoringCard() {
         variant="outline"
         onClick={handleViewDetail}
         disabled={isLoading}
-        className="h-9 px-4 border-[#D1D5DB] text-[#1E2125] text-[13px] font-semibold hover:bg-[#F9FAFB] cursor-pointer disabled:opacity-60"
+        className="h-9 w-22 px-4 border-[1.5px] border-[#D1D5DB] text-[#1E2125] text-[13px] font-semibold hover:bg-[#F9FAFB] hover:border-[#6A7282] cursor-pointer disabled:opacity-60"
       >
         {isLoading ? <InlineDotsLoading /> : '바로가기'}
       </Button>
