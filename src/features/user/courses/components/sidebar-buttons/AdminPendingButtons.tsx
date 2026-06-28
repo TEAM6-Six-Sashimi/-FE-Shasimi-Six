@@ -10,9 +10,10 @@ import { approveCourseAction, fetchCourseRejectReasonsAction, rejectCourseAction
 
 interface AdminPendingButtonsProps {
   courseId: number;
+  courseTitle: string
 }
 
-export default function AdminPendingButtons({ courseId }: AdminPendingButtonsProps) {
+export default function AdminPendingButtons({ courseId, courseTitle }: AdminPendingButtonsProps) {
   const router = useRouter();
   const { showToast } = useToast();
   const [showApproveModal, setShowApproveModal] = useState(false);
@@ -91,7 +92,7 @@ export default function AdminPendingButtons({ courseId }: AdminPendingButtonsPro
         <RejectModal
           title="강의 반려"
           targetLabel="반려 대상"
-          targetName={`강의 ID: ${courseId}`}
+          targetName={courseTitle}
           categories={rejectCategories}
           detailPlaceholder="반려 사유를 상세히 입력해주세요. 강사에게 전달됩니다."
           onConfirm={handleReject}
