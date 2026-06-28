@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CourseDetailFromAPI, CourseSession } from '@/features/user/courses/types';
 import { saveSessionProgressAction } from '@/features/user/courses/actions';
@@ -21,6 +21,7 @@ function formatDuration(seconds: number): string {
 
 export default function PlayerPage({ course, courseId, sessionId }: PlayerPageProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentTime, setCurrentTime] = useState(0);
@@ -32,6 +33,13 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
   const currentSession: CourseSession | undefined = sortedSessions.find(
     (s) => s.sessionId === sessionId,
   );
+
+  // 이어보기 시작 지점: 쿼리(t)가 있으면 우선, 없으면 세션 응답의 lastPositionSeconds 사용
+  const startSeconds = (() => {
+    const queryT = Number(searchParams.get('t'));
+    if (!Number.isNaN(queryT) && queryT > 0) return queryT;
+    return currentSession?.lastPositionSeconds ?? 0;
+  })();
 
   const formatTime = (seconds: number) => {
     if (!Number.isFinite(seconds)) return '0:00';
@@ -64,21 +72,28 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
     setCurrentTime(time);
   };
 
-  // 현재 재생 위치를 백엔드에 저장
+  // 영상 메타데이터가 로드되면 이어보기 지점으로 시작 위치 설정
+  const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
+    setDuration(video.duration);
+    if (startSeconds > 0 && startSeconds < video.duration) {
+      video.currentTime = startSeconds;
+      setCurrentTime(startSeconds);
+    }
+  };
+
   const saveProgress = useCallback(
     async (positionSeconds: number) => {
       try {
         await saveSessionProgressAction(courseId, sessionId, Math.floor(positionSeconds));
         return true;
       } catch {
-        // 자동 저장(주기/unmount) 실패는 학습 흐름을 막지 않도록 조용히 무시
         return false;
       }
     },
     [courseId, sessionId],
   );
 
-  // 일정 주기로 진행률 자동 저장 (10초마다)
   useEffect(() => {
     if (!isPlaying) return;
     const interval = setInterval(() => {
@@ -87,7 +102,6 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
     return () => clearInterval(interval);
   }, [isPlaying, saveProgress]);
 
-  // 페이지를 떠날 때도 마지막 위치 저장
   useEffect(() => {
     return () => {
       if (videoRef.current) {
@@ -97,7 +111,6 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 학습 종료: 진행률 저장 → 결과에 따라 토스트 표시 → 이전 페이지(강의 목록/상세)로 복귀
   const handleEndLearning = async () => {
     setIsEnding(true);
     const success = await saveProgress(videoRef.current?.currentTime ?? currentTime);
@@ -119,8 +132,6 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
     );
   }
 
-  // videoUrl이 null인 경우 — PUBLIC(미구매) 상태에서 preview가 아닌 세션에 접근한 경우 등
-  // (재생 페이지는 본래 ENROLLED/OWNER/ADMIN 전용이지만 방어적으로 처리)
   if (!currentSession.videoUrl) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3 text-[#6A7282]">
@@ -166,7 +177,7 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
               src={currentSession.videoUrl}
               className="w-full h-full"
               onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
-              onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+              onLoadedMetadata={handleLoadedMetadata}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               onEnded={() => saveProgress(videoRef.current?.duration ?? currentTime)}
@@ -251,13 +262,15 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
             {sortedSessions.map((session, idx) => {
               const isCurrent = session.sessionId === sessionId;
               const isPlayable = !!session.videoUrl;
+              const href =
+                session.lastPositionSeconds && session.lastPositionSeconds > 0
+                  ? `/player/${session.sessionId}?courseId=${courseId}&t=${session.lastPositionSeconds}`
+                  : `/player/${session.sessionId}?courseId=${courseId}`;
+
               return (
                 <button
                   key={session.sessionId}
-                  onClick={() =>
-                    isPlayable &&
-                    router.push(`/player/${session.sessionId}?courseId=${courseId}`)
-                  }
+                  onClick={() => isPlayable && router.push(href)}
                   disabled={!isPlayable}
                   className={`flex items-center justify-between px-3.5 py-3 rounded-lg text-left transition-colors ${
                     isPlayable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
@@ -273,6 +286,11 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
                     }`}
                   >
                     {idx + 1}. {session.title}
+                    {session.sessionCompleted && (
+                      <span className="text-[11.5px] text-[#9CA3AF] font-normal ml-1">
+                        (학습 완료)
+                      </span>
+                    )}
                   </span>
                   <span
                     className={`text-[12.5px] shrink-0 ml-2 ${

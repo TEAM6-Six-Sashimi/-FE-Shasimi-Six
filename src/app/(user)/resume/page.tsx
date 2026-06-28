@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { fetchUserMe, GUEST_USER } from '@/services/user.service';
-import { fetchMyResume } from '@/services/ai.service';
+import { fetchMyResume } from '@/services/resume.service';
 import ResumePageClient from '@/features/user/resume/components/ResumePageClient';
 import { fetchMySubscriptionAction } from '@/features/user/payments/actions';
 

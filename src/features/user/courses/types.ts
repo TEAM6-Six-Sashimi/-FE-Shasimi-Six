@@ -36,6 +36,12 @@ export interface CourseReview {
   createdAt: string;
 }
 
+// 별점 분포 - 백엔드가 star별 개수(count)만 내려주고, 비율(%) 계산은 프론트 담당
+export interface RatingDistributionItem {
+  star: number;
+  count: number;
+}
+
 export type ViewerType = 'PUBLIC' | 'ENROLLED' | 'OWNER' | 'ADMIN';
 export type CourseStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'CLOSED';
 
@@ -51,6 +57,10 @@ export interface CourseSession {
   attachmentUrl: string | null; // presigned, 120분 만료
   attachmentType: string | null;
   attachmentSize: number | null;
+  // ENROLLED일 때만 값 있음 - 세션별 시청 진행 정보
+  lastPositionSeconds: number | null; // 마지막 시청 지점(초)
+  sessionProgressRate: number | null; // 세션 진행률(%)
+  sessionCompleted: boolean | null; // 세션 완료 여부
 }
 
 // 강의 상세 — GET /api/courses/{courseId} 응답 (viewerType 공통 스키마)
@@ -65,6 +75,7 @@ export interface CourseDetailFromAPI {
   totalDuration: number;
   ratingAvg: number;
   reviewCount: number;
+  ratingDistribution: RatingDistributionItem[];
   studentCount: number;
   instructor: InstructorInfo;
   mainCategoryName: string;
@@ -73,7 +84,7 @@ export interface CourseDetailFromAPI {
   approvedAt: string | null;
   status: CourseStatus;
   rejectReason: string | null; // OWNER/ADMIN 반려 강의만 값 있음
-  progressRate: number | null; // ENROLLED만 값 있음
+  progressRate: number | null; // ENROLLED만 값 있음 (강의 전체 진행률)
   completed: boolean | null; // ENROLLED만 값 있음
   sessions: CourseSession[];
   reviews: CourseReview[];

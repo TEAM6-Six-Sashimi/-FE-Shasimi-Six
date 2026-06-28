@@ -62,6 +62,7 @@ export default function CourseDetailContent({
           courseId={course.courseId}
           rating={course.ratingAvg}
           reviewCount={course.reviewCount}
+          ratingDistribution={course.ratingDistribution}
           reviews={course.reviews}
           reviewMode={reviewMode}
           currentUserLoginId={currentUserLoginId}

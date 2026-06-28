@@ -19,8 +19,8 @@ import {
   CERTIFICATION_TYPE_LABEL,
 } from '../types';
 import { saveResumeAction, updateResumeAction } from '../actions';
-import { SavedResume } from '@/services/ai.service';
-import { formatYearMonth, formatYearMonthDay } from '@/lib/utils'; 
+import { SavedResume } from '../types';
+import { formatYearMonth, formatYearMonthDay } from '@/lib/utils';
 
 // 임시 id 생성용
 function generateTempId() {
@@ -168,16 +168,6 @@ export default function ResumeMain({
   // 저장하기 버튼 활성화 조건: 새로 작성됐거나(아직 저장 안 됨) 수정이 감지된 경우
   const canSave = !isSaved || isDirty;
 
-  // 임시 디버깅 - 원인 확인 후 제거
-  useEffect(() => {
-    console.log('=== 디버깅 ===');
-    console.log('resumeId:', resumeId);
-    console.log('isSaved:', isSaved);
-    console.log('isDirty:', isDirty);
-    console.log('initialSnapshot:', initialSnapshot);
-    console.log('currentSnapshot:', currentSnapshot);
-  }, []);
-
   // 섹션별 필수 입력 검증 에러 메시지
   const [educationError, setEducationError] = useState('');
   const [careerError, setCareerError] = useState('');
@@ -190,7 +180,13 @@ export default function ResumeMain({
       return false;
     }
     const hasEmpty = educations.some(
-      (e) => !e.schoolName || !e.startYearMonth || !e.endYearMonth || !e.graduationStatus || !e.major || !e.degree,
+      (e) =>
+        !e.schoolName ||
+        !e.startYearMonth ||
+        !e.endYearMonth ||
+        !e.graduationStatus ||
+        !e.major ||
+        !e.degree,
     );
     if (hasEmpty) {
       setEducationError('학력 사항의 필수 항목을 모두 입력해주세요.');
@@ -420,6 +416,7 @@ export default function ResumeMain({
         }
       } else {
         const result = await saveResumeAction(payload);
+
         if (result.success) {
           setResumeId(result.resumeId ?? null);
           setLastSavedSnapshot(currentSnapshot);
@@ -530,9 +527,7 @@ export default function ResumeMain({
                   </label>
                   <select
                     value={edu.graduationStatus}
-                    onChange={(e) =>
-                      updateEducation(edu.id, 'graduationStatus', e.target.value)
-                    }
+                    onChange={(e) => updateEducation(edu.id, 'graduationStatus', e.target.value)}
                     className={inputCls}
                   >
                     <option value="" disabled>
