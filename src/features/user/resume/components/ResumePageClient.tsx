@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import FeatureHeader from '@/components/layout/FeatureHeader';
 import ResumeMain from './ResumeMain';
 import ResumeSidebar from './ResumeSidebar';

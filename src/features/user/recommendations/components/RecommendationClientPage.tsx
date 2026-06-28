@@ -5,19 +5,23 @@ import FeatureHeader from '@/components/layout/FeatureHeader';
 import InputForm from './InputForm';
 import RecomResult from './RecomResult';
 import { JobPostingRecommendationResult } from '../types';
-import { fetchJobPostingRecommendationAction } from '../actions';
+import { fetchJobPostingRecommendationAction, fetchCourseDetailsAction } from '../actions';
 import { MySubscription } from '../../payments/types';
+import { CourseFromAPI } from '../../courses/types';
  
 interface RecommendationPageClientProps {
   resumeId: number | null;
   mySubscription: MySubscription | null;
+  isLoggedIn: boolean;
 }
  
 export default function RecommendationPageClient({
   resumeId,
-  mySubscription
+  mySubscription,
+  isLoggedIn
 }: RecommendationPageClientProps) {
   const [result, setResult] = useState<JobPostingRecommendationResult | null>(null);
+  const [courseDetails, setCourseDetails] = useState<CourseFromAPI[]>([]);
   const [isLoadingResult, setIsLoadingResult] = useState(false);
 
   const subscriptionText = mySubscription?.subscribed
@@ -30,6 +34,14 @@ export default function RecommendationPageClient({
     try {
       const data = await fetchJobPostingRecommendationAction(recommendationId);
       setResult(data);
+ 
+      if (data && data.courses.length > 0) {
+        const courseIds = data.courses.map((c) => c.courseId);
+        const courses = await fetchCourseDetailsAction(courseIds);
+        setCourseDetails(courses);
+      } else {
+        setCourseDetails([]);
+      }
     } finally {
       setIsLoadingResult(false);
     }
@@ -49,6 +61,7 @@ export default function RecommendationPageClient({
           <InputForm
             resumeId={resumeId}
             hasSubscription={!!mySubscription?.subscribed}
+            isLoggedIn={isLoggedIn}
             onAnalyzeSuccess={handleAnalyzeSuccess}
           />
  
@@ -58,7 +71,7 @@ export default function RecommendationPageClient({
             </p>
           )}
  
-          {result && <RecomResult result={result} />}
+          {result && <RecomResult result={result} courseDetails={courseDetails} />}
         </div>
       </div>
     </div>

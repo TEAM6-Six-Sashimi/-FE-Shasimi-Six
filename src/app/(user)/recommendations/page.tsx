@@ -16,6 +16,7 @@ export default async function RecommendationsPage() {
     <RecommendationPageClient
       resumeId={savedResume?.resumeId ?? null}
       mySubscription={mySubscription}
+      isLoggedIn={!!accessToken}
     />
   );
 }
