@@ -7,7 +7,7 @@ import CourseNcsSection from './sections/CourseNcsSection';
 import CourseTabNav, { SECTION_ID } from './sections/CourseTabNav';
 import CourseCurriculumSection from './sections/CourseCurriculumSection';
 import CourseInstructorSection from './sections/CourseInstructorSection';
-import CourseReviewsSection from './sections/reviews/CourseReviews';
+import CourseReviewsSection from './sections/CourseReviews';
 
 interface CourseDetailContentProps {
   course: CourseDetailFromAPI;
