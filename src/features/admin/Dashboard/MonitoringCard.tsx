@@ -11,6 +11,12 @@ export default function MonitoringCard() {
 
   const handleViewDetail = async () => {
     if (isLoading) return;
+    const popup = window.open('', '_blank');
+    if (!popup) {
+      showToast('팝업이 차단되었습니다. 팝업 허용 후 다시 시도해 주세요.', 'negative');
+      return;
+    }
+    popup.opener = null;
     setIsLoading(true);
     try {
       const res = await fetch('/api/admin/monitoring');
