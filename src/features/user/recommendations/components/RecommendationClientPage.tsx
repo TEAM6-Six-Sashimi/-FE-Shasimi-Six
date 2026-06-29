@@ -25,7 +25,7 @@ export default function RecommendationPageClient({
   const [isLoadingResult, setIsLoadingResult] = useState(false);
 
   const subscriptionText = mySubscription?.subscribed
-    ? `${mySubscription.planName} / 갱신일 : ${mySubscription.nextBillingAt.slice(0, 10)}`
+    ? `${mySubscription.planName} / 갱신일 : ${mySubscription.expiresAt?.slice(0, 10)}`
     : '보유한 구독권이 없습니다.';
 
     // 분석 성공 시 recommendationId를 받아 상세 결과 조회

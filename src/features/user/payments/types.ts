@@ -88,7 +88,7 @@ export interface MySubscription {
   status: string;
   startedAt: string;
   expiresAt: string;
-  nextBillingAt: string;
+  nextBillingAt: string | null;
   autoRenew: boolean;
   cancellable: boolean;
 }

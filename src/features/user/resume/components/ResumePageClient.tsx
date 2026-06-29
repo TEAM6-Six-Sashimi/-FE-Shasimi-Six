@@ -26,7 +26,7 @@ export default function ResumePageClient({
   const [resumeId, setResumeId] = useState<number | null>(savedResume?.resumeId ?? null);
 
   const subscriptionText = mySubscription?.subscribed
-    ? `${mySubscription.planName} / 갱신일 : ${mySubscription.nextBillingAt.slice(0, 10)}`
+    ? `${mySubscription.planName} / 갱신일 : ${mySubscription.expiresAt?.slice(0, 10)}`
     : '보유한 구독권이 없습니다.';
 
   return (
