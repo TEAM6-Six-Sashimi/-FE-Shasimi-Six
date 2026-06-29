@@ -45,7 +45,6 @@ export default function SessionItem({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoUploading, materialUploading]);
 
-  // 새로 선택한 영상 파일만 blob URL로 미리보기 생성 (백엔드 인증과 무관하게 항상 동작)
   useEffect(() => {
     if (!session.videoFile) {
       setVideoPreviewUrl('');
@@ -56,11 +55,10 @@ export default function SessionItem({
     return () => URL.revokeObjectURL(url);
   }, [session.videoFile]);
 
-  // 기존에 등록된 영상/자료(수정 시 백엔드에서 내려온 것)는
-  // 정적 파일 엔드포인트가 인증을 요구해서 <video>/<a>로 직접 불러올 수 없으므로,
-  // 미리보기 없이 "등록되어 있음" 안내만 표시한다.
-  const hasExistingVideo = !session.videoFile && !!session.videoUrl;
-  const hasExistingMaterial = !session.materialFile && !!session.materialName;
+  // 기존 파일 데이터 (수정 시 이미 등록된 회차) — 새 파일을 고르지 않았으면 이걸로 표시
+  const existingVideoUrl = !session.videoFile && session.videoUrl ? session.videoUrl : '';
+  const existingMaterialName =
+    !session.materialFile && session.materialName ? session.materialName : '';
   const existingMaterialSize =
     !session.materialFile && session.materialSize ? session.materialSize : 0;
 
@@ -217,7 +215,7 @@ export default function SessionItem({
               <span>↑</span>
               {session.videoFile
                 ? `${session.videoFile.name} (${formatFileSizeMB(session.videoFile.size)})`
-                : hasExistingVideo
+                : existingVideoUrl
                   ? '등록된 영상 있음 (변경하려면 클릭)'
                   : '영상 업로드'}
             </>
@@ -225,17 +223,10 @@ export default function SessionItem({
         </button>
         {videoError && <p className="text-[11px] text-[#FF5E5E] mt-1">{videoError}</p>}
 
-        {/* 새로 선택한 파일일 때만 미리보기 표시 (기존 등록 영상은 인증 필요로 미리보기 미지원) */}
-        {videoPreviewUrl && (
+        {(videoPreviewUrl || existingVideoUrl) && (
           <figure className="relative mt-2 w-full rounded-lg border border-[#E5E7EB] overflow-hidden bg-black">
-            <video src={videoPreviewUrl} controls className="w-full max-h-56" />
+            <video src={videoPreviewUrl || existingVideoUrl} controls className="w-full max-h-56" />
           </figure>
-        )}
-        {!videoPreviewUrl && hasExistingVideo && (
-          <p className="text-[11.5px] text-[#9CA3AF] mt-1.5">
-            ℹ 기존 등록 영상은 미리보기를 제공하지 않습니다. 새 영상으로 변경 시 미리보기가
-            표시됩니다.
-          </p>
         )}
       </div>
 
@@ -257,14 +248,13 @@ export default function SessionItem({
           <div className="w-full h-11 rounded-lg border border-dashed border-[#D1D5DB] bg-white flex items-center justify-center">
             <InlineDotsLoading />
           </div>
-        ) : session.materialFile || hasExistingMaterial ? (
+        ) : session.materialFile || existingMaterialName ? (
           <div className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-dashed border-[#CFEE5D] bg-[#F1FFC1]">
             <div className="flex items-center gap-4">
               <span className="text-[#A8D014] font-bold">✓</span>
               <div>
-                {/* 새로 선택한 파일이 아니면(기존 등록 자료) 다운로드 링크 없이 텍스트로만 표시 */}
                 <p className="text-[13px] font-medium text-[#1E2125] truncate max-w-112.5">
-                  {session.materialFile?.name ?? session.materialName}
+                  {session.materialFile?.name ?? existingMaterialName}
                 </p>
                 {(session.materialFile?.size || existingMaterialSize > 0) && (
                   <p className="text-[11.5px] text-[#6A7282]">
