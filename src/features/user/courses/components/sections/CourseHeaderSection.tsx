@@ -1,11 +1,10 @@
 import Image from 'next/image';
 import { CourseDetailFromAPI } from '../../types';
 import { Category } from '@/features/categories/types';
-import { getThumbnailUrl } from '@/lib/thumbnail';
+import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
 interface CourseHeaderSectionProps {
   course: CourseDetailFromAPI;
-  /** 강사/관리자 검수 화면에서 카테고리 뱃지를 2개(예: 메인+서브) 보여줘야 하는 경우 */
   categories: Category[];
 }
 
@@ -22,7 +21,6 @@ const StarRating = ({ rating }: { rating: number }) => (
   </div>
 );
 
-// 대카테고리 > 소카테고리 (대카테고리 역추적)
 function getMainCategoryName(categories: Category[], subCategoryName: string): string | null {
   for (const cat of categories) {
     const found = cat.options.some((opt) => opt.name === subCategoryName);
@@ -47,7 +45,9 @@ export default function CourseHeaderSection({ course, categories }: CourseHeader
             src={thumbnailUrl}
             alt={course.title}
             fill
-            unoptimized
+            unoptimized={thumbnailUrl ? isLocalhostUrl(thumbnailUrl) : false}
+            priority
+            sizes="(max-width: 768px) 100vw, 800px"
             className="object-cover rounded-t-xl"
           />
         ) : (
@@ -78,7 +78,6 @@ export default function CourseHeaderSection({ course, categories }: CourseHeader
           <Image src="/coursedetail/people.svg" width={17} height={17} alt="" />
           {course.studentCount.toLocaleString()}명
         </span>
-        {/* 승인일 */}
         <span className="flex items-center gap-1.5 text-[#6A7282]">
           <Image src="/coursedetail/calander.svg" width={17} height={17} alt="" />
           등록일 {course.approvedAt?.slice(0, 10) ?? '-'}

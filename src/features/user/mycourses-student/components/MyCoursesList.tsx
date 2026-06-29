@@ -7,16 +7,10 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { StudentCourse } from '../types';
 import { getResumeSessionAction } from '../actions';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
 interface Props {
   courses: StudentCourse[];
-}
-
-function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
-  if (!thumbnail) return null;
-  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
 }
 
 const progressColor = (completed: boolean) => (completed ? 'bg-[#CFEE5D]' : 'bg-[#FF5E5E]');
@@ -84,7 +78,8 @@ export default function MyCoursesList({ courses }: Props) {
                           src={thumbnailUrl}
                           alt={course.title}
                           fill
-                          unoptimized
+                          unoptimized={isLocalhostUrl(thumbnailUrl)}
+                          sizes="176px"
                           className="object-cover"
                         />
                       )}

@@ -34,11 +34,22 @@ export default function CourseCurriculumSection({
           // videoUrl이 null이면 백엔드가 재생 권한 자체를 안 준 것이므로(PUBLIC + non-preview 등) 우선 체크
           const canPlay = (allSessionsPlayable || session.preview) && !!session.videoUrl;
           const progress = session.sessionProgressRate ?? 0;
-          // 이어보기: 마지막 시청 지점이 있으면 그 위치를 쿼리로 전달해 player에서 이어서 시작
-          const playerHref =
-            session.lastPositionSeconds && session.lastPositionSeconds > 0
-              ? `/player/${session.sessionId}?courseId=${courseId}&t=${session.lastPositionSeconds}`
-              : `/player/${session.sessionId}?courseId=${courseId}`;
+
+          // 완료된 세션은 처음부터 다시보기, 미완료 세션은 마지막 시청 지점부터 이어보기
+          const hasResumePoint =
+            !session.sessionCompleted &&
+            session.lastPositionSeconds !== null &&
+            session.lastPositionSeconds > 0;
+
+          const playerHref = hasResumePoint
+            ? `/player/${session.sessionId}?courseId=${courseId}&t=${session.lastPositionSeconds}`
+            : `/player/${session.sessionId}?courseId=${courseId}`;
+
+          const buttonLabel = session.sessionCompleted
+            ? '다시보기'
+            : showProgress && hasResumePoint
+              ? '이어보기'
+              : '재생';
 
           return (
             <li key={session.sessionId} className="flex flex-col gap-1.5">
@@ -72,7 +83,7 @@ export default function CourseCurriculumSection({
                       href={playerHref}
                       className="px-3 py-1 rounded-md bg-[#FF5E5E] text-white text-[12px] font-semibold hover:bg-[#D14848] transition-colors"
                     >
-                      {showProgress && session.lastPositionSeconds ? '이어보기' : '재생'}
+                      {buttonLabel}
                     </Link>
                   ) : (
                     <span className="px-3 py-1 rounded-md bg-[#E5E7EB] text-[#9CA3AF] text-[12px] font-semibold">

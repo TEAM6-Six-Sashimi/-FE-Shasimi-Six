@@ -3,8 +3,7 @@
 import Image from 'next/image';
 import { CartCourseItem } from '../types';
 import { Button } from '@/components/ui/button';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
 interface CartContentProps {
   items: CartCourseItem[];
@@ -12,11 +11,6 @@ interface CartContentProps {
   onToggleSelect: (id: number) => void;
   onToggleAll: () => void;
   onDeleteSelected: () => void;
-}
-
-function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
-  if (!thumbnail) return null;
-  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
 }
 
 export default function CartContent({
@@ -121,14 +115,15 @@ export default function CartContent({
                   )}
                 </div>
 
-                {/* 썸네일 - TODO: 백엔드에서 완전한 URL 내려오면 next/image로 교체 */}
+                {/* 썸네일 */}
                 <div className="relative w-24 h-16 rounded-lg overflow-hidden shrink-0 bg-[#D1D5DB]">
                   {thumbnailUrl && (
                     <Image
                       src={thumbnailUrl}
                       alt={item.title}
                       fill
-                      unoptimized
+                      unoptimized={isLocalhostUrl(thumbnailUrl)}
+                      sizes="96px"
                       className="object-cover"
                     />
                   )}

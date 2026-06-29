@@ -122,6 +122,7 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
     }
 
     router.back();
+    setTimeout(() => router.refresh(), 0);
   };
 
   if (!currentSession) {
