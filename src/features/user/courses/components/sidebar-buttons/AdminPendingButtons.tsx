@@ -1,58 +1,93 @@
-// src/features/user/courses/components/sidebar-buttons/AdminPendingButtons.tsx
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
-import OneButtonModal from '@/components/modals/OneButtonModal';
-// import { approveCourseAction, rejectCourseAction } from '../../actions'; // 추후 연동
+import RejectModal from '@/components/modals/RejectModal';
+import { useToast } from '@/components/ui/ToastContext';
+import {
+  approveCourseAction,
+  fetchCourseRejectReasonsAction,
+  rejectCourseAction,
+} from '@/features/admin/coursemanage/action';
+import { RejectReasonCategory } from '@/features/admin/coursemanage/type';
 
 interface AdminPendingButtonsProps {
   courseId: number;
+  courseTitle: string;
 }
 
-export default function AdminPendingButtons({ courseId }: AdminPendingButtonsProps) {
+type CategoryLoadState = 'idle' | 'loading' | 'loaded' | 'failed';
+
+export default function AdminPendingButtons({ courseId, courseTitle }: AdminPendingButtonsProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
-  const [rejectReason, setRejectReason] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [rejectCategories, setRejectCategories] = useState<RejectReasonCategory[]>([]);
+  const [categoryLoadState, setCategoryLoadState] = useState<CategoryLoadState>('idle');
+
+  const loadRejectCategories = async () => {
+    setCategoryLoadState('loading');
+    try {
+      const categories = await fetchCourseRejectReasonsAction();
+      setRejectCategories(categories);
+      setCategoryLoadState('loaded');
+    } catch {
+      setCategoryLoadState('failed');
+      showToast('반려 사유 카테고리를 불러오지 못했습니다.', 'negative');
+    }
+  };
+
+  // 반려 모달을 열기 전에 카테고리 목록을 미리 받아둠
+  useEffect(() => {
+    loadRejectCategories();
+  }, []);
 
   const handleApprove = async () => {
     setIsLoading(true);
     try {
-      // await approveCourseAction(courseId); // 추후 연동
-      router.push('/admin/coursemanage/pending');
-    } catch {
-      setErrorMessage('승인 처리에 실패했습니다.');
-      setShowErrorModal(true);
+      await approveCourseAction(courseId);
+      showToast('강의가 승인되었습니다.', 'positive');
+      setShowApproveModal(false);
+      router.replace('/admin/coursemanage?tab=pending');
+    } catch (error) {
+      // 실패 시 모달을 닫지 않아 사용자가 바로 재시도할 수 있게 함
+      showToast(error instanceof Error ? error.message : '승인 처리에 실패했습니다.', 'negative');
     } finally {
       setIsLoading(false);
-      setShowApproveModal(false);
     }
   };
 
-  const handleReject = async () => {
-    if (!rejectReason.trim()) {
-      setErrorMessage('반려 사유를 입력해주세요.');
-      setShowErrorModal(true);
-      return;
-    }
+  // RejectModal에는 code 기준 옵션을 넘기고, 콜백도 code를 그대로 받음
+  const handleReject = async (categoryCode: string, detail: string) => {
     setIsLoading(true);
     try {
-      // await rejectCourseAction(courseId, rejectReason); // 추후 연동
-      router.push('/admin/coursemanage/pending');
-    } catch {
-      setErrorMessage('반려 처리에 실패했습니다.');
-      setShowErrorModal(true);
+      await rejectCourseAction(courseId, categoryCode, detail);
+      showToast('강의가 반려되었습니다.', 'positive');
+      setShowRejectModal(false);
+      router.replace('/admin/coursemanage?tab=rejected');
+    } catch (error) {
+      // 실패 시 모달을 닫지 않아 입력했던 상세 사유가 유지됨
+      showToast(error instanceof Error ? error.message : '반려 처리에 실패했습니다.', 'negative');
     } finally {
       setIsLoading(false);
-      setShowRejectModal(false);
     }
   };
+
+  const handleOpenRejectModal = () => {
+    if (categoryLoadState === 'failed') {
+      // 카테고리 로드가 실패한 상태면 반려 모달 자체를 열지 않고 재시도를 유도
+      showToast('반려 사유 카테고리를 다시 불러오는 중입니다...', 'alarm');
+      loadRejectCategories();
+      return;
+    }
+    setShowRejectModal(true);
+  };
+
+  const isRejectDisabled = isLoading || categoryLoadState === 'loading';
 
   return (
     <>
@@ -65,9 +100,9 @@ export default function AdminPendingButtons({ courseId }: AdminPendingButtonsPro
       </Button>
       <Button
         variant="outline"
-        disabled={isLoading}
+        disabled={isRejectDisabled}
         className="w-full h-11 border-[#D1D5DB] text-[#1E2125] font-semibold text-[14px] hover:bg-[#F9FAFB] cursor-pointer"
-        onClick={() => setShowRejectModal(true)}
+        onClick={handleOpenRejectModal}
       >
         반려하기
       </Button>
@@ -76,51 +111,23 @@ export default function AdminPendingButtons({ courseId }: AdminPendingButtonsPro
         <TwoButtonModal
           title="승인 확인"
           message="해당 강의를 승인하시겠습니까?"
-          confirmLabel="승인"
+          confirmLabel={isLoading ? '처리 중...' : '승인'}
           cancelLabel="취소"
           onConfirm={handleApprove}
-          onCancel={() => setShowApproveModal(false)}
+          onCancel={() => !isLoading && setShowApproveModal(false)}
         />
       )}
 
-      {/* 반려 사유 입력 모달 - 입력 필드가 필요해 TwoButtonModal과 별도 구성 */}
       {showRejectModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
-            <h3 className="text-[16px] font-bold text-[#1E2125] mb-3">반려 사유 입력</h3>
-            <textarea
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="반려 사유를 입력해주세요."
-              rows={4}
-              className="w-full px-4 py-3 rounded-lg border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors resize-none mb-4"
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowRejectModal(false)}
-                disabled={isLoading}
-                className="px-5 py-2 rounded border-2 border-[#D1D5DB] text-[13px] font-semibold text-[#1E2125] hover:bg-[#F9FAFB] cursor-pointer transition-colors disabled:opacity-50"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleReject}
-                disabled={isLoading}
-                className="px-5 py-2 rounded border-2 border-[#FF5E5E] bg-[#FF5E5E] text-[13px] font-semibold text-white hover:bg-[#D14848] hover:border-[#D14848] cursor-pointer transition-colors disabled:opacity-50"
-              >
-                {isLoading ? '처리 중...' : '반려'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showErrorModal && (
-        <OneButtonModal
-          title="알림"
-          message={errorMessage}
-          confirmLabel="확인"
-          onConfirm={() => setShowErrorModal(false)}
+        <RejectModal
+          title="강의 반려"
+          targetLabel="반려 대상"
+          targetName={courseTitle}
+          categories={rejectCategories.map((c) => ({ value: c.code, label: c.label }))}
+          detailPlaceholder="반려 사유를 상세히 입력해주세요. 강사에게 전달됩니다."
+          onConfirm={handleReject}
+          onCancel={() => !isLoading && setShowRejectModal(false)}
+          loading={isLoading}
         />
       )}
     </>

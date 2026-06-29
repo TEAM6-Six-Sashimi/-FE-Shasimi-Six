@@ -2,9 +2,12 @@
 
 import { cookies } from 'next/headers';
 import { UserMeWithAgreements } from './types';
+import { cancelSubscription } from '@/services/payment.service';
+import { CancelSubscriptionResponse } from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// 개인정보 조회
 interface UpdateMePayload {
   currentPassword: string;
   phone: string;
@@ -30,6 +33,7 @@ export async function updateMeAction(payload: UpdateMePayload): Promise<UserMeWi
   return res.json();
 }
 
+// 개인정보 수정
 interface ChangePasswordPayload {
   currentPassword: string;
   newPassword: string;
@@ -112,4 +116,19 @@ export async function deleteMeAction(currentPassword: string) {
   });
 
   if (!res.ok) throw new Error('회원 탈퇴에 실패했습니다.');
+}
+
+
+// 결제 내역
+export async function cancelSubscriptionAction(): Promise<CancelSubscriptionResponse> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+ 
+  if (!accessToken) {
+    throw new Error('로그인이 필요합니다.');
+  }
+ 
+  const result = await cancelSubscription(accessToken);
+ 
+  return result;
 }

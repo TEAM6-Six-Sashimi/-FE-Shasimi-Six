@@ -14,7 +14,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // ── 결제 (강의 단일 / 장바구니 / AI 구독 공용) ──────────────────
 
-export async function checkoutAction(payload: CheckoutRequest): Promise<CheckoutResponse> {
+export async function checkoutAction(
+  payload: CheckoutRequest,
+  idempotencyKey: string,
+): Promise<CheckoutResponse> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
@@ -35,13 +38,15 @@ export async function checkoutAction(payload: CheckoutRequest): Promise<Checkout
     headers: {
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
+      'Idempotency-Key': idempotencyKey,
     },
     body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
     const errorBody = await res.json().catch(() => null);
-    throw new Error(errorBody?.code ?? 'CHECKOUT_FAILED');
+
+    throw new Error(errorBody?.errorcode ?? 'CHECKOUT_FAILED');
   }
 
   return res.json();

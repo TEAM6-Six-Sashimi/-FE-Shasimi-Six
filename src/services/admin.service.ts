@@ -1,4 +1,3 @@
-import { AdminCategory } from '@/features/admin/coursemanage/type';
 import {
   AdminUser,
   AdminUserDetail,
@@ -6,6 +5,12 @@ import {
   InstructorApplicationDetail,
   RejectedInstructorApplication,
 } from '@/features/admin/usermanage/types';
+import {
+  AdminCategory,
+  AdminPrivateCourse,
+  RejectedCourse,
+  RejectReasonCategory,
+} from '@/features/admin/coursemanage/type';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -73,7 +78,6 @@ export async function fetchInstructorApplications(
     });
 
     if (!res.ok) {
-      // 디버그: 이전에는 에러를 그냥 삼키고 빈 배열만 반환했음 (확인 후 삭제 가능)
       const errorBody = await res.text().catch(() => '');
       console.error(
         `[fetchInstructorApplications] status=${res.status} body=${errorBody} token=${accessToken ? '있음' : '없음(빈 문자열)'}`,
@@ -105,9 +109,7 @@ export async function fetchInstructorApplicationDetail(
     );
     if (!res.ok) {
       const errorBody = await res.text().catch(() => '');
-      console.error(
-        `[fetchInstructorApplicationDetail] status=${res.status} body=${errorBody}`,
-      );
+      console.error(`[fetchInstructorApplicationDetail] status=${res.status} body=${errorBody}`);
       return null;
     }
     const data = await res.json();
@@ -172,9 +174,7 @@ export async function fetchRejectedInstructorApplications(
 
     if (!res.ok) {
       const errorBody = await res.text().catch(() => '');
-      console.error(
-        `[fetchRejectedInstructorApplications] status=${res.status} body=${errorBody}`,
-      );
+      console.error(`[fetchRejectedInstructorApplications] status=${res.status} body=${errorBody}`);
       return [];
     }
 
@@ -207,7 +207,7 @@ export async function fetchAdminCourses(accessToken: string) {
   }
 }
 
-// 강의 관리 - 승인/반려
+// 강의 관리 - 승인 대기 강의
 export async function fetchAdminPendingCourses(accessToken: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/admin/courses/pending`, {
@@ -221,15 +221,126 @@ export async function fetchAdminPendingCourses(accessToken: string) {
   }
 }
 
-export async function fetchAdminRejectedCourses(accessToken: string) {
+// 강의 승인 처리
+export async function approveCourse(accessToken: string, courseId: number) {
+  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/approve`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) {
+    let message = '승인 처리에 실패했습니다.';
+    try {
+      const errorBody = await res.json();
+      message = errorBody.message || message;
+    } catch {
+      // JSON이 아니면 기본 메시지 사용
+    }
+    throw new Error(message);
+  }
+}
+
+// 강의 반려 사유 카테고리 조회
+export async function fetchCourseRejectReasons(
+  accessToken: string,
+): Promise<RejectReasonCategory[]> {
+  const res = await fetch(`${API_BASE_URL}/admin/courses/reject-reasons`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text().catch(() => '');
+    console.error(`[fetchCourseRejectReasons] status=${res.status} body=${errorBody}`);
+    throw new Error('반려 사유 카테고리를 불러오지 못했습니다.');
+  }
+
+  return res.json();
+}
+
+// 강의 반려 처리 (category 코드 + 상세 사유)
+export async function rejectCourse(
+  accessToken: string,
+  courseId: number,
+  body: { category: string; detail: string },
+) {
+  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/reject`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    let message = '반려 처리에 실패했습니다.';
+    try {
+      const errorBody = await res.json();
+      message = errorBody.message || message;
+    } catch {
+      // JSON이 아니면 기본 메시지 사용
+    }
+    throw new Error(message);
+  }
+}
+
+// 강의 반려 이력 조회
+export async function fetchAdminRejectedCourses(accessToken: string): Promise<RejectedCourse[]> {
+  const res = await fetch(`${API_BASE_URL}/admin/courses/rejected`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text().catch(() => '');
+    console.error(`[fetchAdminRejectedCourses] status=${res.status} body=${errorBody}`);
+    throw new Error('반려된 강의 목록을 불러오지 못했습니다.');
+  }
+
+  return res.json();
+}
+
+// 강의 관리 - 비공개된 강의
+export async function fetchAdminPrivateCourses(accessToken: string): Promise<AdminPrivateCourse[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/courses/rejected`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
+    const res = await fetch(`${API_BASE_URL}/admin/courses/closed`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
       cache: 'no-store',
     });
-    if (!res.ok) return [];
-    return res.json();
-  } catch {
+
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      console.error(`[fetchAdminPrivateCourses] status=${res.status} body=${errorBody}`);
+      return [];
+    }
+
+    const data = await res.json();
+
+    return data.map((course: any) => {
+      const approvedAt = new Date(course.approvedAt);
+
+      const privateDate = new Date(approvedAt);
+      privateDate.setFullYear(privateDate.getFullYear() + 2);
+
+      const formatDate = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+      };
+
+      return {
+        ...course,
+        approvedAt: formatDate(approvedAt),
+        privatedAt: formatDate(privateDate),
+      };
+    });
+  } catch (e) {
+    console.error('[fetchAdminPrivateCourses]', e);
     return [];
   }
 }

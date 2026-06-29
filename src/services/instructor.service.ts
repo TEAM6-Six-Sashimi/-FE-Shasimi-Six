@@ -89,26 +89,21 @@ export async function fetchClosedCourses(
   userId: string,
 ): Promise<PrivateCourse[]> {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/instructor/courses/closed`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'X-USER-ID': userId,
-        },
-        cache: 'no-store',
+    const response = await fetch(`${API_BASE_URL}/instructor/courses/closed`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'X-USER-ID': userId,
       },
-    );
+      cache: 'no-store',
+    });
 
     if (!response.ok) {
       return [];
     }
 
     const result = await response.json();
-    return Array.isArray(result)
-      ? result
-      : (result.data ?? []);
+    return Array.isArray(result) ? result : (result.data ?? []);
   } catch {
     return [];
   }

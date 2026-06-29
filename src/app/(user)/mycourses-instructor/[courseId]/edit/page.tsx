@@ -1,4 +1,4 @@
-import CourseEditForm from '@/features/user/mycourses-instructor/components/CourseEditForm';
+import CourseEditForm from '@/features/user/mycourses-instructor/components/new-course/CourseEditForm';
 import { fetchCategories } from '@/services/categories.service';
 import { cookies } from 'next/headers';
 import { fetchUserMe } from '@/services/user.service';
@@ -59,7 +59,9 @@ export default async function EditCoursePage({ params }: PageProps) {
       materialType: s.attachmentType ?? '',
       materialSize: s.attachmentSize ?? 0,
       preview: s.preview,
-    })) ?? [{ id: 1, title: '', videoUrl: '', durationSeconds: 0, materialUrl: '', preview: false }],
+    })) ?? [
+      { id: 1, title: '', videoUrl: '', durationSeconds: 0, materialUrl: '', preview: false },
+    ],
   };
 
   return (

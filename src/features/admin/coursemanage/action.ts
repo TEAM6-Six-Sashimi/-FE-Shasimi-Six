@@ -1,7 +1,12 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { AdminApiError, CreateCategoryRequest } from './type';
+import { AdminApiError, CreateCategoryRequest, RejectReasonCategory } from './type';
+import {
+  approveCourse,
+  fetchCourseRejectReasons,
+  rejectCourse,
+} from '@/services/admin.service';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -10,28 +15,40 @@ export async function approveCourseAction(courseId: number) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/approve`, {
-    method: 'PATCH',
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-
-  if (!res.ok) throw new Error('승인 처리에 실패했습니다.');
+  await approveCourse(accessToken, courseId);
 }
 
-export async function rejectCourseAction(courseId: number, rejectReason: string) {
+export async function fetchCourseRejectReasonsAction(): Promise<RejectReasonCategory[]> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/reject`, {
-    method: 'PATCH',
+  return fetchCourseRejectReasons(accessToken);
+}
+
+export async function rejectCourseAction(courseId: number, category: string, detail: string) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+
+  await rejectCourse(accessToken, courseId, { category, detail });
+}
+
+// 비공개 강의 목록 조회
+export async function getClosedCoursesAction() {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+
+  const res = await fetch(`${API_BASE_URL}/admin/courses/closed`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ rejectReason }),
+    cache: 'no-store',
   });
 
-  if (!res.ok) throw new Error('반려 처리에 실패했습니다.');
+  if (!res.ok) {
+    throw new Error('비공개 강의 목록 조회에 실패했습니다.');
+  }
+
+  return res.json();
 }
 
 // 카테고리 CRUD
