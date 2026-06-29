@@ -2,7 +2,11 @@
 
 import { cookies } from 'next/headers';
 import { AdminApiError, CreateCategoryRequest, RejectReasonCategory } from './type';
-import { approveCourse, fetchCourseRejectReasonDetail, fetchCourseRejectReasons, rejectCourse } from '@/services/admin.service';
+import {
+  approveCourse,
+  fetchCourseRejectReasons,
+  rejectCourse,
+} from '@/services/admin.service';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -10,21 +14,21 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export async function approveCourseAction(courseId: number) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
- 
+
   await approveCourse(accessToken, courseId);
 }
 
 export async function fetchCourseRejectReasonsAction(): Promise<RejectReasonCategory[]> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
- 
+
   return fetchCourseRejectReasons(accessToken);
 }
 
 export async function rejectCourseAction(courseId: number, category: string, detail: string) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
- 
+
   await rejectCourse(accessToken, courseId, { category, detail });
 }
 
@@ -45,13 +49,6 @@ export async function getClosedCoursesAction() {
   }
 
   return res.json();
-}
-
-export async function fetchCourseRejectReasonDetailAction(courseId: number) {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value ?? '';
-
-  return fetchCourseRejectReasonDetail(accessToken, courseId);
 }
 
 // 카테고리 CRUD

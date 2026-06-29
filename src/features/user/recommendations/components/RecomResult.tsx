@@ -1,4 +1,3 @@
-// src/features/user/recommendations/components/RecomResult.tsx
 'use client';
 
 import Link from 'next/link';
@@ -30,6 +29,20 @@ const CATEGORY_LABEL: Record<FitCategoryResult['category'], string> = {
   CAREER: '경력',
   CERTIFICATION: '자격증',
 };
+
+// 오늘 날짜 기준 D-day 계산 (YYYY-MM-DD 형식 입력)
+function calculateDDay(dateStr: string): string {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(dateStr);
+  target.setHours(0, 0, 0, 0);
+ 
+  const diffDays = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+ 
+  if (diffDays === 0) return 'D-Day';
+  if (diffDays > 0) return `D-${diffDays}`;
+  return `D+${Math.abs(diffDays)}`;
+}
 
 // 한 카테고리(학력/경력/자격증) 카드 - resumeBased일 때만 사용
 function FitCategoryCard({ result }: { result: FitCategoryResult }) {
@@ -217,27 +230,44 @@ export default function RecomResult({ result, courseDetails }: RecomResultProps)
         </p>
 
         <div className="grid grid-cols-3 gap-4">
-          {certificates.map((cert, idx) => (
-            <div key={idx} className="border border-[#E5E7EB] rounded-xl p-5 flex flex-col gap-2.5">
-              <p className="text-[15px] font-bold text-[#1E2125]">{cert.name}</p>
-              <span className="inline-block w-fit px-2.5 py-0.5 rounded-md bg-[#EEF4FF] font-semibold text-[12px] text-[#5B8DEE]">
-                {cert.relatedSkills.join(' | ')}
-              </span>
-
-              <div className="flex flex-col gap-1 mt-1">
-                <div className="flex items-center justify-between text-[12.5px]">
-                  <span className="text-[#9CA3AF]">다음 시험일</span>
-                  <span className="font-semibold text-[#1E2125]">{cert.nextExamDate}</span>
-                </div>
-                <div className="flex items-center justify-between text-[12.5px]">
-                  <span className="text-[#9CA3AF]">접수 기간</span>
-                  <span className="font-semibold text-[#1E2125]">
-                    {cert.applicationStartDate} ~ {cert.applicationEndDate}
-                  </span>
+          {certificates.map((cert, idx) => {
+            // ✅ 다음 시험일 - null이면 안내문구, 있으면 날짜 + D-day
+            const hasExamDate = !!cert.nextExamDate;
+            // ✅ 접수 기간 - 시작/종료 둘 중 하나라도 null이면 안내문구
+            const hasApplicationPeriod = !!cert.applicationStartDate && !!cert.applicationEndDate;
+ 
+            return (
+              <div key={idx} className="border border-[#E5E7EB] rounded-xl p-5 flex flex-col gap-2.5">
+                <p className="text-[15px] font-bold text-[#1E2125]">{cert.name}</p>
+                <span className="inline-block w-fit px-2.5 py-0.5 rounded-md bg-[#EEF4FF] font-semibold text-[12px] text-[#5B8DEE]">
+                  {cert.relatedSkills.join(' | ')}
+                </span>
+ 
+                <div className="flex flex-col gap-1 mt-1">
+                  <div className="flex items-center justify-between text-[12.5px]">
+                    <span className="text-[#9CA3AF]">다음 시험일</span>
+                    {hasExamDate ? (
+                      <span className="font-semibold text-[#1E2125]">
+                        {cert.nextExamDate} ({calculateDDay(cert.nextExamDate)})
+                      </span>
+                    ) : (
+                      <span className="text-[#9CA3AF]">시험 일정 정보가 없습니다.</span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between text-[12.5px]">
+                    <span className="text-[#9CA3AF]">접수 기간</span>
+                    {hasApplicationPeriod ? (
+                      <span className="font-semibold text-[#1E2125]">
+                        {cert.applicationStartDate} ~ {cert.applicationEndDate}
+                      </span>
+                    ) : (
+                      <span className="text-[#9CA3AF]">시험 일정 정보가 없습니다.</span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

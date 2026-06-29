@@ -41,19 +41,8 @@ export interface RejectedCourse {
   instructorName: string;
   categoryName: string;
   updatedAt: string | null;
-  rejectReason: string;
-}
-
-// 반려된 강의 반려 사유 상세
-export interface CourseRejectReasonDetail {
-  courseId: number;
-  title: string;
-  rejectedAt: string;
-  category: {
-    code: string;
-    label: string;
-  };
-  detail: string;
+  rejectCategory: RejectReasonCategory;
+  rejectDetail: string;
 }
 
 // 비공개된 강의
