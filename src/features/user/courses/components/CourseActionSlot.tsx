@@ -19,22 +19,18 @@ export default function CourseActionSlot({ course, actionType }: CourseActionSlo
       return <NotOwnedButtons course={course} />;
 
     case 'continue-watching': {
-      // 백엔드 강의 상세 응답에는 lastSessionId가 없으므로,
-      // 세션 순서상 첫 번째 세션으로 이어보기 진입점을 잡음.
-      // (세션별 시청 여부/마지막 위치를 응답에 포함시켜주면 더 정확한 이어보기 지점 계산 가능)
+      // 세션별 sessionCompleted/lastPositionSeconds를 이용해
+      // 미완료 세션 중 sessionOrder가 가장 작은 것을 이어볼 지점으로 결정.
+      // 모두 완료됐으면 첫 세션(처음부터 다시보기)으로 이동.
       const sorted = [...course.sessions].sort((a, b) => a.sessionOrder - b.sessionOrder);
-      const firstSessionId = sorted[0]?.sessionId;
+      const target = sorted.find((s) => !s.sessionCompleted) ?? sorted[0];
 
       return (
         <StudentOwnedButtons
           courseId={course.courseId}
-          paymentInfo={{
-            paymentId: 0,
-            courseId: course.courseId,
-            progress: course.progressRate ?? 0,
-            lastSessionId: firstSessionId,
-            enrolledAt: '',
-          }}
+          sessionId={target?.sessionId}
+          lastPositionSeconds={target?.sessionCompleted ? 0 : target?.lastPositionSeconds ?? 0}
+          completed={course.completed ?? false}
         />
       );
     }
@@ -47,7 +43,7 @@ export default function CourseActionSlot({ course, actionType }: CourseActionSlo
       );
 
     case 'approve-reject':
-      return <AdminPendingButtons courseId={course.courseId} courseTitle={course.title}/>;
+      return <AdminPendingButtons courseId={course.courseId} courseTitle={course.title} />;
 
     case 'none':
     default:

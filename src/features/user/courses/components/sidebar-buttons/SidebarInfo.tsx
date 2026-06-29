@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { CourseDetailFromAPI, DIFFICULTY_LABEL } from '@/features/user/courses/types';
-import { getThumbnailUrl } from '@/lib/thumbnail';
+import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
 // ── 상단: 썸네일 + 가격 ──────────────────────────
 interface SidebarThumbnailProps {
@@ -15,7 +15,14 @@ export function SidebarThumbnail({ course, showPrice = true }: SidebarThumbnailP
     <>
       <div className="relative w-full aspect-video rounded-lg overflow-hidden shrink-0 bg-[#E5E7EB]">
         {thumbnailUrl ? (
-          <Image src={thumbnailUrl} alt={course.title} fill unoptimized className="object-cover" />
+          <Image
+            src={thumbnailUrl}
+            alt={course.title}
+            fill
+            unoptimized={thumbnailUrl ? isLocalhostUrl(thumbnailUrl) : false}
+            sizes="288px"
+            className="object-cover"
+          />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-[#9CA3AF] text-[13px]">
             썸네일을 불러올 수 없습니다.
@@ -41,7 +48,6 @@ export default function SidebarInfoBox({ course }: SidebarInfoBoxProps) {
   const lectureCount = course.sessions.length;
   const difficultyLabel = DIFFICULTY_LABEL[course.difficulty] ?? course.difficulty;
 
-  // ENROLLED일 때만 progressRate/completed 값이 채워져 있음
   const hasProgress = course.viewerType === 'ENROLLED' && course.progressRate !== null;
 
   const infoRows = [

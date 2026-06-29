@@ -22,6 +22,7 @@ import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import FullScreenLoading from '@/components/ui/FullScreenLoading';
 import Image from 'next/image';
 import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
+import { resizeImageFile } from '@/lib/resizeimagefile';
 
 // ── 타입 ────────────────────────────────────────────────────────
 interface CourseRegisterFormProps {
@@ -138,31 +139,36 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
 
   // 썸네일: object URL 미리보기 + 실제 업로드 API 호출 → form.thumbnail에 URL 저장
   const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      setErrors((prev) => ({ ...prev, thumbnail: '이미지 파일만 업로드할 수 있습니다.' }));
-      return;
-    }
-
-    setForm((prev) => ({ ...prev, thumbnailFile: file, thumbnail: '' }));
-    setErrors((prev) => ({ ...prev, thumbnail: undefined }));
-
-    try {
-      setThumbnailUploading(true);
-      const formData = new FormData();
-      formData.append('image', file);
-      const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
-      if (!res.ok) throw new Error('업로드 실패');
-      const data = await res.json();
-      handleField('thumbnail', data.url);
-    } catch {
-      setErrors((prev) => ({ ...prev, thumbnail: '이미지 업로드에 실패했습니다.' }));
-    } finally {
-      setThumbnailUploading(false);
-    }
-  };
+  const rawFile = e.target.files?.[0];
+  if (!rawFile) return;
+ 
+  if (!rawFile.type.startsWith('image/')) {
+    setErrors((prev) => ({ ...prev, thumbnail: '이미지 파일만 업로드할 수 있습니다.' }));
+    return;
+  }
+ 
+  // 업로드 전 클라이언트 측 리사이징 (최대 1200px, JPEG 85%) - 17MB 같은 원본이 그대로 올라가지 않도록
+  const file = await resizeImageFile(rawFile, { maxWidth: 1200, maxHeight: 1200, quality: 0.85 });
+ 
+  const previewUrl = URL.createObjectURL(file);
+  setThumbnailPreviewUrl(previewUrl);
+  setForm((prev) => ({ ...prev, thumbnailFile: file, thumbnail: '' }));
+  setErrors((prev) => ({ ...prev, thumbnail: undefined }));
+ 
+  try {
+    setThumbnailUploading(true);
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
+    if (!res.ok) throw new Error('업로드 실패');
+    const data = await res.json();
+    handleField('thumbnail', data.url);
+  } catch {
+    setErrors((prev) => ({ ...prev, thumbnail: '이미지 업로드에 실패했습니다.' }));
+  } finally {
+    setThumbnailUploading(false);
+  }
+};
 
   // ── 세션 핸들러 ──────────────────────────────────────────────
   const updateSession = <K extends keyof Session>(id: number, key: K, value: Session[K]) => {

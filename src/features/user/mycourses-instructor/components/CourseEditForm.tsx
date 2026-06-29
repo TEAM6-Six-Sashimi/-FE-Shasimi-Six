@@ -21,6 +21,7 @@ import type {
 import { updateCourseAction } from '../actions';
 import Image from 'next/image';
 import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
+import { resizeImageFile } from '@/lib/resizeimagefile';
 
 interface CourseEditFormProps {
   categories: Category[];
@@ -126,15 +127,20 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
 
   // 썸네일: object URL 미리보기 + 실제 업로드 API 호출 → form.thumbnail에 URL 저장
   const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const rawFile = e.target.files?.[0];
+    if (!rawFile) return;
 
-    if (!file.type.startsWith('image/')) {
+    if (!rawFile.type.startsWith('image/')) {
       setErrors((prev) => ({ ...prev, thumbnail: '이미지 파일만 업로드할 수 있습니다.' }));
       return;
     }
 
-    setForm((prev) => ({ ...prev, thumbnailFile: file }));
+    // 업로드 전 클라이언트 측 리사이징 (최대 1200px, JPEG 85%) - 17MB 같은 원본이 그대로 올라가지 않도록
+    const file = await resizeImageFile(rawFile, { maxWidth: 1200, maxHeight: 1200, quality: 0.85 });
+
+    const previewUrl = URL.createObjectURL(file);
+    setThumbnailPreviewUrl(previewUrl);
+    setForm((prev) => ({ ...prev, thumbnailFile: file, thumbnail: '' }));
     setErrors((prev) => ({ ...prev, thumbnail: undefined }));
 
     try {
@@ -199,7 +205,9 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
 
     if (form.sessions.length === 0) {
       next.sessions = '최소 1개 이상의 회차가 필요합니다.';
-    } else if (form.sessions.some((s) => !s.title.trim() || !s.videoUrl || s.durationSeconds <= 0)) {
+    } else if (
+      form.sessions.some((s) => !s.title.trim() || !s.videoUrl || s.durationSeconds <= 0)
+    ) {
       next.sessions =
         '모든 회차의 소제목과 강의 영상을 입력해주세요. (영상 업로드가 완료될 때까지 기다려주세요)';
     } else if (form.sessions.some((s) => s.title.length > SESSION_TITLE_MAX)) {

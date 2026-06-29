@@ -9,17 +9,11 @@ import { addCartItemAction } from '../../cart/actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import Image from 'next/image';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
 interface CourseCardProps {
   course: CourseFromAPI;
   category: string;
-}
-
-function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
-  if (!thumbnail) return null;
-  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
 }
 
 // 등록일 형식 변환
@@ -27,7 +21,7 @@ function formatApprovedDate(approvedAt: string | null | undefined): string | nul
   if (!approvedAt) return null;
   const date = new Date(approvedAt);
   if (Number.isNaN(date.getTime())) return null;
- 
+
   const yyyy = date.getFullYear();
   const mm = String(date.getMonth() + 1).padStart(2, '0');
   const dd = String(date.getDate()).padStart(2, '0');
@@ -87,13 +81,14 @@ export default function CourseCard({ course, category }: CourseCardProps) {
           href={`/courses/${encodeURIComponent(category)}/${course.courseId}`}
           className="relative block shrink-0"
         >
-          <div className="w-full aspect-video bg-[#E5E7EB]">
+          <div className="relative w-full aspect-video bg-[#E5E7EB]">
             {thumbnailUrl && (
               <Image
                 src={thumbnailUrl}
                 alt={course.title}
                 fill
-                unoptimized
+                unoptimized={isLocalhostUrl(thumbnailUrl)}
+                sizes="(max-width: 768px) 50vw, 280px"
                 className="object-cover"
               />
             )}
