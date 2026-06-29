@@ -130,8 +130,5 @@ export async function cancelSubscriptionAction(): Promise<CancelSubscriptionResp
  
   const result = await cancelSubscription(accessToken);
  
-  // 디버그: 백엔드 응답에 실제로 message가 들어있는지 확인 (확인 후 삭제 가능)
-  console.log('[cancelSubscriptionAction] result =', JSON.stringify(result));
- 
   return result;
 }

@@ -10,12 +10,7 @@ export default async function Header() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  console.log('=== Header 렌더링 ===');
-  console.log('accessToken 존재:', !!accessToken);
-
   const user = accessToken ? await fetchUserMe(accessToken) : GUEST_USER;
-
-  console.log('user.role:', user.role);
 
   return (
     <div className="flex justify-between bg-white border-b border-[#E5E7EB] h-12 items-center p-5">
