@@ -60,10 +60,10 @@ export interface JobPostingRecommendationResult {
   recommendationId: number;
   analysisStatus: AnalysisStatus;
   resumeBased: boolean;
-  summary: JobPostingSummary;
-  fitAnalysis: FitAnalysis | null; // resumeBased가 false면 null
-  certificates: RecommendedCertificate[];
-  courses: RecommendedCourse[];
+  summary: JobPostingSummary | null;
+  fitAnalysis: FitAnalysis | null; // resumeBased가 false or PENDING이면 null
+  certificates: RecommendedCertificate[] | null;
+  courses: RecommendedCourse[] | null;
   createdAt: string;
 }
  
