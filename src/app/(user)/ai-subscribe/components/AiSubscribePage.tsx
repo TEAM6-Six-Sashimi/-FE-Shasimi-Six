@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import AiAgreementRequiredModal from '@/components/modals/AgreementRequiredModal';
+import { useToast } from '@/components/ui/ToastContext';
 import { MySubscription, SubscriptionPlan } from '@/features/user/payments/types';
 
 interface Props {
@@ -14,9 +15,14 @@ interface Props {
 
 export default function AiSubscribePage({ plans, mySubscription, aiConsent }: Props) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [agreementModalOpen, setAgreementModalOpen] = useState(false);
 
   const handleStart = (planCode: string) => {
+    if (mySubscription?.subscribed) {
+      showToast('이미 이용 중인 구독 플랜이 있습니다.', 'negative');
+      return;
+    }
     if (!aiConsent) {
       setAgreementModalOpen(true);
       return;
@@ -83,7 +89,7 @@ export default function AiSubscribePage({ plans, mySubscription, aiConsent }: Pr
                 onClick={() => handleStart(plan.planCode)}
                 className="w-full h-12 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[15px] cursor-pointer"
               >
-                시작하기
+                구매하기
               </Button>
             </div>
           );

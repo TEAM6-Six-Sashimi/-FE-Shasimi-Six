@@ -4,17 +4,11 @@ import { useMemo } from 'react';
 import Image from 'next/image';
 import { OrderLineItem } from '../types';
 import type { Category } from '@/features/categories/types';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
 interface PaymentContentProps {
   items: OrderLineItem[];
   categories: Category[];
-}
-
-function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
-  if (!thumbnail) return null;
-  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
 }
 
 export default function PaymentContent({ items, categories }: PaymentContentProps) {
@@ -41,20 +35,18 @@ export default function PaymentContent({ items, categories }: PaymentContentProp
 
       <div className="space-y-4">
         {items.map((item) => (
-          <OrderLineCard key={item.id} item={item} categoryLabel={getCategoryLabel(item.subtitle)} />
+          <OrderLineCard
+            key={item.id}
+            item={item}
+            categoryLabel={getCategoryLabel(item.subtitle)}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function OrderLineCard({
-  item,
-  categoryLabel,
-}: {
-  item: OrderLineItem;
-  categoryLabel: string;
-}) {
+function OrderLineCard({ item, categoryLabel }: { item: OrderLineItem; categoryLabel: string }) {
   const thumbnailUrl = getThumbnailUrl(item.thumbnail);
 
   return (
@@ -62,7 +54,14 @@ function OrderLineCard({
       {/* 썸네일 */}
       <div className="relative w-30 h-20 shrink-0 rounded-lg overflow-hidden bg-[#D1D5DB]">
         {thumbnailUrl && (
-          <Image src={thumbnailUrl} alt={item.title} fill unoptimized className="object-cover" />
+          <Image
+            src={thumbnailUrl}
+            alt={item.title}
+            fill
+            unoptimized={isLocalhostUrl(thumbnailUrl)}
+            sizes="120px"
+            className="object-cover"
+          />
         )}
       </div>
 

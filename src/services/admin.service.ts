@@ -1,4 +1,3 @@
-import { AdminCategory, AdminPrivateCourse } from '@/features/admin/coursemanage/type';
 import {
   AdminUser,
   AdminUserDetail,
@@ -6,6 +5,12 @@ import {
   InstructorApplicationDetail,
   RejectedInstructorApplication,
 } from '@/features/admin/usermanage/types';
+import {
+  AdminCategory,
+  AdminPrivateCourse,
+  RejectedCourse,
+  RejectReasonCategory,
+} from '@/features/admin/coursemanage/type';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -202,7 +207,7 @@ export async function fetchAdminCourses(accessToken: string) {
   }
 }
 
-// 강의 관리 - 승인/반려
+// 강의 관리 - 승인 대기 강의
 export async function fetchAdminPendingCourses(accessToken: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/admin/courses/pending`, {
@@ -216,21 +221,85 @@ export async function fetchAdminPendingCourses(accessToken: string) {
   }
 }
 
-export async function fetchAdminRejectedCourses(accessToken: string) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/admin/courses/rejected`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      cache: 'no-store',
-    });
-    if (!res.ok) return [];
-    return res.json();
-  } catch {
-    return [];
+// 강의 승인 처리
+export async function approveCourse(accessToken: string, courseId: number) {
+  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/approve`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) {
+    let message = '승인 처리에 실패했습니다.';
+    try {
+      const errorBody = await res.json();
+      message = errorBody.message || message;
+    } catch {
+      // JSON이 아니면 기본 메시지 사용
+    }
+    throw new Error(message);
   }
 }
 
-// 강의 관리 - 반려 이력
+// 강의 반려 사유 카테고리 조회
+export async function fetchCourseRejectReasons(
+  accessToken: string,
+): Promise<RejectReasonCategory[]> {
+  const res = await fetch(`${API_BASE_URL}/admin/courses/reject-reasons`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: 'no-store',
+  });
 
+  if (!res.ok) {
+    const errorBody = await res.text().catch(() => '');
+    console.error(`[fetchCourseRejectReasons] status=${res.status} body=${errorBody}`);
+    throw new Error('반려 사유 카테고리를 불러오지 못했습니다.');
+  }
+
+  return res.json();
+}
+
+// 강의 반려 처리 (category 코드 + 상세 사유)
+export async function rejectCourse(
+  accessToken: string,
+  courseId: number,
+  body: { category: string; detail: string },
+) {
+  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/reject`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    let message = '반려 처리에 실패했습니다.';
+    try {
+      const errorBody = await res.json();
+      message = errorBody.message || message;
+    } catch {
+      // JSON이 아니면 기본 메시지 사용
+    }
+    throw new Error(message);
+  }
+}
+
+// 강의 반려 이력 조회
+export async function fetchAdminRejectedCourses(accessToken: string): Promise<RejectedCourse[]> {
+  const res = await fetch(`${API_BASE_URL}/admin/courses/rejected`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text().catch(() => '');
+    console.error(`[fetchAdminRejectedCourses] status=${res.status} body=${errorBody}`);
+    throw new Error('반려된 강의 목록을 불러오지 못했습니다.');
+  }
+
+  return res.json();
+}
 
 // 강의 관리 - 비공개된 강의
 export async function fetchAdminPrivateCourses(accessToken: string): Promise<AdminPrivateCourse[]> {

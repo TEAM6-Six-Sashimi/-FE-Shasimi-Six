@@ -16,6 +16,7 @@ import CurriculumSection, { SESSION_MAX_COUNT } from './sections/Curriculum';
 import SalesPolicyAgreement from './sections/SalesPolicyAgreement';
 import FormActionButtons from './sections/FormActions';
 import { SESSION_TITLE_MAX } from './sections/SessionItem';
+import { resizeImageFile } from '@/lib/resizeimagefile';
 
 interface CourseRegisterFormProps {
   categories: Category[];
@@ -108,17 +109,20 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
 
   // 썸네일: object URL 미리보기 + 실제 업로드 API 호출 → form.thumbnail에 URL 저장
   const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const rawFile = e.target.files?.[0];
+    if (!rawFile) return;
 
-    if (!file.type.startsWith('image/')) {
+    if (!rawFile.type.startsWith('image/')) {
       setErrors((prev) => ({ ...prev, thumbnail: '이미지 파일만 업로드할 수 있습니다.' }));
       return;
     }
 
+    // 업로드 전 클라이언트 측 리사이징 (최대 1200px, JPEG 85%)
+    const file = await resizeImageFile(rawFile, { maxWidth: 1200, maxHeight: 1200, quality: 0.85 });
+
     const previewUrl = URL.createObjectURL(file);
     setThumbnailPreviewUrl(previewUrl);
-    setForm((prev) => ({ ...prev, thumbnailFile: file, thumbnail: '' }));
+    setForm((prev) => ({ ...prev, thumbnailFile: file, thumbnail: '' })); // CourseEditForm은 thumbnail: '' 줄 없이 유지
     setErrors((prev) => ({ ...prev, thumbnail: undefined }));
 
     try {

@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import FeatureHeader from '@/components/layout/FeatureHeader';
 import ResumeMain from './ResumeMain';
 import ResumeSidebar from './ResumeSidebar';
-import { fetchSubscriptionPlan, SavedResume } from '@/services/ai.service';
-import { SubscriptionPlanResponse } from '../types';
+import { SavedResume } from '../types'; 
 import { MySubscription } from '../../payments/types';
 
 interface ResumePageClientProps {
@@ -21,14 +20,13 @@ export default function ResumePageClient({
   userPhone,
   userEmail,
   savedResume,
-  mySubscription
+  mySubscription,
 }: ResumePageClientProps) {
   const [isSaved, setIsSaved] = useState(!!savedResume);
   const [resumeId, setResumeId] = useState<number | null>(savedResume?.resumeId ?? null);
 
-  const subscriptionText =
-  mySubscription?.subscribed
-    ? `${mySubscription.planName} / 갱신일 : ${mySubscription.nextBillingAt.slice(0, 10)}`
+  const subscriptionText = mySubscription?.subscribed
+    ? `${mySubscription.planName} / 갱신일 : ${mySubscription.expiresAt?.slice(0, 10)}`
     : '보유한 구독권이 없습니다.';
 
   return (

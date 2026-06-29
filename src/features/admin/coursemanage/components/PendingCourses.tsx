@@ -28,7 +28,6 @@ export default function PendingCourses({ courses, categories }: Props) {
 
   const getMainCategory = (categoryName: string) => subToMainMap.get(categoryName) ?? categoryName;
 
-  // TODO: 행 클릭 시 상세 페이지(/admin/coursemanage/pending/[courseId])로 이동, 거기서 승인/반려 처리
   const router = useRouter();
 
   return (
@@ -59,7 +58,7 @@ export default function PendingCourses({ courses, categories }: Props) {
               <tr
                 key={c.courseId}
                 className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors cursor-pointer"
-                onClick={() => router.push(`/admin/coursemanage/pending/${c.courseId}?from=pending`)}
+                onClick={() => router.push(`/admin/coursemanage/${c.courseId}?from=pending`)}
               >
                 <td className="py-3 text-center text-[#6A7282]">{idx + 1}</td>
                 <td className="py-3 px-4 text-left font-semibold text-[#1E2125]">{c.title}</td>
