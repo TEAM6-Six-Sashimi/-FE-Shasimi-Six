@@ -1,4 +1,3 @@
-import { AdminCategory, AdminPrivateCourse } from '@/features/admin/coursemanage/type';
 import {
   AdminUser,
   AdminUserDetail,
@@ -6,6 +5,13 @@ import {
   InstructorApplicationDetail,
   RejectedInstructorApplication,
 } from '@/features/admin/usermanage/types';
+import {
+  AdminCategory,
+  AdminPrivateCourse,
+  CourseRejectReasonDetail,
+  RejectReasonCategory,
+  RejectedCourse,
+} from '@/features/admin/coursemanage/type';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -202,7 +208,7 @@ export async function fetchAdminCourses(accessToken: string) {
   }
 }
 
-// 강의 관리 - 승인/반려
+// 강의 관리 - 승인 대기 강의
 export async function fetchAdminPendingCourses(accessToken: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/admin/courses/pending`, {
@@ -215,22 +221,96 @@ export async function fetchAdminPendingCourses(accessToken: string) {
     return [];
   }
 }
+ 
+// 강의 승인 처리
+export async function approveCourse(accessToken: string, courseId: number) {
+  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/approve`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+ 
+  if (!res.ok) {
+    let message = '승인 처리에 실패했습니다.';
+    try {
+      const errorBody = await res.json();
+      message = errorBody.message || message;
+    } catch {
+      // JSON이 아니면 기본 메시지 사용
+    }
+    throw new Error(message);
+  }
+}
 
-export async function fetchAdminRejectedCourses(accessToken: string) {
+// 강의 반려 사유 카테고리 조회
+export async function fetchCourseRejectReasons(
+  accessToken: string,
+): Promise<RejectReasonCategory[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/courses/reject-reasons`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: 'no-store',
+    });
+ 
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      console.error(`[fetchCourseRejectReasons] status=${res.status} body=${errorBody}`);
+      return [];
+    }
+ 
+    return res.json();
+  } catch (e) {
+    console.error('[fetchCourseRejectReasons] fetch error:', e);
+    return [];
+  }
+}
+ 
+// 강의 반려 처리 (category 코드 + 상세 사유)
+export async function rejectCourse(
+  accessToken: string,
+  courseId: number,
+  body: { category: string; detail: string },
+) {
+  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/reject`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+ 
+  if (!res.ok) {
+    let message = '반려 처리에 실패했습니다.';
+    try {
+      const errorBody = await res.json();
+      message = errorBody.message || message;
+    } catch {
+      // JSON이 아니면 기본 메시지 사용
+    }
+    throw new Error(message);
+  }
+}
+ 
+// 강의 반려 이력 조회
+export async function fetchAdminRejectedCourses(accessToken: string): Promise<RejectedCourse[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/admin/courses/rejected`, {
       headers: { Authorization: `Bearer ${accessToken}` },
       cache: 'no-store',
     });
-    if (!res.ok) return [];
+ 
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      console.error(`[fetchRejectedCourses] status=${res.status} body=${errorBody}`);
+      return [];
+    }
+ 
     return res.json();
-  } catch {
+  } catch (e) {
+    console.error('[fetchRejectedCourses] fetch error:', e);
     return [];
   }
 }
-
-// 강의 관리 - 반려 이력
-
 
 // 강의 관리 - 비공개된 강의
 export async function fetchAdminPrivateCourses(accessToken: string): Promise<AdminPrivateCourse[]> {
@@ -273,6 +353,29 @@ export async function fetchAdminPrivateCourses(accessToken: string): Promise<Adm
   } catch (e) {
     console.error('[fetchAdminPrivateCourses]', e);
     return [];
+  }
+}
+
+export async function fetchCourseRejectReasonDetail(
+  accessToken: string,
+  courseId: number,
+): Promise<CourseRejectReasonDetail | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}/reject-reason`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      console.error(`[fetchCourseRejectReasonDetail] status=${res.status} body=${errorBody}`);
+      return null;
+    }
+
+    return res.json();
+  } catch (e) {
+    console.error('[fetchCourseRejectReasonDetail] fetch error:', e);
+    return null;
   }
 }
 

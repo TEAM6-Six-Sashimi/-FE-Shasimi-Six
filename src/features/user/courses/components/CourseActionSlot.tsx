@@ -47,7 +47,7 @@ export default function CourseActionSlot({ course, actionType }: CourseActionSlo
       );
 
     case 'approve-reject':
-      return <AdminPendingButtons courseId={course.courseId} />;
+      return <AdminPendingButtons courseId={course.courseId} courseTitle={course.title}/>;
 
     case 'none':
     default:
