@@ -20,12 +20,6 @@ export default async function EditCoursePage({ params }: PageProps) {
     ? await fetchCourseDetail(accessToken, String(user.id), Number(courseId))
     : null;
 
-  // 디버그: 백엔드 원본 응답 확인 (확인 후 삭제)
-  console.log('=== course.sessions raw ===');
-  console.log(JSON.stringify(course?.sessions, null, 2));
-  console.log('=== course 전체 (sessions 제외 일부) ===');
-  console.log('courseId:', course?.courseId, 'title:', course?.title);
-
   const DIFFICULTY_REVERSE: Record<string, string> = {
     BEGINNER: '초급',
     INTERMEDIATE: '중급',
@@ -69,11 +63,6 @@ export default async function EditCoursePage({ params }: PageProps) {
       { id: 1, title: '', videoUrl: '', durationSeconds: 0, materialUrl: '', preview: false },
     ],
   };
-
-  console.log(
-    'session ids:',
-    initialData.sessions.map((s) => s.id),
-  );
 
   return (
     <div className="min-h-screen bg-[#F9FAFB]">

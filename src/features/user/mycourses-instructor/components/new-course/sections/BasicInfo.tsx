@@ -80,6 +80,10 @@ export default function BasicInfoSection({
   const fieldErrorCls = 'text-[12px] text-[#FF5E5E] mt-1';
   const borderCls = (hasError?: string) => (hasError ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]');
 
+  // thumbnailPreviewUrl(새로 선택한 파일의 blob URL)이 있을 때만 미리보기를 보여준다.
+  // 기존에 등록된 thumbnail(백엔드 경로)은 인증이 필요해 <Image>로 직접 못 띄우므로 미리보기 제외.
+  const hasExistingThumbnail = !thumbnailPreviewUrl && !!thumbnail;
+
   return (
     <section aria-labelledby="basic-info-heading" className="flex flex-col gap-5">
       <h2
@@ -246,16 +250,24 @@ export default function BasicInfoSection({
           )}
         </Button>
         {errors.thumbnail && <p className={fieldErrorCls}>{errors.thumbnail}</p>}
-        {(thumbnailPreviewUrl || thumbnail) && (
+
+        {/* 새로 선택한 파일일 때만 미리보기 표시 (기존 등록 이미지는 인증 필요로 미리보기 미지원) */}
+        {thumbnailPreviewUrl && (
           <figure className="relative mt-2 w-full h-40 rounded-lg border border-[#E5E7EB] overflow-hidden bg-[#F3F4F6]">
             <Image
-              src={thumbnailPreviewUrl || thumbnail}
+              src={thumbnailPreviewUrl}
               alt="썸네일 미리보기"
               fill
               unoptimized
               className="object-cover"
             />
           </figure>
+        )}
+        {hasExistingThumbnail && (
+          <p className="text-[11.5px] text-[#9CA3AF] mt-1.5">
+            ℹ 기존 등록 이미지는 미리보기를 제공하지 않습니다. 새 이미지로 변경 시 미리보기가
+            표시됩니다.
+          </p>
         )}
       </div>
     </section>

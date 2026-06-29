@@ -29,10 +29,5 @@ export function getThumbnailUrl(thumbnail?: string | null): string | null {
     result = `${API_BASE_URL}${normalizedPath}`;
   }
 
-  // 디버그: 원본 값과 최종 변환 결과 확인 (확인 후 삭제 가능)
-  if (typeof window !== 'undefined') {
-    console.log('[getThumbnailUrl] input =', thumbnail, '→ output =', result);
-  }
-
   return result;
 }
