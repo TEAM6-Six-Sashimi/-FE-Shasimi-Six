@@ -40,8 +40,6 @@ export default function CreditSuccessPage() {
         );
         setState('error');
       });
-    // searchParams는 최초 진입 시 한 번만 읽으면 되므로 의존성 배열 비움
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (state === 'loading') {
@@ -58,7 +56,7 @@ export default function CreditSuccessPage() {
         <OneButtonModal
           title="충전 완료"
           message={`${chargedAmount.toLocaleString()} 크레딧이 충전되었습니다.`}
-          onConfirm={() => router.push('/credit')}
+          onConfirm={() => router.push('/')}
         />
       )}
       {state === 'error' && (

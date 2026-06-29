@@ -18,24 +18,42 @@ export interface AdminCourse {
   approvedAt: string | null;
 }
 
+// 승인 대기 강의
+export interface AdminPendingCourse {
+  courseId: number;
+  title: string;
+  instructorName: string;
+  instructorLoginId: string;
+  categoryName: string;
+  createdAt: string;
+}
+
+// 강의 반려 사유 카테고리
+export interface RejectReasonCategory {
+  code: string;
+  label: string;
+}
+
+// 반려된 강의
 export interface RejectedCourse {
   courseId: number;
   title: string;
   instructorName: string;
   categoryName: string;
   updatedAt: string | null;
-  rejectCategory: string | null;
   rejectReason: string;
 }
 
-// 승인 대기 강의
-export interface AdminPendingCourse {
+// 반려된 강의 반려 사유 상세
+export interface CourseRejectReasonDetail {
   courseId: number;
   title: string;
-  instructorName: string;
-  instructorLoginId: string; // "강사 ID" 수정 필요
-  categoryName: string;
-  createdAt: string;
+  rejectedAt: string;
+  category: {
+    code: string;
+    label: string;
+  };
+  detail: string;
 }
 
 // 비공개된 강의

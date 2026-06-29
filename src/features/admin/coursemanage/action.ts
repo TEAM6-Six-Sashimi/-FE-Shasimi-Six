@@ -1,7 +1,8 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { AdminApiError, CreateCategoryRequest } from './type';
+import { AdminApiError, CreateCategoryRequest, RejectReasonCategory } from './type';
+import { approveCourse, fetchCourseRejectReasonDetail, fetchCourseRejectReasons, rejectCourse } from '@/services/admin.service';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -9,29 +10,22 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export async function approveCourseAction(courseId: number) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
-
-  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/approve`, {
-    method: 'PATCH',
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-
-  if (!res.ok) throw new Error('승인 처리에 실패했습니다.');
+ 
+  await approveCourse(accessToken, courseId);
 }
 
-export async function rejectCourseAction(courseId: number, rejectReason: string) {
+export async function fetchCourseRejectReasonsAction(): Promise<RejectReasonCategory[]> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
+ 
+  return fetchCourseRejectReasons(accessToken);
+}
 
-  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/reject`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ rejectReason }),
-  });
-
-  if (!res.ok) throw new Error('반려 처리에 실패했습니다.');
+export async function rejectCourseAction(courseId: number, category: string, detail: string) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+ 
+  await rejectCourse(accessToken, courseId, { category, detail });
 }
 
 // 비공개 강의 목록 조회
@@ -51,6 +45,13 @@ export async function getClosedCoursesAction() {
   }
 
   return res.json();
+}
+
+export async function fetchCourseRejectReasonDetailAction(courseId: number) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+
+  return fetchCourseRejectReasonDetail(accessToken, courseId);
 }
 
 // 카테고리 CRUD

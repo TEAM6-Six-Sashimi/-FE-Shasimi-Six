@@ -95,8 +95,7 @@ export default function PersonalInfoEditPage({ user }: Props) {
 
       showToast('개인정보가 수정되었습니다.');
       sessionStorage.removeItem('mypage_current_password');
-      router.push('/mypage');
-      router.refresh(); // 새 토큰 기준으로 서버 컴포넌트 데이터 갱신
+      router.replace('/mypage');
     } catch (err) {
       const message = err instanceof Error ? err.message : '';
       if (message === 'REQUIRES_LOGIN') {
