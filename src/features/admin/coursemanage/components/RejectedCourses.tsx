@@ -4,8 +4,6 @@ import { useMemo, useState } from 'react';
 import type { RejectedCourse } from '../type';
 import type { Category } from '@/features/categories/types';
 import RejectDetailModal from '@/components/modals/RejectDetailModal';
-import type { CourseRejectReasonDetail } from '../type';
-import { fetchCourseRejectReasonDetailAction } from '../action';
 
 interface Props {
   courses: RejectedCourse[];
@@ -13,8 +11,7 @@ interface Props {
 }
 
 export default function RejectedCourses({ courses, categories }: Props) {
-  const [detailModal, setDetailModal] = useState<CourseRejectReasonDetail | null>(null);
-  const [loadingCourseId, setLoadingCourseId] = useState<number | null>(null);
+  const [detailModal, setDetailModal] = useState<RejectedCourse | null>(null);
 
   const subToMainMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -28,16 +25,6 @@ export default function RejectedCourses({ courses, categories }: Props) {
 
   const getMainCategory = (categoryName: string) => subToMainMap.get(categoryName) ?? categoryName;
 
-  const handleOpenDetail = async (courseId: number) => {
-    setLoadingCourseId(courseId);
-    try {
-      const detail = await fetchCourseRejectReasonDetailAction(courseId);
-      if (detail) setDetailModal(detail);
-    } finally {
-      setLoadingCourseId(null);
-    }
-  };
-
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
       <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-6">반려된 강의 목록</h2>
@@ -45,21 +32,24 @@ export default function RejectedCourses({ courses, categories }: Props) {
         <thead>
           <tr className="border-b border-[#E5E7EB]">
             <th className="py-3 w-[6%] text-center font-semibold text-[#1E2125]">#</th>
-            <th className="py-3 w-[20%] text-center font-semibold text-[#1E2125]">강의명</th>
+            <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">강의명</th>
             <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">강사명</th>
-            <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">
+            <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125]">
               카테고리 &gt; 세부카테고리
             </th>
             <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">반려일</th>
-            <th className="py-3 w-[25%] text-center font-semibold text-[#1E2125]">
-              반려 사유 (카테고리: 사유 상세)
+            <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">
+              반려 사유 카테고리
+            </th>
+            <th className="py-3 w-[27%] text-center font-semibold text-[#1E2125]">
+              반려 사유 내용
             </th>
           </tr>
         </thead>
         <tbody>
           {courses.length === 0 ? (
             <tr>
-              <td colSpan={6} className="py-16 text-center text-[#6A7282]">
+              <td colSpan={7} className="py-16 text-center text-[#6A7282]">
                 반려된 강의가 없습니다.
               </td>
             </tr>
@@ -78,12 +68,20 @@ export default function RejectedCourses({ courses, categories }: Props) {
                 <td className="py-3 text-center text-[#6A7282]">
                   {c.updatedAt?.slice(0, 10) ?? '-'}
                 </td>
-                <td
-                  onClick={() => handleOpenDetail(c.courseId)}
-                  className="py-3 text-[#6A7282] text-left px-4 truncate cursor-pointer hover:text-[#1E2125] hover:underline transition-colors"
-                  title={c.rejectReason}
-                >
-                  {loadingCourseId === c.courseId ? '불러오는 중...' : c.rejectReason}
+                <td className="py-3 text-center">
+                  <span className="inline-block px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-[#FFEBEB] text-[#FF5E5E]">
+                    {c.rejectCategory.label}
+                  </span>
+                </td>
+                <td className="py-3 px-4 text-left">
+                  <button
+                    type="button"
+                    onClick={() => setDetailModal(c)}
+                    className="w-full text-left text-[#6A7282] truncate cursor-pointer hover:text-[#1E2125] hover:underline transition-colors"
+                    title={c.rejectDetail}
+                  >
+                    {c.rejectDetail}
+                  </button>
                 </td>
               </tr>
             ))
@@ -95,10 +93,11 @@ export default function RejectedCourses({ courses, categories }: Props) {
         <RejectDetailModal
           fields={[
             { label: '강의명', value: detailModal.title },
-            { label: '반려일', value: detailModal.rejectedAt.slice(0, 10) },
+            { label: '강사명', value: detailModal.instructorName },
+            { label: '반려일', value: detailModal.updatedAt?.slice(0, 10) ?? '-' },
           ]}
-          category={detailModal.category.label}
-          detail={detailModal.detail}
+          category={detailModal.rejectCategory.label}
+          detail={detailModal.rejectDetail}
           onClose={() => setDetailModal(null)}
         />
       )}

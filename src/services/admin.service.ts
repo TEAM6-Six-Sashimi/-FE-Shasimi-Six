@@ -8,9 +8,8 @@ import {
 import {
   AdminCategory,
   AdminPrivateCourse,
-  CourseRejectReasonDetail,
-  RejectReasonCategory,
   RejectedCourse,
+  RejectReasonCategory,
 } from '@/features/admin/coursemanage/type';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -221,14 +220,14 @@ export async function fetchAdminPendingCourses(accessToken: string) {
     return [];
   }
 }
- 
+
 // 강의 승인 처리
 export async function approveCourse(accessToken: string, courseId: number) {
   const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}/approve`, {
     method: 'PATCH',
     headers: { Authorization: `Bearer ${accessToken}` },
   });
- 
+
   if (!res.ok) {
     let message = '승인 처리에 실패했습니다.';
     try {
@@ -245,25 +244,20 @@ export async function approveCourse(accessToken: string, courseId: number) {
 export async function fetchCourseRejectReasons(
   accessToken: string,
 ): Promise<RejectReasonCategory[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/admin/courses/reject-reasons`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      cache: 'no-store',
-    });
- 
-    if (!res.ok) {
-      const errorBody = await res.text().catch(() => '');
-      console.error(`[fetchCourseRejectReasons] status=${res.status} body=${errorBody}`);
-      return [];
-    }
- 
-    return res.json();
-  } catch (e) {
-    console.error('[fetchCourseRejectReasons] fetch error:', e);
-    return [];
+  const res = await fetch(`${API_BASE_URL}/admin/courses/reject-reasons`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text().catch(() => '');
+    console.error(`[fetchCourseRejectReasons] status=${res.status} body=${errorBody}`);
+    throw new Error('반려 사유 카테고리를 불러오지 못했습니다.');
   }
+
+  return res.json();
 }
- 
+
 // 강의 반려 처리 (category 코드 + 상세 사유)
 export async function rejectCourse(
   accessToken: string,
@@ -278,7 +272,7 @@ export async function rejectCourse(
     },
     body: JSON.stringify(body),
   });
- 
+
   if (!res.ok) {
     let message = '반려 처리에 실패했습니다.';
     try {
@@ -290,26 +284,21 @@ export async function rejectCourse(
     throw new Error(message);
   }
 }
- 
+
 // 강의 반려 이력 조회
 export async function fetchAdminRejectedCourses(accessToken: string): Promise<RejectedCourse[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/admin/courses/rejected`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      cache: 'no-store',
-    });
- 
-    if (!res.ok) {
-      const errorBody = await res.text().catch(() => '');
-      console.error(`[fetchRejectedCourses] status=${res.status} body=${errorBody}`);
-      return [];
-    }
- 
-    return res.json();
-  } catch (e) {
-    console.error('[fetchRejectedCourses] fetch error:', e);
-    return [];
+  const res = await fetch(`${API_BASE_URL}/admin/courses/rejected`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text().catch(() => '');
+    console.error(`[fetchAdminRejectedCourses] status=${res.status} body=${errorBody}`);
+    throw new Error('반려된 강의 목록을 불러오지 못했습니다.');
   }
+
+  return res.json();
 }
 
 // 강의 관리 - 비공개된 강의
@@ -353,29 +342,6 @@ export async function fetchAdminPrivateCourses(accessToken: string): Promise<Adm
   } catch (e) {
     console.error('[fetchAdminPrivateCourses]', e);
     return [];
-  }
-}
-
-export async function fetchCourseRejectReasonDetail(
-  accessToken: string,
-  courseId: number,
-): Promise<CourseRejectReasonDetail | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}/reject-reason`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      cache: 'no-store',
-    });
-
-    if (!res.ok) {
-      const errorBody = await res.text().catch(() => '');
-      console.error(`[fetchCourseRejectReasonDetail] status=${res.status} body=${errorBody}`);
-      return null;
-    }
-
-    return res.json();
-  } catch (e) {
-    console.error('[fetchCourseRejectReasonDetail] fetch error:', e);
-    return null;
   }
 }
 
