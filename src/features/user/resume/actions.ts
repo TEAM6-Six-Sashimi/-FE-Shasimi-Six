@@ -6,9 +6,8 @@ import {
   updateResume,
   fetchMyResume,
   requestAiReview,
-  SavedResume,
 } from '@/services/resume.service';
-import { ResumePayload } from './types';
+import { ResumePayload, SavedResume } from './types';
 
 export async function saveResumeAction(
   payload: ResumePayload,
