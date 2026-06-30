@@ -1,5 +1,5 @@
+import ComingSoon from "@/components/ui/comingSoon";
+
 export default function AllAlarmPage() {
-    return (
-        <div>All Alarm Page</div>
-    );
+    return <ComingSoon />
 }

@@ -61,7 +61,7 @@ export default function ReportManagePage({ initialReports }: Props) {
           <button
             key={id}
             onClick={() => handleTabChange(id)}
-            className={`px-5 py-3 text-[13.5px] font-medium border-b-2 transition-colors ${
+            className={`px-5 py-3 text-[13.5px] font-medium border-b-2 transition-colors cursor-pointer ${
               tab === id
                 ? 'border-[#FF5E5E] text-[#FF5E5E] font-semibold'
                 : 'border-transparent text-[#6A7282] hover:text-[#1E2125]'
