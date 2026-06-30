@@ -44,7 +44,7 @@ export default function CartSticky({ selectedItems, onPurchase }: CartStickyProp
         type="button"
         onClick={onPurchase}
         disabled={selectedItems.length === 0}
-        className={`w-full py-3 h-auto rounded-xl text-[15px] font-bold ${
+        className={`w-full py-3 h-auto rounded-xl text-[15px] font-bold cursor-pointer ${
           selectedItems.length > 0
             ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848]'
             : 'bg-[#E5E7EB] text-[#6A7282] hover:bg-[#E5E7EB] cursor-not-allowed'

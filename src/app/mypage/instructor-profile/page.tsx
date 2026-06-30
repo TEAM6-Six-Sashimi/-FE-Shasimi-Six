@@ -1,5 +1,5 @@
+import ComingSoon from '@/components/ui/comingSoon';
+
 export default function InstructorProfilePage() {
-    return (
-        <div>MyPage Instructor Profile</div>
-    );
+  return <ComingSoon />;
 }

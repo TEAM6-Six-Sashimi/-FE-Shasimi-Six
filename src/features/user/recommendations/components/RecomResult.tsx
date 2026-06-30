@@ -15,6 +15,15 @@ interface RecomResultProps {
 export default function RecomResult({ result, courseDetails }: RecomResultProps) {
   const { summary, fitAnalysis, certificates, courses, resumeBased } = result;
 
+  if (!summary) {
+    return (
+      <div className="flex flex-col gap-6 mt-6">
+        <p className="text-center text-[13.5px] text-[#6A7282]">
+          분석 결과를 표시할 수 없습니다.
+        </p>
+      </div>
+    );
+  }
   
   return (
     <div className="flex flex-col gap-6 mt-6">
@@ -25,10 +34,10 @@ export default function RecomResult({ result, courseDetails }: RecomResultProps)
       <FitAnalysisSection resumeBased={resumeBased} fitAnalysis={fitAnalysis} />
 
       {/* ===================== 추천 자격증 ===================== */}
-      <CertificateSection certificates={certificates} />
+      <CertificateSection certificates={certificates ?? []} />
 
       {/* ===================== 추천 자격증 기반 강의 정보 ===================== */}
-      <CourseRecommendationSection courses={courses} courseDetails={courseDetails} />
+      <CourseRecommendationSection courses={courses ?? []} courseDetails={courseDetails} />
 
     </div>
   );

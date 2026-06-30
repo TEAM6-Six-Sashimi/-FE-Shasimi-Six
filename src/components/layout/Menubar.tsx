@@ -30,7 +30,7 @@ export default function Menubar({ categories, role }: MenubarProps) {
   const myCoursesHref = role === 'INSTRUCTOR' ? '/mycourses-instructor' : '/mycourses-student';
 
   const NAV_LINKS = [
-    { id: 'ai-subscribe', label: 'AI 구독권', icon: 'subscribe', href: '/ai-subscribe' },
+    { id: 'ai-subscribe', label: 'AI 구독 플랜', icon: 'subscribe', href: '/ai-subscribe' },
     { id: 'ai-recommendation', label: 'AI 채용공고 분석', icon: 'recommendations', href: '/recommendations' },
     { id: 'ai-resume', label: 'AI 이력서 평가', icon: 'resume', href: '/resume' },
     { id: 'community', label: '커뮤니티', icon: 'community', href: '/community' },
