@@ -53,3 +53,4 @@ jobs:
               --restart unless-stopped \
               ${{ secrets.DOCKER_USERNAME }}/${{ vars.APP_NAME }}:latest
             docker image prune -f
+            
