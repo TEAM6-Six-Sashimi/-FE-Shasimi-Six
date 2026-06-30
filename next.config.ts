@@ -18,8 +18,9 @@ const nextConfig: NextConfig = {
         pathname: '/files/**',
       },
       {
-        protocol: 'https',
-        hostname: 'api.sixsahimi.com',
+        protocol: 'http',
+        hostname: '3.34.188.172',
+        port: '8080',
         pathname: '/**',
       },
     ],
