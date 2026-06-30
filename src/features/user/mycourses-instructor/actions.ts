@@ -3,7 +3,6 @@
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { fetchUserMe } from '@/services/user.service';
-import { redirect } from 'next/navigation';
 import type { CreateCourseRequest } from '@/features/user/mycourses-instructor/types';
 import type { UpdateCourseRequest } from '@/features/user/mycourses-instructor/types';
 
@@ -29,11 +28,12 @@ export async function createCourseAction(payload: CreateCourseRequest) {
 
   if (!res.ok) {
     const errorBody = await res.json().catch(() => ({}));
+
     throw new Error(errorBody.message || '강의 등록에 실패했습니다.');
   }
 }
 
-// 등록한 강의 수정
+// 보관/반려 강의 수정
 export async function updateCourseAction(courseId: number, payload: UpdateCourseRequest) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
@@ -57,7 +57,7 @@ export async function updateCourseAction(courseId: number, payload: UpdateCourse
   }
 }
 
-// 등록한 강의 삭제
+// 보관/반려 강의 삭제
 export async function deleteCourseAction(courseId: number) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';

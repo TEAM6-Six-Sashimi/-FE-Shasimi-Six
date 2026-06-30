@@ -8,17 +8,36 @@ import { CourseFromAPI } from '../types';
 import { addCartItemAction } from '../../cart/actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import OneButtonModal from '@/components/modals/OneButtonModal';
+import Image from 'next/image';
+import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
 interface CourseCardProps {
   course: CourseFromAPI;
   category: string;
 }
 
+// 등록일 형식 변환
+function formatApprovedDate(approvedAt: string | null | undefined): string | null {
+  if (!approvedAt) return null;
+  const date = new Date(approvedAt);
+  if (Number.isNaN(date.getTime())) return null;
+
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `등록일: ${yyyy}-${mm}-${dd}`;
+}
+
+const LABEL_TEXT: Record<string, string> = {
+  POPULAR: '인기',
+  NEW: 'NEW',
+};
+
 export default function CourseCard({ course, category }: CourseCardProps) {
   const router = useRouter();
-  const thumbnailUrl = course.thumbnail?.startsWith('http')
-    ? course.thumbnail
-    : `http://localhost:8080/${course.thumbnail}`;
+  const thumbnailUrl = getThumbnailUrl(course.thumbnail);
+  const approvedDateLabel = formatApprovedDate(course.approvedAt);
+
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showCartModal, setShowCartModal] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
@@ -32,7 +51,6 @@ export default function CourseCard({ course, category }: CourseCardProps) {
     setIsAddingToCart(true);
     try {
       await addCartItemAction(course.courseId);
-      router.push('/cart');
       setShowCartModal(true);
     } catch (err) {
       const code = err instanceof Error ? err.message : '';
@@ -44,7 +62,7 @@ export default function CourseCard({ course, category }: CourseCardProps) {
 
       if (code === 'CART_002') {
         setErrorMessage('이미 장바구니에 담긴 강의입니다.');
-      } else if (code === 'ENROLLMENT_001') {
+      } else if (code === 'PAYMENT_001') {
         setErrorMessage('이미 수강 중인 강의입니다.');
       } else {
         setErrorMessage('장바구니 추가에 실패했습니다. 다시 시도해주세요.');
@@ -65,12 +83,32 @@ export default function CourseCard({ course, category }: CourseCardProps) {
       <div className="flex flex-col bg-[#F9FAFB] rounded-xl overflow-hidden border border-[#D1D5DB] hover:shadow-lg transition-shadow duration-200">
         {/* 썸네일 */}
         <Link
-          href={`/courses/${encodeURIComponent(category)}/${encodeURIComponent(course.title)}`}
+          href={`/courses/${encodeURIComponent(category)}/${course.courseId}`}
           className="relative block shrink-0"
         >
-          <div className="w-full aspect-video bg-[#E5E7EB]">
-            {course.thumbnail && (
-              <img src={thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
+          <div className="relative w-full aspect-video bg-[#E5E7EB]">
+            {thumbnailUrl && (
+              <Image
+                src={thumbnailUrl}
+                alt={course.title}
+                fill
+                unoptimized={isLocalhostUrl(thumbnailUrl)}
+                sizes="(max-width: 768px) 50vw, 280px"
+                className="object-cover"
+              />
+            )}
+
+            {/* 인기/NEW 라벨 */}
+            {course.label && LABEL_TEXT[course.label] && (
+              <span
+                className={`absolute top-2 right-2 text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
+                  course.label === 'NEW'
+                    ? 'bg-[#CFEE5D] text-[#1E2125]'
+                    : 'bg-[#FF5E5E] text-white'
+                }`}
+              >
+                {LABEL_TEXT[course.label]}
+              </span>
             )}
           </div>
         </Link>
@@ -86,18 +124,22 @@ export default function CourseCard({ course, category }: CourseCardProps) {
           </p>
           {/* 강사 */}
           <p className="text-[#6A7282] text-[12px]">{course.instructorName}</p>
-          {/* 평점 */}
+          {/* 평점 + 수강생 */}
           <div className="flex items-center gap-1">
-            <span className="text-[#FFD700] text-[12px]">★</span>
-            <span className="text-[#1E2125] text-[12px] font-semibold">
+            <span className="text-[#FFD700] text-[13px]">★</span>
+            <span className="text-[#1E2125] text-[13px] font-semibold">
               {course.ratingAvg.toFixed(1)}
             </span>
-            <span className="text-[#6A7282] text-[11px]">
-              ({course.studentCount.toLocaleString()}명)
+            <span className="text-[#6A7282] text-[12px]">
+              · {course.studentCount.toLocaleString()}명
             </span>
           </div>
+          {/* 등록일 */}
+          {approvedDateLabel && (
+            <p className="text-[#6A7282] text-[12px]">{approvedDateLabel}</p>
+          )}
           {/* 가격 */}
-          <p className="text-[#1E2125] text-[14px] font-bold mt-auto">
+          <p className="text-[#1E2125] text-[18px] font-bold mt-auto">
             {course.price.toLocaleString()} 크레딧
           </p>
         </Link>
@@ -114,7 +156,7 @@ export default function CourseCard({ course, category }: CourseCardProps) {
           <Button
             size="sm"
             variant="outline"
-            className="flex-1 border-[#D1D5DB] text-[#1E2125] text-[12.5px] font-semibold h-8 hover:bg-[#E5E7EB] cursor-pointer"
+            className="flex-1 border-[#1E2125] text-[#1E2125] text-[12.5px] font-semibold h-8 hover:bg-[#F9FAFB] cursor-pointer"
             onClick={handleAddToCart}
             disabled={isAddingToCart}
           >
@@ -132,7 +174,7 @@ export default function CourseCard({ course, category }: CourseCardProps) {
           cancelLabel="취소"
           onConfirm={() => {
             setShowPurchaseModal(false);
-            router.push(`/enrollments?courseIds=${course.courseId}`);
+            router.push(`/payments?courseIds=${course.courseId}`);
           }}
           onCancel={() => setShowPurchaseModal(false)}
         />
@@ -153,7 +195,6 @@ export default function CourseCard({ course, category }: CourseCardProps) {
         />
       )}
 
-      {/* 에러 모달 - TODO: OneButtonModal 컴포넌트 생기면 교체 */}
       {showErrorModal && (
         <OneButtonModal
           title="알림"

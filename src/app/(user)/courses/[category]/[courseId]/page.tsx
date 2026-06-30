@@ -1,7 +1,8 @@
 import { cookies } from 'next/headers';
-import { fetchCourseDetail, fetchEnrollmentInfo } from '@/services/course.service';
+import { fetchCourseDetail } from '@/services/course.service';
+import { fetchCategories } from '@/services/categories.service';
+import { fetchUserMe } from '@/services/user.service';
 import CourseDetailPage from './_components/CourseDetailPage';
-import CourseDetailPageOwned from './_components/CourseDetailPageOwned';
 
 interface PageProps {
   params: Promise<{ category: string; courseId: string }>;
@@ -13,13 +14,12 @@ export default async function Page({ params }: PageProps) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  // 강의 상세 + 수강 여부 조회
-  const [course, enrollmentInfo] = await Promise.all([
+  const [course, categories, user] = await Promise.all([
     fetchCourseDetail(courseId, accessToken),
-    accessToken ? fetchEnrollmentInfo(courseId, accessToken) : Promise.resolve(null),
+    fetchCategories(),
+    accessToken ? fetchUserMe(accessToken) : Promise.resolve(null),
   ]);
 
-  // 강의 정보 조회 실패
   if (!course) {
     return (
       <div className="min-h-screen flex items-center justify-center text-[#6A7282]">
@@ -28,11 +28,11 @@ export default async function Page({ params }: PageProps) {
     );
   }
 
-  const isPurchased = enrollmentInfo !== null;
-
-  return isPurchased ? (
-    <CourseDetailPageOwned course={course} enrollmentInfo={enrollmentInfo!} />
-  ) : (
-    <CourseDetailPage course={course} />
+  return (
+    <CourseDetailPage
+      course={course}
+      categories={categories}
+      currentUserLoginId={user?.loginId ?? null}
+    />
   );
 }

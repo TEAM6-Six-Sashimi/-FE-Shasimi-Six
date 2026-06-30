@@ -12,8 +12,8 @@ export default async function CreditPage() {
     try {
       const data = await fetchCreditBalance(accessToken);
       initialCredit = data.balance;
-    } catch (e) {
-      console.error('크레딧 조회 실패:', e);
+    } catch {
+      // 조회 실패 시 초기값 0
     }
   }
 

@@ -13,7 +13,7 @@ export default async function CartPage() {
       const data = await fetchCart(accessToken);
       initialItems = data.items;
     } catch (e) {
-      console.error('장바구니 조회 실패:', e);
+      initialItems = [];
     }
   }
 

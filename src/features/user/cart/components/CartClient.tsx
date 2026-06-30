@@ -51,24 +51,23 @@ export default function CartClient({ initialItems }: CartClientProps) {
 
       setItems((prev) => prev.filter((i) => !selectedIds.includes(i.courseId)));
       setSelectedIds([]);
-    } catch (e) {
-      console.error('삭제 실패:', e);
-    } finally {
       setShowDeleteModal(false);
+    } catch {
+      // 삭제 실패 시 모달 유지
     }
   };
 
   // 구매하기 → 결제 페이지로 이동
   const handlePurchase = () => {
     const ids = selectedItems.map((i) => i.courseId).join(',');
-    router.push(`/enrollments?courseIds=${ids}`);
+    router.push(`/payments?courseIds=${ids}`);
   };
 
   const selectedItems = items.filter((i) => selectedIds.includes(i.courseId));
 
   return (
     <>
-      <div className="flex gap-6 bg-[#F9FAFB] items-start mx-auto py-6 px-6">
+      <div className="min-h-screen flex gap-6 bg-[#F9FAFB] items-start mx-auto py-6 px-6">
         <div className="flex max-w-275 mx-auto gap-10 w-full">
           <div className="flex-1 bg-white rounded-2xl p-8 shadow-md mb-20">
             <CartContent

@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { fetchCourseDetail } from '@/services/course.service';
+import { fetchCategories } from '@/services/categories.service';
 import CourseDetailInstructor from '@/features/user/mycourses-instructor/components/CourseDetailInstructor';
 
 interface PageProps {
@@ -12,7 +13,10 @@ export default async function Page({ params }: PageProps) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
  
-  const course = await fetchCourseDetail(courseId, accessToken);
+  const [course, categories] = await Promise.all([
+    fetchCourseDetail(courseId, accessToken),
+    fetchCategories()
+  ])
  
   if (!course) {
     return (
@@ -22,6 +26,6 @@ export default async function Page({ params }: PageProps) {
     );
   }
  
-  return <CourseDetailInstructor course={course} />;
+  return <CourseDetailInstructor course={course} categories={categories} />;
 }
  
