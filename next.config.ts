@@ -18,9 +18,8 @@ const nextConfig: NextConfig = {
         pathname: '/files/**',
       },
       {
-        protocol: 'http',
-        hostname: '3.34.188.172',
-        port: '8080',
+        protocol: 'https',
+        hostname: 'api.sixsahimi.com',
         pathname: '/**',
       },
     ],
@@ -29,8 +28,8 @@ const nextConfig: NextConfig = {
 
 // 번들 분석기 설정
 const bundleAnalyzer = withBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true', // 빌드시 ANALYZE 환경변수 true일 경우 번들 분석기 활성화
-  openAnalyzer: true, // 번들 분석기 활성화 된 채로 빌드 완료 => 분석 결과 페이지 브라우저로 자동 열기
+  enabled: process.env.ANALYZE === 'true',
+  openAnalyzer: true,
 });
 
 export default bundleAnalyzer(nextConfig);
