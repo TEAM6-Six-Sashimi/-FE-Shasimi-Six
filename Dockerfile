@@ -19,6 +19,9 @@ COPY . .
 ARG API_URL
 ENV NEXT_PUBLIC_API_URL=$API_URL
 
+ARG TOSS_CLIENT_KEY
+ENV NEXT_PUBLIC_TOSS_CLIENT_KEY=$TOSS_CLIENT_KEY
+
 RUN npm run build
 
 # ==========================================
