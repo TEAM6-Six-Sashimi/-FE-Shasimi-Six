@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
@@ -18,9 +18,8 @@ const nextConfig: NextConfig = {
         pathname: '/files/**',
       },
       {
-        protocol: 'http',
-        hostname: '3.34.188.172',
-        port: '8080',
+        protocol: 'https',
+        hostname: 'api.sixsashimi.com.market-app.org',
         pathname: '/**',
       },
     ],
