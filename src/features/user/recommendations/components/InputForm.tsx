@@ -67,23 +67,25 @@ export default function InputForm({ resumeId, hasSubscription, isLoggedIn, onAna
     setIsAnalyzing(true);
     setErrorMessage('');
  
-    try {
-      const result = await analyzeJobPostingAction({
-        resumeId: resumeId ?? undefined,
-        inputType: activeTab,
-        sourceUrl: activeTab === 'URL' ? url.trim() : null,
-        rawContent: activeTab === 'TEXT' ? text.trim() : null,
-      });
- 
-      if (result.success) {
-        onAnalyzeSuccess(result.data.recommendationId);
-      } else {
-        setErrorMessage(result.error.message);
-      }
-    } finally {
-      setIsAnalyzing(false);
-    }
+    const requestBody = {
+    resumeId: resumeId ?? undefined,
+    inputType: activeTab,
+    sourceUrl: activeTab === 'URL' ? url.trim() : null,
+    rawContent: activeTab === 'TEXT' ? text.trim() : null,
   };
+ 
+  try {
+    const result = await analyzeJobPostingAction(requestBody);
+ 
+    if (result.success) {;
+      onAnalyzeSuccess(result.data.recommendationId);
+    } else {
+      setErrorMessage(result.error.message);
+    }
+  } finally {
+    setIsAnalyzing(false);
+  }
+};
  
   const tabButtonCls = (tab: RecommendationInputType) =>
     `flex items-center gap-1.5 pb-3 text-[14.5px] font-semibold border-b-2 transition-colors cursor-pointer ${
