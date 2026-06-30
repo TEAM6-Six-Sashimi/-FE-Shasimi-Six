@@ -19,7 +19,7 @@ export interface JobPostingSummary {
   mainTaskSummary: string;
 }
  
-export type FitStatus = 'SATISFIED' | 'PARTIALLY_SATISFIED' | 'NOT_SATISFIED';
+export type FitStatus = 'SATISFIED' | 'PARTIALLY_SATISFIED' | 'NOT_SATISFIED' | 'UNKNOWN';
  
 export interface FitCategoryResult {
   category: 'EDUCATION' | 'CAREER' | 'CERTIFICATION';
