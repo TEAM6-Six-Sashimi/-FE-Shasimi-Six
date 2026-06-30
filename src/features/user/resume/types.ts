@@ -156,7 +156,7 @@ export type FeedbackType = 'STRENGTH' | 'IMPROVEMENT';
 // 등급 기준 (점수 → 등급 변환이 필요할 경우 사용. 현재는 백엔드가 grade 문자열을 그대로 내려줌)
 export function getGradeColor(score: number): { bg: string; text: string } {
   if (score >= 90) return { bg: 'bg-[#F9FBE7]', text: 'text-[#827717]' }; // 우수
-  if (score >= 80) return { bg: 'bg-[#E0F2FE]', text: 'text-[#0369A1]' }; // 양호
+  if (score >= 80) return { bg: 'bg-[#EEF4FF]', text: 'text-[#5B8DEE]' }; // 양호
   if (score >= 61) return { bg: 'bg-[#FEF3C7]', text: 'text-[#92400E]' }; // 보통
   return { bg: 'bg-[#FFEBEB]', text: 'text-[#FF5E5E]' }; // 보완 필요
 }

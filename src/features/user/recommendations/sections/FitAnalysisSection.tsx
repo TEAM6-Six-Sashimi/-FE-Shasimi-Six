@@ -13,12 +13,14 @@ const FIT_STATUS_LABEL: Record<FitStatus, string> = {
   SATISFIED: '충족',
   PARTIALLY_SATISFIED: '일부 충족',
   NOT_SATISFIED: '미충족',
+  UNKNOWN: '확인 불가'
 };
 
 const FIT_STATUS_COLOR: Record<FitStatus, { bg: string; text: string }> = {
   SATISFIED: { bg: 'bg-[#F9FBE7]', text: 'text-[#827717]' },
   PARTIALLY_SATISFIED: { bg: 'bg-[#FEF3C7]', text: 'text-[#92400E]' },
   NOT_SATISFIED: { bg: 'bg-[#FFEBEB]', text: 'text-[#FF5E5E]' },
+  UNKNOWN: { bg: 'bg-[#E5E7EB]', text: 'text-[#6A7282]' }
 };
 
 const CATEGORY_LABEL: Record<FitCategoryResult['category'], string> = {
@@ -30,7 +32,14 @@ const CATEGORY_LABEL: Record<FitCategoryResult['category'], string> = {
 // 한 카테고리(학력/경력/자격증) 카드 - resumeBased일 때만 사용
 function FitCategoryCard({ result }: { result: FitCategoryResult }) {
   const { bg, text } = FIT_STATUS_COLOR[result.status];
-  const isPositive = result.status === 'SATISFIED';
+
+  // 코멘트 아이콘/색상 분기: 충족(긍정) / 확인불가(중립) / 그 외(주의)
+  const commentStyle =
+    result.status === 'SATISFIED'
+      ? { icon: '✓', color: 'text-[#5B8DEE]' }
+      : result.status === 'UNKNOWN'
+        ? { icon: 'ℹ', color: 'text-[#6A7282]' }
+        : { icon: '⚠', color: 'text-[#DC2626]' };
 
   return (
     <div className="flex-1 border border-[#E5E7EB] rounded-xl p-5 bg-white flex flex-col gap-3">
@@ -66,11 +75,9 @@ function FitCategoryCard({ result }: { result: FitCategoryResult }) {
       <hr className="border-[#E5E7EB]" />
 
       <p
-        className={`flex items-start gap-1.5 text-[12.5px] leading-relaxed ${
-          isPositive ? 'text-[#5B8DEE]' : 'text-[#DC2626]'
-        }`}
+        className={`flex items-start gap-1.5 text-[12.5px] leading-relaxed ${commentStyle.color}`}
       >
-        <span>{isPositive ? '✓' : '⚠'}</span>
+        <span>{commentStyle.icon}</span>
         {result.comment}
       </p>
     </div>
