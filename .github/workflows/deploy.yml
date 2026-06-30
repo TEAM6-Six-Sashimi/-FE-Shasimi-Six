@@ -26,7 +26,7 @@ jobs:
           context: .
           file: ./Dockerfile
           build-args: |
-            API_URL=${{ secrets.API_URL }}
+            API_BASE_URL=${{ secrets.API_BASE_URL }}
             TOSS_CLIENT_KEY=${{ secrets.TOSS_CLIENT_KEY }}
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ vars.APP_NAME }}:latest
