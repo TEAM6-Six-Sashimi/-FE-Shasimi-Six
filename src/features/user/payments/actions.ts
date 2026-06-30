@@ -73,15 +73,22 @@ export async function getCreditsAction(): Promise<number> {
 
 export async function fetchSubscriptionPlansAction(): Promise<SubscriptionPlan[]> {
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+  const accessToken = cookieStore.get('accessToken')?.value;
+
+  console.log('fetchSubscriptionPlansAction - accessToken:', accessToken);
 
   const res = await fetch(`${API_BASE_URL}/subscriptions/plans`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: {
+      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+    },
     cache: 'no-store',
   });
 
+  console.log('fetchSubscriptionPlansAction - status:', res.status);
+
   if (!res.ok) return [];
   const data = await res.json();
+  console.log('fetchSubscriptionPlansAction - data:', data);
   return data.plans ?? [];
 }
 

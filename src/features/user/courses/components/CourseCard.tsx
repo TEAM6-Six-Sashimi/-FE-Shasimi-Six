@@ -28,6 +28,11 @@ function formatApprovedDate(approvedAt: string | null | undefined): string | nul
   return `등록일: ${yyyy}-${mm}-${dd}`;
 }
 
+const LABEL_TEXT: Record<string, string> = {
+  POPULAR: '인기',
+  NEW: 'NEW',
+};
+
 export default function CourseCard({ course, category }: CourseCardProps) {
   const router = useRouter();
   const thumbnailUrl = getThumbnailUrl(course.thumbnail);
@@ -94,9 +99,15 @@ export default function CourseCard({ course, category }: CourseCardProps) {
             )}
 
             {/* 인기/NEW 라벨 */}
-            {course.label && (
-              <span className="absolute top-2 left-2 bg-[#FF5E5E] text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">
-                {course.label}
+            {course.label && LABEL_TEXT[course.label] && (
+              <span
+                className={`absolute top-2 right-2 text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
+                  course.label === 'NEW'
+                    ? 'bg-[#CFEE5D] text-[#1E2125]'
+                    : 'bg-[#FF5E5E] text-white'
+                }`}
+              >
+                {LABEL_TEXT[course.label]}
               </span>
             )}
           </div>

@@ -57,7 +57,7 @@ export default function CartContent({
           type="button"
           onClick={onDeleteSelected}
           disabled={selectedIds.length === 0}
-          className={`flex items-center gap-1.5 px-3 py-1.5 h-auto text-[13px] font-medium ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 h-auto text-[13px] font-medium cursor-pointer ${
             selectedIds.length > 0
               ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848]'
               : 'bg-[#E5E7EB] text-[#6A7282] hover:bg-[#E5E7EB] cursor-not-allowed'

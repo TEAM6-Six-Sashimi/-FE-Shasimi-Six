@@ -59,7 +59,7 @@ export default function UserManagePage({ applications, users, rejected }: Props)
       <div className="flex items-center border-b border-[#E5E7EB] mb-6">
         <button
           onClick={() => handleTabChange('all')}
-          className={`px-5 py-3 text-[13.5px] font-medium border-b-2 transition-colors ${
+          className={`px-5 py-3 text-[13.5px] font-medium border-b-2 transition-colors cursor-pointer ${
             tab === 'all'
               ? 'border-[#FF5E5E] text-[#FF5E5E] font-semibold'
               : 'border-transparent text-[#6A7282] hover:text-[#1E2125]'
@@ -69,7 +69,7 @@ export default function UserManagePage({ applications, users, rejected }: Props)
         </button>
         <button
           onClick={() => handleTabChange('approval')}
-          className={`px-5 py-3 text-[13.5px] font-medium border-b-2 transition-colors ${
+          className={`px-5 py-3 text-[13.5px] font-medium border-b-2 transition-colors cursor-pointer ${
             tab === 'approval'
               ? 'border-[#FF5E5E] text-[#FF5E5E] font-semibold'
               : 'border-transparent text-[#6A7282] hover:text-[#1E2125]'
@@ -79,7 +79,7 @@ export default function UserManagePage({ applications, users, rejected }: Props)
         </button>
         <button
           onClick={() => handleTabChange('rejected')}
-          className={`px-5 py-3 text-[13.5px] font-medium border-b-2 transition-colors ${
+          className={`px-5 py-3 text-[13.5px] font-medium border-b-2 transition-colors cursor-pointer ${
             tab === 'rejected'
               ? 'border-[#FF5E5E] text-[#FF5E5E] font-semibold'
               : 'border-transparent text-[#6A7282] hover:text-[#1E2125]'

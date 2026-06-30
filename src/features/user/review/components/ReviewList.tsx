@@ -38,6 +38,7 @@ export default function ReviewList({
   const [deleteTarget, setDeleteTarget] = useState<CourseReview | null>(null);
   const [reportTarget, setReportTarget] = useState<CourseReview | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   if (isEmpty) {
     return (
@@ -123,7 +124,7 @@ export default function ReviewList({
                 <div className="flex items-center gap-2.5">
                   {/* 아바타 */}
                   <div className="w-8 h-8 rounded-full bg-[#E5E7EB] shrink-0 flex items-center justify-center text-[#6A7282] text-[12px]">
-                    👤
+                    <Image src="/sidebar/mypage-Icon.svg" alt="사용자" width={18} height={18} />
                   </div>
                   <div className="flex flex-col gap-0.5">
                     {/* 1줄: 아이디(4자리만) + 내 리뷰 라벨 */}
@@ -150,15 +151,17 @@ export default function ReviewList({
                 {mine ? (
                   <button
                     onClick={() => setDeleteTarget(review)}
-                    className="flex items-center gap-1 text-[#6A7282] text-[12px] hover:text-[#FF5E5E] transition-colors shrink-0 cursor-pointer"
+                    onMouseEnter={() => setIsHovered(true)}
+  onMouseLeave={() => setIsHovered(false)}
+                    className="flex items-center gap-1 text-[#6A7282] text-[12px] hover:text-[#E7000B] transition-colors shrink-0 cursor-pointer"
                   >
-                    <Image src="/delete-Icon-gray.svg" width={13} height={13} alt="" />
+                    <Image src={isHovered ? '/delete-Icon-red.svg' : '/delete-Icon-gray.svg'} width={13} height={13} alt="삭제" />
                     삭제
                   </button>
                 ) : (
                   <button
                     onClick={() => setReportTarget(review)}
-                    className="text-[#6A7282] text-[12px] hover:text-[#1E2125] transition-colors shrink-0 cursor-pointer flex items-center gap-0.5"
+                    className="text-[#6A7282] text-[12px] hover:text-[#FF5E5E] transition-colors shrink-0 cursor-pointer flex items-center gap-0.5"
                   >
                     <span>⚠</span> 신고
                   </button>

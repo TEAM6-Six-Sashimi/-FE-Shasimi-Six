@@ -7,11 +7,16 @@ export default async function Page() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
+  console.log('accessToken:', accessToken); // undefined면 비로그인 상태
+
   const [plans, mySubscription, user] = await Promise.all([
     fetchSubscriptionPlansAction(),
     fetchMySubscriptionAction(),
     accessToken ? fetchUserMe(accessToken) : Promise.resolve(null),
   ]);
+
+  console.log('plans:', plans);           // [] 이면 API 호출 실패
+  console.log('plans 길이:', plans.length);
 
   const aiConsent = user?.aiConsent ?? false;
 
