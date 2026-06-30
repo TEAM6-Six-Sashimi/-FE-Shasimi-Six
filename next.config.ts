@@ -2,6 +2,7 @@ import type { NextConfig } from 'next';
 import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   images: {
     remotePatterns: [
       {
@@ -17,9 +18,9 @@ const nextConfig: NextConfig = {
         pathname: '/files/**',
       },
       {
-        // 운영 백엔드 도메인으로 교체 필요 (예: api.fitgyuk.com)
-        protocol: 'https',
-        hostname: 'YOUR_PRODUCTION_API_DOMAIN',
+        protocol: 'http',
+        hostname: '3.34.188.172',
+        port: '8080',
         pathname: '/**',
       },
     ],
