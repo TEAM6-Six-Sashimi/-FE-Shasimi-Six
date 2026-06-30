@@ -39,27 +39,26 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
   const handleConfirm = async () => {
     setIsLoading(true);
     try {
-      console.log('1. readyCreditChargeAction 호출');
+      // 1) 충전 준비: 백엔드에서 orderId/orderName 발급
       const { orderId, orderName, amount } = await readyCreditChargeAction(chargeAmount);
-      console.log('2. ready 성공:', { orderId, orderName, amount });
 
-      console.log('3. loadTossPayments 호출');
+      // 2) Toss 결제창 호출 (성공 시 successUrl로 리다이렉트되며 이 페이지로는 돌아오지 않음)
       const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
-      console.log('4. loadTossPayments 성공');
-
       const payment = tossPayments.payment({ customerKey: orderId });
-      console.log('5. payment 객체 생성 성공');
 
       await payment.requestPayment({
         method: 'CARD',
-        amount: { currency: 'KRW', value: amount },
+        amount: {
+          currency: 'KRW',
+          value: amount,
+        },
         orderId,
         orderName,
         successUrl: `${window.location.origin}/credit/success`,
         failUrl: `${window.location.origin}/credit/fail`,
       });
+      // 정상 흐름에서는 브라우저가 리다이렉트되므로 이 아래 코드는 실행되지 않음
     } catch (err) {
-      console.error('에러 발생:', err);
       const message =
         err instanceof Error ? err.message : '충전에 실패했습니다. 다시 시도해주세요.';
       setErrorMessage(message);
