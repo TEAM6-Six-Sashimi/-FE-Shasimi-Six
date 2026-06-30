@@ -19,7 +19,7 @@ const FIT_STATUS_LABEL: Record<FitStatus, string> = {
 const FIT_STATUS_COLOR: Record<FitStatus, { bg: string; text: string }> = {
   SATISFIED: { bg: 'bg-[#F9FBE7]', text: 'text-[#827717]' },
   PARTIALLY_SATISFIED: { bg: 'bg-[#FEF3C7]', text: 'text-[#92400E]' },
-  NOT_SATISFIED: { bg: 'bg-[#FFEBEB]', text: 'text-[#FF5E5E]' },
+  NOT_SATISFIED: { bg: 'bg-[#FFEBEB]', text: 'text-[#D14848]' },
   UNKNOWN: { bg: 'bg-[#E5E7EB]', text: 'text-[#6A7282]' }
 };
 
@@ -36,10 +36,12 @@ function FitCategoryCard({ result }: { result: FitCategoryResult }) {
   // 코멘트 아이콘/색상 분기: 충족(긍정) / 확인불가(중립) / 그 외(주의)
   const commentStyle =
     result.status === 'SATISFIED'
-      ? { icon: '✓', color: 'text-[#5B8DEE]' }
-      : result.status === 'UNKNOWN'
-        ? { icon: 'ℹ', color: 'text-[#6A7282]' }
-        : { icon: '⚠', color: 'text-[#DC2626]' };
+      ? { icon: '✓', color: 'text-[#827717]' }
+      : result.status === 'PARTIALLY_SATISFIED'
+        ? { icon: '✓', color: 'text-[#92400E]' }
+        : result.status === 'NOT_SATISFIED'
+        ? { icon: '!', color: 'text-[#D14848]' }
+        : { icon: '⚠', color: 'text-[#6A7282]' };
 
   return (
     <div className="flex-1 border border-[#E5E7EB] rounded-xl p-5 bg-white flex flex-col gap-3">
@@ -115,25 +117,17 @@ export default function FitAnalysisSection({ resumeBased, fitAnalysis }: FitAnal
 
           <div className="border border-[#E5E7EB] rounded-xl p-5 bg-[#F9FAFB]">
             <h4 className="text-[14px] font-bold text-[#1E2125] mb-3">AI 종합 분석 코멘트</h4>
-            <div className="flex flex-col gap-2">
+            <ul className="flex flex-col gap-1.5">
               {fitAnalysis.overallComments.map((comment, idx) => (
-                <p
+                <li
                   key={idx}
                   className="flex items-start gap-2 text-[13px] text-[#1E2125] leading-relaxed"
                 >
-                  <span>
-                    {idx === 0 ? (
-                      <Image src="/ai-recommendation/fit.svg" alt="" width={18} height={18} />
-                    ) : idx === fitAnalysis.overallComments.length - 1 ? (
-                      <Image src="/ai-recommendation/prefer.svg" alt="" width={18} height={18} />
-                    ) : (
-                      <Image src="/ai-recommendation/lack.svg" alt="" width={18} height={18} />
-                    )}
-                  </span>
+                  <span className="text-[#6A7282]">•</span>
                   {comment}
-                </p>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </div>
       )}
