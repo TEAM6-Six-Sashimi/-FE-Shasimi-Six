@@ -1,6 +1,6 @@
 'use client';
 
-import { CourseDetailFromAPI, ReviewMode } from '@/features/user/courses/types';
+import { CourseDetailFromAPI } from '@/features/user/courses/types';
 import { Category } from '@/features/categories/types';
 import CourseHeaderSection from './sections/CourseHeaderSection';
 import CourseNcsSection from './sections/CourseNcsSection';
@@ -8,6 +8,7 @@ import CourseTabNav, { SECTION_ID } from './sections/CourseTabNav';
 import CourseCurriculumSection from './sections/CourseCurriculumSection';
 import CourseInstructorSection from './sections/CourseInstructorSection';
 import CourseReviewsSection from './sections/CourseReviews';
+import { ReviewMode } from '../../review/types';
 
 interface CourseDetailContentProps {
   course: CourseDetailFromAPI;
