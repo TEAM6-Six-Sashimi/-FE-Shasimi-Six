@@ -1,3 +1,5 @@
+import { CourseReview } from "../review/types";
+
 // 강의 목록용
 export interface CourseFromAPI {
   courseId: number;
@@ -27,14 +29,6 @@ export interface InstructorInfo {
   bio: string;
   mainCareers: string[];
   portfolioUrl?: string;
-}
-
-export interface CourseReview {
-  reviewId: number;
-  rating: number; // 1~5
-  content: string;
-  writerLoginId: string;
-  createdAt: string;
 }
 
 // 별점 분포 - 백엔드가 star별 개수(count)만 내려주고, 비율(%) 계산은 프론트 담당
@@ -110,9 +104,3 @@ export const DIFFICULTY_LABEL: Record<string, string> = {
 export interface CourseDetail extends CourseFromAPI {
   categoryName: string;
 }
-
-// writable: (구매 후) 작성 가능 + 1번 작성가능 문구
-// readonly: (구매 전) 구매후 작성가능 문구
-// hidden-form: 입력폼x + 목록만
-// no-reviews: 등록된 수강평이 없습니다
-export type ReviewMode = 'writable' | 'readonly' | 'hidden-form' | 'no-reviews';

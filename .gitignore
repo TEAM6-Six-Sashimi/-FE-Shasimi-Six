@@ -43,3 +43,11 @@ next-env.d.ts
 
 # 성능 비교용
 Dockerfile.before
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
