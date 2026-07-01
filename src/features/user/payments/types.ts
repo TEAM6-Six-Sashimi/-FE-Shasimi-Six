@@ -64,6 +64,7 @@ export interface CheckoutResponse {
 
 export interface SubscriptionPlan {
   planCode: string;
+  planThumbnail: string;
   planName: string;
   durationMonths: number;
   originalPrice: number;

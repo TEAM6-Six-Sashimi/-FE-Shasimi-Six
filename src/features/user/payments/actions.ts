@@ -75,8 +75,6 @@ export async function fetchSubscriptionPlansAction(): Promise<SubscriptionPlan[]
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  console.log('fetchSubscriptionPlansAction - accessToken:', accessToken);
-
   const res = await fetch(`${API_BASE_URL}/subscriptions/plans`, {
     headers: {
       ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
@@ -84,11 +82,8 @@ export async function fetchSubscriptionPlansAction(): Promise<SubscriptionPlan[]
     cache: 'no-store',
   });
 
-  console.log('fetchSubscriptionPlansAction - status:', res.status);
-
   if (!res.ok) return [];
   const data = await res.json();
-  console.log('fetchSubscriptionPlansAction - data:', data);
   return data.plans ?? [];
 }
 
@@ -103,7 +98,9 @@ export async function fetchPlanPreviewAction(planCode: string): Promise<PlanPrev
   });
 
   if (!res.ok) return null;
-  return res.json();
+  
+  const data = await res.json();
+  return data;
 }
 
 export async function fetchMySubscriptionAction(): Promise<MySubscription | null> {

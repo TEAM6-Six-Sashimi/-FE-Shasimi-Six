@@ -34,6 +34,7 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
             id: preview.planCode,
             title: preview.planName,
             subtitle: `AI 구독권 ${preview.durationMonths}개월`,
+            thumbnail: preview.planThumbnail,
             price: preview.price,
           },
         ]
