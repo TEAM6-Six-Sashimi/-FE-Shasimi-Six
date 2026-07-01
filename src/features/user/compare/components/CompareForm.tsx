@@ -17,18 +17,12 @@ import {
   fetchCourseDetailAction,
   fetchCoursesBySubCategoryAction,
 } from '../actions';
+import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
-  if (!thumbnail) return null;
-  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
-}
-
-function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  return `${hours}시간`;
-}
+// function formatDuration(seconds: number): string {
+//   const hours = Math.floor(seconds / 3600);
+//   return `${hours}시간`;
+// }
 
 // 비교 슬롯(좌/우) 한 칸의 상태
 interface CompareSlot {
@@ -179,7 +173,7 @@ export default function ComapareForm() {
                             src={getThumbnailUrl(slot.detail.thumbnail)!}
                             alt={slot.detail.title}
                             fill
-                            unoptimized
+                            unoptimized={isLocalhostUrl(slot.detail.thumbnail ?? '')}
                             className="object-cover rounded-lg"
                           />
                         )}
@@ -212,11 +206,11 @@ export default function ComapareForm() {
           valueB={slotB.detail ? DIFFICULTY_LABEL[slotB.detail.difficulty] : null}
           badge
         />
-        <CompareRow
+        {/* <CompareRow
           label="학습 시간"
           valueA={slotA.detail ? formatDuration(slotA.detail.totalDuration) : null}
           valueB={slotB.detail ? formatDuration(slotB.detail.totalDuration) : null}
-        />
+        /> */}
         <CompareRow
           label="강의 수"
           valueA={slotA.detail ? `${slotA.detail.sessions.length}강` : null}
