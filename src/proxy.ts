@@ -9,7 +9,10 @@ export function proxy(request: NextRequest) {
     if (
       pathname.startsWith('/mycourses-student') ||
       pathname.startsWith('/mypage') ||
-      pathname.startsWith('/instructor/application')
+      pathname.startsWith('/instructor/application') ||
+      pathname.startsWith('/payments') ||
+      pathname.startsWith('/cart') ||
+      pathname.startsWith('/alarm') 
     ) {
       return NextResponse.redirect(new URL('/auth/login', request.url));
     }
@@ -20,7 +23,8 @@ export function proxy(request: NextRequest) {
   // 강사 전용 페이지
   if (
     pathname.startsWith('/mycourses-instructor') ||
-    pathname.startsWith('/mypage/instructor-profile')
+    pathname.startsWith('/mypage/instructor-profile') ||
+    pathname.startsWith('/mypage/settlements')
   ) {
     if (role !== 'INSTRUCTOR' && role !== 'ADMIN') {
       return NextResponse.redirect(new URL('/', request.url));
@@ -44,5 +48,8 @@ export const config = {
     '/mypage/:path*',
     '/instructor/application/:path*',
     '/admin/:path*',
+    '/payments/:path*',
+    '/cart/:path*',
+    '/alarm/:path*',
   ],
 };
