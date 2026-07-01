@@ -65,7 +65,7 @@ export default function CareerSection({
 
               <div>
                 <label className={labelCls}>
-                  회사명 <span className="text-[#FF5E5E]">*</span>
+                  프로젝트/회사명 <span className="text-[#FF5E5E]">*</span>
                 </label>
                 <input
                   type="text"
@@ -79,7 +79,7 @@ export default function CareerSection({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={labelCls}>
-                    입사일 <span className="text-[#FF5E5E]">*</span>
+                    시작/입사일 <span className="text-[#FF5E5E]">*</span>
                   </label>
                   <input
                     type="text"
@@ -93,14 +93,14 @@ export default function CareerSection({
                 <div>
                   <div className="flex items-center justify-between">
                     <label className={labelCls}>
-                      퇴사일 <span className="text-[#FF5E5E]">*</span>
+                      종료/퇴사일 <span className="text-[#FF5E5E]">*</span>
                     </label>
                     <CheckboxToggle
                       checked={career.currentlyEmployed}
                       onChange={() =>
                         onUpdate(career.id, 'currentlyEmployed', !career.currentlyEmployed)
                       }
-                      label="재직 중"
+                      label="-ing"
                       size="md"
                     />
                   </div>
@@ -119,7 +119,7 @@ export default function CareerSection({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={labelCls}>
-                    재직 형태 <span className="text-[#FF5E5E]">*</span>
+                    형태 <span className="text-[#FF5E5E]">*</span>
                   </label>
                   <select
                     value={career.employmentType}
