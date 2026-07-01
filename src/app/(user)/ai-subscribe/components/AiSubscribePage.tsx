@@ -98,8 +98,8 @@ export default function AiSubscribePage({ plans, mySubscription, aiConsent }: Pr
 
       <div className="max-w-3xl mx-auto mt-10 text-center">
         <p className="text-[12.5px] text-[#9CA3AF] leading-relaxed">
-          구독 플랜 해지 시, 만료일까지 구독권이 유지됩니다. 구독 플랜 해지는 마이페이지 &gt;
-          결제 내역(구독권)에서 가능합니다.
+          구독 플랜 해지 시, 만료일까지 구독권이 유지됩니다. 구독 플랜 해지는 마이페이지 &gt; 결제
+          내역(구독권)에서 가능합니다.
           <br />
           크레딧이 부족할 경우, 자동 갱신 없이 구독권이 해지됩니다.
         </p>

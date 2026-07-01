@@ -139,9 +139,7 @@ export default function InstructorApplicationDetailPage({ params }: Props) {
 
       <Resume resumeFileUrl={detail.resumeFileUrl} mainCareers={detail.mainCareers} />
 
-      {detail.profileImageUrl && (
-        <ProfileImage profileImageUrl={detail.profileImageUrl} />
-      )}
+      {detail.profileImageUrl && <ProfileImage profileImageUrl={detail.profileImageUrl} />}
 
       <PortfolioSection portfolioUrl={detail.portfolioUrl} />
 

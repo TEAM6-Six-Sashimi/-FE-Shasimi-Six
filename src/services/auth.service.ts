@@ -1,9 +1,13 @@
 // 회원 서비스(로그인/회원가입)
-import { LoginRequest, LoginResponse,
-  ReissueResponse, EmailVerifyResponseDto,
-  LoginIdCheckResponseDto, ReferralCodeCheckResponseDto,
-  SignupPayloadDto
- } from '@/features/auth/types';
+import {
+  LoginRequest,
+  LoginResponse,
+  ReissueResponse,
+  EmailVerifyResponseDto,
+  LoginIdCheckResponseDto,
+  ReferralCodeCheckResponseDto,
+  SignupPayloadDto,
+} from '@/features/auth/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -69,6 +73,41 @@ export async function checkLoginIdDuplicate(loginId: string): Promise<boolean> {
   return !data.available;
 }
 
+// 추천인 코드 확인
+export async function checkReferralCode(
+  referralCode: string,
+): Promise<ReferralCodeCheckResponseDto> {
+  const response = await fetch(
+    `${API_BASE_URL}/auth/referral-code/check?referralCode=${encodeURIComponent(referralCode)}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error('네트워크 응답에 문제가 발생했습니다.');
+  }
+
+  return response.json();
+}
+
+// 회원가입 요청
+export async function registerUser(payload: SignupPayloadDto): Promise<boolean> {
+  const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return response.ok;
+}
+
 // 로그인
 export async function loginService(payload: LoginRequest): Promise<LoginResponse> {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -100,37 +139,4 @@ export async function reissueService(refreshToken: string): Promise<ReissueRespo
   }
 
   return response.json();
-}
-
-// 추천인 코드 확인
-export async function checkReferralCode(referralCode: string): Promise<ReferralCodeCheckResponseDto> {
-  const response = await fetch(
-    `${API_BASE_URL}/auth/referral-code/check?referralCode=${encodeURIComponent(referralCode)}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error('네트워크 응답에 문제가 발생했습니다.');
-  }
-
-  return response.json();
-}
-
-// 회원가입 요청
-export async function registerUser(payload: SignupPayloadDto): Promise<boolean> {
-  const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
-
-  return (response.ok)
 }

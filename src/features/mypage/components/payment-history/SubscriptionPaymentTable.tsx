@@ -38,10 +38,7 @@ export default function SubscriptionPaymentTable({
       showToast(result.message ?? '구독이 해지되었습니다.', 'positive');
       router.refresh();
     } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : '구독 해지에 실패했습니다.',
-        'negative',
-      );
+      showToast(error instanceof Error ? error.message : '구독 해지에 실패했습니다.', 'negative');
     } finally {
       setIsCancelling(false);
     }
@@ -84,9 +81,7 @@ export default function SubscriptionPaymentTable({
               <th className="py-3 w-[5%] text-center font-semibold text-[#1E2125]">#</th>
               <th className="py-3 w-[20%] text-center font-semibold text-[#1E2125]">주문번호</th>
               <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">날짜/시간</th>
-              <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">
-                구독 플랜명
-              </th>
+              <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">구독 플랜명</th>
               <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">
                 총 결제 크레딧
               </th>
@@ -109,15 +104,11 @@ export default function SubscriptionPaymentTable({
                     className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
                   >
                     <td className="py-4 text-center text-[#6A7282]">{idx + 1}</td>
-                    <td className="py-4 text-center text-[#1E2125] font-medium">
-                      {item.orderNo}
-                    </td>
+                    <td className="py-4 text-center text-[#1E2125] font-medium">{item.orderNo}</td>
                     <td className="py-4 text-center text-[#6A7282]">
                       {item.paidAt.slice(0, 10)} / {item.paidAt.slice(11, 16)}
                     </td>
-                    <td className="py-4 text-center text-[#1E2125] font-medium">
-                      {item.planName}
-                    </td>
+                    <td className="py-4 text-center text-[#1E2125] font-medium">{item.planName}</td>
                     <td className="py-4 text-center font-bold text-[#FF5E5E] text-[14px]">
                       {item.amount.toLocaleString()} 크레딧
                     </td>

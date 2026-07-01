@@ -29,7 +29,7 @@ export default function CourseActionSlot({ course, actionType }: CourseActionSlo
         <StudentOwnedButtons
           courseId={course.courseId}
           sessionId={target?.sessionId}
-          lastPositionSeconds={target?.sessionCompleted ? 0 : target?.lastPositionSeconds ?? 0}
+          lastPositionSeconds={target?.sessionCompleted ? 0 : (target?.lastPositionSeconds ?? 0)}
           completed={course.completed ?? false}
         />
       );

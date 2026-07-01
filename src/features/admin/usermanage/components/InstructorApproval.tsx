@@ -52,7 +52,9 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
             <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">이름</th>
             <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">회원 ID</th>
             <th className="py-3 w-[22%] text-center font-semibold text-[#1E2125]">이메일</th>
-            <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125]">지원 카테고리명</th>
+            <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125]">
+              지원 카테고리명
+            </th>
             <th className="py-3 w-[14%] text-center font-semibold text-[#1E2125]">신청일</th>
             <th className="py-3 w-[14%] text-center font-semibold text-[#1E2125]">서류</th>
           </tr>
@@ -87,7 +89,9 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
                         email: a.email ?? '',
                         catName: a.categoryName ?? '',
                       }).toString();
-                      router.push(`/admin/usermanage/instructor-applications/${a.applicationId}?${q}`);
+                      router.push(
+                        `/admin/usermanage/instructor-applications/${a.applicationId}?${q}`,
+                      );
                     }}
                     className="px-3 py-1.5 h-auto border-[1.5px] border-[#D1D5DB] text-[12px] font-semibold text-[#6A7282] hover:border-[#6A7282] hover:bg-white hover:text-[#6A7282] cursor-pointer"
                   >

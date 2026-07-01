@@ -2,7 +2,7 @@ import {
   ResumePayload,
   AiReviewResult,
   SavedResume,
-  AiReviewResponse
+  AiReviewResponse,
 } from '@/features/user/resume/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -13,7 +13,6 @@ export async function saveResume(
   payload: ResumePayload,
 ): Promise<{ resumeId: number } | null> {
   try {
-
     const res = await fetch(`${API_BASE_URL}/resumes`, {
       method: 'POST',
       headers: {
