@@ -40,7 +40,7 @@ export default function FeatureCards() {
       {FEATURE_CARDS.map(
         ({ href, icon, iconBg, title, description, buttonLabel, buttonStyle, cardBg }) => (
           <li key={href}>
-            <article className={`${cardBg} rounded-xl p-6 flex flex-col gap-4 min-h-55`}>
+            <article className={`${cardBg} rounded-xl p-6 flex flex-col gap-4 h-full`}>
               {/* 아이콘 — 원형 배경, 장식용이라 aria-hidden */}
               <div
                 aria-hidden="true"
