@@ -17,7 +17,7 @@ interface FilterDropdownProps {
 
 const DEFAULT_FILTERS: FilterValues = {
   priceRange: [0, 100000],
-  ratingRange: [0, 5]
+  ratingRange: [0, 5],
 };
 
 export default function FilterDropdown({ open, onApply, onReset }: FilterDropdownProps) {
@@ -32,7 +32,6 @@ export default function FilterDropdown({ open, onApply, onReset }: FilterDropdow
 
   return (
     <div className="absolute top-full right-0 mt-2 w-70 bg-[#F9FAFB] border border-[#D1D5DB] rounded-xl shadow-lg z-40 p-5 flex flex-col gap-5">
-
       {/* 가격 범위 */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">

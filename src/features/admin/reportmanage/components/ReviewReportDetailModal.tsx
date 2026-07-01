@@ -109,9 +109,7 @@ export default function ReviewReportDetailModal({ reportId, onClose, onProcessed
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-[#F9FAFB] rounded-lg px-3 py-2.5">
                 <p className="text-[11px] text-[#9CA3AF] mb-0.5">작성자 ID</p>
-                <p className="text-[13.5px] font-semibold text-[#1E2125]">
-                  {detail.writerLoginId}
-                </p>
+                <p className="text-[13.5px] font-semibold text-[#1E2125]">{detail.writerLoginId}</p>
               </div>
               <div className="bg-[#F9FAFB] rounded-lg px-3 py-2.5">
                 <p className="text-[11px] text-[#9CA3AF] mb-0.5">신고자 ID</p>

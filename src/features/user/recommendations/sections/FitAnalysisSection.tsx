@@ -13,14 +13,14 @@ const FIT_STATUS_LABEL: Record<FitStatus, string> = {
   SATISFIED: '충족',
   PARTIALLY_SATISFIED: '일부 충족',
   NOT_SATISFIED: '미충족',
-  UNKNOWN: '확인 불가'
+  UNKNOWN: '확인 불가',
 };
 
 const FIT_STATUS_COLOR: Record<FitStatus, { bg: string; text: string }> = {
   SATISFIED: { bg: 'bg-[#F9FBE7]', text: 'text-[#827717]' },
   PARTIALLY_SATISFIED: { bg: 'bg-[#FEF3C7]', text: 'text-[#92400E]' },
   NOT_SATISFIED: { bg: 'bg-[#FFEBEB]', text: 'text-[#D14848]' },
-  UNKNOWN: { bg: 'bg-[#E5E7EB]', text: 'text-[#6A7282]' }
+  UNKNOWN: { bg: 'bg-[#E5E7EB]', text: 'text-[#6A7282]' },
 };
 
 const CATEGORY_LABEL: Record<FitCategoryResult['category'], string> = {
@@ -40,8 +40,8 @@ function FitCategoryCard({ result }: { result: FitCategoryResult }) {
       : result.status === 'PARTIALLY_SATISFIED'
         ? { icon: '✓', color: 'text-[#92400E]' }
         : result.status === 'NOT_SATISFIED'
-        ? { icon: '!', color: 'text-[#D14848]' }
-        : { icon: '⚠', color: 'text-[#6A7282]' };
+          ? { icon: '!', color: 'text-[#D14848]' }
+          : { icon: '⚠', color: 'text-[#6A7282]' };
 
   return (
     <div className="flex-1 border border-[#E5E7EB] rounded-xl p-5 bg-white flex flex-col gap-3">
@@ -76,9 +76,7 @@ function FitCategoryCard({ result }: { result: FitCategoryResult }) {
 
       <hr className="border-[#E5E7EB]" />
 
-      <p
-        className={`flex items-start gap-1.5 text-[12.5px] leading-relaxed ${commentStyle.color}`}
-      >
+      <p className={`flex items-start gap-1.5 text-[12.5px] leading-relaxed ${commentStyle.color}`}>
         <span>{commentStyle.icon}</span>
         {result.comment}
       </p>

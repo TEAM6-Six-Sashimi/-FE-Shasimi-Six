@@ -152,10 +152,15 @@ export default function ReviewList({
                   <button
                     onClick={() => setDeleteTarget(review)}
                     onMouseEnter={() => setIsHovered(true)}
-  onMouseLeave={() => setIsHovered(false)}
+                    onMouseLeave={() => setIsHovered(false)}
                     className="flex items-center gap-1 text-[#6A7282] text-[12px] hover:text-[#E7000B] transition-colors shrink-0 cursor-pointer"
                   >
-                    <Image src={isHovered ? '/delete-Icon-red.svg' : '/delete-Icon-gray.svg'} width={13} height={13} alt="삭제" />
+                    <Image
+                      src={isHovered ? '/delete-Icon-red.svg' : '/delete-Icon-gray.svg'}
+                      width={13}
+                      height={13}
+                      alt="삭제"
+                    />
                     삭제
                   </button>
                 ) : (

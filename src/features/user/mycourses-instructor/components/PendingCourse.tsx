@@ -178,13 +178,7 @@ export default function PendingCourse({ courses, categories }: Props) {
                         disabled
                         className="h-9 px-4 text-[12.5px] font-semibold text-[#6A7282] bg-[#E5E7EB] cursor-not-allowed"
                       >
-                        <Image
-                          src='/edit-Icon-gray.svg'
-                          alt=""
-                          width={16}
-                          height={16}
-                        />{' '}
-                        수정
+                        <Image src="/edit-Icon-gray.svg" alt="" width={16} height={16} /> 수정
                       </Button>
                     ) : (
                       <Link href={`/mycourses-instructor/${course.courseId}/edit`}>
@@ -193,12 +187,7 @@ export default function PendingCourse({ courses, categories }: Props) {
                           size="sm"
                           className="h-9 px-4 border-[#D1D5DB] text-[#1E2125] text-[12.5px] font-semibold hover:bg-[#F9FAFB] cursor-pointer"
                         >
-                          <Image
-                          src='/edit-Icon-black.svg'
-                          alt=""
-                          width={16}
-                          height={16}
-                          />{' '} 수정
+                          <Image src="/edit-Icon-black.svg" alt="" width={16} height={16} /> 수정
                         </Button>
                       </Link>
                     )}
@@ -217,8 +206,7 @@ export default function PendingCourse({ courses, categories }: Props) {
                         onClick={() => setDeleteTargetId(course.courseId)}
                         className="h-9 px-4 text-[12.5px] font-semibold bg-[#FF5E5E] hover:bg-[#D14848] text-white cursor-pointer"
                       >
-                        <Image src="/delete-Icon-white.svg" alt="" width={16} height={16} />{' '}
-                        삭제
+                        <Image src="/delete-Icon-white.svg" alt="" width={16} height={16} /> 삭제
                       </Button>
                     )}
                   </div>
