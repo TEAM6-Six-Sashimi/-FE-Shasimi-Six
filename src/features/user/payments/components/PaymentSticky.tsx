@@ -30,6 +30,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [showInsufficientModal, setShowInsufficientModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showErrorModal, setShowErrorModal] = useState(false);
 
@@ -41,10 +42,18 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
 
   const isSubscription = summary.purchaseType === 'AI_SUBSCRIPTION';
 
-  const canPurchase = agreedToTerms && agreedToRefund && summary.shortfallCredits === 0;
+  // ✅ 동의 체크박스만 충족하면 버튼 활성화 (크레딧 조건 제거)
+  const canPurchase = agreedToTerms && agreedToRefund;
 
   const handlePaymentClick = () => {
     if (!canPurchase) return;
+
+    // ✅ 크레딧 부족 시 충전 안내 모달, 충분하면 바로 결제 확인 모달
+    if (summary.shortfallCredits > 0) {
+      setShowInsufficientModal(true);
+      return;
+    }
+
     generateIdempotencyKey();
     setShowConfirmModal(true);
   };
@@ -165,7 +174,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
             disabled={!canPurchase || isLoading}
             className={`w-full py-4 h-auto rounded-xl text-white font-semibold text-base ${
               canPurchase && !isLoading
-                ? 'bg-[#FF5F5F] hover:bg-[#D14848]'
+                ? 'bg-[#FF5F5F] hover:bg-[#D14848] cursor-pointer'
                 : 'bg-[#E5E7EB] text-gray-400 hover:bg-[#E5E7EB] cursor-not-allowed'
             }`}
           >
@@ -173,6 +182,21 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
           </Button>
         </div>
       </div>
+
+      {/* 크레딧 부족 모달 */}
+      {showInsufficientModal && (
+        <TwoButtonModal
+          title="크레딧 부족"
+          message="크레딧이 부족합니다. 크레딧 충전 페이지로 이동하시겠습니까?"
+          confirmLabel="확인"
+          cancelLabel="취소"
+          onConfirm={() => {
+            setShowInsufficientModal(false);
+            router.push('/credit');
+          }}
+          onCancel={() => setShowInsufficientModal(false)}
+        />
+      )}
 
       {/* 결제 전 확인 모달 */}
       {showConfirmModal && (
