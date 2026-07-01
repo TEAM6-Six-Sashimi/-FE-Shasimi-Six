@@ -44,19 +44,26 @@ export default function ReviewForm({ courseId }: ReviewFormProps) {
   };
 
   return (
-    <div className="flex flex-col gap-4 pb-6 border-b border-[#E5E7EB]">
-      <h3 className="text-[15px] font-bold text-[#1E2125]">수강평 작성하기</h3>
+    <section
+      aria-labelledby="review-form-heading"
+      className="flex flex-col gap-4 pb-6 border-b border-[#E5E7EB]"
+    >
+      <h3 id="review-form-heading" className="text-[15px] font-bold text-[#1E2125]">
+        수강평 작성하기
+      </h3>
 
       {/* 별점 */}
-      <div>
-        <p className="text-[13px] font-semibold text-[#1E2125] mb-2">
+      <fieldset>
+        <legend className="text-[13px] font-semibold text-[#1E2125] mb-2">
           평점 선택 <span className="text-[#FF5E5E]">*</span>
-        </p>
-        <div className="flex items-center gap-1">
+        </legend>
+        <div className="flex items-center gap-1" role="group" aria-label="별점 선택">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
               type="button"
+              aria-label={`${star}점`}
+              aria-pressed={rating === star}
               onClick={() => setRating(star)}
               className="text-[28px] cursor-pointer transition-colors"
             >
@@ -65,32 +72,49 @@ export default function ReviewForm({ courseId }: ReviewFormProps) {
           ))}
         </div>
         {submitted && rating === 0 && (
-          <p className="text-[12px] text-[#FF5E5E] mt-1">평점을 선택해주세요.</p>
+          <p role="alert" className="text-[12px] text-[#FF5E5E] mt-1">
+            평점을 선택해주세요.
+          </p>
         )}
-      </div>
+      </fieldset>
 
       {/* 안내 문구 */}
-      <div className="bg-[#FFEBEB] rounded-lg px-4 py-4 font-medium text-[13px] text-[#FF5E5E]">
+      <p
+        role="note"
+        className="bg-[#FFEBEB] rounded-lg px-4 py-4 font-medium text-[13px] text-[#FF5E5E]"
+      >
         ⚠ 강의평은 한 번만 작성할 수 있으며, 작성 후 수정이 불가합니다.
-      </div>
+      </p>
 
       {/* 텍스트 입력 */}
-      <textarea
-        placeholder="이 강의에 대한 솔직한 평가를 남겨주세요."
-        value={content}
-        onChange={(e) => setContent(e.target.value.slice(0, 200))}
-        maxLength={200}
-        rows={4}
-        className="w-full px-4 py-3 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors resize-none"
-      />
-      <p className="text-[11.5px] text-[#6A7282] text-right -mt-2">{content.length}/200</p>
-      {submitted && !content.trim() && (
-        <p className="text-[12px] text-[#FF5E5E] -mt-2">내용을 입력해주세요.</p>
-      )}
+      <div>
+        <label htmlFor="review-content" className="sr-only">
+          수강평 내용
+        </label>
+        <textarea
+          id="review-content"
+          placeholder="이 강의에 대한 솔직한 평가를 남겨주세요."
+          value={content}
+          onChange={(e) => setContent(e.target.value.slice(0, 200))}
+          maxLength={200}
+          rows={4}
+          aria-describedby="review-content-count"
+          className="w-full px-4 py-3 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors resize-none"
+        />
+        <p id="review-content-count" className="text-[11.5px] text-[#6A7282] text-right mt-1">
+          {content.length}/200
+        </p>
+        {submitted && !content.trim() && (
+          <p role="alert" className="text-[12px] text-[#FF5E5E]">
+            내용을 입력해주세요.
+          </p>
+        )}
+      </div>
 
       {/* 리뷰 등록 버튼 */}
       <div className="flex justify-end">
         <Button
+          type="button"
           onClick={handleSubmitClick}
           className="h-10 px-6 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[13.5px] cursor-pointer"
         >
@@ -108,6 +132,6 @@ export default function ReviewForm({ courseId }: ReviewFormProps) {
           onCancel={() => !isSubmitting && setConfirmOpen(false)}
         />
       )}
-    </div>
+    </section>
   );
 }

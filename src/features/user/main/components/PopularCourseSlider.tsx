@@ -4,16 +4,12 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CourseFromAPI } from '../../courses/types';
+import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface CourseWithCategory extends CourseFromAPI {
   categoryName: string;
-}
-
-function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
-  if (!thumbnail) return null;
-  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
 }
 
 export default function PopularCourseSlider() {
@@ -28,9 +24,7 @@ export default function PopularCourseSlider() {
         if (!res.ok) throw new Error('강의 목록 조회 실패');
 
         const data: CourseFromAPI[] = await res.json();
-        const topCourses = [...data]
-          .sort((a, b) => b.studentCount - a.studentCount)
-          .slice(0, 9);
+        const topCourses = [...data].sort((a, b) => b.studentCount - a.studentCount).slice(0, 9);
 
         const detailedCourses = await Promise.all(
           topCourses.map(async (course) => {
@@ -108,7 +102,8 @@ export default function PopularCourseSlider() {
                             src={thumbnailUrl}
                             alt={course.title}
                             fill
-                            unoptimized
+                            unoptimized={isLocalhostUrl(thumbnailUrl)}
+                            sizes="(max-width: 768px) 100vw, 33vw"
                             className="object-cover"
                           />
                         )}

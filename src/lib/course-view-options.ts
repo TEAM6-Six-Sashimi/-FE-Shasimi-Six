@@ -1,4 +1,5 @@
-import { CourseDetailFromAPI, ReviewMode } from '@/features/user/courses/types';
+import { CourseDetailFromAPI } from '@/features/user/courses/types';
+import { ReviewMode } from '@/features/user/review/types';
 
 export type ActionType =
   | 'purchase' // 구매하기/장바구니 (PUBLIC)
