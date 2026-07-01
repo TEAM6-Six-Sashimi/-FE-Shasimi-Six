@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -9,19 +9,39 @@ import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { RecommendationInputType } from '../types';
 import { analyzeJobPostingAction, validateUrlAction } from '../actions';
 
-const TABS: { key: RecommendationInputType; label: string; iconActive: string; iconInactive: string }[] = [
-  { key: 'URL', label: 'URL 입력', iconActive: '/ai-recommendation/url-active.svg', iconInactive: '/ai-recommendation/url-inactive.svg' },
-  { key: 'TEXT', label: '텍스트 직접 입력', iconActive: '/ai-recommendation/text-active.svg', iconInactive: '/ai-recommendation/text-inactive.svg' },
+const TABS: {
+  key: RecommendationInputType;
+  label: string;
+  iconActive: string;
+  iconInactive: string;
+}[] = [
+  {
+    key: 'URL',
+    label: 'URL 입력',
+    iconActive: '/ai-recommendation/url-active.svg',
+    iconInactive: '/ai-recommendation/url-inactive.svg',
+  },
+  {
+    key: 'TEXT',
+    label: '텍스트 직접 입력',
+    iconActive: '/ai-recommendation/text-active.svg',
+    iconInactive: '/ai-recommendation/text-inactive.svg',
+  },
 ];
- 
+
 interface InputFormProps {
   resumeId: number | null;
   hasSubscription: boolean;
   isLoggedIn: boolean;
   onAnalyzeSuccess: (recommendationId: number) => void;
 }
- 
-export default function InputForm({ resumeId, hasSubscription, isLoggedIn, onAnalyzeSuccess }: InputFormProps) {
+
+export default function InputForm({
+  resumeId,
+  hasSubscription,
+  isLoggedIn,
+  onAnalyzeSuccess,
+}: InputFormProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<RecommendationInputType>('URL');
   const [url, setUrl] = useState('');
@@ -31,30 +51,30 @@ export default function InputForm({ resumeId, hasSubscription, isLoggedIn, onAna
   const [showInvalidUrlModal, setShowInvalidUrlModal] = useState(false);
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
   const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
- 
+
   const isInputFilled = activeTab === 'URL' ? !!url.trim() : !!text.trim();
   const isAnalyzeDisabled = !isInputFilled || isAnalyzing;
- 
+
   const handleTabChange = (tab: RecommendationInputType) => {
     setActiveTab(tab);
     setErrorMessage('');
   };
- 
+
   const handleAnalyze = async () => {
     if (isAnalyzeDisabled) return;
- 
+
     // 1. 로그인 여부 우선 확인
     if (!isLoggedIn) {
       setShowLoginRequiredModal(true);
       return;
     }
- 
+
     // 2. 구독권 보유 여부 확인
     if (!hasSubscription) {
       setShowSubscribeModal(true);
       return;
     }
- 
+
     // 3. URL 탭이면 접속 가능 여부 확인
     if (activeTab === 'URL') {
       const { valid } = await validateUrlAction(url.trim());
@@ -63,37 +83,37 @@ export default function InputForm({ resumeId, hasSubscription, isLoggedIn, onAna
         return;
       }
     }
- 
+
     setIsAnalyzing(true);
     setErrorMessage('');
- 
+
     const requestBody = {
-    resumeId: resumeId ?? undefined,
-    inputType: activeTab,
-    sourceUrl: activeTab === 'URL' ? url.trim() : null,
-    rawContent: activeTab === 'TEXT' ? text.trim() : null,
-  };
- 
-  try {
-    const result = await analyzeJobPostingAction(requestBody);
- 
-    if (result.success) {;
-      onAnalyzeSuccess(result.data.recommendationId);
-    } else {
-      setErrorMessage(result.error.message);
+      resumeId: resumeId ?? undefined,
+      inputType: activeTab,
+      sourceUrl: activeTab === 'URL' ? url.trim() : null,
+      rawContent: activeTab === 'TEXT' ? text.trim() : null,
+    };
+
+    try {
+      const result = await analyzeJobPostingAction(requestBody);
+
+      if (result.success) {
+        onAnalyzeSuccess(result.data.recommendationId);
+      } else {
+        setErrorMessage(result.error.message);
+      }
+    } finally {
+      setIsAnalyzing(false);
     }
-  } finally {
-    setIsAnalyzing(false);
-  }
-};
- 
+  };
+
   const tabButtonCls = (tab: RecommendationInputType) =>
     `flex items-center gap-1.5 pb-3 text-[14.5px] font-semibold border-b-2 transition-colors cursor-pointer ${
       activeTab === tab
         ? 'border-[#FF5E5E] text-[#FF5E5E]'
         : 'border-transparent text-[#9CA3AF] hover:text-[#6A7282]'
     }`;
- 
+
   return (
     <>
       <div className="bg-white rounded-2xl shadow-md p-8">
@@ -108,7 +128,7 @@ export default function InputForm({ resumeId, hasSubscription, isLoggedIn, onAna
                 onClick={() => handleTabChange(tab.key)}
                 className={tabButtonCls(tab.key)}
               >
-                <span className="relative flex items-center shrink-0 w-[18px] h-[18px]">
+                <span className="relative flex items-center shrink-0 w-4.5 h-4.5">
                   <Image
                     src={isActive ? tab.iconActive : tab.iconInactive}
                     alt=""
@@ -121,7 +141,7 @@ export default function InputForm({ resumeId, hasSubscription, isLoggedIn, onAna
             );
           })}
         </div>
- 
+
         {/* URL 입력 탭 */}
         {activeTab === 'URL' && (
           <div className="flex flex-col gap-2">
@@ -142,7 +162,7 @@ export default function InputForm({ resumeId, hasSubscription, isLoggedIn, onAna
             </p>
           </div>
         )}
- 
+
         {/* 텍스트 직접 입력 탭 */}
         {activeTab === 'TEXT' && (
           <div className="flex flex-col gap-2">
@@ -159,11 +179,9 @@ export default function InputForm({ resumeId, hasSubscription, isLoggedIn, onAna
             />
           </div>
         )}
- 
-        {errorMessage && (
-          <p className="text-[12.5px] text-[#FF5E5E] mt-3">⚠ {errorMessage}</p>
-        )}
- 
+
+        {errorMessage && <p className="text-[12.5px] text-[#FF5E5E] mt-3">⚠ {errorMessage}</p>}
+
         <Button
           type="button"
           onClick={handleAnalyze}
@@ -177,7 +195,7 @@ export default function InputForm({ resumeId, hasSubscription, isLoggedIn, onAna
           {isAnalyzing ? '분석 중입니다...' : '분석하기'}
         </Button>
       </div>
- 
+
       {/* URL이 접속 불가능한 경우 */}
       {showInvalidUrlModal && (
         <OneButtonModal
@@ -201,7 +219,7 @@ export default function InputForm({ resumeId, hasSubscription, isLoggedIn, onAna
           onCancel={() => setShowLoginRequiredModal(false)}
         />
       )}
- 
+
       {/* 구독 플랜 필요 모달 */}
       {showSubscribeModal && (
         <TwoButtonModal

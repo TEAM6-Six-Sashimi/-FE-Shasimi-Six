@@ -247,11 +247,7 @@ export default function ComapareForm() {
           valueA={slotA.detail?.instructor.name ?? null}
           valueB={slotB.detail?.instructor.name ?? null}
         />
-        <CompareCareerRow
-          label="주요 경력"
-          detailA={slotA.detail}
-          detailB={slotB.detail}
-        />
+        <CompareCareerRow label="주요 경력" detailA={slotA.detail} detailB={slotB.detail} />
 
         <CompareRow label="커리큘럼" isSection />
         <CompareSessionRow label="전체 세션" detailA={slotA.detail} detailB={slotB.detail} />
@@ -301,8 +297,6 @@ function CompareRow({
     );
   };
 
-  
-
   return (
     <div className="grid grid-cols-[100px_1fr_1fr] items-center py-3 border-b border-[#F3F4F6]">
       <span className="text-[13px] text-[#6A7282]">{label}</span>
@@ -336,7 +330,7 @@ function CompareCareerRow({
       </ul>
     );
   };
- 
+
   return (
     <div className="grid grid-cols-[100px_1fr_1fr] items-start py-3 border-b border-[#F3F4F6]">
       <span className="text-[13px] text-[#6A7282]">{label}</span>
@@ -345,7 +339,7 @@ function CompareCareerRow({
     </div>
   );
 }
- 
+
 // 커리큘럼 섹션 목록은 줄바꿈이 많아서 별도 행으로 처리
 function CompareSessionRow({
   label,
@@ -370,7 +364,7 @@ function CompareSessionRow({
       </div>
     );
   };
- 
+
   return (
     <div className="grid grid-cols-[100px_1fr_1fr] items-start py-3 border-b border-[#F3F4F6]">
       <span className="text-[13px] text-[#6A7282]">{label}</span>

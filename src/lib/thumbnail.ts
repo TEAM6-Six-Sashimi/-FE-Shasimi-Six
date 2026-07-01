@@ -7,8 +7,6 @@ export function isLocalhostUrl(url: string): boolean {
 export function isValidAbsoluteUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    // 호스트가 비어있는 깨진 URL(예: https:///images/...)만 막고,
-    // localhost/127.0.0.1 같은 개발용 호스트는 정상 URL로 인정
     if (!parsed.hostname) return false;
     if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') return true;
     return parsed.hostname.includes('.');

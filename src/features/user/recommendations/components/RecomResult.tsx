@@ -18,13 +18,11 @@ export default function RecomResult({ result, courseDetails }: RecomResultProps)
   if (!summary) {
     return (
       <div className="flex flex-col gap-6 mt-6">
-        <p className="text-center text-[13.5px] text-[#6A7282]">
-          분석 결과를 표시할 수 없습니다.
-        </p>
+        <p className="text-center text-[13.5px] text-[#6A7282]">분석 결과를 표시할 수 없습니다.</p>
       </div>
     );
   }
-  
+
   return (
     <div className="flex flex-col gap-6 mt-6">
       {/* ===================== 채용 공고 요약 ===================== */}
@@ -38,7 +36,6 @@ export default function RecomResult({ result, courseDetails }: RecomResultProps)
 
       {/* ===================== 추천 자격증 기반 강의 정보 ===================== */}
       <CourseRecommendationSection courses={courses ?? []} courseDetails={courseDetails} />
-
     </div>
   );
 }

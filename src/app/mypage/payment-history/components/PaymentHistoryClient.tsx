@@ -2,10 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CoursePaymentItem, SubscriptionMeResponse, SubscriptionPaymentItem } from '@/features/mypage/types';
+import {
+  CoursePaymentItem,
+  SubscriptionMeResponse,
+  SubscriptionPaymentItem,
+} from '@/features/mypage/types';
 import CoursePaymentTable from '@/features/mypage/components/payment-history/CoursePaymentTable';
 import SubscriptionPaymentTable from '@/features/mypage/components/payment-history/SubscriptionPaymentTable';
-
 
 type Tab = 'course' | 'subscription';
 const VALID_TABS: Tab[] = ['course', 'subscription'];

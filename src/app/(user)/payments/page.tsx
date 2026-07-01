@@ -17,17 +17,17 @@ interface PaymentPageProps {
 
 export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
   const { courseIds: rawIds, type, planCode } = await searchParams;
- 
+
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
- 
+
   // categories는 강의/구독 어느 쪽이든 카테고리 표시에 필요하므로 공통으로 조회
   const categories = await fetchCategories();
- 
+
   // ── AI 구독 결제 ──────────────────────────────────────────
   if (type === 'subscription' && planCode) {
     const preview = accessToken ? await fetchPlanPreviewAction(planCode) : null;
- 
+
     const items: OrderLineItem[] = preview
       ? [
           {
@@ -38,7 +38,7 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
           },
         ]
       : [];
- 
+
     const summary: PaymentSummary = {
       purchaseType: 'AI_SUBSCRIPTION',
       items,
@@ -48,7 +48,7 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
       shortfallCredits: preview?.insufficientAmount ?? 0,
       planCode,
     };
- 
+
     return <PaymentPageLayout summary={summary} categories={categories} />;
   }
   // ── 강의 단일 / 장바구니 결제 ─────────────────────────────
@@ -111,7 +111,7 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
 
   return <PaymentPageLayout summary={summary} categories={categories} />;
 }
- 
+
 // PaymentPageLayout에 categories prop 추가
 function PaymentPageLayout({
   summary,
@@ -127,7 +127,7 @@ function PaymentPageLayout({
           <Suspense fallback={<PaymentContentSkeleton />}>
             <PaymentContent items={summary.items} categories={categories} />
           </Suspense>
- 
+
           <PaymentSticky summary={summary} />
         </div>
       </div>

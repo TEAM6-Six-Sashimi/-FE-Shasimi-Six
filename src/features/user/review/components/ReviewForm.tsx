@@ -37,10 +37,7 @@ export default function ReviewForm({ courseId }: ReviewFormProps) {
       showToast('리뷰가 등록되었습니다.', 'positive');
       router.refresh();
     } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : '리뷰 등록에 실패했습니다.',
-        'negative',
-      );
+      showToast(error instanceof Error ? error.message : '리뷰 등록에 실패했습니다.', 'negative');
     } finally {
       setIsSubmitting(false);
     }

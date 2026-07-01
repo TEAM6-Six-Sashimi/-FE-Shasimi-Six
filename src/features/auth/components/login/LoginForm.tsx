@@ -41,10 +41,12 @@ export default function LoginForm() {
       showToast(`${name}님 환영합니다!`);
       router.push('/');
     } catch (error: any) {
-      if (error.code === '신고 횟수 누적 패널티로 비활성화된 회원 안내 에러 코드 넣는 곳') {  // 수정 필요한 부분!!!!!!!!!!!
+      if (error.code === '신고 횟수 누적 패널티로 비활성화된 회원 안내 에러 코드 넣는 곳') {
+        // 수정 필요한 부분!!!!!!!!!!!
         setFailModal({
           title: '로그인 실패',
-          message: '신고 횟수 누적 패널티로 비활성화된 계정입니다.\n자세한 사항은 관리자에게 문의하세요.',
+          message:
+            '신고 횟수 누적 패널티로 비활성화된 계정입니다.\n자세한 사항은 관리자에게 문의하세요.',
         });
       } else {
         setErrorMessage(error.message || '서버와 연결할 수 없습니다.');
