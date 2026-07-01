@@ -13,16 +13,22 @@ export default async function Page() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const [allCourses, pendingCourses, rejectedCourses, privateCourses, courseCategories, adminCategories] =
-    await Promise.all([
-      fetchAdminCourses(accessToken),
-      fetchAdminPendingCourses(accessToken),
-      fetchAdminRejectedCourses(accessToken),
-      fetchAdminPrivateCourses(accessToken),
-      fetchCategories(), // 기존
-      fetchAdminCategories(accessToken), // 관리자용
-    ]);
-    
+  const [
+    allCourses,
+    pendingCourses,
+    rejectedCourses,
+    privateCourses,
+    courseCategories,
+    adminCategories,
+  ] = await Promise.all([
+    fetchAdminCourses(accessToken),
+    fetchAdminPendingCourses(accessToken),
+    fetchAdminRejectedCourses(accessToken),
+    fetchAdminPrivateCourses(accessToken),
+    fetchCategories(), // 기존
+    fetchAdminCategories(accessToken), // 관리자용
+  ]);
+
   return (
     <CourseManagePage
       allCourses={allCourses}

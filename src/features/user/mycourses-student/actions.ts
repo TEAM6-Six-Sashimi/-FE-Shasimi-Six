@@ -24,6 +24,6 @@ export async function getResumeSessionAction(
 
   return {
     sessionId: next.sessionId,
-    lastPositionSeconds: next.sessionCompleted ? 0 : next.lastPositionSeconds ?? 0,
+    lastPositionSeconds: next.sessionCompleted ? 0 : (next.lastPositionSeconds ?? 0),
   };
 }

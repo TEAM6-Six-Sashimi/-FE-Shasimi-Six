@@ -44,7 +44,7 @@ export default function CourseTabNav() {
       const el = document.getElementById(SECTION_ID[tab.key]);
       if (el) observer.observe(el);
     });
- 
+
     return () => observer.disconnect();
   }, []);
 

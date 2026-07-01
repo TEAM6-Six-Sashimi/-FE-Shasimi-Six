@@ -4,32 +4,9 @@ import {
   CancelSubscriptionResponse,
   SubscriptionMeResponse,
 } from '@/features//mypage/types';
+import { ApiErrorResponse, PaymentResponse } from '@/features/user/payments/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-// 백엔드 공통 에러 응답
-interface ApiErrorResponse {
-  timestamp: string;
-  status: number;
-  errorCode: string;
-  message: string;
-  path: string;
-  traceId: string;
-}
-
-// 결제 성공 응답 (단일/장바구니 동일 구조)
-export interface PaymentResponse {
-  orderId: number;
-  orderNo: string;
-  paymentId: number;
-  amount: number;
-  status: string;
-  courses: {
-    courseId: number;
-    title: string;
-    price: number;
-  }[];
-}
 
 // 보유 크레딧 조회
 export async function fetchCredits(accessToken: string): Promise<{ balance: number }> {
@@ -151,9 +128,7 @@ export async function fetchSubscriptionMe(
   return res.json();
 }
 
-export async function cancelSubscription(
-  accessToken: string,
-): Promise<CancelSubscriptionResponse> {
+export async function cancelSubscription(accessToken: string): Promise<CancelSubscriptionResponse> {
   const res = await fetch(`${API_BASE_URL}/subscriptions/me/cancel`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${accessToken}` },

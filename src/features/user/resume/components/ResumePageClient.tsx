@@ -4,7 +4,7 @@ import { useState } from 'react';
 import FeatureHeader from '@/components/layout/FeatureHeader';
 import ResumeMain from './ResumeMain';
 import ResumeSidebar from './ResumeSidebar';
-import { SavedResume } from '../types'; 
+import { SavedResume } from '../types';
 import { MySubscription } from '../../payments/types';
 
 interface ResumePageClientProps {

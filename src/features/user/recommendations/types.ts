@@ -8,9 +8,9 @@ export interface JobPostingRecommendationRequest {
 }
 
 // ===== GET /recommendations/job-posting/{recommendationId} 응답 =====
- 
+
 export type AnalysisStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
- 
+
 export interface JobPostingSummary {
   jobRole: string;
   requiredQualifications: string[];
@@ -18,9 +18,9 @@ export interface JobPostingSummary {
   experienceRequirement: string;
   mainTaskSummary: string;
 }
- 
+
 export type FitStatus = 'SATISFIED' | 'PARTIALLY_SATISFIED' | 'NOT_SATISFIED' | 'UNKNOWN';
- 
+
 export interface FitCategoryResult {
   category: 'EDUCATION' | 'CAREER' | 'CERTIFICATION';
   status: FitStatus;
@@ -29,14 +29,14 @@ export interface FitCategoryResult {
   comment: string;
   missingItems: string[];
 }
- 
+
 export interface FitAnalysis {
   education: FitCategoryResult;
   career: FitCategoryResult;
   certification: FitCategoryResult;
   overallComments: string[];
 }
- 
+
 export interface RecommendedCertificate {
   certificationId: number | null;
   name: string;
@@ -47,7 +47,7 @@ export interface RecommendedCertificate {
   applicationStartDate: string;
   applicationEndDate: string;
 }
- 
+
 export interface RecommendedCourse {
   courseId: number;
   title: string;
@@ -55,7 +55,7 @@ export interface RecommendedCourse {
   matchedSkill: string;
   reason: string;
 }
- 
+
 export interface JobPostingRecommendationResult {
   recommendationId: number;
   analysisStatus: AnalysisStatus;
@@ -66,18 +66,18 @@ export interface JobPostingRecommendationResult {
   courses: RecommendedCourse[] | null;
   createdAt: string;
 }
- 
+
 // POST 분석 요청 직후 받는 응답 (recommendationId만 있으면 GET으로 상세 조회)
 export interface JobPostingRecommendationResponse {
   recommendationId: number;
   [key: string]: unknown;
 }
- 
+
 export interface RecommendationApiErrorBody {
   errorCode: string;
   message: string;
 }
- 
+
 export type AnalyzeResult =
   | { success: true; data: JobPostingRecommendationResponse }
   | { success: false; error: RecommendationApiErrorBody };

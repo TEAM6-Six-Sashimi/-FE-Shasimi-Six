@@ -106,7 +106,9 @@ export default function CourseManagePage({
       {tab === 'rejected' && (
         <RejectedCourses courses={rejectedCourses} categories={courseCategories} />
       )}
-      {tab === 'private' && <PrivateCourses courses={privateCourses} categories={courseCategories} />}
+      {tab === 'private' && (
+        <PrivateCourses courses={privateCourses} categories={courseCategories} />
+      )}
       {tab === 'category' && (
         <CategoryManage categories={adminCategories} accessToken={accessToken} />
       )}
