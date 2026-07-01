@@ -18,7 +18,7 @@ export default async function UserLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen flex flex-col">
       <Menubar categories={categories} role={role} />
-      <main className="flex-1">{children}</main>
+      <div className="flex-1">{children}</div>
       <Footer />
     </div>
   );
