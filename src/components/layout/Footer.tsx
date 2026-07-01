@@ -3,7 +3,7 @@ import Link from 'next/link';
 export default function Footer() {
   return (
     <div className="bg-[#1E2125] py-1 border-t border-[#E5E7EB]">
-      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10 pt-8 pb-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10 px-10 py-8">
         <div className="flex flex-col gap-2">
           <div className="text-[15px] font-semibold text-[#CFEE5D]">회사 소개</div>
           <div className="flex flex-col gap-1.5">
