@@ -83,7 +83,7 @@ export default function CartContent({
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {items.map((item) => {
+          {items.map((item, idx) => {
             const isSelected = selectedIds.includes(item.courseId);
             const thumbnailUrl = getThumbnailUrl(item.thumbnail);
             return (
@@ -122,6 +122,7 @@ export default function CartContent({
                       src={thumbnailUrl}
                       alt={item.title}
                       fill
+                      priority={idx === 0}
                       unoptimized={isLocalhostUrl(thumbnailUrl)}
                       sizes="96px"
                       className="object-cover"

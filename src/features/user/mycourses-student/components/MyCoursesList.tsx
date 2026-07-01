@@ -60,7 +60,7 @@ export default function MyCoursesList({ courses }: Props) {
             <p className="text-[20px] font-medium">수강 중인 강의가 없습니다.</p>
           </div>
         ) : (
-          courses.map((course) => {
+          courses.map((course, idx) => {
             const thumbnailUrl = getThumbnailUrl(course.thumbnail);
             const isLoading = loadingCourseId === course.courseId;
 
@@ -80,6 +80,7 @@ export default function MyCoursesList({ courses }: Props) {
                           fill
                           unoptimized={isLocalhostUrl(thumbnailUrl)}
                           sizes="176px"
+                          priority={idx === 0} // 첫 번째 카드만 priority
                           className="object-cover"
                         />
                       )}
