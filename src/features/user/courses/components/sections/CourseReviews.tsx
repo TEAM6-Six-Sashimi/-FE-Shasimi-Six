@@ -1,7 +1,8 @@
-import { CourseReview, RatingDistributionItem, ReviewMode } from '@/features/user/courses/types';
+import { RatingDistributionItem } from '@/features/user/courses/types';
 import ReviewForm from '@/features/user/review/components/ReviewForm';
 import ReviewList from '@/features/user/review/components/ReviewList';
 import ReviewSummary from '@/features/user/review/components/ReviewSummary';
+import { CourseReview, ReviewMode } from '@/features/user/review/types';
 
 interface CourseReviewsSectionProps {
   courseId: number;
