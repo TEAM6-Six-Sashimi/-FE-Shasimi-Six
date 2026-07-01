@@ -7,7 +7,7 @@ test.describe("수강평 읽기 전용", () => {
 
   test.beforeEach(async ({ page }) => {
     // 구매하지 않은 학생 계정
-    await login(page, "student03", "student");
+    await login(page, "student06", "student");
 
     await page.goto(COURSE_URL);
   });
