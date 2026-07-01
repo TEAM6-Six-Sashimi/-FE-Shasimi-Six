@@ -64,16 +64,16 @@ export async function logoutAction(): Promise<void> {
 export async function reissueAction(): Promise<{ success: boolean }> {
   const cookieStore = await cookies();
   const refreshToken = cookieStore.get('refreshToken')?.value;
- 
+
   if (!refreshToken) {
     return { success: false };
   }
- 
+
   try {
     const result = await reissueService(refreshToken);
 
     const maxAgeSeconds = Math.floor((result.accessTokenExpiresIn - Date.now()) / 1000);
- 
+
     cookieStore.set('accessToken', result.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -81,7 +81,7 @@ export async function reissueAction(): Promise<{ success: boolean }> {
       maxAge: maxAgeSeconds,
       path: '/',
     });
- 
+
     cookieStore.set('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -89,7 +89,7 @@ export async function reissueAction(): Promise<{ success: boolean }> {
       maxAge: 60 * 60 * 24 * 7,
       path: '/',
     });
- 
+
     // 만료 시각도 새로 갱신
     cookieStore.set('accessTokenExpiresAt', String(result.accessTokenExpiresIn), {
       httpOnly: false,
@@ -98,7 +98,7 @@ export async function reissueAction(): Promise<{ success: boolean }> {
       maxAge: maxAgeSeconds,
       path: '/',
     });
- 
+
     return { success: true };
   } catch {
     // 재발급 실패 시 로그인 페이지로 이동

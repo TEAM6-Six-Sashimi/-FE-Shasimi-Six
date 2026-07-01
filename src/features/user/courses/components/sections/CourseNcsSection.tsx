@@ -1,26 +1,34 @@
-import { NcsInfo } from "../../types";
-import Image from "next/image";
- 
+import { NcsInfo } from '../../types';
+import Image from 'next/image';
+
 interface CourseNcsSectionProps {
   ncs: NcsInfo | null;
 }
 
 function formatAbilityUnits(ncs: NcsInfo | null): string {
   if (!ncs || !ncs.abilityUnitNames?.length) return '-';
- 
+
   const names = ncs.abilityUnitNames.join(', ');
   const remaining = ncs.totalAbilityUnitCount - ncs.abilityUnitNames.length;
- 
+
   return remaining > 0 ? `${names} 외 ${remaining}개` : names;
 }
- 
+
 export default function CourseNcsSection({ ncs }: CourseNcsSectionProps) {
   const rows = [
     { label: '분류', value: ncs?.categoryPath || '-', icon: '/coursedetail/ncs-category.svg' },
-    { label: '직무 설명', value: ncs?.jobDescription || '-', icon: '/coursedetail/ncs-description.svg' },
-    { label: '능력단위명', value: formatAbilityUnits(ncs) || '-', icon: '/coursedetail/ncs-skillunit.svg' },
+    {
+      label: '직무 설명',
+      value: ncs?.jobDescription || '-',
+      icon: '/coursedetail/ncs-description.svg',
+    },
+    {
+      label: '능력단위명',
+      value: formatAbilityUnits(ncs) || '-',
+      icon: '/coursedetail/ncs-skillunit.svg',
+    },
   ];
- 
+
   return (
     <section className="bg-white rounded-xl shadow-md p-6 overflow-hidden">
       <h2 className="text-[#1E2125] text-[17px] font-bold mb-3">NCS 정보</h2>

@@ -118,17 +118,16 @@ export async function deleteMeAction(currentPassword: string) {
   if (!res.ok) throw new Error('회원 탈퇴에 실패했습니다.');
 }
 
-
 // 결제 내역
 export async function cancelSubscriptionAction(): Promise<CancelSubscriptionResponse> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
- 
+
   if (!accessToken) {
     throw new Error('로그인이 필요합니다.');
   }
- 
+
   const result = await cancelSubscription(accessToken);
- 
+
   return result;
 }

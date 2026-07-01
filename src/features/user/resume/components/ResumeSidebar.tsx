@@ -140,9 +140,7 @@ export default function ResumeSidebar({ isSaved, resumeId }: ResumeSidebarProps)
                         className="flex items-start gap-2 px-3 py-2.5 bg-[#FEF3C7] rounded-lg"
                       >
                         <span className="text-[#92400E] text-[13px] mt-0.5">⚠</span>
-                        <p className="text-[12.5px] text-[#1E2125] leading-relaxed">
-                          {fb.message}
-                        </p>
+                        <p className="text-[12.5px] text-[#1E2125] leading-relaxed">{fb.message}</p>
                       </div>
                     ))}
                   </div>

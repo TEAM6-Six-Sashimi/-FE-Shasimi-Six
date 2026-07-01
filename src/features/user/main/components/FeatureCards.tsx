@@ -44,7 +44,7 @@ export default function FeatureCards() {
             <div
               className={`${iconBg} w-13 h-13 rounded-full flex items-center justify-center shrink-0`}
             >
-              <Image src={icon} alt="" width={24} height={24} />
+              <Image src={icon} alt="아이콘" width={24} height={24} />
             </div>
 
             {/* 텍스트 */}
