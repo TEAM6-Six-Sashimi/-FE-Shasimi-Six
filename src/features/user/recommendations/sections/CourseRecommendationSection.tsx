@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { RecommendedCourse } from '../types';
 import { CourseFromAPI } from '../../courses/types';
+import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
 interface CourseRecommendationSectionProps {
   courses: RecommendedCourse[];
@@ -35,10 +36,11 @@ export default function CourseRecommendationSection({
               <div className="relative w-30 h-20 rounded-lg overflow-hidden bg-[#E5E7EB] shrink-0">
                 {detail?.thumbnail && (
                   <Image
-                    src={detail.thumbnail}
+                    src={getThumbnailUrl(detail.thumbnail) ?? ''}
                     alt={course.title}
                     fill
-                    unoptimized
+                    unoptimized={isLocalhostUrl(detail.thumbnail)}
+                    sizes="120px"
                     className="object-cover"
                   />
                 )}
