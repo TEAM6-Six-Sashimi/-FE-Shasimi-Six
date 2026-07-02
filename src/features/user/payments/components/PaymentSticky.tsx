@@ -42,13 +42,13 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
 
   const isSubscription = summary.purchaseType === 'AI_SUBSCRIPTION';
 
-  // ✅ 동의 체크박스만 충족하면 버튼 활성화 (크레딧 조건 제거)
+  // 동의 체크박스만 충족하면 버튼 활성화 (크레딧 조건 제거)
   const canPurchase = agreedToTerms && agreedToRefund;
 
   const handlePaymentClick = () => {
     if (!canPurchase) return;
 
-    // ✅ 크레딧 부족 시 충전 안내 모달, 충분하면 바로 결제 확인 모달
+    // 크레딧 부족 시 충전 안내 모달, 충분하면 바로 결제 확인 모달
     if (summary.shortfallCredits > 0) {
       setShowInsufficientModal(true);
       return;
@@ -108,7 +108,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
   };
 
   // 결제 완료 후 이동 경로 (강의 → 내 강의 목록 / 구독 → 채용공고 분석 페이지)
-  const completeRedirectPath = isSubscription ? '/recommendations' : '/mycourses-student';
+  const completeRedirectPath = isSubscription ? '/resume' : '/mycourses-student';
   const cancelRedirectPath = isSubscription ? '/' : '/cart';
 
   return (
@@ -216,7 +216,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
           title="결제 완료"
           message={
             isSubscription
-              ? '구독이 시작되었습니다. AI 채용공고 분석 페이지로 이동할까요?'
+              ? '구독이 시작되었습니다. [AI 이력서 작성 및 분석] 페이지로 이동하시겠습니까?'
               : '결제가 완료되었습니다. 내 강의 목록으로 이동할까요?'
           }
           confirmLabel="확인"
