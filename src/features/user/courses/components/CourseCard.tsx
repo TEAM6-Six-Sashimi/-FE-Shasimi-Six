@@ -49,27 +49,28 @@ export default function CourseCard({ course, category, priority = false }: Cours
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (isAddingToCart) return;
-
     setIsAddingToCart(true);
-    try {
-      await addCartItemAction(course.courseId);
-      setShowCartModal(true);
-    } catch (err) {
-      const code = err instanceof Error ? err.message : '';
 
-      if (code === 'UNAUTHORIZED') {
-        router.push('/login');
+    try {
+      const result = await addCartItemAction(course.courseId);
+
+      if (!result.success) {
+        if (result.code === 'UNAUTHORIZED') {
+          router.push('/login');
+          return;
+        }
+        if (result.code === 'CART_002') {
+          setErrorMessage('이미 장바구니에 담긴 강의입니다.');
+        } else if (result.code === 'PAYMENT_001') {
+          setErrorMessage('이미 수강 중인 강의입니다.');
+        } else {
+          setErrorMessage('장바구니 추가에 실패했습니다.');
+        }
+        setShowErrorModal(true);
         return;
       }
 
-      if (code === 'CART_002') {
-        setErrorMessage('이미 장바구니에 담긴 강의입니다.');
-      } else if (code === 'PAYMENT_001') {
-        setErrorMessage('이미 수강 중인 강의입니다.');
-      } else {
-        setErrorMessage('장바구니 추가에 실패했습니다. 다시 시도해주세요.');
-      }
-      setShowErrorModal(true);
+      setShowCartModal(true);
     } finally {
       setIsAddingToCart(false);
     }
@@ -84,7 +85,12 @@ export default function CourseCard({ course, category, priority = false }: Cours
     <>
       <article className="flex flex-col bg-[#F9FAFB] rounded-xl overflow-hidden border border-[#D1D5DB] hover:shadow-lg transition-shadow duration-200 h-full">
         {/* 썸네일 */}
-        <Link href={courseHref} className="relative block shrink-0" tabIndex={-1} aria-hidden="true">
+        <Link
+          href={courseHref}
+          className="relative block shrink-0"
+          tabIndex={-1}
+          aria-hidden="true"
+        >
           <div className="relative w-full aspect-video bg-[#E5E7EB]">
             {thumbnailUrl && (
               <Image
@@ -101,9 +107,7 @@ export default function CourseCard({ course, category, priority = false }: Cours
               <span
                 aria-hidden="true"
                 className={`absolute top-2 right-2 text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
-                  course.label === 'NEW'
-                    ? 'bg-[#CFEE5D] text-[#1E2125]'
-                    : 'bg-[#FF5E5E] text-white'
+                  course.label === 'NEW' ? 'bg-[#CFEE5D] text-[#1E2125]' : 'bg-[#FF5E5E] text-white'
                 }`}
               >
                 {LABEL_TEXT[course.label]}
@@ -120,8 +124,13 @@ export default function CourseCard({ course, category, priority = false }: Cours
             </Link>
           </h3>
           <p className="text-[#6A7282] text-[12px]">{course.instructorName}</p>
-          <div className="flex items-center gap-1" aria-label={`평점 ${course.ratingAvg.toFixed(1)}점, 수강생 ${course.studentCount.toLocaleString()}명`}>
-            <span aria-hidden="true" className="text-[#FFD700] text-[13px]">★</span>
+          <div
+            className="flex items-center gap-1"
+            aria-label={`평점 ${course.ratingAvg.toFixed(1)}점, 수강생 ${course.studentCount.toLocaleString()}명`}
+          >
+            <span aria-hidden="true" className="text-[#FFD700] text-[13px]">
+              ★
+            </span>
             <span className="text-[#1E2125] text-[13px] font-semibold">
               {course.ratingAvg.toFixed(1)}
             </span>
