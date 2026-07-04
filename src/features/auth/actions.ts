@@ -6,49 +6,56 @@ import { loginService, reissueService } from '@/services/auth.service';
 import { fetchUserMe } from '@/services/user.service';
 import { LoginRequest } from '@/features/auth/types';
 
-export async function loginAction(payload: LoginRequest): Promise<{ name: string }> {
-  const result = await loginService(payload);
+export async function loginAction(
+  payload: LoginRequest,
+): Promise<{ success: true; name: string } | { success: false; message: string }> {
+  try {
+    const result = await loginService(payload);
 
-  const cookieStore = await cookies();
+    const cookieStore = await cookies();
 
-  const maxAgeSeconds = Math.floor((result.accessTokenExpiresIn - Date.now()) / 1000);
+    const maxAgeSeconds = Math.floor((result.accessTokenExpiresIn - Date.now()) / 1000);
 
-  cookieStore.set('accessToken', result.accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: maxAgeSeconds,
-    path: '/',
-  });
+    cookieStore.set('accessToken', result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: maxAgeSeconds,
+      path: '/',
+    });
 
-  cookieStore.set('refreshToken', result.refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 7,
-    path: '/',
-  });
+    cookieStore.set('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    });
 
-  // role 가져오기
-  const user = await fetchUserMe(result.accessToken);
-  cookieStore.set('role', user.role, {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: maxAgeSeconds,
-    path: '/',
-  });
+    // role 가져오기
+    const user = await fetchUserMe(result.accessToken);
+    cookieStore.set('role', user.role, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: maxAgeSeconds,
+      path: '/',
+    });
 
-  // accessToken 만료시간 저장
-  cookieStore.set('accessTokenExpiresAt', String(result.accessTokenExpiresIn), {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: maxAgeSeconds,
-    path: '/',
-  });
+    // accessToken 만료시간 저장
+    cookieStore.set('accessTokenExpiresAt', String(result.accessTokenExpiresIn), {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: maxAgeSeconds,
+      path: '/',
+    });
 
-  return { name: result.name };
+    return { success: true, name: result.name };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '로그인에 실패했습니다.';
+    return { success: false, message };
+  }
 }
 
 export async function logoutAction(): Promise<void> {
