@@ -11,17 +11,9 @@ interface CreditClientProps {
 export default function CreditClient({ initialCredit }: CreditClientProps) {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState<string>('');
-  const [currentCredit, setCurrentCredit] = useState<number>(initialCredit);
 
   const chargeAmount = selectedAmount ?? (parseInt(customAmount.replace(/,/g, '')) || 0);
-  const afterCredit = currentCredit + chargeAmount;
-
-  // 충전 완료 후 잔액 갱신 + 입력값 초기화
-  const handleChargeSuccess = (newBalance: number) => {
-    setCurrentCredit(newBalance);
-    setSelectedAmount(null);
-    setCustomAmount('');
-  };
+  const afterCredit = initialCredit + chargeAmount;
 
   return (
     <div className="flex gap-6 bg-[#F9FAFB] items-start mx-auto py-10 px-4">
@@ -36,10 +28,9 @@ export default function CreditClient({ initialCredit }: CreditClientProps) {
         </div>
         <div className="w-72 shrink-0 sticky top-4">
           <Sticky
-            currentCredit={currentCredit}
+            currentCredit={initialCredit}
             chargeAmount={chargeAmount}
             afterCredit={afterCredit}
-            onChargeSuccess={handleChargeSuccess}
           />
         </div>
       </div>

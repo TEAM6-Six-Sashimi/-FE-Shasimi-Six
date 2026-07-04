@@ -1,6 +1,9 @@
 'use client';
 
+import Image from 'next/image';
 import { CartCourseItem } from '../types';
+import { Button } from '@/components/ui/button';
+import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
 interface CartContentProps {
   items: CartCourseItem[];
@@ -50,16 +53,15 @@ export default function CartContent({
           <span className="text-[14px] font-medium text-[#1E2125]">전체 선택</span>
         </label>
 
-        <button
+        <Button
           type="button"
           onClick={onDeleteSelected}
           disabled={selectedIds.length === 0}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-colors
-                        ${
-                          selectedIds.length > 0
-                            ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848] cursor-pointer'
-                            : 'bg-[#E5E7EB] text-[#6A7282] cursor-not-allowed'
-                        }`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 h-auto text-[13px] font-medium cursor-pointer ${
+            selectedIds.length > 0
+              ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848]'
+              : 'bg-[#E5E7EB] text-[#6A7282] hover:bg-[#E5E7EB] cursor-not-allowed'
+          }`}
         >
           <svg width="13" height="14" viewBox="0 0 13 14" fill="none">
             <path
@@ -71,7 +73,7 @@ export default function CartContent({
             />
           </svg>
           선택 삭제
-        </button>
+        </Button>
       </div>
 
       {/* 장바구니 아이템 목록 */}
@@ -81,8 +83,9 @@ export default function CartContent({
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {items.map((item) => {
+          {items.map((item, idx) => {
             const isSelected = selectedIds.includes(item.courseId);
+            const thumbnailUrl = getThumbnailUrl(item.thumbnail);
             return (
               <div
                 key={item.courseId}
@@ -112,14 +115,25 @@ export default function CartContent({
                   )}
                 </div>
 
-                {/* 썸네일 - TODO: 백엔드에서 완전한 URL 내려오면 next/image로 교체 */}
-                <div className="w-24 h-18 rounded-lg overflow-hidden shrink-0 bg-[#D1D5DB]" />
+                {/* 썸네일 */}
+                <div className="relative w-24 h-16 rounded-lg overflow-hidden shrink-0 bg-[#D1D5DB]">
+                  {thumbnailUrl && (
+                    <Image
+                      src={thumbnailUrl}
+                      alt={item.title}
+                      fill
+                      priority={idx === 0}
+                      unoptimized={isLocalhostUrl(thumbnailUrl)}
+                      sizes="96px"
+                      className="object-cover"
+                    />
+                  )}
+                </div>
 
                 {/* 강의 정보 */}
                 <div className="flex-1 min-w-0">
                   <p className="text-[15px] font-semibold text-[#1E2125] truncate">{item.title}</p>
                   <div className="flex items-center gap-1 mt-1">
-                    <div className="w-5 h-5 rounded-full bg-[#6A7282] flex items-center justify-center text-[10px] font-bold text-[#1E2125]" />
                     <span className="text-[12px] text-[#6A7282]">{item.instructorName}</span>
                   </div>
                 </div>

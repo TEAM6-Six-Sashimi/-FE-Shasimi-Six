@@ -1,7 +1,35 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
+import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: 'standalone',
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8080',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8080',
+        pathname: '/files/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.sixsashimi.com.market-app.org',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
-export default nextConfig;
+// 번들 분석기 설정
+const bundleAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+  openAnalyzer: true,
+});
+
+export default bundleAnalyzer(nextConfig);

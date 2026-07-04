@@ -1,48 +1,68 @@
 'use client';
 
 import { useState } from 'react';
+import { loadTossPayments } from '@tosspayments/tosspayments-sdk';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
-import { chargeCreditAction } from '@/features/user/credit/actions';
+import { readyCreditChargeAction } from '@/features/user/credit/actions';
+import { Button } from '@/components/ui/button';
 
 interface StickyProps {
   currentCredit: number;
   chargeAmount: number;
   afterCredit: number;
-  onChargeSuccess: (newBalance: number) => void;
 }
 
-type ModalState = 'none' | 'invalid' | 'confirm' | 'success';
+type ModalState = 'none' | 'invalid' | 'confirm' | 'error';
 
-export default function Sticky({
-  currentCredit,
-  chargeAmount,
-  afterCredit,
-  onChargeSuccess,
-}: StickyProps) {
+const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? '';
+const MIN_AMOUNT = 10000;
+const UNIT_AMOUNT = 1000;
+
+export default function Sticky({ currentCredit, chargeAmount, afterCredit }: StickyProps) {
   const [modalState, setModalState] = useState<ModalState>('none');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const isAmountInvalid = chargeAmount < MIN_AMOUNT || chargeAmount % UNIT_AMOUNT !== 0;
 
   // 충전하기 버튼 클릭
   const handleChargeClick = () => {
-    // 유효성 검사: 최소 10,000원, 1,000원 단위
-    if (chargeAmount < 10000 || chargeAmount % 1000 !== 0) {
+    if (isAmountInvalid) {
       setModalState('invalid');
       return;
     }
     setModalState('confirm');
   };
 
-  // 충전 확인 → API 호출
+  // 충전 확인 → 1) 백엔드에 주문 준비(ready) → 2) Toss 결제창 호출
   const handleConfirm = async () => {
     setIsLoading(true);
     try {
-      const result = await chargeCreditAction(chargeAmount);
-      onChargeSuccess(result.balance);
-      setModalState('success');
-    } catch (error) {
-      console.error('충전 실패:', error);
-      setModalState('invalid'); // 에러 시 안내
+      // 1) 충전 준비: 백엔드에서 orderId/orderName 발급
+      const { orderId, orderName, amount } = await readyCreditChargeAction(chargeAmount);
+
+      // 2) Toss 결제창 호출 (성공 시 successUrl로 리다이렉트되며 이 페이지로는 돌아오지 않음)
+      const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
+      const payment = tossPayments.payment({ customerKey: orderId });
+
+      await payment.requestPayment({
+        method: 'CARD',
+        amount: {
+          currency: 'KRW',
+          value: amount,
+        },
+        orderId,
+        orderName,
+        successUrl: `${window.location.origin}/credit/success`,
+        failUrl: `${window.location.origin}/credit/fail`,
+      });
+      // 정상 흐름에서는 브라우저가 리다이렉트되므로 이 아래 코드는 실행되지 않음
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : '충전에 실패했습니다. 다시 시도해주세요.';
+      setErrorMessage(message);
+      setModalState('error');
     } finally {
       setIsLoading(false);
     }
@@ -83,26 +103,25 @@ export default function Sticky({
           </div>
         </div>
 
-        <button
+        <Button
           type="button"
           onClick={handleChargeClick}
           disabled={chargeAmount <= 0 || isLoading}
-          className={`w-full py-3 rounded-lg text-[15px] font-medium transition-colors duration-150
-                        ${
-                          chargeAmount > 0
-                            ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848] cursor-pointer'
-                            : 'bg-[#E5E7EB] text-[#6A7282]'
-                        }`}
+          className={`w-full py-3 h-auto rounded-lg text-[15px] font-medium ${
+            chargeAmount > 0
+              ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848]'
+              : 'bg-[#E5E7EB] text-[#6A7282] hover:bg-[#E5E7EB]'
+          }`}
         >
-          충전하기
-        </button>
+          {isLoading ? '결제창 준비 중...' : '충전하기'}
+        </Button>
       </div>
 
-      {/* 유효성 실패 모달 */}
+      {/* 유효성 실패 모달 (직접 입력 필드에 이미 에러가 표시되지만, 버튼을 누른 경우를 대비한 최종 방어선) */}
       {modalState === 'invalid' && (
         <OneButtonModal
           title="충전 금액 확인"
-          message="입력한 충전 금액을 주세요."
+          message={`최소 ${MIN_AMOUNT.toLocaleString()}원 이상, ${UNIT_AMOUNT.toLocaleString()}원 단위로 입력해주세요.`}
           onConfirm={() => setModalState('none')}
         />
       )}
@@ -111,17 +130,17 @@ export default function Sticky({
       {modalState === 'confirm' && (
         <TwoButtonModal
           title="크레딧 충전"
-          message={'크레딧을 충전하시겠습니까?'}
+          message="크레딧을 충전하시겠습니까? 확인 시 Toss 결제창으로 이동합니다."
           onConfirm={handleConfirm}
           onCancel={() => setModalState('none')}
         />
       )}
 
-      {/* 충전 완료 모달 */}
-      {modalState === 'success' && (
+      {/* 충전 실패 모달 (ready 단계 또는 SDK 호출 실패) */}
+      {modalState === 'error' && (
         <OneButtonModal
-          title="충전 완료"
-          message="충전이 완료되었습니다."
+          title="충전 실패"
+          message={errorMessage}
           onConfirm={() => setModalState('none')}
         />
       )}

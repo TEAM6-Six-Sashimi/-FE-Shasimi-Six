@@ -3,19 +3,30 @@ import {
   fetchAdminCourses,
   fetchAdminPendingCourses,
   fetchAdminRejectedCourses,
+  fetchAdminPrivateCourses,
+  fetchAdminCategories,
 } from '@/services/admin.service';
-import { fetchCategories } from '@/services/categories.service';
 import CourseManagePage from './_components/CourseManagePage';
+import { fetchCategories } from '@/services/categories.service';
 
 export default async function Page() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const [allCourses, pendingCourses, rejectedCourses, categories] = await Promise.all([
+  const [
+    allCourses,
+    pendingCourses,
+    rejectedCourses,
+    privateCourses,
+    courseCategories,
+    adminCategories,
+  ] = await Promise.all([
     fetchAdminCourses(accessToken),
     fetchAdminPendingCourses(accessToken),
     fetchAdminRejectedCourses(accessToken),
-    fetchCategories(),
+    fetchAdminPrivateCourses(accessToken),
+    fetchCategories(), // 기존
+    fetchAdminCategories(accessToken), // 관리자용
   ]);
 
   return (
@@ -23,7 +34,10 @@ export default async function Page() {
       allCourses={allCourses}
       pendingCourses={pendingCourses}
       rejectedCourses={rejectedCourses}
-      categories={categories}
+      privateCourses={privateCourses}
+      courseCategories={courseCategories}
+      adminCategories={adminCategories}
+      accessToken={accessToken}
     />
   );
 }

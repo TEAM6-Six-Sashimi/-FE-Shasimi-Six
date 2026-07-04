@@ -1,6 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function NotFound() {
   const router = useRouter();
@@ -8,7 +10,7 @@ export default function NotFound() {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 bg-white">
       <div className="w-16 h-16 rounded-full bg-[#FFEBEB] flex items-center justify-center">
-        <span className="text-[#FF5E5E] text-[28px]">!</span>
+        <span className="text-[#FF5E5E] text-[35px] font-bold">!</span>
       </div>
       <div className="flex flex-col items-center gap-2">
         <h1 className="text-[72px] font-bold text-[#FF5E5E] leading-none">404</h1>
@@ -18,18 +20,19 @@ export default function NotFound() {
         </p>
       </div>
       <div className="flex gap-3">
-        <button
+        <Button
+          variant="outline"
           onClick={() => router.back()}
-          className="px-6 py-2.5 rounded-lg border-2 border-[#D1D5DB] text-[14px] font-semibold text-[#1E2125] hover:bg-[#F9FAFB] cursor-pointer transition-colors"
+          className="px-6 py-2.5 h-auto border-2 border-[#D1D5DB] text-[14px] font-semibold text-[#1E2125] hover:bg-[#F9FAFB] hover:text-[#1E2125] cursor-pointer"
         >
           이전 페이지로 돌아가기
-        </button>
-        <button
-          onClick={() => router.push('/')}
-          className="px-6 py-2.5 rounded-lg bg-[#FF5E5E] hover:bg-[#D14848] text-[14px] font-semibold text-white cursor-pointer transition-colors"
+        </Button>
+        <Button
+          asChild
+          className="px-6 py-2.5 h-auto bg-[#FF5E5E] hover:bg-[#D14848]! text-[14px] font-semibold text-white"
         >
-          홈으로 가기
-        </button>
+          <Link href="/">홈으로 가기</Link>
+        </Button>
       </div>
     </div>
   );

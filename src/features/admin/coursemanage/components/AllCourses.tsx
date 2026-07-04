@@ -11,28 +11,47 @@ import {
 } from '@/components/ui/select';
 import Image from 'next/image';
 import { AdminCourse } from '../type';
+import type { Category } from '@/features/categories/types';
 
 type SortOption = '최신순' | '인기순' | '높은 평점순';
 
 interface Props {
   courses: AdminCourse[];
+  categories: Category[];
 }
 
 const ITEMS_PER_PAGE = 7;
 
-export default function AllCourses({ courses }: Props) {
+export default function AllCourses({ courses, categories }: Props) {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortOption>('최신순');
   const [categoryFilter, setCategoryFilter] = useState('전체');
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const categoryNames = ['전체', ...Array.from(new Set(courses.map((c) => c.categoryName)))];
+  // 세부카테고리명 → 대카테고리명 매핑 (courses.categoryName은 세부카테고리명만 담고 있음)
+  const subToMainMap = useMemo(() => {
+    const map = new Map<string, string>();
+    categories.forEach((cat) => {
+      cat.options.forEach((opt) => {
+        map.set(opt.name, cat.name);
+      });
+    });
+    return map;
+  }, [categories]);
+
+  const getMainCategory = (categoryName: string) => subToMainMap.get(categoryName) ?? categoryName;
+
+  const categoryNames = [
+    '전체',
+    ...Array.from(new Set(courses.map((c) => getMainCategory(c.categoryName)))),
+  ];
 
   const filtered = useMemo(() => {
     let result = [...courses];
     if (search) result = result.filter((c) => c.title.includes(search));
-    if (categoryFilter !== '전체') result = result.filter((c) => c.categoryName === categoryFilter);
+    if (categoryFilter !== '전체')
+      result = result.filter((c) => getMainCategory(c.categoryName) === categoryFilter);
     if (sort === '인기순') result.sort((a, b) => b.studentCount - a.studentCount);
     if (sort === '높은 평점순') result.sort((a, b) => b.ratingAvg - a.ratingAvg);
     if (sort === '최신순')
@@ -40,10 +59,25 @@ export default function AllCourses({ courses }: Props) {
         (a, b) => new Date(b.approvedAt ?? 0).getTime() - new Date(a.approvedAt ?? 0).getTime(),
       );
     return result;
-  }, [courses, search, sort, categoryFilter]);
+  }, [courses, search, sort, categoryFilter, subToMainMap]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  const getStatusBadge = (course: AdminCourse) => {
+    // status가 APPROVED이면서 비공개 처리된 경우를 구분할 필드가 따로 없다면,
+    // 우선 APPROVED → 공개, 그 외(DRAFT 등 전체 목록에 노출되는 경우) → 비공개로 표시
+    const isPublic = course.status === 'APPROVED';
+    return isPublic ? (
+      <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#827717] bg-[#F9FBE7] border border-[#827717]">
+        공개
+      </span>
+    ) : (
+      <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#6A7282] bg-[#F3F4F6] border border-[#6A7282]">
+        비공개
+      </span>
+    );
+  };
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
@@ -56,7 +90,7 @@ export default function AllCourses({ courses }: Props) {
               setSearch(e.target.value);
               setCurrentPage(1);
             }}
-            placeholder="강의명 검색..."
+            placeholder="강의명, 강사명 검색..."
             className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
           />
           <span className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -70,10 +104,10 @@ export default function AllCourses({ courses }: Props) {
             setCurrentPage(1);
           }}
         >
-          <SelectTrigger className="h-8 w-32 text-[12.5px] border-[#D1D5DB] text-[#1E2125]">
+          <SelectTrigger className="h-11! w-32 text-[13px] border-[#D1D5DB] bg-[#F9FAFB] text-[#1E2125] rounded-full">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent side="bottom">
+          <SelectContent position="popper" side="bottom">
             {(['최신순', '인기순', '높은 평점순'] as SortOption[]).map((s) => (
               <SelectItem key={s} value={s} className="text-[12.5px]">
                 {s}
@@ -86,11 +120,12 @@ export default function AllCourses({ courses }: Props) {
       <table className="w-full text-[13px] table-fixed">
         <thead>
           <tr className="border-b border-[#E5E7EB]">
+            <th className="py-3 w-[5%] text-center font-semibold text-[#1E2125]">#</th>
             <th className="py-3 w-[28%] text-center font-semibold text-[#1E2125]">강의명</th>
             <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">강사명</th>
-            <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125]">
+            <th className="py-3 w-[22%] text-center font-semibold text-[#1E2125]">
               <div className="flex items-center text-center justify-center gap-1">
-                카테고리
+                카테고리 &gt; 세부카테고리
                 <div className="relative">
                   <button
                     onClick={() => setCategoryOpen((v) => !v)}
@@ -101,7 +136,7 @@ export default function AllCourses({ courses }: Props) {
                     </svg>
                   </button>
                   {categoryOpen && (
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white border border-[#E5E7EB] rounded-lg shadow-lg z-10 min-w-30">
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white border border-[#E5E7EB] rounded-lg shadow-lg z-10 min-w-50">
                       {categoryNames.map((cat) => (
                         <button
                           key={cat}
@@ -125,34 +160,39 @@ export default function AllCourses({ courses }: Props) {
               </div>
             </th>
             <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">수강생 수</th>
-            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">평점</th>
-            <th className="py-3 w-[13%] text-center font-semibold text-[#1E2125]">등록일</th>
-            <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">상태</th>
+            <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">평점</th>
+            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">등록일</th>
+            <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">상태</th>
           </tr>
         </thead>
         <tbody>
           {paged.length === 0 ? (
             <tr>
-              <td colSpan={7} className="py-16 text-center text-[#6A7282]">
+              <td colSpan={8} className="py-16 text-center text-[#6A7282]">
                 검색 결과가 없습니다.
               </td>
             </tr>
           ) : (
-            paged.map((c) => (
+            paged.map((c, idx) => (
               <tr
                 key={c.courseId}
                 className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
               >
-                <td className="px-6 py-3 text-left">
+                <td className="py-3 text-center text-[#6A7282]">
+                  {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
+                </td>
+                <td className="px-4 py-3 text-left">
                   <Link
-                    href={`/courses/${encodeURIComponent(c.categoryName)}/${c.courseId}`}
+                    href={`/admin/coursemanage/${c.courseId}?from=all`}
                     className="font-semibold text-[#1E2125] hover:text-[#FF5E5E] hover:underline transition-colors"
                   >
                     {c.title}
                   </Link>
                 </td>
                 <td className="py-3 text-center text-[#6A7282]">{c.instructorName}</td>
-                <td className="py-3 text-center text-[#6A7282]">{c.categoryName}</td>
+                <td className="py-3 text-center text-[#6A7282]">
+                  {getMainCategory(c.categoryName)} &gt; {c.categoryName}
+                </td>
                 <td className="py-3 text-center text-[#6A7282]">
                   {c.studentCount.toLocaleString()}명
                 </td>
@@ -165,11 +205,7 @@ export default function AllCourses({ courses }: Props) {
                 <td className="py-3 text-center text-[#6A7282]">
                   {c.approvedAt?.slice(0, 10) ?? '-'}
                 </td>
-                <td className="py-3 text-center">
-                  <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#1E2125] bg-[#F1FFC1] border border-[#CFEE5D]">
-                    공개
-                  </span>
-                </td>
+                <td className="py-3 text-center">{getStatusBadge(c)}</td>
               </tr>
             ))
           )}
