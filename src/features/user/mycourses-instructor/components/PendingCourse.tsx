@@ -67,16 +67,17 @@ export default function PendingCourse({ courses, categories }: Props) {
 
   const handleDelete = async () => {
     if (deleteTargetId === null) return;
-    try {
-      setDeleteLoading(true);
-      await deleteCourseAction(deleteTargetId);
+    setDeleteLoading(true);
+
+    const result = await deleteCourseAction(deleteTargetId);
+
+    if (result.success) {
       setLocalCourses((prev) => prev.filter((c) => c.courseId !== deleteTargetId));
       setDeleteTargetId(null);
-    } catch {
-      alert('삭제 처리에 실패했습니다.');
-    } finally {
-      setDeleteLoading(false);
+    } else {
+      alert(result.message);
     }
+    setDeleteLoading(false);
   };
 
   return (

@@ -48,33 +48,33 @@ export default function AdminPendingButtons({ courseId, courseTitle }: AdminPend
 
   const handleApprove = async () => {
     setIsLoading(true);
-    try {
-      await approveCourseAction(courseId);
+    const result = await approveCourseAction(courseId);
+
+    if (result.success) {
       showToast('강의가 승인되었습니다.', 'positive');
       setShowApproveModal(false);
       router.replace('/admin/coursemanage?tab=pending');
-    } catch (error) {
+    } else {
       // 실패 시 모달을 닫지 않아 사용자가 바로 재시도할 수 있게 함
-      showToast(error instanceof Error ? error.message : '승인 처리에 실패했습니다.', 'negative');
-    } finally {
-      setIsLoading(false);
+      showToast(result.message, 'negative');
     }
+    setIsLoading(false);
   };
 
   // RejectModal에는 code 기준 옵션을 넘기고, 콜백도 code를 그대로 받음
   const handleReject = async (categoryCode: string, detail: string) => {
     setIsLoading(true);
-    try {
-      await rejectCourseAction(courseId, categoryCode, detail);
+    const result = await rejectCourseAction(courseId, categoryCode, detail);
+
+    if (result.success) {
       showToast('강의가 반려되었습니다.', 'positive');
       setShowRejectModal(false);
       router.replace('/admin/coursemanage?tab=rejected');
-    } catch (error) {
+    } else {
       // 실패 시 모달을 닫지 않아 입력했던 상세 사유가 유지됨
-      showToast(error instanceof Error ? error.message : '반려 처리에 실패했습니다.', 'negative');
-    } finally {
-      setIsLoading(false);
+      showToast(result.message, 'negative');
     }
+    setIsLoading(false);
   };
 
   const handleOpenRejectModal = () => {

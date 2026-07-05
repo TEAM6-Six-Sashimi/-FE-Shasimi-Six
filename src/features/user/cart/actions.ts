@@ -1,18 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { fetchCart, deleteCartItems, addCartItem } from '@/services/cart.service';
-import { CartResponse } from '@/features/user/cart/types';
-
-// 장바구니 조회
-export async function getCartAction(): Promise<CartResponse> {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value;
-
-  if (!accessToken) throw new Error('로그인이 필요합니다.');
-
-  return fetchCart(accessToken);
-}
+import { deleteCartItems, addCartItem } from '@/services/cart.service';
 
 // 장바구니 아이템 추가
 export async function addCartItemAction(

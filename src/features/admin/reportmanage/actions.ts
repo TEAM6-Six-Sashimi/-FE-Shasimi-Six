@@ -34,27 +34,47 @@ export async function fetchReviewReportDetailAction(
 }
 
 // 신고된 수강평 삭제 처리
-export async function deleteReportedReviewAction(reportId: number) {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+export async function deleteReportedReviewAction(
+  reportId: number,
+): Promise<{ success: true } | { success: false; message: string }> {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const res = await fetch(`${API_BASE_URL}/admin/reviews/reports/${reportId}/delete`, {
-    method: 'PATCH',
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+    const res = await fetch(`${API_BASE_URL}/admin/reviews/reports/${reportId}/delete`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
-  if (!res.ok) throw new Error('삭제 처리에 실패했습니다.');
+    if (!res.ok) throw new Error('삭제 처리에 실패했습니다.');
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : '삭제 처리에 실패했습니다.',
+    };
+  }
 }
 
 // 신고된 수강평 반려 처리 (수강평 그대로 유지)
-export async function rejectReportedReviewAction(reportId: number) {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+export async function rejectReportedReviewAction(
+  reportId: number,
+): Promise<{ success: true } | { success: false; message: string }> {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const res = await fetch(`${API_BASE_URL}/admin/reviews/reports/${reportId}/reject`, {
-    method: 'PATCH',
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+    const res = await fetch(`${API_BASE_URL}/admin/reviews/reports/${reportId}/reject`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
-  if (!res.ok) throw new Error('반려 처리에 실패했습니다.');
+    if (!res.ok) throw new Error('반려 처리에 실패했습니다.');
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : '반려 처리에 실패했습니다.',
+    };
+  }
 }

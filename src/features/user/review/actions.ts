@@ -20,17 +20,50 @@ async function getAuthOrThrow() {
   return { accessToken, user };
 }
 
-export async function createReviewAction(courseId: number, body: CreateReviewRequest) {
-  const { accessToken, user } = await getAuthOrThrow();
-  await createReview(accessToken, user.id, courseId, body);
+export async function createReviewAction(
+  courseId: number,
+  body: CreateReviewRequest,
+): Promise<{ success: true } | { success: false; message: string }> {
+  try {
+    const { accessToken, user } = await getAuthOrThrow();
+    await createReview(accessToken, user.id, courseId, body);
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : '리뷰 등록에 실패했습니다.',
+    };
+  }
 }
 
-export async function deleteReviewAction(courseId: number, reviewId: number) {
-  const { accessToken, user } = await getAuthOrThrow();
-  await deleteReview(accessToken, user.id, courseId, reviewId);
+export async function deleteReviewAction(
+  courseId: number,
+  reviewId: number,
+): Promise<{ success: true } | { success: false; message: string }> {
+  try {
+    const { accessToken, user } = await getAuthOrThrow();
+    await deleteReview(accessToken, user.id, courseId, reviewId);
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : '수강평 삭제에 실패했습니다.',
+    };
+  }
 }
 
-export async function reportReviewAction(reviewId: number, body: ReportReviewRequest) {
-  const { accessToken } = await getAuthOrThrow();
-  await reportReview(accessToken, reviewId, body);
+export async function reportReviewAction(
+  reviewId: number,
+  body: ReportReviewRequest,
+): Promise<{ success: true } | { success: false; message: string }> {
+  try {
+    const { accessToken } = await getAuthOrThrow();
+    await reportReview(accessToken, reviewId, body);
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : '신고 처리에 실패했습니다.',
+    };
+  }
 }

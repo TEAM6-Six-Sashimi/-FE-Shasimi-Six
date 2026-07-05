@@ -80,26 +80,28 @@ export default function InstructorApplicationDetailPage({ params }: Props) {
   };
 
   const handleApprove = async () => {
-    try {
-      setLoading(true);
-      await approveInstructorAction(Number(applicationId));
+    setLoading(true);
+    const result = await approveInstructorAction(Number(applicationId));
+
+    if (result.success) {
       setApproveModalOpen(false);
       router.push(buildListUrlWithToast('approved'));
-    } catch {
-      showToast('승인 처리에 실패했습니다.', 'negative');
+    } else {
+      showToast(result.message, 'negative');
       setLoading(false);
     }
   };
 
   const handleReject = async (categoryLabel: string, detailText: string) => {
-    try {
-      setLoading(true);
-      const categoryValue = CATEGORY_VALUE_MAP[categoryLabel] ?? categoryLabel;
-      await rejectInstructorAction(Number(applicationId), categoryValue, detailText);
+    setLoading(true);
+    const categoryValue = CATEGORY_VALUE_MAP[categoryLabel] ?? categoryLabel;
+    const result = await rejectInstructorAction(Number(applicationId), categoryValue, detailText);
+
+    if (result.success) {
       setRejectModalOpen(false);
       router.push(buildListUrlWithToast('rejected'));
-    } catch {
-      showToast('반려 처리에 실패했습니다.', 'negative');
+    } else {
+      showToast(result.message, 'negative');
       setLoading(false);
     }
   };

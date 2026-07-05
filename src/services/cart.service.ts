@@ -34,7 +34,7 @@ export async function fetchCart(accessToken: string): Promise<CartResponse> {
 
 // 장바구니 추가
 //   CART_002        -> 이미 장바구니에 담긴 강의
-//   PAYMENT_001  -> 이미 수강 중인 강의
+//   ENROLLMENT_001 -> 이미 수강 중인 강의
 //   UNAUTHORIZED    -> 로그인 필요
 export async function addCartItem(
   accessToken: string,
@@ -55,7 +55,7 @@ export async function addCartItem(
     const errorBody: ApiErrorResponse = await response.json().catch(() => ({}) as ApiErrorResponse);
     const errorCode = errorBody?.errorCode ?? '';
 
-    if (errorCode === 'CART_002' || errorCode === 'PAYMENT_001') {
+    if (errorCode === 'CART_002' || errorCode === 'ENROLLMENT_001') {
       throw new Error(errorCode);
     }
 

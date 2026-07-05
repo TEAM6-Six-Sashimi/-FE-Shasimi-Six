@@ -38,9 +38,19 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
   // 충전 확인 → 1) 백엔드에 주문 준비(ready) → 2) Toss 결제창 호출
   const handleConfirm = async () => {
     setIsLoading(true);
+
+    // 1) 충전 준비: 백엔드에서 orderId/orderName 발급
+    const readyResult = await readyCreditChargeAction(chargeAmount);
+
+    if (!readyResult.success) {
+      setErrorMessage(readyResult.message);
+      setModalState('error');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      // 1) 충전 준비: 백엔드에서 orderId/orderName 발급
-      const { orderId, orderName, amount } = await readyCreditChargeAction(chargeAmount);
+      const { orderId, orderName, amount } = readyResult.data;
 
       // 2) Toss 결제창 호출 (성공 시 successUrl로 리다이렉트되며 이 페이지로는 돌아오지 않음)
       const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
