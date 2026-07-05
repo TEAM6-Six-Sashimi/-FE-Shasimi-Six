@@ -5,6 +5,7 @@ import { PaymentSticky } from '@/features/user/payments/components/PaymentSticky
 import { fetchPlanPreviewAction } from '@/features/user/payments/actions';
 import { PaymentSummary, OrderLineItem } from '@/features/user/payments/types';
 import { fetchCategories } from '@/services/categories.service';
+import { fetchCreditBalance } from '@/services/credit.service';
 import { Category } from '@/features/categories/types';
 
 interface PaymentPageProps {
@@ -73,10 +74,7 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
           }).then((r) => r.json()),
         ),
       ),
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/credits/me`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        cache: 'no-store',
-      }).then((r) => r.json()),
+      fetchCreditBalance(accessToken),
     ]);
 
     if (courseResults.status === 'fulfilled') {

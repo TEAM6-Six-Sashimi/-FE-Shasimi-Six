@@ -16,6 +16,7 @@ interface PaymentStickyProps {
 const ERROR_MAP: Record<string, string> = {
   CREDIT_INSUFFICIENT_BALANCE: '크레딧 잔액이 부족합니다.',
   PAYMENT_001: '이미 수강 중인 강의가 포함되어 있습니다.',
+  ENROLLMENT_001: '이미 수강 중인 강의가 포함되어 있습니다.',
   CART_003: '결제할 강의를 선택해주세요.',
   CART_004: '장바구니 선택 정보가 올바르지 않습니다.',
   PAYMENT_002: '결제할 강의가 없습니다.',
@@ -61,50 +62,51 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
   const handleConfirmPayment = async () => {
     setShowConfirmModal(false);
     setIsLoading(true);
-    try {
-      if (summary.purchaseType === 'AI_SUBSCRIPTION') {
-        await checkoutAction(
-          {
-            purchaseType: 'AI_SUBSCRIPTION',
-            planCode: summary.planCode,
-            agreed: true,
-          },
-          idempotencyKeyRef.current,
-        );
-      } else if (summary.purchaseType === 'COURSE') {
-        await checkoutAction(
-          {
-            purchaseType: 'COURSE',
-            courseId: summary.courseIds?.[0],
-            agreed: true,
-          },
-          idempotencyKeyRef.current,
-        );
-      } else {
-        await checkoutAction(
-          {
-            purchaseType: 'CART',
-            courseIds: summary.courseIds,
-            agreed: true,
-          },
-          idempotencyKeyRef.current,
-        );
-      }
 
+    let result;
+    if (summary.purchaseType === 'AI_SUBSCRIPTION') {
+      result = await checkoutAction(
+        {
+          purchaseType: 'AI_SUBSCRIPTION',
+          planCode: summary.planCode,
+          agreed: true,
+        },
+        idempotencyKeyRef.current,
+      );
+    } else if (summary.purchaseType === 'COURSE') {
+      result = await checkoutAction(
+        {
+          purchaseType: 'COURSE',
+          courseId: summary.courseIds?.[0],
+          agreed: true,
+        },
+        idempotencyKeyRef.current,
+      );
+    } else {
+      result = await checkoutAction(
+        {
+          purchaseType: 'CART',
+          courseIds: summary.courseIds,
+          agreed: true,
+        },
+        idempotencyKeyRef.current,
+      );
+    }
+
+    if (result.success) {
       setShowCompleteModal(true);
-    } catch (err) {
-      const code = err instanceof Error ? err.message : '';
-
-      if (code === 'UNAUTHORIZED') {
+    } else {
+      if (result.code === 'UNAUTHORIZED') {
         router.push('/login');
+        setIsLoading(false);
         return;
       }
 
-      setErrorMessage(ERROR_MAP[code] ?? '결제에 실패했습니다. 다시 시도해주세요.');
+      setErrorMessage(ERROR_MAP[result.code] ?? '결제에 실패했습니다. 다시 시도해주세요.');
       setShowErrorModal(true);
-    } finally {
-      setIsLoading(false);
     }
+
+    setIsLoading(false);
   };
 
   // 결제 완료 후 이동 경로 (강의 → 내 강의 목록 / 구독 → 채용공고 분석 페이지)
