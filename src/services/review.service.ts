@@ -27,6 +27,15 @@ async function parseErrorMessage(res: Response, fallback: string): Promise<strin
   }
 }
 
+async function parseErrorCode(res: Response): Promise<string | undefined> {
+  try {
+    const body = await res.json();
+    return body.errorCode;
+  } catch {
+    return undefined;
+  }
+}
+
 // 수강평 등록
 export async function createReview(
   accessToken: string,
@@ -45,6 +54,12 @@ export async function createReview(
   });
 
   if (!res.ok) {
+    // REVIEW_001 -> 이미 해당 강의에 리뷰를 작성한 경우
+    const errorCode = await parseErrorCode(res.clone());
+    if (errorCode === 'REVIEW_001') {
+      throw new ReviewApiError('수강평이 이미 등록되어 있습니다.', res.status);
+    }
+
     const message = await parseErrorMessage(res, '리뷰 등록에 실패했습니다.');
     throw new ReviewApiError(message, res.status);
   }

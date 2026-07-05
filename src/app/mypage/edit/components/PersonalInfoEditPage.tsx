@@ -70,43 +70,49 @@ export default function PersonalInfoEditPage({ user }: Props) {
     }
     setPasswordMismatch(false);
 
-    try {
-      setLoading(true);
+    setLoading(true);
 
-      // 전화번호 + 동의 항목 수정
-      await updateMeAction({
+    // 전화번호 + 동의 항목 수정
+    const updateResult = await updateMeAction({
+      currentPassword,
+      phone,
+      marketingConsent: marketing,
+      emailConsent: emailNotice,
+      aiConsent: aiUsage,
+    });
+
+    if (!updateResult.success) {
+      showToast(updateResult.message, 'negative');
+      setLoading(false);
+      return;
+    }
+
+    // 새 비밀번호를 입력했으면 비밀번호도 변경
+    // 서버가 새 accessToken/refreshToken을 내려주고 쿠키를 즉시 교체하므로
+    // 세션이 끊기지 않고 그대로 마이페이지로 돌아갈 수 있음
+    if (newPassword) {
+      const passwordResult = await changePasswordAction({
         currentPassword,
-        phone,
-        marketingConsent: marketing,
-        emailConsent: emailNotice,
-        aiConsent: aiUsage,
+        newPassword,
+        newPasswordConfirm,
       });
 
-      // 새 비밀번호를 입력했으면 비밀번호도 변경
-      // 서버가 새 accessToken/refreshToken을 내려주고 쿠키를 즉시 교체하므로
-      // 세션이 끊기지 않고 그대로 마이페이지로 돌아갈 수 있음
-      if (newPassword) {
-        await changePasswordAction({
-          currentPassword,
-          newPassword,
-          newPasswordConfirm,
-        });
+      if (!passwordResult.success) {
+        showToast(passwordResult.message, 'negative');
+        setLoading(false);
+        return;
       }
 
-      showToast('개인정보가 수정되었습니다.');
-      sessionStorage.removeItem('mypage_current_password');
-      router.replace('/mypage');
-    } catch (err) {
-      const message = err instanceof Error ? err.message : '';
-      if (message === 'REQUIRES_LOGIN') {
+      if (passwordResult.requiresLogin) {
         showToast('비밀번호가 변경되었습니다. 다시 로그인해주세요.', 'negative');
         router.push('/auth/login');
         return;
       }
-      showToast(message || '수정에 실패했습니다.', 'negative');
-    } finally {
-      setLoading(false);
     }
+
+    showToast('개인정보가 수정되었습니다.');
+    sessionStorage.removeItem('mypage_current_password');
+    router.replace('/mypage');
   };
 
   if (currentPassword === null) {

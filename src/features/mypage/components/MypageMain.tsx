@@ -53,24 +53,24 @@ export default function MypageMain({ user }: MypageMainProps) {
   // 틀리면 서버가 에러를 던지므로 이 모달에서 바로 에러를 보여주고 다음 페이지로 넘어가지 않음.
   const handleEditPasswordConfirm = async (password: string) => {
     setPasswordError('');
-    try {
-      setLoading(true);
-      await updateMeAction({
-        currentPassword: password,
-        phone: user.phone,
-        marketingConsent: agreements.marketing,
-        emailConsent: agreements.emailNotice,
-        aiConsent: agreements.aiUsage,
-      });
+    setLoading(true);
 
+    const result = await updateMeAction({
+      currentPassword: password,
+      phone: user.phone,
+      marketingConsent: agreements.marketing,
+      emailConsent: agreements.emailNotice,
+      aiConsent: agreements.aiUsage,
+    });
+
+    if (result.success) {
       sessionStorage.setItem('mypage_current_password', password);
       setModalMode(null);
       router.push('/mypage/edit');
-    } catch {
+    } else {
       setPasswordError('비밀번호가 일치하지 않습니다. 다시 입력해주세요.');
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   // 탈퇴하기 클릭 → 1단계: 동의 모달
@@ -87,17 +87,18 @@ export default function MypageMain({ user }: MypageMainProps) {
   // 2단계 비밀번호 확인 → 즉시 deleteMeAction 호출, 틀리면 이 모달에서 바로 에러
   const handleWithdrawPasswordConfirm = async (password: string) => {
     setPasswordError('');
-    try {
-      setLoading(true);
-      await deleteMeAction(password);
+    setLoading(true);
+
+    const result = await deleteMeAction(password);
+
+    if (result.success) {
       showToast('성공적으로 탈퇴 되었습니다. 안녕히 가세요.');
       setModalMode(null);
       router.push('/');
-    } catch {
-      setPasswordError('비밀번호가 일치하지 않습니다. 다시 입력해주세요.');
-    } finally {
-      setLoading(false);
+    } else {
+      setPasswordError(result.message);
     }
+    setLoading(false);
   };
 
   return (

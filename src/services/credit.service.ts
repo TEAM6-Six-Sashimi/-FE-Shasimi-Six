@@ -16,7 +16,8 @@ export async function fetchCreditBalance(accessToken: string): Promise<CreditBal
   });
 
   if (!res.ok) {
-    throw new Error('크레딧 잔액 조회에 실패했습니다.');
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(errorBody.message || '크레딧 잔액 조회에 실패했습니다.');
   }
 
   return res.json();

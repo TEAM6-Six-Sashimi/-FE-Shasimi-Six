@@ -234,17 +234,18 @@ export default function CourseRegisterForm({ categories }: CourseRegisterFormPro
       })),
     };
 
-    try {
-      setLoadingMessage(type === 'save' ? '임시 저장 중입니다...' : '승인 요청 중입니다...');
-      setIsLoading(true);
-      await createCourseAction(payload);
+    setLoadingMessage(type === 'save' ? '임시 저장 중입니다...' : '승인 요청 중입니다...');
+    setIsLoading(true);
+
+    const result = await createCourseAction(payload);
+
+    if (result.success) {
       router.push('/mycourses-instructor?tab=pending');
-    } catch (error: any) {
+    } else {
       setErrors((prev) => ({
         ...prev,
-        sessions: error.message || '강의 등록에 실패했습니다.',
+        sessions: result.message,
       }));
-    } finally {
       setIsLoading(false);
     }
   };

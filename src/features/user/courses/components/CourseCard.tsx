@@ -61,7 +61,7 @@ export default function CourseCard({ course, category, priority = false }: Cours
         }
         if (result.code === 'CART_002') {
           setErrorMessage('이미 장바구니에 담긴 강의입니다.');
-        } else if (result.code === 'PAYMENT_001') {
+        } else if (result.code === 'PAYMENT_001' || result.code === 'ENROLLMENT_001') {
           setErrorMessage('이미 수강 중인 강의입니다.');
         } else {
           setErrorMessage('장바구니 추가에 실패했습니다.');

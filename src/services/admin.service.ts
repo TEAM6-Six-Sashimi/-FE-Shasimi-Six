@@ -131,9 +131,14 @@ export async function approveInstructor(accessToken: string, applicationId: numb
   );
 
   if (!res.ok) {
-    const errorBody = await res.text().catch(() => '');
-    console.error(`[approveInstructor] status=${res.status} body=${errorBody}`);
-    throw new Error('승인 처리에 실패했습니다.');
+    let message = '승인 처리에 실패했습니다.';
+    try {
+      const errorBody = await res.json();
+      message = errorBody.message || message;
+    } catch {
+      // JSON이 아니면 기본 메시지 사용
+    }
+    throw new Error(message);
   }
 }
 
@@ -156,9 +161,14 @@ export async function rejectInstructor(
   );
 
   if (!res.ok) {
-    const errorBody = await res.text().catch(() => '');
-    console.error(`[rejectInstructor] status=${res.status} body=${errorBody}`);
-    throw new Error('반려 처리에 실패했습니다.');
+    let message = '반려 처리에 실패했습니다.';
+    try {
+      const errorBody = await res.json();
+      message = errorBody.message || message;
+    } catch {
+      // JSON이 아니면 기본 메시지 사용
+    }
+    throw new Error(message);
   }
 }
 

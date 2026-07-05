@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { AdminApiError, AdminCategory } from '../../type';
+import { AdminCategory } from '../../type';
 import CategoryRegisterModal from './CategoryRegisterModal';
 import { createAdminCategory, deleteAdminCategory, updateAdminCategory } from '../../action';
 import { useToast } from '@/components/ui/ToastContext';
@@ -46,67 +46,57 @@ export default function CategoryManage({ categories, accessToken }: Props) {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    try {
-      await createAdminCategory(accessToken, {
-        name: data.name,
-        subCategory: data.subCategory,
-      });
+    const result = await createAdminCategory(accessToken, {
+      name: data.name,
+      subCategory: data.subCategory,
+    });
+
+    if (result.success) {
       showToast('카테고리가 등록되었습니다.');
       setOpenRegisterModal(false);
-      setConfirmModal(null);
       router.refresh();
-    } catch (e) {
-      showToast(
-        e instanceof AdminApiError ? e.message : '등록 중 오류가 발생했습니다.',
-        'negative',
-      );
-      setConfirmModal(null);
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      showToast(result.message, 'negative');
     }
+    setConfirmModal(null);
+    setIsSubmitting(false);
   };
 
   // 수정 API 호출
   const handleEditSubmit = async (data: { subCategory: string }) => {
     if (!editTarget || isSubmitting) return;
     setIsSubmitting(true);
-    try {
-      await updateAdminCategory(accessToken, editTarget.id, {
-        subCategory: data.subCategory,
-      });
+
+    const result = await updateAdminCategory(accessToken, editTarget.id, {
+      subCategory: data.subCategory,
+    });
+
+    if (result.success) {
       showToast('카테고리가 수정되었습니다.');
       setEditTarget(null);
-      setConfirmModal(null);
       router.refresh();
-    } catch (e) {
-      showToast(
-        e instanceof AdminApiError ? e.message : '수정 중 오류가 발생했습니다.',
-        'negative',
-      );
-      setConfirmModal(null);
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      showToast(result.message, 'negative');
     }
+    setConfirmModal(null);
+    setIsSubmitting(false);
   };
 
   // 삭제 API 호출
   const handleDeleteSubmit = async (id: number) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-    try {
-      await deleteAdminCategory(accessToken, id);
+
+    const result = await deleteAdminCategory(accessToken, id);
+
+    if (result.success) {
       showToast('카테고리가 삭제되었습니다.');
-      setConfirmModal(null);
       router.refresh();
-    } catch (e) {
-      showToast(
-        e instanceof AdminApiError ? e.message : '삭제 중 오류가 발생했습니다.',
-        'negative',
-      );
-      setConfirmModal(null);
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      showToast(result.message, 'negative');
     }
+    setConfirmModal(null);
+    setIsSubmitting(false);
   };
 
   return (

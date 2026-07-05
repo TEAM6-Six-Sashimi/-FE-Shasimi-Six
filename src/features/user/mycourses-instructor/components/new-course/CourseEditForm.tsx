@@ -223,17 +223,18 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
       })),
     };
 
-    try {
-      setLoadingMessage(type === 'save' ? '임시 저장 중입니다...' : '승인 요청 중입니다...');
-      setIsLoading(true);
-      await updateCourseAction(form.courseId, payload);
+    setLoadingMessage(type === 'save' ? '임시 저장 중입니다...' : '승인 요청 중입니다...');
+    setIsLoading(true);
+
+    const result = await updateCourseAction(form.courseId, payload);
+
+    if (result.success) {
       router.push('/mycourses-instructor?tab=pending');
-    } catch (error: any) {
+    } else {
       setErrors((prev) => ({
         ...prev,
-        sessions: error.message || '강의 수정에 실패했습니다.',
+        sessions: result.message,
       }));
-    } finally {
       setIsLoading(false);
     }
   };

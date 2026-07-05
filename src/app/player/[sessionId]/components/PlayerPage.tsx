@@ -248,6 +248,8 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
               <a
                 href={currentSession.attachmentUrl}
                 download={currentSession.attachmentName || undefined}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="px-4 py-2.5 rounded-lg border border-[#FF5E5E] text-[#FF5E5E] text-[13px] font-semibold hover:bg-[#FFEBEB] transition-colors whitespace-nowrap"
               >
                 강의 자료 다운로드
@@ -271,7 +273,7 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
               return (
                 <button
                   key={session.sessionId}
-                  onClick={() => isPlayable && router.push(href)}
+                  onClick={() => isPlayable && router.replace(href)}
                   disabled={!isPlayable}
                   className={`flex items-center justify-between px-3.5 py-3 rounded-lg text-left transition-colors ${
                     isPlayable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'

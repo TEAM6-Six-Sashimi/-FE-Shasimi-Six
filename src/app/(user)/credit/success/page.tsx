@@ -29,17 +29,15 @@ export default function CreditSuccessPage() {
       paymentKey,
       orderId,
       amount: Number(amount),
-    })
-      .then((result) => {
-        setChargedAmount(result.chargedAmount);
+    }).then((result) => {
+      if (result.success) {
+        setChargedAmount(result.data.chargedAmount);
         setState('success');
-      })
-      .catch((err) => {
-        setErrorMessage(
-          err instanceof Error ? err.message : '결제 승인에 실패했습니다.',
-        );
+      } else {
+        setErrorMessage(result.message);
         setState('error');
-      });
+      }
+    });
   }, []);
 
   if (state === 'loading') {

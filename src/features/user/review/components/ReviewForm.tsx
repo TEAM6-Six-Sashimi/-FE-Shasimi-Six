@@ -31,16 +31,21 @@ export default function ReviewForm({ courseId }: ReviewFormProps) {
   const handleConfirm = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-    try {
-      await createReviewAction(courseId, { rating, content: content.trim() });
+
+    const result = await createReviewAction(courseId, { rating, content: content.trim() });
+
+    if (result.success) {
       setConfirmOpen(false);
+      setRating(0);
+      setContent('');
+      setSubmitted(false);
       showToast('리뷰가 등록되었습니다.', 'positive');
       router.refresh();
-    } catch (error) {
-      showToast(error instanceof Error ? error.message : '리뷰 등록에 실패했습니다.', 'negative');
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      showToast(result.message, 'negative');
     }
+
+    setIsSubmitting(false);
   };
 
   return (
