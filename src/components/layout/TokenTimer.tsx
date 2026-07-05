@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { reissueAction } from '@/features/auth/actions';
+import { reissueAction, logoutAction } from '@/features/auth/actions';
+import { useToast } from '@/components/ui/ToastContext';
 
 export default function TokenTimer() {
+  const { showToast } = useToast();
   const [remaining, setRemaining] = useState<number | null>(null);
   const [isExtending, setIsExtending] = useState(false);
 
@@ -34,8 +36,9 @@ export default function TokenTimer() {
     try {
       const result = await reissueAction();
       if (!result.success) {
-        // 재발급 실패 시 홈으로
-        window.location.href = '/';
+        // 리프레시 토큰도 이미 만료/누락된 상태(자동 로그아웃) -> 남은 쿠키를 정리하고 홈으로
+        showToast('로그인 유효시간이 만료되었습니다', 'alarm');
+        await logoutAction();
         return;
       }
       // 성공 시 새 만료 시각을 즉시 반영
