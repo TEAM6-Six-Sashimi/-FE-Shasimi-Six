@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CourseFromAPI } from '../types';
 import { addCartItemAction } from '../../cart/actions';
+import { checkAlreadyEnrolledAction } from '../actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import Image from 'next/image';
@@ -41,6 +42,7 @@ export default function CourseCard({ course, category, priority = false }: Cours
   const courseHref = `/courses/${encodeURIComponent(category)}/${course.courseId}`;
 
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isCheckingPurchase, setIsCheckingPurchase] = useState(false);
   const [showCartModal, setShowCartModal] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -76,9 +78,22 @@ export default function CourseCard({ course, category, priority = false }: Cours
     }
   };
 
-  const handlePurchase = (e: React.MouseEvent) => {
+  const handlePurchase = async (e: React.MouseEvent) => {
     e.preventDefault();
-    setShowPurchaseModal(true);
+    if (isCheckingPurchase) return;
+    setIsCheckingPurchase(true);
+
+    try {
+      const alreadyEnrolled = await checkAlreadyEnrolledAction(course.courseId);
+      if (alreadyEnrolled) {
+        setErrorMessage('이미 수강 중인 강의입니다.');
+        setShowErrorModal(true);
+        return;
+      }
+      setShowPurchaseModal(true);
+    } finally {
+      setIsCheckingPurchase(false);
+    }
   };
 
   return (
@@ -155,6 +170,7 @@ export default function CourseCard({ course, category, priority = false }: Cours
             size="sm"
             className="flex-1 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[12.5px] font-semibold h-8 cursor-pointer"
             onClick={handlePurchase}
+            disabled={isCheckingPurchase}
           >
             구매하기
           </Button>
