@@ -1,16 +1,5 @@
-import { Metadata } from 'next';
 import FeatureHeader from '@/components/layout/FeatureHeader';
 import ComapareForm from '@/features/user/compare/components/CompareForm';
-
-export const metadata: Metadata = {
-  title: '강의 한눈에 비교하기',
-  description: '관심 강의를 나란히 놓고 내용을 한눈에 비교해보세요.',
-  openGraph: {
-    title: '강의 한눈에 비교하기 | 핏(Fit)-격',
-    description: '관심 강의를 나란히 놓고 내용을 한눈에 비교해보세요.',
-    url: '/compare',
-  },
-};
 
 export default function CourseComparePage() {
   return (
