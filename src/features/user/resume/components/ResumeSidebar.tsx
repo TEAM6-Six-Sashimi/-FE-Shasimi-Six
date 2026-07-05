@@ -81,7 +81,7 @@ export default function ResumeSidebar({ isSaved, resumeId }: ResumeSidebarProps)
 
   return (
     <>
-      <div className="w-80 shrink-0 flex flex-col gap-4">
+      <div className="w-full flex flex-col gap-4">
         <div className="bg-white rounded-xl shadow-md p-6 flex flex-col gap-3">
           <h2 className="flex items-center gap-1.5 text-[16px] font-bold text-[#1E2125]">
             <Image src="/ai-resume/ai-evaluation.svg" alt="ai 이력서 평가" width={18} height={18} />{' '}

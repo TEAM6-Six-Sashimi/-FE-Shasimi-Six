@@ -209,7 +209,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
 
         {/* 강의 목록 */}
         {pagedCourses.length > 0 ? (
-          <ul className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10 list-none">
+          <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10 list-none">
             {pagedCourses.map((course, idx) => (
               <li key={course.courseId}>
                 {/* 첫 4개(1행)는 priority로 LCP 개선 */}

@@ -77,7 +77,7 @@ export default function HeaderDropdown({ user }: HeaderDropdownProps) {
           <form action={logoutAction}>
             <button
               type="submit"
-              className="w-full text-left block px-4 py-2 text-[#D14848] hover:bg-[#E5E7EB]"
+              className="w-full text-left block px-4 py-2 text-[#D14848] hover:bg-[#E5E7EB] cursor-pointer"
             >
               로그아웃
             </button>

@@ -117,7 +117,7 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
           type="button"
           onClick={handleChargeClick}
           disabled={chargeAmount <= 0 || isLoading}
-          className={`w-full py-3 h-auto rounded-lg text-[15px] font-medium ${
+          className={`w-full py-3 h-auto rounded-lg text-[15px] font-semibold ${
             chargeAmount > 0
               ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848]'
               : 'bg-[#E5E7EB] text-[#6A7282] hover:bg-[#E5E7EB]'
