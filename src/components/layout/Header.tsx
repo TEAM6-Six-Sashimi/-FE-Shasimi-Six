@@ -23,7 +23,7 @@ export default async function Header() {
           className="object-contain"
         />
       </Link>
-      <TokenTimer />
+      {user.role !== 'GUEST' && <TokenTimer />}
 
       {user.role === 'GUEST' ? (
         <div className="flex gap-2 items-center">
