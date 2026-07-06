@@ -82,6 +82,18 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
     }
   };
 
+  // 같은 세션(같은 videoUrl)으로 t 값만 바뀌어 재진입한 경우 - src가 안 바뀌어
+  // loadedmetadata가 다시 발생하지 않으므로, 이미 로드된 영상이면 직접 위치를 옮겨줌
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || startSeconds <= 0) return;
+    if (video.readyState >= 1 && startSeconds < video.duration) {
+      video.currentTime = startSeconds;
+      setCurrentTime(startSeconds);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startSeconds]);
+
   const saveProgress = useCallback(
     async (positionSeconds: number) => {
       try {
