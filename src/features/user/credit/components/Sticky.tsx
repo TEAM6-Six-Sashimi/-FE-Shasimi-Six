@@ -38,9 +38,19 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
   // 충전 확인 → 1) 백엔드에 주문 준비(ready) → 2) Toss 결제창 호출
   const handleConfirm = async () => {
     setIsLoading(true);
+
+    // 1) 충전 준비: 백엔드에서 orderId/orderName 발급
+    const readyResult = await readyCreditChargeAction(chargeAmount);
+
+    if (!readyResult.success) {
+      setErrorMessage(readyResult.message);
+      setModalState('error');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      // 1) 충전 준비: 백엔드에서 orderId/orderName 발급
-      const { orderId, orderName, amount } = await readyCreditChargeAction(chargeAmount);
+      const { orderId, orderName, amount } = readyResult.data;
 
       // 2) Toss 결제창 호출 (성공 시 successUrl로 리다이렉트되며 이 페이지로는 돌아오지 않음)
       const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
@@ -107,7 +117,7 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
           type="button"
           onClick={handleChargeClick}
           disabled={chargeAmount <= 0 || isLoading}
-          className={`w-full py-3 h-auto rounded-lg text-[15px] font-medium ${
+          className={`w-full py-3 h-auto rounded-lg text-[15px] font-semibold ${
             chargeAmount > 0
               ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848]'
               : 'bg-[#E5E7EB] text-[#6A7282] hover:bg-[#E5E7EB]'

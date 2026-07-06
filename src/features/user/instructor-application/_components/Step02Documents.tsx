@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
+import { useToast } from '@/components/ui/ToastContext';
 
 export interface CertificationItem {
   name: string;
@@ -68,6 +69,7 @@ function CheckboxItem({
 }
 
 export default function Step02Documents({ data, onSubmit, onPrev }: Step02DocumentsProps) {
+  const { showToast } = useToast();
   const [form, setForm] = useState<Step02Data>(data);
   const [submitted, setSubmitted] = useState(false);
   const [confirmModal, setConfirmModal] = useState(false);
@@ -140,7 +142,7 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch {
-      alert('이력서 양식을 다운로드하지 못했습니다. 잠시 후 다시 시도해주세요.');
+      showToast('이력서 양식을 다운로드하지 못했습니다. 잠시 후 다시 시도해주세요.', 'negative');
     } finally {
       setTemplateDownloading(false);
     }

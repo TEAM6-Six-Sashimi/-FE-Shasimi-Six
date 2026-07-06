@@ -1,11 +1,35 @@
+import { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { fetchCourseDetail } from '@/services/course.service';
 import { fetchCategories } from '@/services/categories.service';
 import { fetchUserMe } from '@/services/user.service';
 import CourseDetailPage from './_components/CourseDetailPage';
+import { getThumbnailUrl } from '@/lib/thumbnail';
 
 interface PageProps {
   params: Promise<{ category: string; courseId: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { courseId } = await params;
+  const course = await fetchCourseDetail(courseId);
+
+  if (!course) return {};
+
+  const thumbnailUrl = getThumbnailUrl(course.thumbnail);
+
+  return {
+    title: course.title,
+    description: course.description,
+    openGraph: {
+      title: `${course.title} | 핏(Fit)-격`,
+      description: course.description,
+      url: `/courses/${encodeURIComponent(course.categoryName)}/${courseId}`,
+      images: thumbnailUrl
+        ? [{ url: thumbnailUrl, width: 1200, height: 630, alt: course.title }]
+        : [{url: '/FitGyeok-sharing.png', width: 1200, height: 630, alt: '핏(Fit)-격 로고' }],
+    },
+  };
 }
 
 export default async function Page({ params }: PageProps) {

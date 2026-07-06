@@ -17,56 +17,45 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export async function checkoutAction(
   payload: CheckoutRequest,
   idempotencyKey: string,
-): Promise<CheckoutResponse> {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value;
+): Promise<{ success: true; data: CheckoutResponse } | { success: false; code: string }> {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value;
 
-  if (!accessToken) throw new Error('UNAUTHORIZED');
+    if (!accessToken) throw new Error('UNAUTHORIZED');
 
-  async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}, ms = 8000) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), ms);
-    try {
-      return await fetch(input, { ...init, signal: controller.signal });
-    } finally {
-      clearTimeout(timer);
+    async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}, ms = 8000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), ms);
+      try {
+        return await fetch(input, { ...init, signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
     }
+
+    const res = await fetchWithTimeout(`${API_BASE_URL}/payments/checkout`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        'Idempotency-Key': idempotencyKey,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => null);
+      throw new Error(errorBody?.errorCode ?? 'CHECKOUT_FAILED');
+    }
+
+    return { success: true, data: await res.json() };
+  } catch (error) {
+    return {
+      success: false,
+      code: error instanceof Error ? error.message : 'CHECKOUT_FAILED',
+    };
   }
-
-  const res = await fetchWithTimeout(`${API_BASE_URL}/payments/checkout`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      'Idempotency-Key': idempotencyKey,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) {
-    const errorBody = await res.json().catch(() => null);
-
-    throw new Error(errorBody?.errorcode ?? 'CHECKOUT_FAILED');
-  }
-
-  return res.json();
-}
-
-// 보유 크레딧 조회
-export async function getCreditsAction(): Promise<number> {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value;
-
-  if (!accessToken) throw new Error('UNAUTHORIZED');
-
-  const res = await fetch(`${API_BASE_URL}/credits/me`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-    cache: 'no-store',
-  });
-
-  if (!res.ok) throw new Error('크레딧 조회에 실패했습니다.');
-  const data = await res.json();
-  return data.balance ?? 0;
 }
 
 // ── AI 구독 플랜 조회 ──────────────────────────────────────
@@ -75,8 +64,6 @@ export async function fetchSubscriptionPlansAction(): Promise<SubscriptionPlan[]
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  console.log('fetchSubscriptionPlansAction - accessToken:', accessToken);
-
   const res = await fetch(`${API_BASE_URL}/subscriptions/plans`, {
     headers: {
       ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
@@ -84,11 +71,8 @@ export async function fetchSubscriptionPlansAction(): Promise<SubscriptionPlan[]
     cache: 'no-store',
   });
 
-  console.log('fetchSubscriptionPlansAction - status:', res.status);
-
   if (!res.ok) return [];
   const data = await res.json();
-  console.log('fetchSubscriptionPlansAction - data:', data);
   return data.plans ?? [];
 }
 
@@ -103,7 +87,9 @@ export async function fetchPlanPreviewAction(planCode: string): Promise<PlanPrev
   });
 
   if (!res.ok) return null;
-  return res.json();
+  
+  const data = await res.json();
+  return data;
 }
 
 export async function fetchMySubscriptionAction(): Promise<MySubscription | null> {

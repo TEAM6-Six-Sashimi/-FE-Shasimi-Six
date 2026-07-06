@@ -66,36 +66,32 @@ export default function ReviewList({
   const handleDeleteConfirm = async () => {
     if (!deleteTarget || isProcessing) return;
     setIsProcessing(true);
-    try {
-      await deleteReviewAction(courseId, deleteTarget.reviewId);
+
+    const result = await deleteReviewAction(courseId, deleteTarget.reviewId);
+
+    if (result.success) {
       setDeleteTarget(null);
       showToast('수강평이 삭제되었습니다.', 'positive');
       router.refresh();
-    } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : '수강평 삭제에 실패했습니다.',
-        'negative',
-      );
-    } finally {
-      setIsProcessing(false);
+    } else {
+      showToast(result.message, 'negative');
     }
+    setIsProcessing(false);
   };
 
   const handleReportConfirm = async (category: ReportCategoryOption['value'], reason: string) => {
     if (!reportTarget || isProcessing) return;
     setIsProcessing(true);
-    try {
-      await reportReviewAction(reportTarget.reviewId, { category, reason });
+
+    const result = await reportReviewAction(reportTarget.reviewId, { category, reason });
+
+    if (result.success) {
       setReportTarget(null);
       showToast('신고가 접수되었습니다.', 'positive');
-    } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : '신고 처리에 실패했습니다.',
-        'negative',
-      );
-    } finally {
-      setIsProcessing(false);
+    } else {
+      showToast(result.message, 'negative');
     }
+    setIsProcessing(false);
   };
 
   return (
@@ -217,7 +213,7 @@ export default function ReviewList({
       {deleteTarget && (
         <TwoButtonModal
           title="수강평 삭제 확인"
-          message={'수강평 삭제하시면 다시 작성하실 수\n없습니다. 삭제하시겠습니까?'}
+          message={'기존 수강평을 삭제하셔도 다시 작성하실 수\n없습니다. 삭제하시겠습니까?'}
           confirmLabel={isProcessing ? '삭제 중...' : '확인'}
           cancelLabel="취소"
           onConfirm={handleDeleteConfirm}

@@ -23,6 +23,9 @@ export default function CourseReviewsSection({
   reviewMode,
   currentUserLoginId,
 }: CourseReviewsSectionProps) {
+  const hasReviewed =
+    !!currentUserLoginId && reviews.some((review) => review.writerLoginId === currentUserLoginId);
+
   return (
     <section className="flex flex-col gap-4">
       <h2 className="text-[#1E2125] text-[17px] font-bold">수강평</h2>
@@ -33,7 +36,13 @@ export default function CourseReviewsSection({
         ratingDistribution={ratingDistribution}
       />
 
-      {reviewMode === 'writable' && <ReviewForm courseId={courseId} />}
+      {reviewMode === 'writable' && hasReviewed && (
+        <div className="bg-[#F9FAFB] rounded-lg px-4 py-4 font-medium text-[13px] text-[#6A7282]">
+          수강평이 이미 등록되어 있습니다.
+        </div>
+      )}
+
+      {reviewMode === 'writable' && !hasReviewed && <ReviewForm courseId={courseId} />}
 
       {reviewMode === 'readonly' && (
         <div className="bg-[#F9FAFB] rounded-lg px-4 py-4 font-medium text-[13px] text-[#6A7282]">

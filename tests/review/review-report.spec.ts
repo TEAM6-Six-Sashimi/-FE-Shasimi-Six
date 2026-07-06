@@ -6,7 +6,7 @@ const COURSE_URL = "/courses/정보처리기사/1";
 test.describe("수강평 신고", () => {
 
   test.beforeEach(async ({ page }) => {
-    await login(page, "student02", "student");
+    await login(page, "instructor01", "instructor");
     await page.goto(COURSE_URL);
   });
 

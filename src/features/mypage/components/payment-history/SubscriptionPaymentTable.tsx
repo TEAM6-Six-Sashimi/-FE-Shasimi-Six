@@ -32,16 +32,17 @@ export default function SubscriptionPaymentTable({
   const handleCancelConfirm = async () => {
     if (isCancelling) return;
     setIsCancelling(true);
-    try {
-      const result = await cancelSubscriptionAction();
+
+    const result = await cancelSubscriptionAction();
+
+    if (result.success) {
       setCancelModalOpen(false);
-      showToast(result.message ?? '구독이 해지되었습니다.', 'positive');
+      showToast('구독이 해지되었습니다.', 'positive');
       router.refresh();
-    } catch (error) {
-      showToast(error instanceof Error ? error.message : '구독 해지에 실패했습니다.', 'negative');
-    } finally {
-      setIsCancelling(false);
+    } else {
+      showToast(result.message, 'negative');
     }
+    setIsCancelling(false);
   };
 
   // 최신 결제 건의 해지/만료 상태 셀 렌더링

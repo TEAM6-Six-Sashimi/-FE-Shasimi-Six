@@ -5,6 +5,7 @@ import { PaymentSticky } from '@/features/user/payments/components/PaymentSticky
 import { fetchPlanPreviewAction } from '@/features/user/payments/actions';
 import { PaymentSummary, OrderLineItem } from '@/features/user/payments/types';
 import { fetchCategories } from '@/services/categories.service';
+import { fetchCreditBalance } from '@/services/credit.service';
 import { Category } from '@/features/categories/types';
 
 interface PaymentPageProps {
@@ -34,6 +35,7 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
             id: preview.planCode,
             title: preview.planName,
             subtitle: `AI 구독권 ${preview.durationMonths}개월`,
+            thumbnail: preview.planThumbnail,
             price: preview.price,
           },
         ]
@@ -72,10 +74,7 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
           }).then((r) => r.json()),
         ),
       ),
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/credits/me`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        cache: 'no-store',
-      }).then((r) => r.json()),
+      fetchCreditBalance(accessToken),
     ]);
 
     if (courseResults.status === 'fulfilled') {
@@ -123,7 +122,7 @@ function PaymentPageLayout({
   return (
     <div className="min-h-screen bg-gray-50/60">
       <div className="max-w-280 mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] max-w-275 gap-10 items-start">
           <Suspense fallback={<PaymentContentSkeleton />}>
             <PaymentContent items={summary.items} categories={categories} />
           </Suspense>
