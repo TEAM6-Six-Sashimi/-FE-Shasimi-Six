@@ -63,14 +63,42 @@ export async function POST(req: NextRequest) {
       const errorBody = await res.text();
       console.error('instructor-apply error:', errorBody);
 
-      let message = '강사 지원에 실패했습니다.';
-      if (res.status === 400) {
-        message = '입력값을 확인해주세요. 이미 지원한 내역이 있거나 서류 검증에 실패했을 수 있습니다.';
-      } else if (res.status === 403) {
-        message = '본인 계정으로만 지원할 수 있습니다.';
+      // 백엔드가 구조화된 에러(코드/메시지)를 내려주면 그걸 우선 사용하고,
+      // 없으면 상태 코드 기반의 안내 문구로 대체
+      const parsed = (() => {
+        try {
+          return JSON.parse(errorBody);
+        } catch {
+          return null;
+        }
+      })();
+      const backendMessage: string | undefined = parsed?.message || parsed?.error;
+      const backendCode: string | undefined = parsed?.errorCode || parsed?.code;
+
+      const alreadyApplied =
+        backendCode === 'INSTRUCTOR_APPLICATION_DUPLICATE' ||
+        /이미\s*지원/.test(backendMessage ?? '') ||
+        /이미\s*지원/.test(errorBody);
+
+      // COMMON_999 등 백엔드 내부 오류 코드는 사용자에게 그대로 보여줘도 도움이 안 되므로
+      // 재시도를 유도하는 안내 문구로 대체
+      const isGenericServerError = backendCode === 'COMMON_999' || res.status >= 500;
+
+      let message = backendMessage || '강사 지원에 실패했습니다.';
+      if (isGenericServerError) {
+        message =
+          '일시적인 오류로 지원 접수에 실패했습니다. 잠시 후 다시 시도해주세요. 문제가 계속되면 고객센터로 문의해주세요.';
+      } else if (!backendMessage) {
+        if (alreadyApplied) {
+          message = '이미 처리 중인 지원 내역이 있습니다.';
+        } else if (res.status === 400) {
+          message = '서류 검증에 실패했습니다. 첨부한 파일과 입력 내용을 다시 확인해주세요.';
+        } else if (res.status === 403) {
+          message = '본인 계정으로만 지원할 수 있습니다.';
+        }
       }
 
-      return NextResponse.json({ error: message }, { status: res.status });
+      return NextResponse.json({ error: message, alreadyApplied }, { status: res.status });
     }
 
     // 204 No Content 응답
