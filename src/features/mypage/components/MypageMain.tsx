@@ -109,7 +109,7 @@ export default function MypageMain({ user }: MypageMainProps) {
       </div>
 
       {/* 기본 정보 2열 - 각 행마다 구분선 */}
-      <div className="grid grid-cols-2 gap-x-10">
+      <div className="flex flex-col md:grid md:grid-cols-2 gap-x-10">
         <InfoRow label="이름" value={user.name} />
         <InfoRow label="아이디" value={user.loginId} />
         <InfoRow label="생년월일" value={user.birthDate} />

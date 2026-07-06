@@ -36,10 +36,10 @@ const FEATURE_CARDS = [
 
 export default function FeatureCards() {
   return (
-    <ul className="grid grid-cols-3 gap-8 px-24 list-none">
+    <ul className="grid grid-cols-1 md:grid-cols-3 gap-8 px-24 list-none">
       {FEATURE_CARDS.map(
         ({ href, icon, iconBg, title, description, buttonLabel, buttonStyle, cardBg }) => (
-          <li key={href}>
+          <li key={href} className="min-w-13">
             <article className={`${cardBg} rounded-xl p-6 flex flex-col gap-4 h-full`}>
               {/* 아이콘 — 원형 배경, 장식용이라 aria-hidden */}
               <div

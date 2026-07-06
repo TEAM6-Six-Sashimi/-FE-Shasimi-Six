@@ -174,7 +174,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
           <Button
             onClick={handlePaymentClick}
             disabled={!canPurchase || isLoading}
-            className={`w-full py-4 h-auto rounded-xl text-white font-semibold text-base ${
+            className={`w-full py-3 h-auto rounded-lg text-white font-semibold text-base ${
               canPurchase && !isLoading
                 ? 'bg-[#FF5F5F] hover:bg-[#D14848] cursor-pointer'
                 : 'bg-[#E5E7EB] text-gray-400 hover:bg-[#E5E7EB] cursor-not-allowed'
