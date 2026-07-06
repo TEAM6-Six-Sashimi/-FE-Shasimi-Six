@@ -78,7 +78,7 @@ export default function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 -mt-2"
+              className="absolute right-3 top-1/2 -translate-y-1/2 -mt-2 p-1 rounded-md hover:bg-[#E5E7EB] cursor-pointer"
               aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보이기'}
             >
               <Image
