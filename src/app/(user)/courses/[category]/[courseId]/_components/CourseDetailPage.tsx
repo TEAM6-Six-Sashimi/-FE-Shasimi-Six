@@ -32,7 +32,7 @@ export default function CourseDetailPage({
             reviewMode={reviewMode}
             currentUserLoginId={currentUserLoginId}
           />
-          <div className="w-72 shrink-0 sticky top-4">
+          <div className="w-72 shrink-0 sticky top-4 z-30">
             <CourseDetailSidebar
               course={course}
               actionSlot={<CourseActionSlot course={course} actionType={actionType} />}
