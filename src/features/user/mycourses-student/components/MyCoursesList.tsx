@@ -1,22 +1,55 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { StudentCourse } from '../types';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { getResumeSessionAction } from '../actions';
+import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
 interface Props {
   courses: StudentCourse[];
 }
 
-function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
-  if (!thumbnail) return null;
-  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
-}
-
 const progressColor = (completed: boolean) => (completed ? 'bg-[#CFEE5D]' : 'bg-[#FF5E5E]');
 
 export default function MyCoursesList({ courses }: Props) {
+  const router = useRouter();
+  const [loadingCourseId, setLoadingCourseId] = useState<number | null>(null);
+
+  const courseDetailHref = (course: StudentCourse) =>
+    `/courses/${encodeURIComponent(course.categoryName)}/${course.courseId}`;
+
+  // 이어보기/다시보기: courseId로 이어볼 세션을 조회해서 player로 직행
+  const handleContinueWatching = async (e: React.MouseEvent, course: StudentCourse) => {
+    e.preventDefault(); // 카드 전체를 감싼 Link로 전파되지 않도록
+    if (loadingCourseId) return;
+
+    setLoadingCourseId(course.courseId);
+    try {
+      const result = await getResumeSessionAction(course.courseId);
+      if (!result) {
+        router.push(courseDetailHref(course));
+        return;
+      }
+      const query =
+        result.lastPositionSeconds > 0
+          ? `?courseId=${course.courseId}&t=${result.lastPositionSeconds}`
+          : `?courseId=${course.courseId}`;
+      router.push(`/player/${result.sessionId}${query}`);
+    } finally {
+      setLoadingCourseId(null);
+    }
+  };
+
+  // 리뷰 작성: 강의 상세 페이지의 수강평 섹션으로 이동
+  const handleWriteReview = (e: React.MouseEvent, course: StudentCourse) => {
+    e.preventDefault();
+    router.push(`${courseDetailHref(course)}#course-reviews`);
+  };
+
   return (
     <div className="max-w-275 mx-auto px-6 py-8">
       <h1 className="text-[24px] font-bold text-[#1E2125] mb-6">내 강의</h1>
@@ -27,14 +60,16 @@ export default function MyCoursesList({ courses }: Props) {
             <p className="text-[20px] font-medium">수강 중인 강의가 없습니다.</p>
           </div>
         ) : (
-          courses.map((course) => {
+          courses.map((course, idx) => {
             const thumbnailUrl = getThumbnailUrl(course.thumbnail);
+            const isLoading = loadingCourseId === course.courseId;
+
             return (
               <div
                 key={course.courseId}
                 className="bg-white rounded-xl border border-[#E5E7EB] p-5"
               >
-                <Link href={`/mycourses-student/${course.courseId}`}>
+                <Link href={courseDetailHref(course)}>
                   <div className="flex gap-5">
                     {/* 썸네일 - 카드 안쪽 여백 + 둥근 모서리 */}
                     <div className="relative w-44 h-28 shrink-0 rounded-lg overflow-hidden bg-[#E5E7EB]">
@@ -43,7 +78,9 @@ export default function MyCoursesList({ courses }: Props) {
                           src={thumbnailUrl}
                           alt={course.title}
                           fill
-                          unoptimized
+                          unoptimized={isLocalhostUrl(thumbnailUrl)}
+                          sizes="176px"
+                          priority={idx === 0} // 첫 번째 카드만 priority
                           className="object-cover"
                         />
                       )}
@@ -63,13 +100,20 @@ export default function MyCoursesList({ courses }: Props) {
                         <div className="flex items-center gap-2 shrink-0 ml-4">
                           <Button
                             size="sm"
-                            className="h-9 px-4 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[12.5px] font-semibold cursor-pointer"
+                            onClick={(e) => handleContinueWatching(e, course)}
+                            disabled={isLoading}
+                            className="h-9 px-4 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[12.5px] font-semibold cursor-pointer disabled:opacity-70"
                           >
-                            {course.completed ? '다시보기 >' : '이어보기 >'}
+                            {isLoading
+                              ? '이동 중...'
+                              : course.completed
+                                ? '다시보기 >'
+                                : '이어보기 >'}
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
+                            onClick={(e) => handleWriteReview(e, course)}
                             className="h-9 px-4 border-[1.5px] border-[#1E2125] text-[#1E2125] text-[12.5px] font-semibold bg-white hover:bg-[#F9FAFB] cursor-pointer"
                           >
                             리뷰 작성

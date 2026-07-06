@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import ReviewReports from '@/features/admin/reportmanage/components/CourseReviewReports';
+import CourseReviewReports from '@/features/admin/reportmanage/components/CourseReviewReports';
 import CommunityReports from '@/features/admin/reportmanage/components/CommunityReports';
 import { ReviewReport } from '@/features/admin/reportmanage/types';
 
@@ -61,7 +61,7 @@ export default function ReportManagePage({ initialReports }: Props) {
           <button
             key={id}
             onClick={() => handleTabChange(id)}
-            className={`px-5 py-3 text-[13.5px] font-medium border-b-2 transition-colors ${
+            className={`px-5 py-3 text-[13.5px] font-medium border-b-2 transition-colors cursor-pointer ${
               tab === id
                 ? 'border-[#FF5E5E] text-[#FF5E5E] font-semibold'
                 : 'border-transparent text-[#6A7282] hover:text-[#1E2125]'
@@ -72,7 +72,7 @@ export default function ReportManagePage({ initialReports }: Props) {
         ))}
       </div>
 
-      {tab === 'review' && <ReviewReports reports={reports} setReports={setReports} />}
+      {tab === 'review' && <CourseReviewReports reports={reports} setReports={setReports} />}
       {tab === 'community' && <CommunityReports />}
     </div>
   );

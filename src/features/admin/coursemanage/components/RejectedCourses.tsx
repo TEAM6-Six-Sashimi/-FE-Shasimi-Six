@@ -13,7 +13,6 @@ interface Props {
 export default function RejectedCourses({ courses, categories }: Props) {
   const [detailModal, setDetailModal] = useState<RejectedCourse | null>(null);
 
-  // 세부카테고리명 → 대카테고리명 매핑
   const subToMainMap = useMemo(() => {
     const map = new Map<string, string>();
     categories.forEach((cat) => {
@@ -33,16 +32,16 @@ export default function RejectedCourses({ courses, categories }: Props) {
         <thead>
           <tr className="border-b border-[#E5E7EB]">
             <th className="py-3 w-[6%] text-center font-semibold text-[#1E2125]">#</th>
-            <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125]">강의명</th>
-            <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">강사명</th>
-            <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">
+            <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">강의명</th>
+            <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">강사명</th>
+            <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125]">
               카테고리 &gt; 세부카테고리
             </th>
             <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">반려일</th>
-            <th className="py-3 w-[14%] text-center font-semibold text-[#1E2125]">
+            <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">
               반려 사유 카테고리
             </th>
-            <th className="py-3 w-[26%] text-center font-semibold text-[#1E2125]">
+            <th className="py-3 w-[27%] text-center font-semibold text-[#1E2125]">
               반려 사유 내용
             </th>
           </tr>
@@ -70,20 +69,19 @@ export default function RejectedCourses({ courses, categories }: Props) {
                   {c.updatedAt?.slice(0, 10) ?? '-'}
                 </td>
                 <td className="py-3 text-center">
-                  {c.rejectCategory ? (
-                    <span className="inline-block px-2.5 py-1 rounded-md text-[11.5px] font-semibold bg-[#FFEBEB] text-[#FF5E5E]">
-                      {c.rejectCategory}
-                    </span>
-                  ) : (
-                    <span className="text-[#9CA3AF]">-</span>
-                  )}
+                  <span className="inline-block px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-[#FFEBEB] text-[#FF5E5E]">
+                    {c.rejectCategory.label}
+                  </span>
                 </td>
-                <td
-                  onClick={() => setDetailModal(c)}
-                  className="py-3 text-[#6A7282] text-left px-4 truncate cursor-pointer hover:text-[#1E2125] hover:underline transition-colors"
-                  title={c.rejectReason}
-                >
-                  {c.rejectReason}
+                <td className="py-3 px-4 text-left">
+                  <button
+                    type="button"
+                    onClick={() => setDetailModal(c)}
+                    className="w-full text-left text-[#6A7282] truncate cursor-pointer hover:text-[#1E2125] hover:underline transition-colors"
+                    title={c.rejectDetail}
+                  >
+                    {c.rejectDetail}
+                  </button>
                 </td>
               </tr>
             ))
@@ -91,7 +89,6 @@ export default function RejectedCourses({ courses, categories }: Props) {
         </tbody>
       </table>
 
-      {/* 반려 사유 상세 모달 (공용) */}
       {detailModal && (
         <RejectDetailModal
           fields={[
@@ -99,8 +96,8 @@ export default function RejectedCourses({ courses, categories }: Props) {
             { label: '강사명', value: detailModal.instructorName },
             { label: '반려일', value: detailModal.updatedAt?.slice(0, 10) ?? '-' },
           ]}
-          category={detailModal.rejectCategory ?? '-'}
-          detail={detailModal.rejectReason}
+          category={detailModal.rejectCategory.label}
+          detail={detailModal.rejectDetail}
           onClose={() => setDetailModal(null)}
         />
       )}

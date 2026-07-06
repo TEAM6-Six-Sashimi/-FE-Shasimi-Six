@@ -64,7 +64,7 @@ export default function Content({
       <h1 className="text-[27px] font-bold mt-2 mb-8">크레딧 충전</h1>
       <div className="mb-10">
         <h2 className="text-[17px] font-semibold mb-3">충전 금액 선택</h2>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {PRESET_OPTIONS.map((opt) => {
             const isSelected = selectedAmount === opt.credit;
             return (
@@ -72,7 +72,7 @@ export default function Content({
                 key={opt.credit}
                 type="button"
                 onClick={() => handlePresetClick(opt.credit)}
-                className={`flex flex-col items-center justify-center py-7 px-3 h-auto rounded-xl border-[1.5px] transition-all duration-100
+                className={`flex flex-col items-center justify-center py-7 px-3 h-auto rounded-xl border-[1.5px] transition-all duration-100 cursor-pointer
                   ${
                     isSelected
                       ? 'bg-[#FF5F5F] text-white border-transparent hover:bg-[#FF5F5F]'

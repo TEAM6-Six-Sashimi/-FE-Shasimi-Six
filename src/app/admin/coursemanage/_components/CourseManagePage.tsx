@@ -7,6 +7,7 @@ import {
   AdminCourse,
   RejectedCourse,
   AdminPendingCourse,
+  AdminPrivateCourse,
   AdminCategory,
 } from '@/features/admin/coursemanage/type';
 import AllCourses from '@/features/admin/coursemanage/components/AllCourses';
@@ -23,7 +24,7 @@ interface Props {
   allCourses: AdminCourse[];
   pendingCourses: AdminPendingCourse[];
   rejectedCourses: RejectedCourse[];
-
+  privateCourses: AdminPrivateCourse[];
   courseCategories: Category[];
   adminCategories: AdminCategory[];
   accessToken: string;
@@ -33,6 +34,7 @@ export default function CourseManagePage({
   allCourses,
   pendingCourses,
   rejectedCourses,
+  privateCourses,
   courseCategories,
   adminCategories,
   accessToken,
@@ -86,7 +88,7 @@ export default function CourseManagePage({
           <button
             key={id}
             onClick={() => handleTabChange(id)}
-            className={`px-5 py-3 text-[13.5px] font-medium border-b-2 transition-colors ${
+            className={`px-5 py-3 text-[13.5px] font-medium border-b-2 transition-colors cursor-pointer ${
               tab === id
                 ? 'border-[#FF5E5E] text-[#FF5E5E] font-semibold'
                 : 'border-transparent text-[#6A7282] hover:text-[#1E2125]'
@@ -104,7 +106,9 @@ export default function CourseManagePage({
       {tab === 'rejected' && (
         <RejectedCourses courses={rejectedCourses} categories={courseCategories} />
       )}
-      {tab === 'private' && <PrivateCourses categories={courseCategories} />}
+      {tab === 'private' && (
+        <PrivateCourses courses={privateCourses} categories={courseCategories} />
+      )}
       {tab === 'category' && (
         <CategoryManage categories={adminCategories} accessToken={accessToken} />
       )}

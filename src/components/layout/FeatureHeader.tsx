@@ -26,7 +26,7 @@ export default function FeatureHeader({ icon, title, description, right }: Featu
         <p className="text-[13px] text-[#6A7282] mt-1">{description}</p>
         </div>
         {right && (
-        <p className="text-[13px] font-medium text-[#827717] whitespace-nowrap">{right}</p>
+        <p className="text-[13px] font-medium text-[#827717] whitespace-nowrap pt-7.5">{right}</p>
       )}
       </div>
       

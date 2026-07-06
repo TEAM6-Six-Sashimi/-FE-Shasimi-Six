@@ -5,7 +5,11 @@ import ApprovedCourse from '@/features/user/mycourses-instructor/components/Appr
 import PendingCourse from '@/features/user/mycourses-instructor/components/PendingCourse';
 import PrivateCourse from '@/features/user/mycourses-instructor/components/PrivateCourse';
 import { fetchCategories } from '@/services/categories.service';
-import { fetchApprovedCourses, fetchInProgressCourses } from '@/services/instructor.service';
+import {
+  fetchApprovedCourses,
+  fetchInProgressCourses,
+  fetchClosedCourses,
+} from '@/services/instructor.service';
 import { fetchUserMe } from '@/services/user.service';
 
 type InstructorTab = 'dashboard' | 'approved' | 'pending' | 'private';
@@ -35,18 +39,22 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
   const user = accessToken ? await fetchUserMe(accessToken) : null;
   const userId = user ? String(user.id) : '';
 
-  const [approvedCourses, inProgressCourses, categories] =
+  const [approvedCourses, inProgressCourses, closedCourses, categories] =
     accessToken && userId
       ? await Promise.all([
           activeTab === 'approved'
             ? fetchApprovedCourses(accessToken, userId)
             : Promise.resolve([]),
+
           activeTab === 'pending'
             ? fetchInProgressCourses(accessToken, userId)
             : Promise.resolve([]),
+
+          activeTab === 'private' ? fetchClosedCourses(accessToken, userId) : Promise.resolve([]),
+
           fetchCategories(),
         ])
-      : [[], [], []];
+      : [[], [], [], []];
 
   return (
     <div className="max-w-275 min-h-[calc(100vh-95px)] container mx-auto px-6 py-8">
@@ -55,7 +63,8 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
       <div className="flex items-center gap-0 border-b border-[#E5E7EB] mb-6">
         {TABS.map(({ id, label }) => {
           // 기본 탭(dashboard)은 쿼리 없는 깨끗한 URL, 그 외는 ?tab= 포함
-          const href = id === 'dashboard' ? '/mycourses-instructor' : `/mycourses-instructor?tab=${id}`;
+          const href =
+            id === 'dashboard' ? '/mycourses-instructor' : `/mycourses-instructor?tab=${id}`;
           return (
             <Link
               key={id}
@@ -79,7 +88,7 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
       {activeTab === 'pending' && (
         <PendingCourse courses={inProgressCourses} categories={categories} />
       )}
-      {activeTab === 'private' && <PrivateCourse />}
+      {activeTab === 'private' && <PrivateCourse courses={closedCourses} categories={categories} />}
     </div>
   );
 }

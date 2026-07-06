@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import AiAgreementRequiredModal from '@/components/modals/AgreementRequiredModal';
+import { useToast } from '@/components/ui/ToastContext';
 import { MySubscription, SubscriptionPlan } from '@/features/user/payments/types';
 
 interface Props {
@@ -14,9 +15,14 @@ interface Props {
 
 export default function AiSubscribePage({ plans, mySubscription, aiConsent }: Props) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [agreementModalOpen, setAgreementModalOpen] = useState(false);
 
   const handleStart = (planCode: string) => {
+    if (mySubscription?.subscribed) {
+      showToast('이미 이용 중인 구독 플랜이 있습니다.', 'negative');
+      return;
+    }
     if (!aiConsent) {
       setAgreementModalOpen(true);
       return;
@@ -39,7 +45,7 @@ export default function AiSubscribePage({ plans, mySubscription, aiConsent }: Pr
         )}
       </div>
 
-      <div className="max-w-210 mx-auto grid grid-cols-2 gap-10">
+      <div className="max-w-210 mx-auto grid grid-cols-1 sm:grid-cols-2 gap-10">
         {plans.map((plan) => {
           const hasDiscount = plan.discountRate > 0;
           return (
@@ -83,7 +89,7 @@ export default function AiSubscribePage({ plans, mySubscription, aiConsent }: Pr
                 onClick={() => handleStart(plan.planCode)}
                 className="w-full h-12 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[15px] cursor-pointer"
               >
-                시작하기
+                구매하기
               </Button>
             </div>
           );
@@ -92,8 +98,8 @@ export default function AiSubscribePage({ plans, mySubscription, aiConsent }: Pr
 
       <div className="max-w-3xl mx-auto mt-10 text-center">
         <p className="text-[12.5px] text-[#9CA3AF] leading-relaxed">
-          구독 플랜 해지 시, 만료일까지 구독권이 유지됩니다. 구독 플랜 해지는 마이페이지 &gt;
-          결제 내역(구독권)에서 가능합니다.
+          구독 플랜 해지 시, 만료일까지 구독권이 유지됩니다. 구독 플랜 해지는 마이페이지 &gt; 결제
+          내역(구독권)에서 가능합니다.
           <br />
           크레딧이 부족할 경우, 자동 갱신 없이 구독권이 해지됩니다.
         </p>

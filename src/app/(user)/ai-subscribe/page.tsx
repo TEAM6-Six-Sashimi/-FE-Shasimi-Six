@@ -1,6 +1,9 @@
 import { cookies } from 'next/headers';
 import { fetchUserMe } from '@/services/user.service';
-import { fetchSubscriptionPlansAction, fetchMySubscriptionAction } from '@/features/user/payments/actions';
+import {
+  fetchSubscriptionPlansAction,
+  fetchMySubscriptionAction,
+} from '@/features/user/payments/actions';
 import AiSubscribePage from './components/AiSubscribePage';
 
 export default async function Page() {

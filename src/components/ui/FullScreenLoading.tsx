@@ -6,7 +6,7 @@ export default function FullScreenLoading({
   message = '처리 중입니다...',
 }: FullScreenLoadingProps) {
   return (
-    <div className="fixed inset-0 z-100 flex flex-col items-center justify-center gap-4 bg-white/20">
+    <div className="fixed inset-0 z-100 flex flex-col items-center justify-center gap-4 bg-white/60">
       <p className="text-[15px] text-[#6A7282]">{message}</p>
       <div className="flex items-center gap-2">
         {[0, 150, 300].map((delay, i) => (

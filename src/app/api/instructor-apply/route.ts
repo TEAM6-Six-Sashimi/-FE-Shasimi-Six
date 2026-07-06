@@ -49,29 +49,34 @@ export async function POST(req: NextRequest) {
     newFormData.append('certificateFiles', file);
   });
 
-  const res = await fetch(
-    `${API_BASE_URL}/api/members/${user.id}/instructor-apply?${queryParams.toString()}`,
-    {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${accessToken}` },
-      body: newFormData,
-    },
-  );
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/members/${user.id}/instructor-apply?${queryParams.toString()}`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: newFormData,
+      },
+    );
 
-  if (!res.ok) {
-    const errorBody = await res.text();
-    console.error('instructor-apply error:', errorBody);
+    if (!res.ok) {
+      const errorBody = await res.text();
+      console.error('instructor-apply error:', errorBody);
 
-    let message = '강사 지원에 실패했습니다.';
-    if (res.status === 400) {
-      message = '입력값을 확인해주세요. 이미 지원한 내역이 있거나 서류 검증에 실패했을 수 있습니다.';
-    } else if (res.status === 403) {
-      message = '본인 계정으로만 지원할 수 있습니다.';
+      let message = '강사 지원에 실패했습니다.';
+      if (res.status === 400) {
+        message = '입력값을 확인해주세요. 이미 지원한 내역이 있거나 서류 검증에 실패했을 수 있습니다.';
+      } else if (res.status === 403) {
+        message = '본인 계정으로만 지원할 수 있습니다.';
+      }
+
+      return NextResponse.json({ error: message }, { status: res.status });
     }
 
-    return NextResponse.json({ error: message }, { status: res.status });
+    // 204 No Content 응답
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('instructor-apply request failed:', error);
+    return NextResponse.json({ error: '강사 지원에 실패했습니다.' }, { status: 502 });
   }
-
-  // 204 No Content 응답
-  return NextResponse.json({ success: true });
 }

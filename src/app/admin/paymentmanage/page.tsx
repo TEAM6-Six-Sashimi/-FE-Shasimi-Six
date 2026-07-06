@@ -1,5 +1,5 @@
+import ComingSoon from '@/components/ui/comingSoon';
+
 export default function PaymentManagePage() {
-    return (
-        <div>결제 관리</div>
-    );
+  return <ComingSoon />;
 }

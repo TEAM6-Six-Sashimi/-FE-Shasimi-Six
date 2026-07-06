@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   const res = await fetch(`${API_BASE_URL}/instructor/files/upload`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'X-USER-ID': String(user.id),
     },
     body: newFormData,
@@ -35,5 +35,6 @@ export async function POST(req: NextRequest) {
   }
 
   const data = await res.json();
+
   return NextResponse.json({ url: data.url });
 }

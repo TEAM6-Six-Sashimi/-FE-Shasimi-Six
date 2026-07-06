@@ -75,7 +75,7 @@ export default function InstructorApplicationClient({
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || '강사 지원에 실패했습니다.');
       }
 

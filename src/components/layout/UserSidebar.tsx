@@ -9,7 +9,7 @@ const BASE_MENUS = [
   { label: '개인정보 조회', href: '/mypage', icon: 'mypage' },
   { label: '강사 지원 내역', href: '/mypage/instructor-application-list', icon: 'instructor-application' },
   { label: '크레딧 충전 내역', href: '/mypage/credit-charge', icon: 'credit' },
-  { label: '결제 내역', href: '/mypage/payments', icon: 'payments' },
+  { label: '결제 내역', href: '/mypage/payment-history', icon: 'payments' },
 ] as const;
 
 // ---- 메인 컴포넌트 ------------------------------------------------

@@ -44,7 +44,7 @@ export default function CourseTabNav() {
       const el = document.getElementById(SECTION_ID[tab.key]);
       if (el) observer.observe(el);
     });
- 
+
     return () => observer.disconnect();
   }, []);
 
@@ -60,7 +60,7 @@ export default function CourseTabNav() {
   };
 
   return (
-    <div className="sticky top-4 z-10 flex bg-white rounded-xl shadow-md border-[1.5px] border-[#D1D5DB] overflow-hidden">
+    <div className="sticky top-4 z-20 flex bg-white rounded-xl shadow-md border-[1.5px] border-[#D1D5DB] overflow-hidden">
       {ALL_TABS.map((tab) => {
         const isActive = activeTab === tab.key;
         return (

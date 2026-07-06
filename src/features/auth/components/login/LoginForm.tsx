@@ -7,13 +7,11 @@ import Image from 'next/image';
 import { loginAction } from '../../actions';
 import LoginButton from './LoginButton';
 import { useToast } from '@/components/ui/ToastContext';
-import OneButtonModal from '@/components/modals/OneButtonModal';
 
 export default function LoginForm() {
   const [userIdInput, setUserIdInput] = useState('');
   const [userPasswordInput, setUserPasswordInput] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [failModal, setFailModal] = useState<{ title: string; message: string } | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -32,31 +30,23 @@ export default function LoginForm() {
 
     setIsSubmitting(true);
 
-    try {
-      const { name } = await loginAction({
-        loginId: userIdInput,
-        password: userPasswordInput,
-      });
+    const result = await loginAction({
+      loginId: userIdInput,
+      password: userPasswordInput,
+    });
 
-      showToast(`${name}님 환영합니다!`);
+    if (result.success) {
+      showToast(`${result.name}님 환영합니다!`);
       router.push('/');
-    } catch (error: any) {
-      if (error.code === '신고 횟수 누적 패널티로 비활성화된 회원 안내 에러 코드 넣는 곳') {  // 수정 필요한 부분!!!!!!!!!!!
-        setFailModal({
-          title: '로그인 실패',
-          message: '신고 횟수 누적 패널티로 비활성화된 계정입니다.\n자세한 사항은 관리자에게 문의하세요.',
-        });
-      } else {
-        setErrorMessage(error.message || '서버와 연결할 수 없습니다.');
-      }
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      setErrorMessage(result.message || '서버와 연결할 수 없습니다.');
     }
+
+    setIsSubmitting(false);
   };
 
   return (
-    <>
-      <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}>
         <fieldset className="text-[17px]">
           <label htmlFor="loginId" className="font-medium mb-2">
             아이디
@@ -123,15 +113,6 @@ export default function LoginForm() {
             회원가입
           </Link>
         </p>
-      </form>
-
-      {failModal && (
-        <OneButtonModal
-          title={failModal.title}
-          message={failModal.message}
-          onConfirm={() => setFailModal(null)}
-        />
-      )}
-    </>
+    </form>
   );
 }

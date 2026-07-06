@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchUserMe } from '@/services/user.service';
+import { extractFileKey } from '@/lib/file-url';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -13,21 +14,20 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
   }
 
-  const key = req.nextUrl.searchParams.get('key');
-  if (!key) {
+  const rawKey = req.nextUrl.searchParams.get('key');
+  if (!rawKey) {
     return NextResponse.json({ error: 'key가 필요합니다.' }, { status: 400 });
   }
 
-  const res = await fetch(
-    `${API_BASE_URL}/files/download?key=${encodeURIComponent(key)}`,
-    {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    },
-  );
+  const key = extractFileKey(rawKey);
+
+  const res = await fetch(`${API_BASE_URL}/files/download?key=${encodeURIComponent(key)}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
 
   if (!res.ok) {
     const errorBody = await res.text().catch(() => '');
-    console.error(`[files/download] status=${res.status} body=${errorBody}`);
+    console.error(`[files/download] status=${res.status} body=${errorBody} key=${key}`);
     return NextResponse.json({ error: '파일을 불러오지 못했습니다.' }, { status: res.status });
   }
 

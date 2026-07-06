@@ -3,8 +3,7 @@
 import Image from 'next/image';
 import { CartCourseItem } from '../types';
 import { Button } from '@/components/ui/button';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
 interface CartContentProps {
   items: CartCourseItem[];
@@ -12,11 +11,6 @@ interface CartContentProps {
   onToggleSelect: (id: number) => void;
   onToggleAll: () => void;
   onDeleteSelected: () => void;
-}
-
-function getThumbnailUrl(thumbnail: string | null | undefined): string | null {
-  if (!thumbnail) return null;
-  return thumbnail.startsWith('http') ? thumbnail : `${API_BASE_URL}/${thumbnail}`;
 }
 
 export default function CartContent({
@@ -63,7 +57,7 @@ export default function CartContent({
           type="button"
           onClick={onDeleteSelected}
           disabled={selectedIds.length === 0}
-          className={`flex items-center gap-1.5 px-3 py-1.5 h-auto text-[13px] font-medium ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 h-auto text-[13px] font-medium cursor-pointer ${
             selectedIds.length > 0
               ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848]'
               : 'bg-[#E5E7EB] text-[#6A7282] hover:bg-[#E5E7EB] cursor-not-allowed'
@@ -89,7 +83,7 @@ export default function CartContent({
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {items.map((item) => {
+          {items.map((item, idx) => {
             const isSelected = selectedIds.includes(item.courseId);
             const thumbnailUrl = getThumbnailUrl(item.thumbnail);
             return (
@@ -121,14 +115,16 @@ export default function CartContent({
                   )}
                 </div>
 
-                {/* 썸네일 - TODO: 백엔드에서 완전한 URL 내려오면 next/image로 교체 */}
+                {/* 썸네일 */}
                 <div className="relative w-24 h-16 rounded-lg overflow-hidden shrink-0 bg-[#D1D5DB]">
                   {thumbnailUrl && (
                     <Image
                       src={thumbnailUrl}
                       alt={item.title}
                       fill
-                      unoptimized
+                      priority={idx === 0}
+                      unoptimized={isLocalhostUrl(thumbnailUrl)}
+                      sizes="96px"
                       className="object-cover"
                     />
                   )}
