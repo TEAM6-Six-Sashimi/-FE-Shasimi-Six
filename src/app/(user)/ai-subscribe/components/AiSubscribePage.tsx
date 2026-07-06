@@ -45,7 +45,7 @@ export default function AiSubscribePage({ plans, mySubscription, aiConsent }: Pr
         )}
       </div>
 
-      <div className="max-w-210 mx-auto grid grid-cols-2 gap-10">
+      <div className="max-w-210 mx-auto grid grid-cols-1 sm:grid-cols-2 gap-10">
         {plans.map((plan) => {
           const hasDiscount = plan.discountRate > 0;
           return (

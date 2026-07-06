@@ -122,7 +122,7 @@ function PaymentPageLayout({
   return (
     <div className="min-h-screen bg-gray-50/60">
       <div className="max-w-280 mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] max-w-275 gap-10 items-start">
           <Suspense fallback={<PaymentContentSkeleton />}>
             <PaymentContent items={summary.items} categories={categories} />
           </Suspense>

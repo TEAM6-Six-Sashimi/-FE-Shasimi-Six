@@ -39,8 +39,8 @@ export default function ResumePageClient({
       />
       <div className="min-h-screen ">
         <div className="max-w-275 mx-auto py-6 px-6">
-          <div className="flex gap-10 items-start">
-            <div className="flex-1 min-w-0">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-10 items-start">
+            <div className="min-w-0">
               <ResumeMain
                 userName={userName}
                 userPhone={userPhone}
@@ -52,7 +52,7 @@ export default function ResumePageClient({
                 }}
               />
             </div>
-            <div className="w-72 shrink-0 sticky top-4">
+            <div className="sticky top-4">
               <ResumeSidebar isSaved={isSaved} resumeId={resumeId} />
             </div>
           </div>
