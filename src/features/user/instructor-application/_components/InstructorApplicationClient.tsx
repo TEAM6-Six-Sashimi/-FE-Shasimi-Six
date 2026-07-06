@@ -8,6 +8,7 @@ import Step02Documents, { Step02Data } from './Step02Documents';
 import { UserMe } from '@/features/auth/types';
 import { Category } from '@/features/categories/types';
 import OneButtonModal from '@/components/modals/OneButtonModal';
+import FullScreenLoading from '@/components/ui/FullScreenLoading';
 
 const STEPS = [{ label: '강사 정보' }, { label: '서류 제출' }];
 
@@ -44,6 +45,7 @@ export default function InstructorApplicationClient({
     message: string;
     isSuccess: boolean;
   } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleStep01Next = (data: Step01Data) => {
     setStep01Data(data);
@@ -52,6 +54,7 @@ export default function InstructorApplicationClient({
 
   const handleSubmit = async (data: Step02Data) => {
     setStep02Data(data);
+    setIsSubmitting(true);
 
     try {
       const formData = new FormData();
@@ -76,6 +79,15 @@ export default function InstructorApplicationClient({
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
+        if (errorData.alreadyApplied) {
+          setResultModal({
+            title: '이미 지원 내역이 있습니다',
+            message:
+              '이미 강사 지원 신청이 접수되어 있습니다.\n지원 결과는 마이페이지 > 강사 지원 내역에서 확인해주세요.',
+            isSuccess: true,
+          });
+          return;
+        }
         throw new Error(errorData.error || '강사 지원에 실패했습니다.');
       }
 
@@ -91,6 +103,8 @@ export default function InstructorApplicationClient({
         message: error.message || '강사 지원에 실패했습니다.',
         isSuccess: false,
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -118,6 +132,8 @@ export default function InstructorApplicationClient({
           <Step02Documents data={step02Data} onSubmit={handleSubmit} onPrev={() => setStep(1)} />
         )}
       </div>
+
+      {isSubmitting && <FullScreenLoading message="강사 지원서를 제출하는 중입니다..." />}
 
       {/* 결과 모달 */}
       {resultModal && (
