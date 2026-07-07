@@ -3,8 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { CourseFromAPI } from '../../courses/types';
+import { checkAlreadyEnrolledAction } from '../../courses/actions';
 import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
+import TwoButtonModal from '@/components/modals/TwoButtonModal';
+import OneButtonModal from '@/components/modals/OneButtonModal';
 
 interface CourseWithCategory extends CourseFromAPI {
   categoryName: string;
@@ -43,60 +47,9 @@ export default function PopularCourseSliderClient({ courses }: PopularCourseSlid
           >
             {slides.map((group, gIdx) => (
               <div key={gIdx} className="min-w-full grid grid-cols-3 gap-5">
-                {group.map((course) => {
-                  const thumbnailUrl = getThumbnailUrl(course.thumbnail);
-                  return (
-                    <div
-                      key={course.courseId}
-                      className="bg-white rounded-xl overflow-hidden border border-[#D1D5DB] hover:shadow-lg transition-shadow duration-200"
-                    >
-                      {/* 썸네일 */}
-                      <div className="relative w-full aspect-video bg-[#E5E7EB]">
-                        {thumbnailUrl && (
-                          <Image
-                            src={thumbnailUrl}
-                            alt={course.title}
-                            fill
-                            unoptimized={isLocalhostUrl(thumbnailUrl)}
-                            sizes="(max-width: 768px) 100vw, 33vw"
-                            className="object-cover"
-                          />
-                        )}
-                        <span className="absolute top-3 right-3 bg-[#FF5E5E] text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
-                          인기
-                        </span>
-                      </div>
-
-                      {/* 강의 정보 */}
-                      <div className="px-4 pt-3.5 pb-4 flex flex-col gap-1.5">
-                        <p className="text-[#1E2125] text-[14px] font-semibold leading-snug line-clamp-2">
-                          {course.title}
-                        </p>
-                        <p className="text-[#6A7282] text-[12px]">{course.instructorName}</p>
-                        <div className="flex items-center gap-1">
-                          <span className="text-[#FFD700] text-[12px]">★</span>
-                          <span className="text-[#1E2125] text-[12px] font-semibold">
-                            {course.ratingAvg.toFixed(1)}
-                          </span>
-                          <span className="text-[#6A7282] text-[11px]">
-                            ({course.studentCount.toLocaleString()}명)
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between mt-1">
-                          <p className="text-[#1E2125] text-[15px] font-bold">
-                            {course.price.toLocaleString()} 크레딧
-                          </p>
-                          <Link
-                            href={`/courses/${encodeURIComponent(course.categoryName)}/${course.courseId}`}
-                            className="px-4 py-1.5 rounded-lg border-2 border-[#1E2125] text-[12px] font-semibold text-[#1E2125] hover:bg-[#1E2125] hover:text-white transition-colors"
-                          >
-                            상세 보기
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                {group.map((course) => (
+                  <SliderCourseCard key={course.courseId} course={course} />
+                ))}
               </div>
             ))}
           </div>
@@ -138,5 +91,114 @@ export default function PopularCourseSliderClient({ courses }: PopularCourseSlid
         ))}
       </div>
     </section>
+  );
+}
+
+function SliderCourseCard({ course }: { course: CourseWithCategory }) {
+  const router = useRouter();
+  const thumbnailUrl = getThumbnailUrl(course.thumbnail);
+  const courseHref = `/courses/${encodeURIComponent(course.categoryName)}/${course.courseId}`;
+
+  const [isCheckingPurchase, setIsCheckingPurchase] = useState(false);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showErrorModal, setShowErrorModal] = useState(false);
+
+  const handlePurchase = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isCheckingPurchase) return;
+    setIsCheckingPurchase(true);
+
+    try {
+      const alreadyEnrolled = await checkAlreadyEnrolledAction(course.courseId);
+      if (alreadyEnrolled) {
+        setErrorMessage('이미 수강 중인 강의입니다.');
+        setShowErrorModal(true);
+        return;
+      }
+      setShowPurchaseModal(true);
+    } finally {
+      setIsCheckingPurchase(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="bg-white rounded-xl overflow-hidden border border-[#D1D5DB] hover:shadow-lg transition-shadow duration-200">
+        {/* 썸네일 */}
+        <Link href={courseHref} className="relative block" tabIndex={-1} aria-hidden="true">
+          <div className="relative w-full aspect-video bg-[#E5E7EB]">
+            {thumbnailUrl && (
+              <Image
+                src={thumbnailUrl}
+                alt=""
+                fill
+                unoptimized={isLocalhostUrl(thumbnailUrl)}
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover"
+              />
+            )}
+            <span className="absolute top-3 right-3 bg-[#FF5E5E] text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
+              인기
+            </span>
+          </div>
+        </Link>
+
+        {/* 강의 정보 */}
+        <div className="px-4 pt-3.5 pb-4 flex flex-col gap-1.5">
+          <Link href={courseHref} className="flex flex-col gap-1.5">
+            <p className="text-[#1E2125] text-[14px] font-semibold leading-snug line-clamp-2">
+              {course.title}
+            </p>
+            <p className="text-[#6A7282] text-[12px]">{course.instructorName}</p>
+            <div className="flex items-center gap-1">
+              <span className="text-[#FFD700] text-[12px]">★</span>
+              <span className="text-[#1E2125] text-[12px] font-semibold">
+                {course.ratingAvg.toFixed(1)}
+              </span>
+              <span className="text-[#6A7282] text-[11px]">
+                ({course.studentCount.toLocaleString()}명)
+              </span>
+            </div>
+          </Link>
+          <div className="flex items-center justify-between mt-1">
+            <p className="text-[#1E2125] text-[15px] font-bold">
+              {course.price.toLocaleString()} 크레딧
+            </p>
+            <button
+              type="button"
+              onClick={handlePurchase}
+              disabled={isCheckingPurchase}
+              className="px-4 py-1.5 rounded-lg border-2 border-[#1E2125] text-[12px] font-semibold text-[#1E2125] hover:bg-[#1E2125] hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              구매하기
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {showPurchaseModal && (
+        <TwoButtonModal
+          title="구매 확인"
+          message={`"${course.title}"\n강의를 구매하시겠습니까?`}
+          confirmLabel="확인"
+          cancelLabel="취소"
+          onConfirm={() => {
+            setShowPurchaseModal(false);
+            router.push(`/payments?courseIds=${course.courseId}`);
+          }}
+          onCancel={() => setShowPurchaseModal(false)}
+        />
+      )}
+
+      {showErrorModal && (
+        <OneButtonModal
+          title="알림"
+          message={errorMessage}
+          confirmLabel="확인"
+          onConfirm={() => setShowErrorModal(false)}
+        />
+      )}
+    </>
   );
 }

@@ -33,7 +33,7 @@ export default function Menubar({ categories, role }: MenubarProps) {
     { id: 'ai-subscribe', label: 'AI 구독 플랜', icon: 'subscribe', href: '/ai-subscribe' },
     { id: 'ai-recommendation', label: 'AI 채용공고 분석', icon: 'recommendations', href: '/recommendations' },
     { id: 'ai-resume', label: 'AI 이력서 평가', icon: 'resume', href: '/resume' },
-    { id: 'community', label: '커뮤니티', icon: 'community', href: '/community' },
+    { id: 'notice', label: '공지사항', icon: 'community', href: '/notice' },
     { id: 'mycourse', label: '내 강의', icon: 'mycourses', href: myCoursesHref },
     { id: 'instructor', label: '강사지원', icon: 'instructor', href: '/instructor-application' },
   ];
@@ -133,10 +133,10 @@ export default function Menubar({ categories, role }: MenubarProps) {
                   }
                   onClick={() => setOpen(false)}
                   className={`
-      block text-[12.5px] tracking-tight py-1.5 transition-colors duration-150
-      text-[#F9FAFB] hover:text-[#CFEE5D]
-      ${item.name === '전체' ? 'font-semibold mb-0.5' : 'font-normal'}
-    `}
+                    block text-[12.5px] tracking-tight py-1.5 transition-colors duration-150
+                    text-[#F9FAFB] hover:text-[#CFEE5D]
+                    ${item.name === '전체' ? 'font-semibold mb-0.5' : 'font-normal'}
+                  `}
                 >
                   {item.name}
                 </Link>
