@@ -24,7 +24,8 @@ export default function MyCoursesList({ courses }: Props) {
 
   // 이어보기/다시보기: courseId로 이어볼 세션을 조회해서 player로 직행
   const handleContinueWatching = async (e: React.MouseEvent, course: StudentCourse) => {
-    e.preventDefault(); // 카드 전체를 감싼 Link로 전파되지 않도록
+    e.preventDefault();
+    e.stopPropagation(); // 카드 전체를 감싼 Link로 전파되지 않도록
     if (loadingCourseId) return;
 
     setLoadingCourseId(course.courseId);
@@ -47,6 +48,7 @@ export default function MyCoursesList({ courses }: Props) {
   // 리뷰 작성: 강의 상세 페이지의 수강평 섹션으로 이동
   const handleWriteReview = (e: React.MouseEvent, course: StudentCourse) => {
     e.preventDefault();
+    e.stopPropagation();
     router.push(`${courseDetailHref(course)}#course-reviews`);
   };
 
@@ -108,7 +110,9 @@ export default function MyCoursesList({ courses }: Props) {
                               ? '이동 중...'
                               : course.completed
                                 ? '다시보기 >'
-                                : '이어보기 >'}
+                                : course.progressRate > 0
+                                  ? '이어보기 >'
+                                  : '수강하기 >'}
                           </Button>
                           <Button
                             size="sm"

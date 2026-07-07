@@ -37,13 +37,13 @@ export default function Footer() {
           <div className="text-[15px] font-semibold text-[#CFEE5D]">고객 지원</div>
           <div className="flex flex-col gap-1.5">
             <Link
-              href="/community"
+              href="/notice"
               className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]"
             >
               공지사항
             </Link>
             <Link
-              href="/community"
+              href="/notice"
               className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]"
             >
               1:1 문의

@@ -177,7 +177,7 @@ export default function PersonalInfoEditPage({ user }: Props) {
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2"
+                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
                 aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보이기'}
               >
                 <Image
@@ -275,7 +275,7 @@ function ToggleRow({
       <Switch
         checked={checked}
         onCheckedChange={onChange}
-        className="data-[state=checked]:bg-[#FF5E5E]"
+        className="data-[state=checked]:bg-[#FF5E5E] cursor-pointer"
       />
     </div>
   );

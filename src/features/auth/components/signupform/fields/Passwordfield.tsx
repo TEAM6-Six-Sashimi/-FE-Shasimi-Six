@@ -20,6 +20,7 @@ export default function PasswordFields({
   onPasswordConfirmChange,
   onMatchedChange,
 }: PasswordFieldsProps) {
+  const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState('');
   const [isMatched, setIsMatched] = useState(false);
@@ -60,13 +61,26 @@ export default function PasswordFields({
         </div>
         <div className="relative">
           <input
-            type="text"
+            type={showPassword ? 'text' : 'password'}
             name="password"
             value={password}
             onChange={(e) => onPasswordChange(e.target.value)}
             required
             className={`${inputCls(passwordHasError)} pr-11`}
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer "
+            aria-label={showPassword ? '비밀번호 보이기' : '비밀번호 숨기기'}
+          >
+            <Image
+              src={showPassword ? '/auth/closeeye.svg' : '/auth/openeye.svg'}
+              alt="비밀번호 보이기"
+              width={20}
+              height={20}
+            />
+          </button>
         </div>
         <p className="text-[12px] text-[#6A7282] mt-0.5">
           대소문자, 숫자, 특수문자(!@#$%^_) 포함, 8자 이상 16자 이하
@@ -97,7 +111,7 @@ export default function PasswordFields({
           >
             <Image
               src={showPasswordConfirm ? '/auth/closeeye.svg' : '/auth/openeye.svg'}
-              alt=""
+              alt="비밀번호 보이기"
               width={20}
               height={20}
             />

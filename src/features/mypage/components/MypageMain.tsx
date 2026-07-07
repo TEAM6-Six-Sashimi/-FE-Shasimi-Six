@@ -92,7 +92,7 @@ export default function MypageMain({ user }: MypageMainProps) {
     const result = await deleteMeAction(password);
 
     if (result.success) {
-      showToast('성공적으로 탈퇴 되었습니다. 안녕히 가세요.');
+      showToast('성공적으로 탈퇴가 완료되었습니다. 안녕히 가세요.');
       setModalMode(null);
       router.push('/');
     } else {

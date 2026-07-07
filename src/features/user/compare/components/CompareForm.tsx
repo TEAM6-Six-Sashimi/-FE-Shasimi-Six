@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   Select,
   SelectContent,
@@ -34,6 +35,10 @@ interface CompareSlot {
 const EMPTY_SLOT: CompareSlot = { courseId: null, detail: null, isLoading: false };
 
 export default function ComapareForm() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [mainCategoryId, setMainCategoryId] = useState<string>('');
   const [subCategoryId, setSubCategoryId] = useState<string>('');
@@ -48,6 +53,53 @@ export default function ComapareForm() {
     fetchCategoriesAction().then(setCategories);
   }, []);
 
+  // URL 쿼리(a, b)로 비교 상태 복원 - 상세보기 갔다가 뒤로가기 등으로 돌아왔을 때 사용
+  useEffect(() => {
+    if (categories.length === 0 || mainCategoryId) return;
+
+    const aId = searchParams.get('a');
+    const bId = searchParams.get('b');
+    if (!aId && !bId) return;
+
+    (async () => {
+      const primaryId = aId ?? bId!;
+      const primaryDetail = await fetchCourseDetailAction(primaryId);
+      if (!primaryDetail) return;
+
+      const mainCat = categories.find((cat) => cat.name === primaryDetail.mainCategoryName);
+      const subCat = mainCat?.options.find((opt) => opt.name === primaryDetail.categoryName);
+      if (!mainCat || !subCat) return;
+
+      setMainCategoryId(String(mainCat.mainCategoryId));
+      setSubCategoryId(String(subCat.id));
+
+      setIsLoadingCourses(true);
+      const courses = await fetchCoursesBySubCategoryAction(mainCat.name, String(subCat.id));
+      setCourseOptions(courses);
+      setIsLoadingCourses(false);
+
+      if (aId) {
+        const detail = aId === primaryId ? primaryDetail : await fetchCourseDetailAction(aId);
+        setSlotA({ courseId: Number(aId), detail, isLoading: false });
+      }
+      if (bId) {
+        const detail = bId === primaryId ? primaryDetail : await fetchCourseDetailAction(bId);
+        setSlotB({ courseId: Number(bId), detail, isLoading: false });
+      }
+    })();
+  }, [categories, mainCategoryId, searchParams]);
+
+  // 비교 슬롯 선택 상태를 URL 쿼리에 반영 (뒤로가기/새로고침/공유 시 복원용)
+  const updateQuery = (updates: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    });
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  };
+
   const selectedMainCategory = categories.find(
     (cat) => String(cat.mainCategoryId) === mainCategoryId,
   );
@@ -60,6 +112,7 @@ export default function ComapareForm() {
     setCourseOptions([]);
     setSlotA(EMPTY_SLOT);
     setSlotB(EMPTY_SLOT);
+    updateQuery({ a: null, b: null });
   };
 
   // 소분류(자격증) 변경 시 - 그 안의 강의 목록 조회, 비교슬롯 초기화
@@ -67,6 +120,7 @@ export default function ComapareForm() {
     setSubCategoryId(value);
     setSlotA(EMPTY_SLOT);
     setSlotB(EMPTY_SLOT);
+    updateQuery({ a: null, b: null });
 
     if (!selectedMainCategory) return;
 
@@ -85,6 +139,7 @@ export default function ComapareForm() {
     const setSlot = slot === 'A' ? setSlotA : setSlotB;
 
     setSlot({ courseId: id, detail: null, isLoading: true });
+    updateQuery({ [slot === 'A' ? 'a' : 'b']: courseId });
 
     const detail = await fetchCourseDetailAction(courseId);
     setSlot({ courseId: id, detail, isLoading: false });
@@ -103,7 +158,7 @@ export default function ComapareForm() {
               <SelectTrigger className={`${selectCls} w-48`}>
                 <SelectValue placeholder="대분류 선택" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper" side="bottom">
                 {categories.map((cat) => (
                   <SelectItem key={cat.mainCategoryId} value={String(cat.mainCategoryId)}>
                     {cat.name}
@@ -125,7 +180,7 @@ export default function ComapareForm() {
               <SelectTrigger className={`${selectCls} w-48`}>
                 <SelectValue placeholder="자격증 선택" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper" side="bottom">
                 {subCategoryOptions.map((opt) => (
                   <SelectItem key={opt.id} value={String(opt.id)}>
                     {opt.name}
@@ -152,7 +207,7 @@ export default function ComapareForm() {
                   <SelectTrigger className={selectCls}>
                     <SelectValue placeholder="강의를 선택하세요" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent position="popper" side="bottom">
                     {courseOptions.map((course) => (
                       <SelectItem key={course.courseId} value={String(course.courseId)}>
                         {course.title}
