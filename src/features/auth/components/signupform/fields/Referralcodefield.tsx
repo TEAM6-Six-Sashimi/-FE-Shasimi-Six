@@ -43,7 +43,7 @@ export default function ReferralCodeField({
       if (result.available) {
         onCheckedChange(true);
         setHasError(false);
-        setMessage('');
+        setMessage('추천인 코드 확인이 완료되었습니다.');
       } else {
         onCheckedChange(false);
         setHasError(true);
@@ -85,7 +85,7 @@ export default function ReferralCodeField({
         </div>
         {message && (
           <p
-            className={`text-xs mt-1 font-medium ${isChecked ? 'text-green-600' : 'text-red-500'}`}
+            className={`text-xs mt-1 font-medium ${isChecked ? 'text-[#827717]' : 'text-[#DC2626]'}`}
           >
             {message}
           </p>
