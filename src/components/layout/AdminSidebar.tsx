@@ -11,10 +11,8 @@ const SIDEBAR_MENUS = [
   { label: '강의 관리', href: '/admin/coursemanage', icon: 'course' },
   { label: '신고 관리', href: '/admin/reportmanage', icon: 'report' },
   { label: '결제 관리', href: '/admin/paymentmanage', icon: 'payments' },
-  { label: '정산 관리', href: '/admin/settlementmanage', icon: 'settlements' },
   { label: '크레딧 관리', href: '/admin/creditmanage', icon: 'credits' },
-  { label: '커뮤니티 관리', href: '/admin/communitymanage', icon: 'communities' },
-  { label: '프롬프트 관리', href: '/admin/promptmanage', icon: 'prompt' },
+  { label: '공지사항 관리', href: '/admin/noticemanage', icon: 'communities' },
 ] as const;
 
 // ---- 메인 컴포넌트 ------------------------------------------------
