@@ -88,7 +88,7 @@ export default function ReviewForm({ courseId }: ReviewFormProps) {
         role="note"
         className="bg-[#FFEBEB] rounded-lg px-4 py-4 font-medium text-[13px] text-[#FF5E5E]"
       >
-        ⚠ 강의평은 한 번만 작성할 수 있으며, 작성 후 수정이 불가합니다.
+        ⚠ 강의평은 삭제 후 재작성할 수 있으며, 작성 후 수정이 불가합니다.
       </p>
 
       {/* 텍스트 입력 */}
