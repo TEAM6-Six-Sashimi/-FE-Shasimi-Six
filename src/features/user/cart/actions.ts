@@ -1,27 +1,24 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { fetchCart, deleteCartItems, addCartItem } from '@/services/cart.service';
-import { CartResponse } from '@/features/user/cart/types';
-
-// 장바구니 조회
-export async function getCartAction(): Promise<CartResponse> {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value;
-
-  if (!accessToken) throw new Error('로그인이 필요합니다.');
-
-  return fetchCart(accessToken);
-}
+import { deleteCartItems, addCartItem } from '@/services/cart.service';
 
 // 장바구니 아이템 추가
-export async function addCartItemAction(courseId: number): Promise<void> {
+export async function addCartItemAction(
+  courseId: number,
+): Promise<{ success: true } | { success: false; code: string }> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  if (!accessToken) throw new Error('UNAUTHORIZED');
+  if (!accessToken) return { success: false, code: 'UNAUTHORIZED' };
 
-  await addCartItem(accessToken, courseId);
+  try {
+    await addCartItem(accessToken, courseId);
+    return { success: true };
+  } catch (error) {
+    const code = error instanceof Error ? error.message : 'UNKNOWN';
+    return { success: false, code };
+  }
 }
 
 // 장바구니 아이템 삭제

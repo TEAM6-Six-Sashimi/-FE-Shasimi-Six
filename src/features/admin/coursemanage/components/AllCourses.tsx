@@ -183,7 +183,7 @@ export default function AllCourses({ courses, categories }: Props) {
                 </td>
                 <td className="px-4 py-3 text-left">
                   <Link
-                    href={`/courses/${encodeURIComponent(c.categoryName)}/${c.courseId}`}
+                    href={`/admin/coursemanage/${c.courseId}?from=all`}
                     className="font-semibold text-[#1E2125] hover:text-[#FF5E5E] hover:underline transition-colors"
                   >
                     {c.title}

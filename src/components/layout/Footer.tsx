@@ -3,7 +3,7 @@ import Link from 'next/link';
 export default function Footer() {
   return (
     <div className="bg-[#1E2125] py-1 border-t border-[#E5E7EB]">
-      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10 pt-8 pb-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10 px-10 py-8">
         <div className="flex flex-col gap-2">
           <div className="text-[15px] font-semibold text-[#CFEE5D]">회사 소개</div>
           <div className="flex flex-col gap-1.5">
@@ -37,13 +37,13 @@ export default function Footer() {
           <div className="text-[15px] font-semibold text-[#CFEE5D]">고객 지원</div>
           <div className="flex flex-col gap-1.5">
             <Link
-              href="/customer-service"
+              href="/notice"
               className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]"
             >
               공지사항
             </Link>
             <Link
-              href="/customer-service"
+              href="/notice"
               className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]"
             >
               1:1 문의
@@ -53,17 +53,17 @@ export default function Footer() {
         <div className="flex flex-col gap-2">
           <div className="text-[15px] font-semibold text-[#CFEE5D]">서비스</div>
           <div className="flex flex-col gap-1.5">
-            <Link href="/courses" className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]">
-              전체 강의
+            <Link href="/recommendations" className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]">
+              맞춤 강의 추천
             </Link>
             <Link
-              href="/recommendations"
+              href="/compare"
               className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]"
             >
-              AI 서비스
-            </Link>
-            <Link href="/compare" className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]">
               강의 비교
+            </Link>
+            <Link href="/resume" className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]">
+              AI 이력서 평가
             </Link>
           </div>
         </div>

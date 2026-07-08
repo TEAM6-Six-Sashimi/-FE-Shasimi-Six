@@ -68,8 +68,8 @@ export default function CartClient({ initialItems }: CartClientProps) {
   return (
     <>
       <div className="min-h-screen flex gap-6 bg-[#F9FAFB] items-start mx-auto py-6 px-6">
-        <div className="flex max-w-275 mx-auto gap-10 w-full">
-          <div className="flex-1 bg-white rounded-2xl p-8 shadow-md mb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 max-w-275 mx-auto w-full items-start">
+          <div className="bg-white rounded-2xl p-8 shadow-md gap-10">
             <CartContent
               items={items}
               selectedIds={selectedIds}
@@ -78,7 +78,7 @@ export default function CartClient({ initialItems }: CartClientProps) {
               onDeleteSelected={handleDeleteSelected}
             />
           </div>
-          <div className="w-80 shrink-0 sticky top-4">
+          <div className="sticky top-4">
             <CartSticky selectedItems={selectedItems} onPurchase={handlePurchase} />
           </div>
         </div>

@@ -11,10 +11,8 @@ const SIDEBAR_MENUS = [
   { label: '강의 관리', href: '/admin/coursemanage', icon: 'course' },
   { label: '신고 관리', href: '/admin/reportmanage', icon: 'report' },
   { label: '결제 관리', href: '/admin/paymentmanage', icon: 'payments' },
-  { label: '정산 관리', href: '/admin/settlementmanage', icon: 'settlements' },
   { label: '크레딧 관리', href: '/admin/creditmanage', icon: 'credits' },
-  { label: '커뮤니티 관리', href: '/admin/communitymanage', icon: 'communities' },
-  { label: '프롬프트 관리', href: '/admin/promptmanage', icon: 'prompt' },
+  { label: '공지사항 관리', href: '/admin/noticemanage', icon: 'communities' },
 ] as const;
 
 // ---- 메인 컴포넌트 ------------------------------------------------
@@ -31,7 +29,9 @@ export default function AdminSidebar() {
       {/* 메뉴 목록 */}
       <nav className="flex flex-col gap-2">
         {SIDEBAR_MENUS.map(({ label, href, icon }) => {
-          const isActive = pathname === href;
+          // '/admin' 자체는 정확히 일치할 때만, 나머지는 하위 경로(상세 페이지 등)도 포함해서 활성 처리
+          const isActive =
+            pathname === href || (href !== '/admin' && pathname.startsWith(`${href}/`));
           return (
             <Link
               key={href}

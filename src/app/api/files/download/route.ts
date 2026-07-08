@@ -19,8 +19,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'key가 필요합니다.' }, { status: 400 });
   }
 
-  // 혹시 호출부에서 "/files/download?key=..." 형태를 그대로 넘기는 실수가 있어도
-  // 안전하게 진짜 key만 추출
   const key = extractFileKey(rawKey);
 
   const res = await fetch(`${API_BASE_URL}/files/download?key=${encodeURIComponent(key)}`, {

@@ -27,14 +27,14 @@ export default function TwoButtonModal({
         <div className="flex gap-3">
           <Button
             onClick={onConfirm}
-            className="flex-1 py-3 h-auto rounded-xl bg-[#FF5E5E] text-white text-[15px] font-medium hover:bg-[#D14848]"
+            className="flex-1 py-3 h-auto rounded-xl bg-[#FF5E5E] text-white text-[15px] font-medium hover:bg-[#D14848] cursor-pointer"
           >
             {confirmLabel}
           </Button>
           <Button
             variant="outline"
             onClick={onCancel}
-            className="flex-1 py-3 h-auto rounded-xl border border-[#D1D5DB] text-[#1E2125] text-[15px] font-medium hover:bg-[#F9FAFB] hover:text-[#1E2125]"
+            className="flex-1 py-3 h-auto rounded-xl border border-[#D1D5DB] text-[#1E2125] text-[15px] font-medium hover:bg-[#F9FAFB] hover:text-[#1E2125] cursor-pointer"
           >
             {cancelLabel}
           </Button>

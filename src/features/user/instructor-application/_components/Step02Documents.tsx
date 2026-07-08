@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
+import { useToast } from '@/components/ui/ToastContext';
 
 export interface CertificationItem {
   name: string;
@@ -68,12 +69,15 @@ function CheckboxItem({
 }
 
 export default function Step02Documents({ data, onSubmit, onPrev }: Step02DocumentsProps) {
+  const { showToast } = useToast();
   const [form, setForm] = useState<Step02Data>(data);
   const [submitted, setSubmitted] = useState(false);
   const [confirmModal, setConfirmModal] = useState(false);
   const [certError, setCertError] = useState('');
   const [resumeError, setResumeError] = useState('');
   const [templateDownloading, setTemplateDownloading] = useState(false);
+  const [isCertDragging, setIsCertDragging] = useState(false);
+  const [isResumeDragging, setIsResumeDragging] = useState(false);
   const certFileRef = useRef<HTMLInputElement>(null);
   const resumeRef = useRef<HTMLInputElement>(null);
 
@@ -110,6 +114,13 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
     }));
   };
 
+  const handleCertDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsCertDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) addCertificationFiles(files);
+  };
+
   const handleResumeChange = (file: File | null) => {
     if (file && !ALLOWED_RESUME_TYPES.includes(file.type)) {
       setResumeError('docx 파일만 첨부할 수 있습니다.');
@@ -118,6 +129,13 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
     }
     setResumeError('');
     setForm((prev) => ({ ...prev, resumeFile: file }));
+  };
+
+  const handleResumeDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsResumeDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleResumeChange(file);
   };
 
   const handleTemplateDownload = async () => {
@@ -140,7 +158,7 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch {
-      alert('이력서 양식을 다운로드하지 못했습니다. 잠시 후 다시 시도해주세요.');
+      showToast('이력서 양식을 다운로드하지 못했습니다. 잠시 후 다시 시도해주세요.', 'negative');
     } finally {
       setTemplateDownloading(false);
     }
@@ -192,10 +210,18 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
           className="hidden"
         />
         <div
-          className={`flex items-center justify-between px-4 py-3 rounded-lg border border-dashed ${
-            (isError && !isCertValid) || certError
-              ? 'border-[#FF5E5E] bg-[#F9FAFB]'
-              : 'border-[#D1D5DB] bg-[#F9FAFB]'
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsCertDragging(true);
+          }}
+          onDragLeave={() => setIsCertDragging(false)}
+          onDrop={handleCertDrop}
+          className={`flex items-center justify-between px-4 py-3 rounded-lg border border-dashed transition-colors ${
+            isCertDragging
+              ? 'border-[#FF5E5E] bg-[#FFEBEB]'
+              : (isError && !isCertValid) || certError
+                ? 'border-[#FF5E5E] bg-[#F9FAFB]'
+                : 'border-[#D1D5DB] bg-[#F9FAFB]'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -260,7 +286,9 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
           >
             {templateDownloading ? '다운로드 중...' : '이력서 양식 다운로드'}
           </button>
-          <span className="text-[11.5px] text-[#6A7282]">제공된 양식으로만 제출 가능합니다.</span>
+          <span className="text-[11.5px] text-[#6A7282]">
+            제공된 양식의 작성란을 빠짐없이 채운 후 제출해주세요.
+          </span>
         </div>
 
         <input
@@ -292,10 +320,18 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
           </div>
         ) : (
           <div
-            className={`flex items-center justify-between px-4 py-3 rounded-lg border border-dashed ${
-              (isError && !isResumeValid) || resumeError
-                ? 'border-[#FF5E5E] bg-[#F9FAFB]'
-                : 'border-[#D1D5DB] bg-[#F9FAFB]'
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsResumeDragging(true);
+            }}
+            onDragLeave={() => setIsResumeDragging(false)}
+            onDrop={handleResumeDrop}
+            className={`flex items-center justify-between px-4 py-3 rounded-lg border border-dashed transition-colors ${
+              isResumeDragging
+                ? 'border-[#FF5E5E] bg-[#FFEBEB]'
+                : (isError && !isResumeValid) || resumeError
+                  ? 'border-[#FF5E5E] bg-[#F9FAFB]'
+                  : 'border-[#D1D5DB] bg-[#F9FAFB]'
             }`}
           >
             <div className="flex items-center gap-2">

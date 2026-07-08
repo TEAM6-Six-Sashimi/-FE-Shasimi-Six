@@ -13,7 +13,11 @@ interface InterestsProps {
   initialReferralCode: string;
   initialReferralChecked: boolean;
   onPrev: (selectedCategories: number[], referral_code: string, isReferralChecked: boolean) => void;
-  onSubmit: (selectedCategories: number[], referral_code: string, agreements: AgreementState) => void;
+  onSubmit: (
+    selectedCategories: number[],
+    referral_code: string,
+    agreements: AgreementState,
+  ) => void;
 }
 
 export default function Signup02Interests({

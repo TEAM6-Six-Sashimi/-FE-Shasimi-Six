@@ -5,6 +5,7 @@ import { PaymentSticky } from '@/features/user/payments/components/PaymentSticky
 import { fetchPlanPreviewAction } from '@/features/user/payments/actions';
 import { PaymentSummary, OrderLineItem } from '@/features/user/payments/types';
 import { fetchCategories } from '@/services/categories.service';
+import { fetchCreditBalance } from '@/services/credit.service';
 import { Category } from '@/features/categories/types';
 
 interface PaymentPageProps {
@@ -17,28 +18,29 @@ interface PaymentPageProps {
 
 export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
   const { courseIds: rawIds, type, planCode } = await searchParams;
- 
+
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
- 
+
   // categories는 강의/구독 어느 쪽이든 카테고리 표시에 필요하므로 공통으로 조회
   const categories = await fetchCategories();
- 
+
   // ── AI 구독 결제 ──────────────────────────────────────────
   if (type === 'subscription' && planCode) {
     const preview = accessToken ? await fetchPlanPreviewAction(planCode) : null;
- 
+
     const items: OrderLineItem[] = preview
       ? [
           {
             id: preview.planCode,
             title: preview.planName,
             subtitle: `AI 구독권 ${preview.durationMonths}개월`,
+            thumbnail: preview.planThumbnail,
             price: preview.price,
           },
         ]
       : [];
- 
+
     const summary: PaymentSummary = {
       purchaseType: 'AI_SUBSCRIPTION',
       items,
@@ -48,7 +50,7 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
       shortfallCredits: preview?.insufficientAmount ?? 0,
       planCode,
     };
- 
+
     return <PaymentPageLayout summary={summary} categories={categories} />;
   }
   // ── 강의 단일 / 장바구니 결제 ─────────────────────────────
@@ -72,10 +74,7 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
           }).then((r) => r.json()),
         ),
       ),
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/credits/me`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        cache: 'no-store',
-      }).then((r) => r.json()),
+      fetchCreditBalance(accessToken),
     ]);
 
     if (courseResults.status === 'fulfilled') {
@@ -111,7 +110,7 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
 
   return <PaymentPageLayout summary={summary} categories={categories} />;
 }
- 
+
 // PaymentPageLayout에 categories prop 추가
 function PaymentPageLayout({
   summary,
@@ -123,11 +122,11 @@ function PaymentPageLayout({
   return (
     <div className="min-h-screen bg-gray-50/60">
       <div className="max-w-280 mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] max-w-275 gap-10 items-start">
           <Suspense fallback={<PaymentContentSkeleton />}>
             <PaymentContent items={summary.items} categories={categories} />
           </Suspense>
- 
+
           <PaymentSticky summary={summary} />
         </div>
       </div>

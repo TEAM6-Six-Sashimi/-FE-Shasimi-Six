@@ -5,4 +5,7 @@ export interface StudentCourse {
   instructorName: string;
   progressRate: number;
   completed: boolean;
+  categoryId: number;
+  categoryName: string;
+  mainCategoryName: string;
 }

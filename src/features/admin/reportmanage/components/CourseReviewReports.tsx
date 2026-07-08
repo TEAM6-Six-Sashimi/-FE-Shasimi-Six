@@ -2,11 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
-import {
-  ReviewReport,
-  REPORT_CATEGORY_LABEL,
-  REPORT_CATEGORY_STYLE,
-} from '../types';
+import { ReviewReport, REPORT_CATEGORY_LABEL, REPORT_CATEGORY_STYLE } from '../types';
 import ReviewReportDetailModal from './ReviewReportDetailModal';
 
 type FilterType = '전체' | '처리전' | '처리됨';

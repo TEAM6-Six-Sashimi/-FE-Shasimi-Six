@@ -9,70 +9,102 @@ import type { UpdateCourseRequest } from '@/features/user/mycourses-instructor/t
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // 신규 강의 등록
-export async function createCourseAction(payload: CreateCourseRequest) {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+export async function createCourseAction(
+  payload: CreateCourseRequest,
+): Promise<{ success: true } | { success: false; message: string }> {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const user = await fetchUserMe(accessToken);
-  if (!user || user.role === 'GUEST') throw new Error('인증이 필요합니다.');
+    const user = await fetchUserMe(accessToken);
+    if (!user || user.role === 'GUEST') throw new Error('인증이 필요합니다.');
 
-  const res = await fetch(`${API_BASE_URL}/instructor/courses`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-      'X-USER-ID': String(user.id),
-    },
-    body: JSON.stringify(payload),
-  });
+    const res = await fetch(`${API_BASE_URL}/instructor/courses`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        'X-USER-ID': String(user.id),
+      },
+      body: JSON.stringify(payload),
+    });
 
-  if (!res.ok) {
-    const errorBody = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => ({}));
+      throw new Error(errorBody.message || '강의 등록에 실패했습니다.');
+    }
 
-    throw new Error(errorBody.message || '강의 등록에 실패했습니다.');
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : '강의 등록에 실패했습니다.',
+    };
   }
 }
 
+type CourseActionResult = { success: true } | { success: false; message: string };
+
 // 보관/반려 강의 수정
-export async function updateCourseAction(courseId: number, payload: UpdateCourseRequest) {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+export async function updateCourseAction(
+  courseId: number,
+  payload: UpdateCourseRequest,
+): Promise<CourseActionResult> {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const user = await fetchUserMe(accessToken);
-  if (!user || user.role === 'GUEST') throw new Error('인증이 필요합니다.');
+    const user = await fetchUserMe(accessToken);
+    if (!user || user.role === 'GUEST') throw new Error('인증이 필요합니다.');
 
-  const res = await fetch(`${API_BASE_URL}/instructor/courses/${courseId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-      'X-USER-ID': String(user.id),
-    },
-    body: JSON.stringify(payload),
-  });
+    const res = await fetch(`${API_BASE_URL}/instructor/courses/${courseId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        'X-USER-ID': String(user.id),
+      },
+      body: JSON.stringify(payload),
+    });
 
-  if (!res.ok) {
-    const errorBody = await res.json().catch(() => ({}));
-    throw new Error(errorBody.message || '강의 수정에 실패했습니다.');
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => ({}));
+      throw new Error(errorBody.message || '강의 수정에 실패했습니다.');
+    }
+
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : '강의 수정에 실패했습니다.',
+    };
   }
 }
 
 // 보관/반려 강의 삭제
-export async function deleteCourseAction(courseId: number) {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+export async function deleteCourseAction(courseId: number): Promise<CourseActionResult> {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const user = await fetchUserMe(accessToken);
-  if (!user || user.role === 'GUEST') throw new Error('인증이 필요합니다.');
+    const user = await fetchUserMe(accessToken);
+    if (!user || user.role === 'GUEST') throw new Error('인증이 필요합니다.');
 
-  const res = await fetch(`${API_BASE_URL}/instructor/courses/${courseId}`, {
-    method: 'DELETE',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'X-USER-ID': String(user.id),
-    },
-  });
+    const res = await fetch(`${API_BASE_URL}/instructor/courses/${courseId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'X-USER-ID': String(user.id),
+      },
+    });
 
-  if (!res.ok) throw new Error('삭제 처리에 실패했습니다.');
-  revalidatePath('/mycourses-instructor');
+    if (!res.ok) throw new Error('삭제 처리에 실패했습니다.');
+    revalidatePath('/mycourses-instructor');
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : '삭제 처리에 실패했습니다.',
+    };
+  }
 }

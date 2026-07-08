@@ -22,7 +22,7 @@ export default function OneButtonModal({
         </div>
         <Button
           onClick={onConfirm}
-          className="w-full py-3 h-auto rounded-xl bg-[#FF5E5E] text-white text-[15px] font-semibold hover:bg-[#D14848]"
+          className="w-full py-3 h-auto rounded-xl bg-[#FF5E5E] text-white text-[15px] font-semibold hover:bg-[#D14848] cursor-pointer"
         >
           {confirmLabel}
         </Button>

@@ -1,6 +1,6 @@
 import { CourseFromAPI } from '@/features/user/courses/types';
 import { StudentCourse } from '@/features/user/mycourses-student/types';
-import { CourseDetailFromAPI, PaymentInfo, StudentCourseDetail } from '@/features/user/courses/types';
+import { CourseDetailFromAPI, PaymentInfo } from '@/features/user/courses/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -28,14 +28,12 @@ export async function fetchCourses(
   }
 }
 
-// 강의 상세 조회
+// 강의 상세 조회 (viewerType 기반 통합 API: PUBLIC/ENROLLED/OWNER/ADMIN 분기)
 export async function fetchCourseDetail(
   courseId: string,
   accessToken?: string,
 ): Promise<CourseDetailFromAPI | null> {
   try {
-    const url = `${API_BASE_URL}/api/courses/${courseId}`;
-
     const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}`, {
       headers: {
         'Content-Type': 'application/json',
@@ -51,7 +49,7 @@ export async function fetchCourseDetail(
   }
 }
 
-// 수강 여부 조회
+// 수강 여부 조회 (이어보기 진입 시 lastSessionId 등 결제/진행 정보가 필요할 때 보조로 사용)
 export async function fetchPaymentInfo(
   courseId: string,
   accessToken: string,
@@ -95,26 +93,18 @@ export async function fetchStudentCourses(
   }
 }
 
-// 수강생 내 강의 상세 + 진행률 조회 (이어보기 진입)
-export async function fetchStudentCourseDetail(
-  courseId: string,
-  accessToken: string,
-  userId: string,
-): Promise<StudentCourseDetail | null> {
+// 강의 다건 조회(채용 공고 분석 결과용)
+export async function fetchCoursesByIds(courseIds: number[]): Promise<CourseFromAPI[]> {
+  if (courseIds.length === 0) return [];
+
   try {
-    const res = await fetch(`${API_BASE_URL}/student/courses/${courseId}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-        'X-USER-ID': userId,
-      },
+    const res = await fetch(`${API_BASE_URL}/api/courses?ids=${courseIds.join(',')}`, {
       cache: 'no-store',
     });
- 
-    if (!res.ok) return null;
+
+    if (!res.ok) return [];
     return res.json();
   } catch {
-    return null;
+    return [];
   }
 }
- 

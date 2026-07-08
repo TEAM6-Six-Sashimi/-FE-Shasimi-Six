@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { PaymentSummary } from '../types';
 import { checkoutAction } from '../actions';
@@ -16,9 +16,11 @@ interface PaymentStickyProps {
 const ERROR_MAP: Record<string, string> = {
   CREDIT_INSUFFICIENT_BALANCE: '크레딧 잔액이 부족합니다.',
   PAYMENT_001: '이미 수강 중인 강의가 포함되어 있습니다.',
+  ENROLLMENT_001: '이미 수강 중인 강의가 포함되어 있습니다.',
   CART_003: '결제할 강의를 선택해주세요.',
   CART_004: '장바구니 선택 정보가 올바르지 않습니다.',
   PAYMENT_002: '결제할 강의가 없습니다.',
+  SUBSCRIPTION_002: '이미 활성화된 구독권이 있습니다.',
 };
 
 export function PaymentSticky({ summary }: PaymentStickyProps) {
@@ -29,60 +31,86 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [showInsufficientModal, setShowInsufficientModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showErrorModal, setShowErrorModal] = useState(false);
 
+  const idempotencyKeyRef = useRef('');
+
+  const generateIdempotencyKey = () => {
+    idempotencyKeyRef.current = crypto.randomUUID();
+  };
+
   const isSubscription = summary.purchaseType === 'AI_SUBSCRIPTION';
 
-  const canPurchase = agreedToTerms && agreedToRefund && summary.shortfallCredits === 0;
+  // 동의 체크박스만 충족하면 버튼 활성화 (크레딧 조건 제거)
+  const canPurchase = agreedToTerms && agreedToRefund;
 
   const handlePaymentClick = () => {
     if (!canPurchase) return;
+
+    // 크레딧 부족 시 충전 안내 모달, 충분하면 바로 결제 확인 모달
+    if (summary.shortfallCredits > 0) {
+      setShowInsufficientModal(true);
+      return;
+    }
+
+    generateIdempotencyKey();
     setShowConfirmModal(true);
   };
 
   const handleConfirmPayment = async () => {
     setShowConfirmModal(false);
     setIsLoading(true);
-    try {
-      if (summary.purchaseType === 'AI_SUBSCRIPTION') {
-        await checkoutAction({
+
+    let result;
+    if (summary.purchaseType === 'AI_SUBSCRIPTION') {
+      result = await checkoutAction(
+        {
           purchaseType: 'AI_SUBSCRIPTION',
           planCode: summary.planCode,
           agreed: true,
-        });
-      } else if (summary.purchaseType === 'COURSE') {
-        await checkoutAction({
+        },
+        idempotencyKeyRef.current,
+      );
+    } else if (summary.purchaseType === 'COURSE') {
+      result = await checkoutAction(
+        {
           purchaseType: 'COURSE',
           courseId: summary.courseIds?.[0],
           agreed: true,
-        });
-      } else {
-        await checkoutAction({
+        },
+        idempotencyKeyRef.current,
+      );
+    } else {
+      result = await checkoutAction(
+        {
           purchaseType: 'CART',
           courseIds: summary.courseIds,
           agreed: true,
-        });
-      }
+        },
+        idempotencyKeyRef.current,
+      );
+    }
 
+    if (result.success) {
       setShowCompleteModal(true);
-    } catch (err) {
-      const code = err instanceof Error ? err.message : '';
-
-      if (code === 'UNAUTHORIZED') {
+    } else {
+      if (result.code === 'UNAUTHORIZED') {
         router.push('/login');
+        setIsLoading(false);
         return;
       }
 
-      setErrorMessage(ERROR_MAP[code] ?? '결제에 실패했습니다. 다시 시도해주세요.');
+      setErrorMessage(ERROR_MAP[result.code] ?? '결제에 실패했습니다. 다시 시도해주세요.');
       setShowErrorModal(true);
-    } finally {
-      setIsLoading(false);
     }
+
+    setIsLoading(false);
   };
 
   // 결제 완료 후 이동 경로 (강의 → 내 강의 목록 / 구독 → 채용공고 분석 페이지)
-  const completeRedirectPath = isSubscription ? '/recommendations' : '/mycourses-student';
+  const completeRedirectPath = isSubscription ? '/resume' : '/mycourses-student';
   const cancelRedirectPath = isSubscription ? '/' : '/cart';
 
   return (
@@ -146,9 +174,9 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
           <Button
             onClick={handlePaymentClick}
             disabled={!canPurchase || isLoading}
-            className={`w-full py-4 h-auto rounded-xl text-white font-semibold text-base ${
+            className={`w-full py-3 h-auto rounded-lg text-white font-semibold text-base ${
               canPurchase && !isLoading
-                ? 'bg-[#FF5F5F] hover:bg-[#D14848]'
+                ? 'bg-[#FF5F5F] hover:bg-[#D14848] cursor-pointer'
                 : 'bg-[#E5E7EB] text-gray-400 hover:bg-[#E5E7EB] cursor-not-allowed'
             }`}
           >
@@ -156,6 +184,21 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
           </Button>
         </div>
       </div>
+
+      {/* 크레딧 부족 모달 */}
+      {showInsufficientModal && (
+        <TwoButtonModal
+          title="크레딧 부족"
+          message="크레딧이 부족합니다. 크레딧 충전 페이지로 이동하시겠습니까?"
+          confirmLabel="확인"
+          cancelLabel="취소"
+          onConfirm={() => {
+            setShowInsufficientModal(false);
+            router.push('/credit');
+          }}
+          onCancel={() => setShowInsufficientModal(false)}
+        />
+      )}
 
       {/* 결제 전 확인 모달 */}
       {showConfirmModal && (
@@ -175,7 +218,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
           title="결제 완료"
           message={
             isSubscription
-              ? '구독이 시작되었습니다. AI 채용공고 분석 페이지로 이동할까요?'
+              ? '구독이 시작되었습니다. [AI 이력서 작성 및 분석] 페이지로 이동하시겠습니까?'
               : '결제가 완료되었습니다. 내 강의 목록으로 이동할까요?'
           }
           confirmLabel="확인"

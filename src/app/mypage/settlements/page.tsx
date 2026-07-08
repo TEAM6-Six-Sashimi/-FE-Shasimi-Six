@@ -1,5 +1,5 @@
+import ComingSoon from '@/components/ui/comingSoon';
+
 export default function SettlementsPage() {
-    return (
-        <div>정산내역</div>
-    );
+  return <ComingSoon />;
 }

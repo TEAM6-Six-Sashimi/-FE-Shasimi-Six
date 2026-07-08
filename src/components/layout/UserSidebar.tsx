@@ -9,11 +9,10 @@ const BASE_MENUS = [
   { label: '개인정보 조회', href: '/mypage', icon: 'mypage' },
   { label: '강사 지원 내역', href: '/mypage/instructor-application-list', icon: 'instructor-application' },
   { label: '크레딧 충전 내역', href: '/mypage/credit-charge', icon: 'credit' },
-  { label: '결제 내역', href: '/mypage/payments', icon: 'payments' },
+  { label: '결제 내역', href: '/mypage/payment-history', icon: 'payments' },
 ] as const;
 
 // ---- 메인 컴포넌트 ------------------------------------------------
-const STUDENT_MENU = { label: '나의 이력서', href: '/mypage/resume', icon: 'resume' };
 const INSTRUCTOR_MENU = { label: '강사 프로필', href: '/mypage/instructor-profile', icon: 'resume' };
 const INSTRUCTOR_SETTLEMENT_MENU = { label: '정산 내역', href: '/mypage/settlements', icon: 'settlements' };
 
@@ -27,7 +26,7 @@ export default function UserSidebar({ role }: UserSidebarProps) {
 
   const menus = [
     BASE_MENUS[0],
-    isInstructor ? INSTRUCTOR_MENU : STUDENT_MENU,
+    ...(isInstructor ? [INSTRUCTOR_MENU] : []),
     ...BASE_MENUS.slice(1),
     ...(isInstructor ? [INSTRUCTOR_SETTLEMENT_MENU] : []),
   ];
@@ -40,7 +39,9 @@ export default function UserSidebar({ role }: UserSidebarProps) {
 
       <nav className="flex flex-col gap-2">
         {menus.map(({ label, href, icon }) => {
-          const isActive = pathname === href;
+          // '/mypage' 자체는 정확히 일치할 때만, 나머지는 하위 경로(상세 페이지 등)도 포함해서 활성 처리
+          const isActive =
+            pathname === href || (href !== '/mypage' && pathname.startsWith(`${href}/`));
           return (
             <Link
               key={href}
