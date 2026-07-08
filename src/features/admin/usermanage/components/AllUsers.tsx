@@ -104,12 +104,12 @@ export default function AllUsers({ users }: Props) {
               </td>
             </tr>
           ) : (
-            filtered.map((u) => (
+            filtered.map((u, idx) => (
               <tr
                 key={u.id}
                 className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
               >
-                <td className="py-3 text-center text-[#6A7282]">{u.id}</td>
+                <td className="py-3 text-center text-[#6A7282]">{idx + 1}</td>
                 <td className="py-3 text-center font-semibold text-[#1E2125]">{u.name}</td>
                 <td className="py-3 text-center text-[#6A7282]">{u.loginId}</td>
                 <td className="py-3 text-center text-[#6A7282]">{u.email}</td>

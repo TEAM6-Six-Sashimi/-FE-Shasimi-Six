@@ -16,18 +16,16 @@ export default function HeaderDropdown({ user }: HeaderDropdownProps) {
   const dropMenu = {
     STUDENT: [
       { label: '마이페이지', href: '/mypage' },
-      { label: '나의 이력서', href: '/mypage/resume' },
-      { label: '1:1 문의', href: '/' },
+      // { label: '1:1 문의', href: '/' },
     ],
     INSTRUCTOR: [
       { label: '마이페이지', href: '/mypage' },
       { label: '강사 프로필', href: '/mypage/instructor-profile' },
-      { label: '1:1 문의', href: '/' },
+      // { label: '1:1 문의', href: '/' },
     ],
     ADMIN: [
       { label: '마이페이지', href: '/mypage' },
-      { label: '나의 이력서', href: '/mypage/resume' },
-      { label: '1:1 문의', href: '/' },
+      // { label: '1:1 문의', href: '/' },
     ],
     GUEST: [],
   };

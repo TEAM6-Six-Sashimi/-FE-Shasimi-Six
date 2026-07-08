@@ -1,5 +1,5 @@
 import ComingSoon from '@/components/ui/comingSoon';
 
-export default function CommunityManagePage() {
+export default function NoticeManagePage() {
   return <ComingSoon />;
 }

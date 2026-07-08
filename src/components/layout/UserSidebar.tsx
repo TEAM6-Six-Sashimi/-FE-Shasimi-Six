@@ -13,7 +13,6 @@ const BASE_MENUS = [
 ] as const;
 
 // ---- 메인 컴포넌트 ------------------------------------------------
-const STUDENT_MENU = { label: '나의 이력서', href: '/mypage/resume', icon: 'resume' };
 const INSTRUCTOR_MENU = { label: '강사 프로필', href: '/mypage/instructor-profile', icon: 'resume' };
 const INSTRUCTOR_SETTLEMENT_MENU = { label: '정산 내역', href: '/mypage/settlements', icon: 'settlements' };
 
@@ -27,7 +26,7 @@ export default function UserSidebar({ role }: UserSidebarProps) {
 
   const menus = [
     BASE_MENUS[0],
-    isInstructor ? INSTRUCTOR_MENU : STUDENT_MENU,
+    ...(isInstructor ? [INSTRUCTOR_MENU] : []),
     ...BASE_MENUS.slice(1),
     ...(isInstructor ? [INSTRUCTOR_SETTLEMENT_MENU] : []),
   ];

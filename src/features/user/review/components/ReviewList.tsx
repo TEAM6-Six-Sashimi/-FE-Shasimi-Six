@@ -20,6 +20,8 @@ interface ReviewListProps {
 
 type SortType = '최신순' | '추천순';
 
+const ITEMS_PER_PAGE = 5;
+
 // 아이디 앞 4자리만 노출 (예: "hong123" → "hong****")
 function maskLoginId(loginId: string): string {
   if (loginId.length <= 4) return loginId;
@@ -35,6 +37,7 @@ export default function ReviewList({
   const router = useRouter();
   const { showToast } = useToast();
   const [sort, setSort] = useState<SortType>('최신순');
+  const [currentPage, setCurrentPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<CourseReview | null>(null);
   const [reportTarget, setReportTarget] = useState<CourseReview | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -62,6 +65,17 @@ export default function ReviewList({
     }
     return b.rating - a.rating;
   });
+
+  const totalPages = Math.ceil(sortedReviews.length / ITEMS_PER_PAGE);
+  const pagedReviews = sortedReviews.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
+
+  const handleSortChange = (next: SortType) => {
+    setSort(next);
+    setCurrentPage(1);
+  };
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget || isProcessing) return;
@@ -103,7 +117,7 @@ export default function ReviewList({
             <li key={s}>
               <button
                 type="button"
-                onClick={() => setSort(s)}
+                onClick={() => handleSortChange(s)}
                 aria-pressed={sort === s}
                 className={`px-4 py-2.5 text-[13px] font-medium border-b-2 transition-colors duration-150 cursor-pointer ${
                   sort === s
@@ -120,7 +134,7 @@ export default function ReviewList({
 
       {/* 리뷰 목록 */}
       <ol className="flex flex-col gap-4" aria-label="수강평 목록">
-        {sortedReviews.map((review) => {
+        {pagedReviews.map((review) => {
           const mine = isMine(review);
           return (
             <li
@@ -199,21 +213,60 @@ export default function ReviewList({
         })}
       </ol>
 
-      {/* 더보기 */}
-      {reviews.length >= 3 && (
-        <button
-          type="button"
-          className="text-[#6A7282] text-[13px] hover:text-[#FF5E5E] transition-colors text-center py-1 cursor-pointer"
-        >
-          더보기
-        </button>
+      {/* 페이지네이션 */}
+      {totalPages > 1 && (
+        <nav aria-label="페이지 이동">
+          <ul className="flex items-center justify-center gap-1 list-none">
+            <li>
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                aria-label="이전 페이지"
+                className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
+              >
+                이전
+              </button>
+            </li>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <li key={page}>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(page)}
+                  aria-label={`${page}페이지`}
+                  aria-current={currentPage === page ? 'page' : undefined}
+                  className={`w-8 h-8 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
+                    currentPage === page
+                      ? 'bg-[#FF5E5E] text-white'
+                      : 'text-[#1E2125] hover:bg-[#F9FAFB]'
+                  }`}
+                >
+                  {page}
+                </button>
+              </li>
+            ))}
+            <li>
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                aria-label="다음 페이지"
+                className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
+              >
+                다음
+              </button>
+            </li>
+          </ul>
+        </nav>
       )}
 
       {/* 삭제 확인 모달 */}
       {deleteTarget && (
         <TwoButtonModal
           title="수강평 삭제 확인"
-          message={'기존 수강평을 삭제하셔도 다시 작성하실 수\n없습니다. 삭제하시겠습니까?'}
+          message={
+            '수강평은 작성 후 수정이 불가능합니다.\n내용을 바꾸시려면 삭제 후 다시 작성해주세요.\n삭제하시겠습니까?'
+          }
           confirmLabel={isProcessing ? '삭제 중...' : '확인'}
           cancelLabel="취소"
           onConfirm={handleDeleteConfirm}

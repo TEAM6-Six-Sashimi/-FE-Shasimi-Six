@@ -27,6 +27,7 @@ export default function NotOwnedButtons({ course }: NotOwnedButtonsProps) {
     try {
       await addCartItemAction(course.courseId);
       setShowCartModal(true);
+      router.refresh();
     } catch (err) {
       const code = err instanceof Error ? err.message : '';
       if (code === 'UNAUTHORIZED') {
