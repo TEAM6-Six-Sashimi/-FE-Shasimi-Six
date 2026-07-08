@@ -96,3 +96,71 @@ export interface CancelSubscriptionResponse {
   aiAvailable: boolean;
   message: string;
 }
+
+
+// 강사 지원 내역
+export type InstructorApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export interface MyInstructorApplication {
+  applicationId: number;
+  categoryId: number;
+  createdAt: string;
+  approvalStatus: InstructorApplicationStatus;
+}
+
+export const INSTRUCTOR_APPLICATION_STATUS_LABEL: Record<InstructorApplicationStatus, string> = {
+  PENDING: '심사 중',
+  APPROVED: '승인',
+  REJECTED: '반려',
+};
+
+export const INSTRUCTOR_APPLICATION_STATUS_STYLE: Record<InstructorApplicationStatus, string> = {
+  PENDING: 'bg-[#FEF3C7] text-[#92400E]',
+  APPROVED: 'bg-[#F1FFC1] text-[#5C7A00]',
+  REJECTED: 'bg-[#FFEBEB] text-[#FF5E5E]',
+};
+
+// 강사 지원 상세 (반려 사유 포함)
+// 관리자 반려 처리 시 실제로 전송/저장되는 값과 동일하게 맞춤 (admin 쪽 RejectionCategory 타입은 오타가 있어 미신뢰)
+export type InstructorApplicationRejectionCategory =
+  | 'INSUFFICIENT_CAREER_PROOF'
+  | 'INSUFFICIENT_BASIC_INFO'
+  | 'UNABLE_TO_VERIFY_IDENTITY'
+  | 'INAPPROPRIATE_CAREER_INCLUDED';
+
+export interface InstructorApplicationCertification {
+  certificationName: string;
+  issuedBy: string;
+  fileUrl: string;
+}
+
+// GET /api/members/{userId}/instructor-applications/{applicationId}
+export interface MyInstructorApplicationDetail {
+  userName: string;
+  loginId: string;
+  email: string;
+  phone: string;
+  categoryId: number;
+  createdAt: string;
+  approvalStatus: InstructorApplicationStatus;
+  rejectionCategory: InstructorApplicationRejectionCategory | null;
+  rejectionReason: string | null;
+  rejectedAt: string | null;
+  profileImageUrl: string | null;
+  bio: string;
+  motivationLetter: string;
+  portfolioUrl: string;
+  resumeFileUrl: string;
+  mainCareers: string[] | null;
+  certifications: InstructorApplicationCertification[] | null;
+}
+
+export const INSTRUCTOR_REJECTION_CATEGORY_LABEL: Record<
+  InstructorApplicationRejectionCategory,
+  string
+> = {
+  INSUFFICIENT_CAREER_PROOF: '경력/이력 증빙 부족',
+  INSUFFICIENT_BASIC_INFO: '기본 정보 미흡',
+  UNABLE_TO_VERIFY_IDENTITY: '신원 확인 불가',
+  INAPPROPRIATE_CAREER_INCLUDED: '부적절한 이력 포함',
+};

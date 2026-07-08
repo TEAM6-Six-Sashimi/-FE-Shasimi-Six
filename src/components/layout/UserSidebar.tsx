@@ -40,7 +40,9 @@ export default function UserSidebar({ role }: UserSidebarProps) {
 
       <nav className="flex flex-col gap-2">
         {menus.map(({ label, href, icon }) => {
-          const isActive = pathname === href;
+          // '/mypage' 자체는 정확히 일치할 때만, 나머지는 하위 경로(상세 페이지 등)도 포함해서 활성 처리
+          const isActive =
+            pathname === href || (href !== '/mypage' && pathname.startsWith(`${href}/`));
           return (
             <Link
               key={href}

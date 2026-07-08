@@ -15,7 +15,7 @@ export default function Certifications({ certifications }: CertificationsProps) 
       {list.length === 0 ? (
         <p className="text-[13px] text-[#6A7282]">등록된 자격증이 없습니다.</p>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <p className={fieldLabelCls}>자격증명</p>
             <ul className="flex flex-col gap-2 mt-1">

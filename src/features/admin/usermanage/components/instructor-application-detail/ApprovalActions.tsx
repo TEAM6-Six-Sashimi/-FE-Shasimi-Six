@@ -35,18 +35,18 @@ export default function ApprovalActions({
 }: ApprovalActionsProps) {
   return (
     <>
-      <nav aria-label="강사 신청 처리" className="flex justify-center gap-3">
+      <nav aria-label="강사 신청 처리" className="flex flex-col sm:flex-row gap-3">
         <Button
           onClick={onOpenApprove}
           disabled={loading}
-          className="px-8 py-2.5 w-120 h-auto border-2 border-[#CFEE5D] text-[14px] font-semibold text-[#1E2125] bg-white hover:border-[#A8D014] hover:bg-[#F9FBE7] cursor-pointer"
+          className="px-8 py-2.5 w-full sm:flex-1 h-auto border-2 border-[#CFEE5D] text-[14px] font-semibold text-[#1E2125] bg-white hover:border-[#A8D014] hover:bg-[#F9FBE7] cursor-pointer"
         >
           승인
         </Button>
         <Button
           onClick={onOpenReject}
           disabled={loading}
-          className="px-8 py-2.5 w-120 h-auto border-2 border-[#FF5E5E] text-[14px] font-semibold text-white bg-[#FF5E5E] hover:bg-[#D14848] hover:border-[#D14848] cursor-pointer"
+          className="px-8 py-2.5 w-full sm:flex-1 h-auto border-2 border-[#FF5E5E] text-[14px] font-semibold text-white bg-[#FF5E5E] hover:bg-[#D14848] hover:border-[#D14848] cursor-pointer"
         >
           반려
         </Button>
