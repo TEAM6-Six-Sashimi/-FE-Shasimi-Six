@@ -9,7 +9,7 @@ export default function LoginButton({ disabled = false }: LoginButtonProps) {
     <Button
       type="submit"
       disabled={disabled}
-      className={`w-full py-3 h-auto text-[19px] rounded-lg text-white font-semibold mb-2 transition-all ${
+      className={`w-full py-3 h-auto text-[19px] rounded-lg text-white font-semibold mb-2 transition-all cursor-pointer ${
         disabled
           ? 'bg-gray-400 cursor-not-allowed opacity-70'
           : 'bg-[#FF5F5F] hover:bg-[#D14848] active:scale-[0.99]'
