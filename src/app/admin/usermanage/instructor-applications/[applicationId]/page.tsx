@@ -14,7 +14,6 @@ import ApplicantInfo from '@/features/admin/usermanage/components/instructor-app
 import Introduction from '@/features/admin/usermanage/components/instructor-application-detail/Introduction';
 import Certifications from '@/features/admin/usermanage/components/instructor-application-detail/Certification';
 import Resume from '@/features/admin/usermanage/components/instructor-application-detail/Resume';
-import ProfileImage from '@/features/admin/usermanage/components/instructor-application-detail/ProfileImage';
 import PortfolioSection from '@/features/admin/usermanage/components/instructor-application-detail/Portfolio';
 import RejectionReason from '@/features/admin/usermanage/components/instructor-application-detail/RejectionReason';
 import ApprovalActions from '@/features/admin/usermanage/components/instructor-application-detail/ApprovalActions';
@@ -140,8 +139,6 @@ export default function InstructorApplicationDetailPage({ params }: Props) {
       <Certifications certifications={detail.certifications} />
 
       <Resume resumeFileUrl={detail.resumeFileUrl} mainCareers={detail.mainCareers} />
-
-      {detail.profileImageUrl && <ProfileImage profileImageUrl={detail.profileImageUrl} />}
 
       <PortfolioSection portfolioUrl={detail.portfolioUrl} />
 
