@@ -5,6 +5,7 @@ import {
   CreditConfirmRequest,
   CreditConfirmResponse,
 } from '@/features/user/credit/types';
+import { CreditChargeHistoryResponse } from '@/features/mypage/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -62,6 +63,28 @@ export async function confirmCreditCharge(
   if (!res.ok) {
     const errorBody = await res.json().catch(() => ({}));
     throw new Error(errorBody.message || '충전 승인에 실패했습니다.');
+  }
+
+  return res.json();
+}
+
+// 크레딧 충전 내역 조회
+export async function fetchCreditChargeHistory(
+  accessToken: string,
+  page = 0,
+  size = 10,
+): Promise<CreditChargeHistoryResponse> {
+  const params = new URLSearchParams({ page: String(page), size: String(size) });
+
+  const res = await fetch(`${API_BASE_URL}/credits/charges?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text().catch(() => '');
+    console.error(`[fetchCreditChargeHistory] status=${res.status} body=${errorBody}`);
+    return { items: [], totalElements: 0, totalPages: 0, page: 0, size };
   }
 
   return res.json();
