@@ -52,6 +52,7 @@ export default function CartClient({ initialItems }: CartClientProps) {
       setItems((prev) => prev.filter((i) => !selectedIds.includes(i.courseId)));
       setSelectedIds([]);
       setShowDeleteModal(false);
+      router.refresh();
     } catch {
       // 삭제 실패 시 모달 유지
     }

@@ -73,6 +73,7 @@ export default function CourseCard({ course, category, priority = false }: Cours
       }
 
       setShowCartModal(true);
+      router.refresh();
     } finally {
       setIsAddingToCart(false);
     }
