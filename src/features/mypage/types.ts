@@ -98,6 +98,24 @@ export interface CancelSubscriptionResponse {
 }
 
 
+// 크레딧 충전 내역
+export interface CreditChargeItem {
+  creditChargePaymentId: number;
+  orderId: string;
+  paidAmount: number;
+  chargedCredit: number;
+  approvedAt: string;
+  paymentMethod: string;
+}
+
+export interface CreditChargeHistoryResponse {
+  items: CreditChargeItem[];
+  totalElements: number;
+  totalPages: number;
+  page: number;
+  size: number;
+}
+
 // 강사 지원 내역
 export type InstructorApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
