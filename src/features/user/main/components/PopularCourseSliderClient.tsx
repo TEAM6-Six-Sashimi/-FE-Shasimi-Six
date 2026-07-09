@@ -75,7 +75,11 @@ export default function PopularCourseSliderClient({ courses }: PopularCourseSlid
         </button>
       </div>
 
-      <div className="flex items-center justify-center gap-2 mt-6" role="tablist" aria-label="슬라이드 페이지">
+      <div
+        className="flex items-center justify-center gap-2 mt-6"
+        role="tablist"
+        aria-label="슬라이드 페이지"
+      >
         {slides.map((_, i) => (
           <button
             key={i}
@@ -145,36 +149,39 @@ function SliderCourseCard({ course }: { course: CourseWithCategory }) {
         </Link>
 
         {/* 강의 정보 */}
-        <div className="px-4 pt-3.5 pb-4 flex flex-col gap-1.5">
-          <Link href={courseHref} className="flex flex-col gap-1.5">
-            <p className="text-[#1E2125] text-[14px] font-semibold leading-snug line-clamp-2">
-              {course.title}
-            </p>
-            <p className="text-[#6A7282] text-[12px]">{course.instructorName}</p>
-            <div className="flex items-center gap-1">
-              <span className="text-[#FFD700] text-[12px]">★</span>
-              <span className="text-[#1E2125] text-[12px] font-semibold">
-                {course.ratingAvg.toFixed(1)}
-              </span>
-              <span className="text-[#6A7282] text-[11px]">
-                ({course.studentCount.toLocaleString()}명)
-              </span>
+        <Link href={courseHref}>
+          <div className="px-4 pt-3.5 pb-4 flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5">
+              <p className="text-[#1E2125] text-[14px] font-semibold leading-snug line-clamp-2">
+                {course.title}
+              </p>
+              <p className="text-[#6A7282] text-[12px]">{course.instructorName}</p>
+              <div className="flex items-center gap-1">
+                <span className="text-[#FFD700] text-[12px]">★</span>
+                <span className="text-[#1E2125] text-[12px] font-semibold">
+                  {course.ratingAvg.toFixed(1)}
+                </span>
+                <span className="text-[#6A7282] text-[11px]">
+                  ({course.studentCount.toLocaleString()}명)
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-[#1E2125] text-[15px] font-bold">
+                  {course.price.toLocaleString()} 크레딧
+                </p>
+                <button
+                  type="button"
+                  onClick={handlePurchase}
+                  disabled={isCheckingPurchase}
+                  className="px-4 py-1.5 rounded-lg border-2 border-[#1E2125] text-[12px] font-semibold text-[#1E2125] hover:bg-[#1E2125] hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  구매하기
+                </button>
+              </div>
             </div>
-          </Link>
-          <div className="flex items-center justify-between mt-1">
-            <p className="text-[#1E2125] text-[15px] font-bold">
-              {course.price.toLocaleString()} 크레딧
-            </p>
-            <button
-              type="button"
-              onClick={handlePurchase}
-              disabled={isCheckingPurchase}
-              className="px-4 py-1.5 rounded-lg border-2 border-[#1E2125] text-[12px] font-semibold text-[#1E2125] hover:bg-[#1E2125] hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              구매하기
-            </button>
           </div>
-        </div>
+        </Link>
       </div>
 
       {showPurchaseModal && (

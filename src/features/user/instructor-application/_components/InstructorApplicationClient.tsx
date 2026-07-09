@@ -8,6 +8,7 @@ import Step02Documents, { Step02Data } from './Step02Documents';
 import { UserMe } from '@/features/auth/types';
 import { Category } from '@/features/categories/types';
 import OneButtonModal from '@/components/modals/OneButtonModal';
+import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import FullScreenLoading from '@/components/ui/FullScreenLoading';
 
 const STEPS = [{ label: '강사 정보' }, { label: '서류 제출' }];
@@ -30,13 +31,16 @@ const DEFAULT_STEP02: Step02Data = {
 interface InstructorApplicationClientProps {
   userInfo: UserMe;
   categories: Category[];
+  hasPendingApplication: boolean;
 }
 
 export default function InstructorApplicationClient({
   userInfo,
   categories,
+  hasPendingApplication,
 }: InstructorApplicationClientProps) {
   const router = useRouter();
+  const [showPendingModal, setShowPendingModal] = useState(hasPendingApplication);
   const [step, setStep] = useState(1);
   const [step01Data, setStep01Data] = useState<Step01Data>(DEFAULT_STEP01);
   const [step02Data, setStep02Data] = useState<Step02Data>(DEFAULT_STEP02);
@@ -134,6 +138,26 @@ export default function InstructorApplicationClient({
       </div>
 
       {isSubmitting && <FullScreenLoading message="강사 지원서를 제출하는 중입니다..." />}
+
+      {/* 심사 중 안내 모달 - 대기 중인 지원서가 있으면 진입 즉시 노출 */}
+      {showPendingModal && (
+        <TwoButtonModal
+          title="강사 지원 심사 중"
+          message={
+            '이미 제출한 강사 지원서가 심사 중입니다.\n결과가 나올 때까지 재지원하실 수 없습니다.'
+          }
+          confirmLabel="지원 내역 확인하기"
+          cancelLabel="홈으로"
+          onConfirm={() => {
+            setShowPendingModal(false);
+            router.push('/mypage/instructor-application-list');
+          }}
+          onCancel={() => {
+            setShowPendingModal(false);
+            router.push('/');
+          }}
+        />
+      )}
 
       {/* 결과 모달 */}
       {resultModal && (

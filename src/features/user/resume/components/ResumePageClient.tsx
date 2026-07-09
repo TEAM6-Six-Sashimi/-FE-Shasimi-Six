@@ -13,6 +13,7 @@ interface ResumePageClientProps {
   userEmail: string;
   savedResume: SavedResume | null;
   mySubscription: MySubscription | null;
+  isLoggedIn: boolean;
 }
 
 export default function ResumePageClient({
@@ -21,6 +22,7 @@ export default function ResumePageClient({
   userEmail,
   savedResume,
   mySubscription,
+  isLoggedIn,
 }: ResumePageClientProps) {
   const [isSaved, setIsSaved] = useState(!!savedResume);
   const [resumeId, setResumeId] = useState<number | null>(savedResume?.resumeId ?? null);
@@ -36,6 +38,7 @@ export default function ResumePageClient({
         title="AI 이력서 작성 & 평가"
         description="템플릿으로 이력서를 작성하고 AI가 점수와 개선 방향까지 알려드립니다."
         right={subscriptionText}
+        rightHighlight={!mySubscription?.subscribed}
       />
       <div className="min-h-screen ">
         <div className="max-w-275 mx-auto py-6 px-6">
@@ -46,6 +49,7 @@ export default function ResumePageClient({
                 userPhone={userPhone}
                 userEmail={userEmail}
                 savedResume={savedResume}
+                isLoggedIn={isLoggedIn}
                 onSavedStateChange={(saved, id) => {
                   setIsSaved(saved);
                   setResumeId(id);

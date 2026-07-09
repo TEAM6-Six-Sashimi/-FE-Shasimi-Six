@@ -1,7 +1,32 @@
+export type EmailVerifyPurpose = 'SIGNUP' | 'PASSWORD_RESET' | 'EMAIL_CHANGE';
+
+// POST /verifications/email/request 응답
+export interface EmailVerificationRequestResponseDto {
+  targetEmail: string;
+  purpose: EmailVerifyPurpose;
+  expiresInSeconds: number;
+  resendAvailableInSeconds: number;
+}
+
+// POST /verifications/email/confirm 응답
 export interface EmailVerifyResponseDto {
   targetEmail: string;
-  purpose: 'SIGNUP' | 'PASSWORD_RESET' | 'EMAIL_CHANGE';
+  purpose: EmailVerifyPurpose;
   verified: boolean;
+}
+
+// POST /auth/password-reset/confirm
+export interface ResetPasswordPayload {
+  email: string;
+  code: string;
+  newPassword: string;
+  newPasswordConfirm: string;
+  newPasswordMatched: boolean;
+}
+
+export interface ResetPasswordResponseDto {
+  passwordReset: boolean;
+  requiresLogin: boolean;
 }
 
 export interface LoginRequest {
