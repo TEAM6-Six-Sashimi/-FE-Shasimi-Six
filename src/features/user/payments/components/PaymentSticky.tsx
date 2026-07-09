@@ -109,9 +109,9 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
     setIsLoading(false);
   };
 
-  // 결제 완료 후 이동 경로 (강의 → 내 강의 목록 / 구독 → 채용공고 분석 페이지)
-  const completeRedirectPath = isSubscription ? '/resume' : '/mycourses-student';
-  const cancelRedirectPath = isSubscription ? '/' : '/cart';
+  // 결제 완료 후 이동 경로 (강의 결제 완료 시에만 사용 — 구독은 선택지가 2개라 별도 처리)
+  const completeRedirectPath = '/mycourses-student';
+  const cancelRedirectPath = '/cart';
 
   return (
     <>
@@ -213,14 +213,30 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
       )}
 
       {/* 결제 완료 모달 */}
-      {showCompleteModal && (
+      {showCompleteModal && isSubscription && (
+        <TwoButtonModal
+          title="구독 시작 완료"
+          message={'구독이 시작되었습니다.\n원하시는 페이지로 이동해보세요.'}
+          confirmLabel="AI 채용공고 분석"
+          cancelLabel="AI 이력서 평가"
+          onConfirm={() => {
+            setShowCompleteModal(false);
+            router.push('/recommendations');
+          }}
+          onCancel={() => {
+            setShowCompleteModal(false);
+            router.push('/resume');
+          }}
+          onClose={() => {
+            setShowCompleteModal(false);
+            router.push('/');
+          }}
+        />
+      )}
+      {showCompleteModal && !isSubscription && (
         <TwoButtonModal
           title="결제 완료"
-          message={
-            isSubscription
-              ? '구독이 시작되었습니다. [AI 이력서 작성 및 분석] 페이지로 이동하시겠습니까?'
-              : '결제가 완료되었습니다. 내 강의 목록으로 이동할까요?'
-          }
+          message={'결제가 완료되었습니다. 내 강의 목록으로 이동할까요?'}
           confirmLabel="확인"
           cancelLabel="취소"
           onConfirm={() => {
