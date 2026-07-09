@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 
-const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,16}$/;
+export const PASSWORD_REGEX =
+  /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,16}$/;
 
 interface PasswordFieldsProps {
   password: string;
@@ -11,26 +12,32 @@ interface PasswordFieldsProps {
   passwordConfirm: string;
   onPasswordConfirmChange: (value: string) => void;
   onMatchedChange: (value: boolean) => void;
+  label?: string;
+  confirmLabel?: string;
+  inputHeightClass?: string;
 }
- 
+
 export default function PasswordFields({
   password,
   onPasswordChange,
   passwordConfirm,
   onPasswordConfirmChange,
   onMatchedChange,
+  label = '비밀번호',
+  confirmLabel = '비밀번호 확인',
+  inputHeightClass = 'h-9',
 }: PasswordFieldsProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState('');
   const [isMatched, setIsMatched] = useState(false);
- 
+
   const isFormatValid = PASSWORD_REGEX.test(password);
   const passwordHasError = password !== '' && !isFormatValid;
   const passwordConfirmHasError = passwordConfirm !== '' && !isMatched;
- 
+
   const inputCls = (error: boolean) =>
-    `w-full h-9 px-4 rounded-lg border bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none transition-colors ${
+    `w-full ${inputHeightClass} px-4 rounded-lg border bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none transition-colors ${
       error ? 'border-[#FF5F5F]' : 'border-[#D1D5DB] focus:border-[#1E2125]'
     }`;
  
@@ -56,7 +63,7 @@ export default function PasswordFields({
     <>
       <div className="mb-4">
         <div className="flex mb-1">
-          <p className="text-[15px] font-semibold text-[#1E2125]">비밀번호</p>
+          <p className="text-[15px] font-semibold text-[#1E2125]">{label}</p>
           <p className="text-[#FF5F5F]">*</p>
         </div>
         <div className="relative">
@@ -92,7 +99,7 @@ export default function PasswordFields({
  
       <div className="mb-10">
         <div className="flex">
-          <p className="text-[15px] font-semibold text-[#1E2125]">비밀번호 확인</p>
+          <p className="text-[15px] font-semibold text-[#1E2125]">{confirmLabel}</p>
           <p className="text-[#FF5F5F]">*</p>
         </div>
         <div className="relative">

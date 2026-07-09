@@ -17,8 +17,8 @@ interface RecommendationPageClientProps {
 }
 
 // polling
-const POLLING_INTERVAL_MS = 3000; // 3초
-const MAX_POLLING_ATTEMPTS = 20; // 최대 대기 3 * 20초(60초)
+const POLLING_INTERVAL_MS = 1000; // 1초
+const MAX_POLLING_ATTEMPTS = 40; // 최대 대기 1 * 40초(40초)
 
 export default function RecommendationPageClient({
   resumeId,
@@ -102,6 +102,7 @@ export default function RecommendationPageClient({
         title="AI 맞춤 강의 추천 (Beta)"
         description="채용공고를 등록하고 나에게 필요한 강의를 추천받아보세요."
         right={subscriptionText}
+        rightHighlight={!mySubscription?.subscribed}
       />
 
       <div className="min-h-screen">

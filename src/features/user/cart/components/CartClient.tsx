@@ -68,7 +68,7 @@ export default function CartClient({ initialItems }: CartClientProps) {
 
   return (
     <>
-      <div className="min-h-screen flex gap-6 bg-[#F9FAFB] items-start mx-auto py-6 px-6">
+      <div className="min-h-screen flex gap-6 bg-[#F9FAFB] items-start mx-auto py-10 px-6">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 max-w-275 mx-auto w-full items-start">
           <div className="bg-white rounded-2xl p-8 shadow-md gap-10">
             <CartContent

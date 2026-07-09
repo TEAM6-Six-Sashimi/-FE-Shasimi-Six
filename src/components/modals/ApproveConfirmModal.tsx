@@ -42,7 +42,7 @@ export default function ApproveConfirmModal({
           </span>
           <div>
             <p className="text-[11.5px] text-[#6A7282]">{targetLabel}</p>
-            <p className="text-[15px] font-bold text-[#1E2125]">{targetName}</p>
+            <p className="text-[15px] font-bold text-[#1E2125] break-words">{targetName}</p>
           </div>
         </div>
 
