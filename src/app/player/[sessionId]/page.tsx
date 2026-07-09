@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { fetchCourseDetail } from '@/services/course.service';
-import PlayerPage from './components/PlayerPage';
+import PlayerPage from '@/features/player/components/PlayerPage';
 
 interface Props {
   params: Promise<{ sessionId: string }>;

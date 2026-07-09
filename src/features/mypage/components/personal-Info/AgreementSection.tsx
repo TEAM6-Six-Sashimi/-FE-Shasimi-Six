@@ -1,4 +1,4 @@
-import { UserAgreements } from '../types';
+import { UserAgreements } from '../../types';
 
 interface AgreementSectionProps {
   agreements: UserAgreements;

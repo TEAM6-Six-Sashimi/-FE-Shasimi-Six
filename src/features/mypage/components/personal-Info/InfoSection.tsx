@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useToast } from '@/components/ui/ToastContext';
-import { UserMeWithAgreements } from '../types';
+import { UserMeWithAgreements } from '../../types';
 
 interface InfoSectionProps {
   user: UserMeWithAgreements;
