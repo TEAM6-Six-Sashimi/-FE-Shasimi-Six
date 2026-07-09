@@ -18,7 +18,9 @@ export default function OneButtonModal({
       <div className="bg-white rounded-2xl shadow-xl w-85 p-7 flex flex-col gap-5">
         <div>
           <h2 className="text-[18px] font-bold text-[#1E2125] mb-2">{title}</h2>
-          <p className="text-[14px] text-[#6A7282] leading-relaxed whitespace-pre-line">{message}</p>
+          <p className="text-[14px] text-[#6A7282] leading-relaxed whitespace-pre-line break-words">
+            {message}
+          </p>
         </div>
         <Button
           onClick={onConfirm}
