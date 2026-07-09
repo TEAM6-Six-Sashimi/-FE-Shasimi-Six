@@ -20,11 +20,6 @@ import {
 } from '../actions';
 import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
-// function formatDuration(seconds: number): string {
-//   const hours = Math.floor(seconds / 3600);
-//   return `${hours}시간`;
-// }
-
 // 비교 슬롯(좌/우) 한 칸의 상태
 interface CompareSlot {
   courseId: number | null;
@@ -155,12 +150,12 @@ export default function ComapareForm() {
           <div className="flex flex-col gap-1.5">
             <label className="text-[13px] font-semibold text-[#1E2125]">대분류</label>
             <Select value={mainCategoryId} onValueChange={handleMainCategoryChange}>
-              <SelectTrigger className={`${selectCls} w-48`}>
+              <SelectTrigger className={`${selectCls} w-48 cursor-pointer`}>
                 <SelectValue placeholder="대분류 선택" />
               </SelectTrigger>
               <SelectContent position="popper" side="bottom">
                 {categories.map((cat) => (
-                  <SelectItem key={cat.mainCategoryId} value={String(cat.mainCategoryId)}>
+                  <SelectItem key={cat.mainCategoryId} value={String(cat.mainCategoryId)} className='cursor-pointer'>
                     {cat.name}
                   </SelectItem>
                 ))}
@@ -177,12 +172,12 @@ export default function ComapareForm() {
               onValueChange={handleSubCategoryChange}
               disabled={!mainCategoryId}
             >
-              <SelectTrigger className={`${selectCls} w-48`}>
+              <SelectTrigger className={`${selectCls} w-48 cursor-pointer`}>
                 <SelectValue placeholder="자격증 선택" />
               </SelectTrigger>
               <SelectContent position="popper" side="bottom">
                 {subCategoryOptions.map((opt) => (
-                  <SelectItem key={opt.id} value={String(opt.id)}>
+                  <SelectItem key={opt.id} value={String(opt.id)} className='cursor-pointer'>
                     {opt.name}
                   </SelectItem>
                 ))}
@@ -204,12 +199,12 @@ export default function ComapareForm() {
                   onValueChange={(value) => handleCourseSelect(key, value)}
                   disabled={!subCategoryId || isLoadingCourses}
                 >
-                  <SelectTrigger className={selectCls}>
+                  <SelectTrigger className={`${selectCls} cursor-pointer`}>
                     <SelectValue placeholder="강의를 선택하세요" />
                   </SelectTrigger>
                   <SelectContent position="popper" side="bottom">
                     {courseOptions.map((course) => (
-                      <SelectItem key={course.courseId} value={String(course.courseId)}>
+                      <SelectItem key={course.courseId} value={String(course.courseId)} className='cursor-pointer'>
                         {course.title}
                       </SelectItem>
                     ))}

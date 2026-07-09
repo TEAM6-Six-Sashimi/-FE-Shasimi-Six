@@ -119,7 +119,7 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
           disabled={chargeAmount <= 0 || isLoading}
           className={`w-full py-3 h-auto rounded-lg text-[15px] font-semibold ${
             chargeAmount > 0
-              ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848]'
+              ? 'bg-[#FF5E5E] text-white hover:bg-[#D14848] cursor-pointer'
               : 'bg-[#E5E7EB] text-[#6A7282] hover:bg-[#E5E7EB]'
           }`}
         >
@@ -131,7 +131,7 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
       {modalState === 'invalid' && (
         <OneButtonModal
           title="충전 금액 확인"
-          message={`최소 ${MIN_AMOUNT.toLocaleString()}원 이상, ${UNIT_AMOUNT.toLocaleString()}원 단위로 입력해주세요.`}
+          message={"입력하신 충전 금액을 확인해주세요."}
           onConfirm={() => setModalState('none')}
         />
       )}

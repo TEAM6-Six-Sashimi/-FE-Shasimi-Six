@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { useToast } from '@/components/ui/ToastContext';
 import {
   EducationItem,
@@ -54,6 +56,7 @@ interface ResumeMainProps {
   userPhone: string;
   userEmail: string;
   savedResume: SavedResume | null;
+  isLoggedIn: boolean;
   onSavedStateChange?: (isSaved: boolean, resumeId: number | null) => void;
   onDirtyStateChange?: (isDirty: boolean) => void;
 }
@@ -63,10 +66,13 @@ export default function ResumeMain({
   userPhone,
   userEmail,
   savedResume,
+  isLoggedIn,
   onSavedStateChange,
   onDirtyStateChange,
 }: ResumeMainProps) {
+  const router = useRouter();
   const { showToast } = useToast();
+  const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
 
   // 저장된 이력서가 있으면 그 값으로, 없으면 빈 배열로 초기화
   const initial = savedResume ? toFormState(savedResume) : null;
@@ -293,6 +299,12 @@ export default function ResumeMain({
   const handleSave = async () => {
     if (!canSave || isSaving) return;
 
+    // 로그인 여부 우선 확인
+    if (!isLoggedIn) {
+      setShowLoginRequiredModal(true);
+      return;
+    }
+
     // 저장 전 필수 입력 검증 - 실패 시 각 섹션 아래 안내문구만 표시, 토스트는 띄우지 않음
     const isEducationValid = validateEducations();
     const isCareerValid = validateCareers();
@@ -361,6 +373,7 @@ export default function ResumeMain({
   };
 
   return (
+    <>
     <form
       onSubmit={(e) => {
         e.preventDefault();
@@ -423,5 +436,21 @@ export default function ResumeMain({
         {isSaving ? '저장 중...' : '저장하기'}
       </Button>
     </form>
+
+    {/* 로그인 필요 모달 */}
+    {showLoginRequiredModal && (
+      <TwoButtonModal
+        title="로그인이 필요합니다"
+        message={`로그인 후 이용할 수 있는 기능입니다.\n로그인 페이지로 이동하시겠습니까?`}
+        confirmLabel="확인"
+        cancelLabel="취소"
+        onConfirm={() => {
+          setShowLoginRequiredModal(false);
+          router.push('/auth/login');
+        }}
+        onCancel={() => setShowLoginRequiredModal(false)}
+      />
+    )}
+    </>
   );
 }

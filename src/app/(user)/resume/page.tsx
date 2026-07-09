@@ -33,6 +33,7 @@ export default async function ResumePage() {
       userEmail={user.email}
       savedResume={savedResume}
       mySubscription={mySubscription}
+      isLoggedIn={!!accessToken}
     />
   );
 }
