@@ -265,7 +265,7 @@ export default function ReviewList({
         <TwoButtonModal
           title="수강평 삭제 확인"
           message={
-            '수강평은 작성 후 수정이 불가능합니다.\n내용을 바꾸시려면 삭제 후 다시 작성해주세요.\n삭제하시겠습니까?'
+            '수강평은 작성 후 수정이 불가능하며, 삭제 후에도 다시 작성할 수 없습니다.\n정말 삭제하시겠습니까?'
           }
           confirmLabel={isProcessing ? '삭제 중...' : '확인'}
           cancelLabel="취소"
