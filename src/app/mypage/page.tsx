@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { fetchUserMe, GUEST_USER } from '@/services/user.service';
-import MypageMain from '@/features/mypage/components/MypageMain';
+import MypageMain from '@/features/mypage/components/personal-Info/MypageMain';
 import { withAgreements } from '@/features/mypage/types';
 
 export default async function UserMyPage() {
