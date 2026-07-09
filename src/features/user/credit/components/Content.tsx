@@ -17,6 +17,8 @@ const PRESET_OPTIONS = [
 ];
 
 const MIN_AMOUNT = 10000;
+const MAX_AMOUNT = 10000000;
+const MAX_DIGITS = String(MAX_AMOUNT).length;
 const UNIT_AMOUNT = 1000;
 
 // 직접 입력 금액에 대한 에러 메시지를 반환. 유효하면 null.
@@ -28,13 +30,16 @@ function getCustomAmountError(rawValue: string): string | null {
   if (numeric < MIN_AMOUNT) {
     return `최소 ${MIN_AMOUNT.toLocaleString()}원 이상 입력해주세요.`;
   }
+  if (numeric > MAX_AMOUNT) {
+    return `최대 ${MAX_AMOUNT.toLocaleString()}원까지 입력 가능합니다.`;
+  }
   if (numeric % UNIT_AMOUNT !== 0) {
     return `${UNIT_AMOUNT.toLocaleString()}원 단위로 입력해주세요.`;
   }
   return null;
 }
 
-export default function Content({
+export default function CreditContent({
   selectedAmount,
   setSelectedAmount,
   customAmount,
@@ -53,7 +58,7 @@ export default function Content({
   };
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/[^0-9]/g, '');
+    const raw = e.target.value.replace(/[^0-9]/g, '').slice(0, MAX_DIGITS);
     const formatted = raw ? parseInt(raw, 10).toLocaleString() : '';
     setCustomAmount(formatted);
     setSelectedAmount(null);
@@ -64,7 +69,7 @@ export default function Content({
       <h1 className="text-[27px] font-bold mt-2 mb-8">크레딧 충전</h1>
       <div className="mb-10">
         <h2 className="text-[17px] font-semibold mb-3">충전 금액 선택</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
           {PRESET_OPTIONS.map((opt) => {
             const isSelected = selectedAmount === opt.credit;
             return (
@@ -72,16 +77,16 @@ export default function Content({
                 key={opt.credit}
                 type="button"
                 onClick={() => handlePresetClick(opt.credit)}
-                className={`flex flex-col items-center justify-center py-7 px-3 h-auto rounded-xl border-[1.5px] transition-all duration-100 cursor-pointer
+                className={`flex flex-col items-center justify-center py-10 px-3 h-auto rounded-xl border-[1.5px] transition-all duration-100 cursor-pointer
                   ${
                     isSelected
                       ? 'bg-[#FF5F5F] text-white border-transparent hover:bg-[#FF5F5F]'
                       : 'bg-white border-[#E5E7EB] text-[#1E2125] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
                   }`}
               >
-                <span className="text-[15px] font-bold">{opt.label}</span>
+                <span className="text-[18px] font-bold">{opt.label}</span>
                 <span
-                  className={`text-[12px] mt-1 ${isSelected ? 'text-white' : 'text-[#6A7282]'}`}
+                  className={`text-[14px] mt-0.5 ${isSelected ? 'text-white' : 'text-[#6A7282]'}`}
                 >
                   {opt.credit.toLocaleString()} 크레딧
                 </span>
@@ -110,13 +115,14 @@ export default function Content({
             value={customAmount}
             onChange={handleCustomChange}
             aria-invalid={hasCustomError}
+            maxLength={MAX_AMOUNT.toLocaleString().length}
             className="flex-1 text-[15px] text-[#1E2125] placeholder:text-[#6A7282] outline-none bg-transparent"
           />
           <span className="text-[15px] text-[#6A7282] ml-2">원</span>
         </div>
 
         {hasCustomError ? (
-          <p className="text-[12px] text-[#FF5E5E] mt-2 mb-2">⚠ {customAmountError}</p>
+          <p className="text-[12px] text-[#DC2626] mt-2 mb-2">⚠ {customAmountError}</p>
         ) : (
           <p className="text-[12px] text-[#6A7282] mt-2 mb-2">
             최소 10,000원 이상, 1,000원 단위로 입력해주세요.
