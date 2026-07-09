@@ -3,16 +3,23 @@ import {
   LoginRequest,
   LoginResponse,
   ReissueResponse,
+  EmailVerifyPurpose,
+  EmailVerificationRequestResponseDto,
   EmailVerifyResponseDto,
   LoginIdCheckResponseDto,
   ReferralCodeCheckResponseDto,
   SignupPayloadDto,
+  ResetPasswordPayload,
+  ResetPasswordResponseDto,
 } from '@/features/auth/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// 회원가입 - 이메일 인증 요청
-export async function sendEmailVerification(email: string): Promise<void> {
+// 이메일 인증 요청 (회원가입/비밀번호 재설정 등 공용, purpose로 목적 구분)
+export async function sendEmailVerification(
+  email: string,
+  purpose: EmailVerifyPurpose = 'SIGNUP',
+): Promise<EmailVerificationRequestResponseDto> {
   const response = await fetch(`${API_BASE_URL}/verifications/email/request`, {
     method: 'POST',
     headers: {
@@ -20,7 +27,7 @@ export async function sendEmailVerification(email: string): Promise<void> {
     },
     body: JSON.stringify({
       targetEmail: email,
-      purpose: 'SIGNUP',
+      purpose,
     }),
   });
 
@@ -30,9 +37,15 @@ export async function sendEmailVerification(email: string): Promise<void> {
     }
     throw new Error('인증번호 발송에 실패했습니다. 이메일 주소를 확인해 주세요.');
   }
+
+  return response.json();
 }
 
-export async function verifyEmailCode(email: string, code: string): Promise<boolean> {
+export async function verifyEmailCode(
+  email: string,
+  code: string,
+  purpose: EmailVerifyPurpose = 'SIGNUP',
+): Promise<boolean> {
   const response = await fetch(`${API_BASE_URL}/verifications/email/confirm`, {
     method: 'POST',
     headers: {
@@ -41,12 +54,13 @@ export async function verifyEmailCode(email: string, code: string): Promise<bool
     body: JSON.stringify({
       targetEmail: email,
       code: code,
-      purpose: 'SIGNUP',
+      purpose,
     }),
   });
 
   if (!response.ok) {
-    throw new Error('인증번호 확인 중 서버 오류가 발생했습니다.');
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(errorBody.message || '인증번호 확인 중 서버 오류가 발생했습니다.');
   }
 
   const data: EmailVerifyResponseDto = await response.json();
@@ -136,6 +150,35 @@ export async function reissueService(refreshToken: string): Promise<ReissueRespo
 
   if (!response.ok) {
     throw new Error('토큰 재발급에 실패했습니다.');
+  }
+
+  return response.json();
+}
+
+// 비밀번호 재설정 (이메일 인증코드 + 새 비밀번호)
+export async function resetPassword(
+  payload: ResetPasswordPayload,
+): Promise<ResetPasswordResponseDto> {
+  const response = await fetch(`${API_BASE_URL}/auth/password-reset/confirm`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    if (errorBody.message) {
+      throw new Error(errorBody.message);
+    }
+    if (response.status === 403) {
+      throw new Error('비활성화된 계정입니다. 관리자에게 문의해주세요.');
+    }
+    if (response.status === 404) {
+      throw new Error('인증 요청 내역 또는 사용자를 찾을 수 없습니다. 인증을 다시 시도해주세요.');
+    }
+    throw new Error(
+      '비밀번호 재설정에 실패했습니다. 인증코드가 만료되었거나 일치하지 않을 수 있습니다.',
+    );
   }
 
   return response.json();
