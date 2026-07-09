@@ -35,7 +35,7 @@ export default function TwoButtonModal({
         )}
         <div>
           <h2 className="text-[20px] font-bold text-[#1E2125] mb-5">{title}</h2>
-          <p className="text-[15px] text-[#6A7282] whitespace-pre-line">{message}</p>
+          <p className="text-[15px] text-[#6A7282] whitespace-pre-line break-words">{message}</p>
         </div>
         <div className="flex gap-3">
           <Button
