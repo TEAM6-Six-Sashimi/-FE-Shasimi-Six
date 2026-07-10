@@ -33,7 +33,7 @@ export default function Menubar({ categories, role }: MenubarProps) {
     { id: 'ai-subscribe', label: 'AI 구독 플랜', icon: 'subscribe', href: '/ai-subscribe' },
     { id: 'ai-recommendation', label: 'AI 채용공고 분석', icon: 'recommendations', href: '/recommendations' },
     { id: 'ai-resume', label: 'AI 이력서 평가', icon: 'resume', href: '/resume' },
-    { id: 'notice', label: '공지사항', icon: 'community', href: '/notice' },
+    { id: 'coffee-chat', label: '커피챗', icon: 'community', href: '/coffee-chat' },
     { id: 'mycourse', label: '내 강의', icon: 'mycourses', href: myCoursesHref },
     { id: 'instructor', label: '강사지원', icon: 'instructor', href: '/instructor-application' },
   ];
