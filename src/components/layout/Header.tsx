@@ -6,7 +6,6 @@ import HeaderDropdown from '../../features/header/components/HeaderDropdown';
 import HeaderCartLink from '../../features/header/components/HeaderCartComponent';
 import AdminModeToggle from './AdminMode';
 import TokenTimer from './TokenTimer';
-import HeaderAlarmComponent from '@/features/header/components/HeaderAlarmComponent';
 
 export default async function Header() {
   const cookieStore = await cookies();
@@ -49,7 +48,6 @@ export default async function Header() {
                 <span className="hidden sm:inline">크레딧 충전</span>
               </Link>
               <HeaderCartLink accessToken={accessToken} />
-              <HeaderAlarmComponent />
               <HeaderDropdown user={user} />
             </div>
           )}
@@ -61,7 +59,6 @@ export default async function Header() {
                 <span className="hidden sm:inline">크레딧 충전</span>
               </Link>
               <HeaderCartLink accessToken={accessToken} />
-              <HeaderAlarmComponent />
               <HeaderDropdown user={user} />
             </div>
           )}
@@ -74,7 +71,6 @@ export default async function Header() {
                 <span className="hidden sm:inline">크레딧 충전</span>
               </Link>
               <HeaderCartLink accessToken={accessToken} />
-              <HeaderAlarmComponent />
               <HeaderDropdown user={user} />
             </div>
           )}

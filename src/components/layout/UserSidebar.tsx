@@ -14,7 +14,6 @@ const BASE_MENUS = [
 
 // ---- 메인 컴포넌트 ------------------------------------------------
 const INSTRUCTOR_MENU = { label: '강사 프로필', href: '/mypage/instructor-profile', icon: 'resume' };
-const INSTRUCTOR_SETTLEMENT_MENU = { label: '정산 내역', href: '/mypage/settlements', icon: 'settlements' };
 
 interface UserSidebarProps {
   role?: string;
@@ -28,7 +27,6 @@ export default function UserSidebar({ role }: UserSidebarProps) {
     BASE_MENUS[0],
     ...(isInstructor ? [INSTRUCTOR_MENU] : []),
     ...BASE_MENUS.slice(1),
-    ...(isInstructor ? [INSTRUCTOR_SETTLEMENT_MENU] : []),
   ];
 
   return (
