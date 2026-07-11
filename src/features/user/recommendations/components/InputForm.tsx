@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
+import { useToast } from '@/components/ui/ToastContext';
+import { logoutAction } from '@/features/auth/actions';
 import { RecommendationInputType } from '../types';
 import { analyzeJobPostingAction, validateUrlAction } from '../actions';
 
@@ -43,6 +45,7 @@ export default function InputForm({
   onAnalyzeSuccess,
 }: InputFormProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<RecommendationInputType>('URL');
   const [url, setUrl] = useState('');
   const [text, setText] = useState('');
@@ -99,6 +102,10 @@ export default function InputForm({
 
       if (result.success) {
         onAnalyzeSuccess(result.data.recommendationId);
+      } else if (result.error.authError) {
+        showToast(result.error.message, 'alarm');
+        await logoutAction();
+        return;
       } else {
         setErrorMessage(result.error.message);
       }

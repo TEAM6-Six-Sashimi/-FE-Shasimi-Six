@@ -4,6 +4,7 @@ import {
   JobPostingRecommendationResult,
   AnalyzeResult,
 } from '@/features/user/recommendations/types';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -22,6 +23,15 @@ export async function postJobPostingRecommendation(
     });
 
     if (!res.ok) {
+      // 세션이 죽은 경우(다른 기기 로그인 등) - 안내 메시지 + authError 플래그로 구분
+      const authMessage = await handleAuthErrorResponse(res);
+      if (authMessage) {
+        return {
+          success: false,
+          error: { errorCode: 'AUTH_SESSION_EXPIRED', message: authMessage, authError: true },
+        };
+      }
+
       const errorBody = await res.json().catch(() => ({}));
       return {
         success: false,

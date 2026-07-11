@@ -69,6 +69,7 @@ export default function AccountActions({ user, agreements }: AccountActionsProps
       showToast('성공적으로 탈퇴가 완료되었습니다. 안녕히 가세요.');
       setModalMode(null);
       router.push('/');
+      router.refresh();
     } else {
       setPasswordError(result.message);
     }

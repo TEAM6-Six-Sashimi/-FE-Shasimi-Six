@@ -10,6 +10,7 @@ import {
   rejectInstructorAction,
   getApplicationDetailAction,
 } from '@/features/admin/usermanage/actions';
+import { logoutAction } from '@/features/auth/actions';
 import ApplicantInfo from '@/features/admin/usermanage/components/instructor-application-detail/ApplicantInfo';
 import Introduction from '@/features/admin/usermanage/components/instructor-application-detail/Introduction';
 import Certifications from '@/features/admin/usermanage/components/instructor-application-detail/Certification';
@@ -85,6 +86,9 @@ export default function InstructorApplicationDetailPage({ params }: Props) {
     if (result.success) {
       setApproveModalOpen(false);
       router.push(buildListUrlWithToast('approved'));
+    } else if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
     } else {
       showToast(result.message, 'negative');
       setLoading(false);
@@ -99,6 +103,9 @@ export default function InstructorApplicationDetailPage({ params }: Props) {
     if (result.success) {
       setRejectModalOpen(false);
       router.push(buildListUrlWithToast('rejected'));
+    } else if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
     } else {
       showToast(result.message, 'negative');
       setLoading(false);

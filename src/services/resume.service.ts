@@ -4,14 +4,20 @@ import {
   SavedResume,
   AiReviewResponse,
 } from '@/features/user/resume/types';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+export type SaveResumeResult =
+  | { resumeId: number }
+  | { authError: true; message: string }
+  | null;
 
 // 이력서 신규 작성
 export async function saveResume(
   accessToken: string,
   payload: ResumePayload,
-): Promise<{ resumeId: number } | null> {
+): Promise<SaveResumeResult> {
   try {
     const res = await fetch(`${API_BASE_URL}/resumes`, {
       method: 'POST',
@@ -23,24 +29,25 @@ export async function saveResume(
     });
 
     if (!res.ok) {
-      const text = await res.text();
+      const authMessage = await handleAuthErrorResponse(res);
+      if (authMessage) return { authError: true, message: authMessage };
       return null;
     }
 
-    const data = await res.json();
-
-    return data;
-  } catch (e) {
+    return await res.json();
+  } catch {
     return null;
   }
 }
+
+export type UpdateResumeResult = { success: true } | { success: false; authError?: true; message?: string };
 
 // 이력서 수정
 export async function updateResume(
   accessToken: string,
   resumeId: number,
   payload: ResumePayload,
-): Promise<boolean> {
+): Promise<UpdateResumeResult> {
   try {
     const res = await fetch(`${API_BASE_URL}/resumes/${resumeId}`, {
       method: 'PATCH',
@@ -51,9 +58,15 @@ export async function updateResume(
       body: JSON.stringify(payload),
     });
 
-    return res.ok;
+    if (!res.ok) {
+      const authMessage = await handleAuthErrorResponse(res);
+      if (authMessage) return { success: false, authError: true, message: authMessage };
+      return { success: false };
+    }
+
+    return { success: true };
   } catch {
-    return false;
+    return { success: false };
   }
 }
 
@@ -93,6 +106,14 @@ export async function requestAiReview(
     });
 
     if (!res.ok) {
+      const authMessage = await handleAuthErrorResponse(res);
+      if (authMessage) {
+        return {
+          success: false,
+          error: { errorCode: 'AUTH_SESSION_EXPIRED', message: authMessage, authError: true },
+        };
+      }
+
       const errorBody = await res.json().catch(() => ({}));
       return {
         success: false,

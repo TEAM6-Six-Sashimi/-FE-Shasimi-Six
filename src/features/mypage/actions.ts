@@ -150,6 +150,12 @@ export async function deleteMeAction(currentPassword: string): Promise<DeleteMeA
       throw new Error(errorBody.message || '회원 탈퇴에 실패했습니다.');
     }
 
+    // 탈퇴 성공 - 계정이 더 이상 존재하지 않으므로 세션 쿠키를 정리한다.
+    cookieStore.delete('accessToken');
+    cookieStore.delete('refreshToken');
+    cookieStore.delete('role');
+    cookieStore.delete('accessTokenExpiresAt');
+
     return { success: true };
   } catch (error) {
     return {

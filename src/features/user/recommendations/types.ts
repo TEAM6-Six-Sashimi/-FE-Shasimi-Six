@@ -76,6 +76,7 @@ export interface JobPostingRecommendationResponse {
 export interface RecommendationApiErrorBody {
   errorCode: string;
   message: string;
+  authError?: true;
 }
 
 export type AnalyzeResult =
