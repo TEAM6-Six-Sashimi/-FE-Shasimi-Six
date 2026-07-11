@@ -17,6 +17,7 @@ import {
   SavedResume,
 } from '../types';
 import { saveResumeAction, updateResumeAction } from '../actions';
+import { logoutAction } from '@/features/auth/actions';
 import { formatYearMonth, formatYearMonthDay } from '@/lib/utils';
 import ResumeLoginInfo from '../sections/ResumeLoginInfo';
 import EducationSection from '../sections/EducationSection';
@@ -353,6 +354,10 @@ export default function ResumeMain({
         if (result.success) {
           setLastSavedSnapshot(currentSnapshot);
           showToast('이력서가 저장되었습니다.');
+        } else if (result.authError) {
+          showToast(result.message ?? '다른 기기에서 로그인되어 자동 로그아웃 되었습니다.', 'alarm');
+          await logoutAction();
+          return;
         } else {
           showToast('이력서 저장에 실패했습니다.', 'negative');
         }
@@ -363,6 +368,10 @@ export default function ResumeMain({
           setResumeId(result.resumeId ?? null);
           setLastSavedSnapshot(currentSnapshot);
           showToast('이력서가 저장되었습니다.');
+        } else if (result.authError) {
+          showToast(result.message ?? '다른 기기에서 로그인되어 자동 로그아웃 되었습니다.', 'alarm');
+          await logoutAction();
+          return;
         } else {
           showToast('이력서 저장에 실패했습니다.', 'negative');
         }

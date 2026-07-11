@@ -11,6 +11,7 @@ import {
   fetchCourseRejectReasonsAction,
   rejectCourseAction,
 } from '@/features/admin/coursemanage/action';
+import { logoutAction } from '@/features/auth/actions';
 import { RejectReasonCategory } from '@/features/admin/coursemanage/type';
 
 interface AdminPendingButtonsProps {
@@ -54,6 +55,10 @@ export default function AdminPendingButtons({ courseId, courseTitle }: AdminPend
       showToast('강의가 승인되었습니다.', 'positive');
       setShowApproveModal(false);
       router.replace('/admin/coursemanage?tab=pending');
+    } else if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
+      return;
     } else {
       // 실패 시 모달을 닫지 않아 사용자가 바로 재시도할 수 있게 함
       showToast(result.message, 'negative');
@@ -70,6 +75,10 @@ export default function AdminPendingButtons({ courseId, courseTitle }: AdminPend
       showToast('강의가 반려되었습니다.', 'positive');
       setShowRejectModal(false);
       router.replace('/admin/coursemanage?tab=rejected');
+    } else if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
+      return;
     } else {
       // 실패 시 모달을 닫지 않아 입력했던 상세 사유가 유지됨
       showToast(result.message, 'negative');

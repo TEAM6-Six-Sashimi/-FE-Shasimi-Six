@@ -7,13 +7,16 @@ import {
   fetchCourseRejectReasons,
   rejectCourse,
 } from '@/services/admin.service';
+import { AuthSessionError } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+type CourseApprovalActionResult =
+  | { success: true }
+  | { success: false; message: string; authError?: true };
+
 // 강의 승인/반려
-export async function approveCourseAction(
-  courseId: number,
-): Promise<{ success: true } | { success: false; message: string }> {
+export async function approveCourseAction(courseId: number): Promise<CourseApprovalActionResult> {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken')?.value ?? '';
@@ -24,6 +27,7 @@ export async function approveCourseAction(
     return {
       success: false,
       message: error instanceof Error ? error.message : '승인 처리에 실패했습니다.',
+      authError: error instanceof AuthSessionError || undefined,
     };
   }
 }
@@ -39,7 +43,7 @@ export async function rejectCourseAction(
   courseId: number,
   category: string,
   detail: string,
-): Promise<{ success: true } | { success: false; message: string }> {
+): Promise<CourseApprovalActionResult> {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken')?.value ?? '';
@@ -50,6 +54,7 @@ export async function rejectCourseAction(
     return {
       success: false,
       message: error instanceof Error ? error.message : '반려 처리에 실패했습니다.',
+      authError: error instanceof AuthSessionError || undefined,
     };
   }
 }

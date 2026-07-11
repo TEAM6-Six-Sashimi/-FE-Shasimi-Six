@@ -8,6 +8,8 @@ import { RadialBar, RadialBarChart, PolarAngleAxis } from 'recharts';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { requestAiReviewAction } from '../actions';
+import { logoutAction } from '@/features/auth/actions';
+import { useToast } from '@/components/ui/ToastContext';
 import { AiReviewResult, getGradeColor } from '../types';
 
 interface ResumeSidebarProps {
@@ -47,6 +49,7 @@ function ScoreCircle({ score }: { score: number }) {
 
 export default function ResumeSidebar({ isSaved, resumeId }: ResumeSidebarProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluationResult, setEvaluationResult] = useState<AiReviewResult | null>(null);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
@@ -69,8 +72,13 @@ export default function ResumeSidebar({ isSaved, resumeId }: ResumeSidebarProps)
       } else if (result.error.errorCode === 'SUBSCRIPTION_007') {
         // 구독 플랜 필요 - 안내 모달
         setShowSubscribeModal(true);
+      } else if (result.error.authError) {
+        showToast(result.error.message, 'alarm');
+        await logoutAction();
+        return;
+      } else {
+        showToast(result.error.message, 'negative');
       }
-      // 그 외 에러는 우선 조용히 처리 (필요 시 별도 토스트/모달 추가 가능)
     } finally {
       setIsEvaluating(false);
     }
