@@ -1,8 +1,10 @@
 import CourseEditForm from '@/features/user/mycourses-instructor/components/new-course/CourseEditForm';
 import { fetchCategories } from '@/services/categories.service';
 import { cookies } from 'next/headers';
-import { fetchUserMe } from '@/services/user.service';
+import { fetchUserMeStrict, UserMeAuthError } from '@/services/user.service';
+import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
 import { fetchCourseDetail } from '@/services/instructor.service';
+import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 interface PageProps {
   params: Promise<{ courseId: string }>;
@@ -13,12 +15,21 @@ export default async function EditCoursePage({ params }: PageProps) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const [categories, user] = await Promise.all([fetchCategories(), fetchUserMe(accessToken)]);
+  let user;
+  try {
+    user = await fetchUserMeStrict(accessToken);
+  } catch (error) {
+    if (error instanceof UserMeAuthError) {
+      const message = (await parseAuthErrorMessage(error.response)) ?? '다시 로그인해주세요.';
+      return <SessionExpiredRedirect message={message} />;
+    }
+    throw error;
+  }
 
-  // 단건 조회 API로 해당 강의 정보 가져오기
-  const course = user
-    ? await fetchCourseDetail(accessToken, String(user.id), Number(courseId))
-    : null;
+  const [categories, course] = await Promise.all([
+    fetchCategories(),
+    fetchCourseDetail(accessToken, String(user.id), Number(courseId)),
+  ]);
 
   const DIFFICULTY_REVERSE: Record<string, string> = {
     BEGINNER: '초급',

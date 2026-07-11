@@ -6,6 +6,7 @@ import { CourseReview } from '../types';
 import { StarRating } from './ReviewSummary';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { useToast } from '@/components/ui/ToastContext';
+import { logoutAction } from '@/features/auth/actions';
 import { deleteReviewAction, reportReviewAction } from '../actions';
 import ReportModal, { ReportCategoryOption } from '@/components/modals/ReportModal';
 import Image from 'next/image';
@@ -87,6 +88,10 @@ export default function ReviewList({
       setDeleteTarget(null);
       showToast('수강평이 삭제되었습니다.', 'positive');
       router.refresh();
+    } else if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
+      return;
     } else {
       showToast(result.message, 'negative');
     }
@@ -102,6 +107,10 @@ export default function ReviewList({
     if (result.success) {
       setReportTarget(null);
       showToast('신고가 접수되었습니다.', 'positive');
+    } else if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
+      return;
     } else {
       showToast(result.message, 'negative');
     }

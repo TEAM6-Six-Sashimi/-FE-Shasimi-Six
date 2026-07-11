@@ -1,7 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { fetchUserMe } from '@/services/user.service';
+import { fetchUserMeStrict, UserMeAuthError } from '@/services/user.service';
 import { AuthSessionError, handleAuthErrorResponse } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -15,8 +15,14 @@ export async function saveSessionProgressAction(
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const user = await fetchUserMe(accessToken);
-  if (!user || user.role === 'GUEST') {
+  let user;
+  try {
+    user = await fetchUserMeStrict(accessToken);
+  } catch (error) {
+    if (error instanceof UserMeAuthError) {
+      const authMessage = await handleAuthErrorResponse(error.response);
+      if (authMessage) throw new AuthSessionError(authMessage);
+    }
     throw new Error('로그인이 필요합니다.');
   }
 

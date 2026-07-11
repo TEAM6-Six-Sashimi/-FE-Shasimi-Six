@@ -1,29 +1,41 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { fetchUserMe } from '@/services/user.service';
+import { fetchUserMeStrict, UserMeAuthError } from '@/services/user.service';
+import { AuthSessionError, handleAuthErrorResponse } from '@/features/auth/auth-error';
 import {
   createReview,
   deleteReview,
   reportReview,
+  ReviewApiError,
   CreateReviewRequest,
   ReportReviewRequest,
 } from '@/services/review.service';
 
+function isAuthError(error: unknown): boolean {
+  return error instanceof AuthSessionError || (error instanceof ReviewApiError && !!error.isAuthError);
+}
+
 async function getAuthOrThrow() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
-  const user = await fetchUserMe(accessToken);
-  if (!user || user.role === 'GUEST') {
+
+  try {
+    const user = await fetchUserMeStrict(accessToken);
+    return { accessToken, user };
+  } catch (error) {
+    if (error instanceof UserMeAuthError) {
+      const authMessage = await handleAuthErrorResponse(error.response);
+      if (authMessage) throw new AuthSessionError(authMessage);
+    }
     throw new Error('로그인이 필요합니다.');
   }
-  return { accessToken, user };
 }
 
 export async function createReviewAction(
   courseId: number,
   body: CreateReviewRequest,
-): Promise<{ success: true } | { success: false; message: string }> {
+): Promise<{ success: true } | { success: false; message: string; authError?: true }> {
   try {
     const { accessToken, user } = await getAuthOrThrow();
     await createReview(accessToken, user.id, courseId, body);
@@ -32,6 +44,7 @@ export async function createReviewAction(
     return {
       success: false,
       message: error instanceof Error ? error.message : '리뷰 등록에 실패했습니다.',
+      authError: isAuthError(error) || undefined,
     };
   }
 }
@@ -39,7 +52,7 @@ export async function createReviewAction(
 export async function deleteReviewAction(
   courseId: number,
   reviewId: number,
-): Promise<{ success: true } | { success: false; message: string }> {
+): Promise<{ success: true } | { success: false; message: string; authError?: true }> {
   try {
     const { accessToken, user } = await getAuthOrThrow();
     await deleteReview(accessToken, user.id, courseId, reviewId);
@@ -48,6 +61,7 @@ export async function deleteReviewAction(
     return {
       success: false,
       message: error instanceof Error ? error.message : '수강평 삭제에 실패했습니다.',
+      authError: isAuthError(error) || undefined,
     };
   }
 }
@@ -55,7 +69,7 @@ export async function deleteReviewAction(
 export async function reportReviewAction(
   reviewId: number,
   body: ReportReviewRequest,
-): Promise<{ success: true } | { success: false; message: string }> {
+): Promise<{ success: true } | { success: false; message: string; authError?: true }> {
   try {
     const { accessToken } = await getAuthOrThrow();
     await reportReview(accessToken, reviewId, body);
@@ -64,6 +78,7 @@ export async function reportReviewAction(
     return {
       success: false,
       message: error instanceof Error ? error.message : '신고 처리에 실패했습니다.',
+      authError: isAuthError(error) || undefined,
     };
   }
 }
