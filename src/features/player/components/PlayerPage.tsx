@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CourseDetailFromAPI, CourseSession } from '@/features/user/courses/types';
 import { useToast } from '@/components/ui/ToastContext';
+import { AuthSessionError } from '@/features/auth/errors';
+import { logoutAction } from '@/features/auth/actions';
 import { saveSessionProgressAction } from '../actions';
 import PlayerTopBar from './PlayerTopBar';
 import VideoPlayer from './VideoPlayer';
@@ -36,16 +38,27 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
     return currentSession?.lastPositionSeconds ?? 0;
   })();
 
+  const loggedOutRef = useRef(false);
+
   const saveProgress = useCallback(
-    async (positionSeconds: number) => {
+    async (positionSeconds: number): Promise<'success' | 'authError' | 'error'> => {
       try {
         await saveSessionProgressAction(courseId, sessionId, Math.floor(positionSeconds));
-        return true;
-      } catch {
-        return false;
+        return 'success';
+      } catch (error) {
+        // 세션이 완전히 끊긴 경우(다른 기기 로그인 등) - 안내 후 한 번만 로그아웃 처리
+        if (error instanceof AuthSessionError) {
+          if (!loggedOutRef.current) {
+            loggedOutRef.current = true;
+            showToast(error.message, 'alarm');
+            await logoutAction();
+          }
+          return 'authError';
+        }
+        return 'error';
       }
     },
-    [courseId, sessionId],
+    [courseId, sessionId, showToast],
   );
 
   useEffect(() => {
@@ -67,13 +80,14 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
 
   const handleEndLearning = async () => {
     setIsEnding(true);
-    const success = await saveProgress(videoRef.current?.currentTime ?? 0);
+    const result = await saveProgress(videoRef.current?.currentTime ?? 0);
 
-    if (success) {
+    if (result === 'success') {
       showToast('학습 진행 상황이 저장되었습니다.', 'positive');
-    } else {
+    } else if (result === 'error') {
       showToast('저장에 실패했습니다. 잠시 후 다시 시도해주세요.', 'negative');
     }
+    // authError는 saveProgress 내부에서 이미 안내 토스트 + 로그아웃 처리함
 
     router.back();
     setTimeout(() => router.refresh(), 0);
