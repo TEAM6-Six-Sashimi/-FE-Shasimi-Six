@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { fetchUserMe } from '@/services/user.service';
+import { AuthSessionError, handleAuthErrorResponse } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -33,6 +34,9 @@ export async function saveSessionProgressAction(
   );
 
   if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     const errorBody = await res.text().catch(() => '');
     console.error(`[saveSessionProgressAction] status=${res.status} body=${errorBody}`);
     throw new Error('학습 진행률 저장에 실패했습니다.');

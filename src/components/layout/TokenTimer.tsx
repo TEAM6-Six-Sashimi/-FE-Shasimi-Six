@@ -37,7 +37,7 @@ export default function TokenTimer() {
       const result = await reissueAction();
       if (!result.success) {
         // 리프레시 토큰도 이미 만료/누락된 상태(자동 로그아웃) -> 남은 쿠키를 정리하고 홈으로
-        showToast('로그인 유효시간이 만료되었습니다', 'alarm');
+        showToast(result.message ?? '로그인 유효시간이 만료되었습니다.', 'alarm');
         await logoutAction();
         return;
       }

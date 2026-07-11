@@ -96,6 +96,14 @@ export interface SignupStatusData {
   isVerificationSent: boolean;
 }
 
+// 인증/토큰 관련 401 응답 바디 - errorCode로 구체적인 원인을 구분
+export type AuthErrorCode = 'AUTH_001' | 'AUTH_003' | 'AUTH_004' | 'AUTH_005' | 'AUTH_008';
+
+export interface AuthErrorResponseBody {
+  errorCode?: string;
+  message?: string;
+}
+
 export interface UserMe {
   id: number;
   name: string;
