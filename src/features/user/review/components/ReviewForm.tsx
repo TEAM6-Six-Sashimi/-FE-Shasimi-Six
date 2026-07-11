@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { useToast } from '@/components/ui/ToastContext';
+import { logoutAction } from '@/features/auth/actions';
 import { createReviewAction } from '../actions';
 
 interface ReviewFormProps {
@@ -41,6 +42,10 @@ export default function ReviewForm({ courseId }: ReviewFormProps) {
       setSubmitted(false);
       showToast('리뷰가 등록되었습니다.', 'positive');
       router.refresh();
+    } else if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
+      return;
     } else {
       showToast(result.message, 'negative');
     }

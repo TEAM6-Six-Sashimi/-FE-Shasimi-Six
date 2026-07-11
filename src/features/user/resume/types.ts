@@ -196,6 +196,7 @@ export interface SavedResume extends ResumePayload {
 export interface AiReviewError {
   errorCode: string;
   message: string;
+  authError?: true;
 }
 
 export type AiReviewResponse =

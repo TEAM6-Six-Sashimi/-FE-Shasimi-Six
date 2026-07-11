@@ -7,6 +7,8 @@ import Image from 'next/image';
 import type { InstructorInProgressCourse } from '../types';
 import type { Category } from '@/features/categories/types';
 import { deleteCourseAction } from '../actions';
+import { logoutAction } from '@/features/auth/actions';
+import { useToast } from '@/components/ui/ToastContext';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import RejectDetailModal from '@/components/modals/RejectDetailModal';
 import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
@@ -38,6 +40,7 @@ interface RejectionModalData {
 }
 
 export default function PendingCourse({ courses, categories }: Props) {
+  const { showToast } = useToast();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterType>('전체');
   const [rejectionModal, setRejectionModal] = useState<RejectionModalData | null>(null);
@@ -74,6 +77,10 @@ export default function PendingCourse({ courses, categories }: Props) {
     if (result.success) {
       setLocalCourses((prev) => prev.filter((c) => c.courseId !== deleteTargetId));
       setDeleteTargetId(null);
+    } else if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
+      return;
     } else {
       alert(result.message);
     }

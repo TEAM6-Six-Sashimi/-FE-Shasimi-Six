@@ -14,9 +14,11 @@ export interface ReportReviewRequest {
 
 export class ReviewApiError extends Error {
   status?: number;
-  constructor(message: string, status?: number) {
+  isAuthError?: boolean;
+  constructor(message: string, status?: number, isAuthError?: boolean) {
     super(message);
     this.status = status;
+    this.isAuthError = isAuthError;
   }
 }
 
@@ -57,7 +59,7 @@ export async function createReview(
 
   if (!res.ok) {
     const authMessage = await handleAuthErrorResponse(res);
-    if (authMessage) throw new ReviewApiError(authMessage, res.status);
+    if (authMessage) throw new ReviewApiError(authMessage, res.status, true);
 
     // REVIEW_001 -> 이미 해당 강의에 리뷰를 작성한 경우
     const errorCode = await parseErrorCode(res.clone());
@@ -90,7 +92,7 @@ export async function deleteReview(
 
   if (!res.ok) {
     const authMessage = await handleAuthErrorResponse(res);
-    if (authMessage) throw new ReviewApiError(authMessage, res.status);
+    if (authMessage) throw new ReviewApiError(authMessage, res.status, true);
 
     const message = await parseErrorMessage(res, '리뷰 삭제에 실패했습니다.');
     throw new ReviewApiError(message, res.status);
@@ -115,7 +117,7 @@ export async function reportReview(
 
   if (!res.ok) {
     const authMessage = await handleAuthErrorResponse(res);
-    if (authMessage) throw new ReviewApiError(authMessage, res.status);
+    if (authMessage) throw new ReviewApiError(authMessage, res.status, true);
 
     let message = '신고 처리에 실패했습니다.';
     if (res.status === 403) message = '본인이 작성한 수강평은 신고할 수 없습니다.';

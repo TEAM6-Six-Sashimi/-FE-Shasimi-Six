@@ -11,6 +11,7 @@ import {
   RejectedCourse,
   RejectReasonCategory,
 } from '@/features/admin/coursemanage/type';
+import { AuthSessionError, handleAuthErrorResponse } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -131,6 +132,9 @@ export async function approveInstructor(accessToken: string, applicationId: numb
   );
 
   if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     let message = '승인 처리에 실패했습니다.';
     try {
       const errorBody = await res.json();
@@ -161,6 +165,9 @@ export async function rejectInstructor(
   );
 
   if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     let message = '반려 처리에 실패했습니다.';
     try {
       const errorBody = await res.json();
@@ -239,6 +246,9 @@ export async function approveCourse(accessToken: string, courseId: number) {
   });
 
   if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     let message = '승인 처리에 실패했습니다.';
     try {
       const errorBody = await res.json();
@@ -284,6 +294,9 @@ export async function rejectCourse(
   });
 
   if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     let message = '반려 처리에 실패했습니다.';
     try {
       const errorBody = await res.json();

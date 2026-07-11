@@ -10,7 +10,9 @@ import {
   fetchInProgressCourses,
   fetchClosedCourses,
 } from '@/services/instructor.service';
-import { fetchUserMe } from '@/services/user.service';
+import { fetchUserMeStrict, UserMeAuthError } from '@/services/user.service';
+import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
+import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 type InstructorTab = 'dashboard' | 'approved' | 'pending' | 'private';
 
@@ -36,7 +38,18 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  const user = accessToken ? await fetchUserMe(accessToken) : null;
+  let user = null;
+  if (accessToken) {
+    try {
+      user = await fetchUserMeStrict(accessToken);
+    } catch (error) {
+      if (error instanceof UserMeAuthError) {
+        const message = (await parseAuthErrorMessage(error.response)) ?? '다시 로그인해주세요.';
+        return <SessionExpiredRedirect message={message} />;
+      }
+      throw error;
+    }
+  }
   const userId = user ? String(user.id) : '';
 
   const [approvedCourses, inProgressCourses, closedCourses, categories] =
