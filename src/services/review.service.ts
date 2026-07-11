@@ -1,3 +1,5 @@
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export interface CreateReviewRequest {
@@ -54,6 +56,9 @@ export async function createReview(
   });
 
   if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new ReviewApiError(authMessage, res.status);
+
     // REVIEW_001 -> 이미 해당 강의에 리뷰를 작성한 경우
     const errorCode = await parseErrorCode(res.clone());
     if (errorCode === 'REVIEW_001') {
@@ -84,6 +89,9 @@ export async function deleteReview(
   );
 
   if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new ReviewApiError(authMessage, res.status);
+
     const message = await parseErrorMessage(res, '리뷰 삭제에 실패했습니다.');
     throw new ReviewApiError(message, res.status);
   }
@@ -106,6 +114,9 @@ export async function reportReview(
   });
 
   if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new ReviewApiError(authMessage, res.status);
+
     let message = '신고 처리에 실패했습니다.';
     if (res.status === 403) message = '본인이 작성한 수강평은 신고할 수 없습니다.';
     else if (res.status === 404) message = '수강평을 찾을 수 없습니다.';

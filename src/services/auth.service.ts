@@ -12,6 +12,7 @@ import {
   ResetPasswordPayload,
   ResetPasswordResponseDto,
 } from '@/features/auth/types';
+import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -149,7 +150,8 @@ export async function reissueService(refreshToken: string): Promise<ReissueRespo
   });
 
   if (!response.ok) {
-    throw new Error('토큰 재발급에 실패했습니다.');
+    const authMessage = await parseAuthErrorMessage(response);
+    throw new Error(authMessage ?? '토큰 재발급에 실패했습니다.');
   }
 
   return response.json();

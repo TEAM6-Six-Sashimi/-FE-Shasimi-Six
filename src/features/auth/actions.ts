@@ -68,7 +68,9 @@ export async function logoutAction(): Promise<void> {
 }
 
 // 토큰 재발급(연장하기)
-export async function reissueAction(): Promise<{ success: boolean }> {
+export async function reissueAction(): Promise<
+  { success: true } | { success: false; message?: string }
+> {
   const cookieStore = await cookies();
   const refreshToken = cookieStore.get('refreshToken')?.value;
 
@@ -107,8 +109,8 @@ export async function reissueAction(): Promise<{ success: boolean }> {
     });
 
     return { success: true };
-  } catch {
+  } catch (error) {
     // 재발급 실패 시 로그인 페이지로 이동
-    return { success: false };
+    return { success: false, message: error instanceof Error ? error.message : undefined };
   }
 }

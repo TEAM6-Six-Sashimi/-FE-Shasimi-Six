@@ -20,7 +20,7 @@ interface Props {
   categories: Category[];
 }
 
-const ITEMS_PER_PAGE = 7;
+const ITEMS_PER_PAGE = 10;
 
 export default function AllCourses({ courses, categories }: Props) {
   const [search, setSearch] = useState('');
