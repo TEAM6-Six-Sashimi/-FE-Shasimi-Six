@@ -22,10 +22,13 @@ const STATUS_LABEL: Record<ReviewReport['status'], string> = {
   PROCESSED: '처리됨',
 };
 
+const ITEMS_PER_PAGE = 10;
+
 export default function CourseReviewReports({ reports, setReports }: Props) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterType>('전체');
   const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filtered = useMemo(() => {
     let result = [...reports];
@@ -44,6 +47,9 @@ export default function CourseReviewReports({ reports, setReports }: Props) {
     );
   }, [reports, search, filter]);
 
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paged = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
   // 삭제/반려 처리 후 해당 신고를 PROCESSED로 갱신 (서버 재조회 없이 즉시 반영)
   const handleProcessed = (reportId: number) => {
     setReports((prev) =>
@@ -60,7 +66,10 @@ export default function CourseReviewReports({ reports, setReports }: Props) {
           {(['전체', '처리전', '처리됨'] as FilterType[]).map((f) => (
             <button
               key={f}
-              onClick={() => setFilter(f)}
+              onClick={() => {
+                setFilter(f);
+                setCurrentPage(1);
+              }}
               className={`px-4 py-1.5 rounded-full text-[13px] font-semibold transition-colors cursor-pointer ${
                 filter === f
                   ? 'bg-[#1E2125] text-white'
@@ -76,7 +85,10 @@ export default function CourseReviewReports({ reports, setReports }: Props) {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="작성자 ID, 강의명 검색"
             className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
           />
@@ -99,20 +111,22 @@ export default function CourseReviewReports({ reports, setReports }: Props) {
           </tr>
         </thead>
         <tbody>
-          {filtered.length === 0 ? (
+          {paged.length === 0 ? (
             <tr>
               <td colSpan={7} className="py-16 text-center text-[#6A7282]">
                 해당하는 신고가 없습니다.
               </td>
             </tr>
           ) : (
-            filtered.map((r, idx) => (
+            paged.map((r, idx) => (
               <tr
                 key={r.reportId}
                 onClick={() => setSelectedReportId(r.reportId)}
                 className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors cursor-pointer"
               >
-                <td className="py-3 text-center text-[#6A7282]">{idx + 1}</td>
+                <td className="py-3 text-center text-[#6A7282]">
+                  {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
+                </td>
                 <td className="py-3 px-4 text-left text-[#1E2125] truncate" title={r.reviewContent}>
                   {r.reviewContent}
                 </td>
@@ -138,6 +152,38 @@ export default function CourseReviewReports({ reports, setReports }: Props) {
           )}
         </tbody>
       </table>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1 mt-6">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
+          >
+            이전
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`w-8 h-8 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
+                currentPage === page
+                  ? 'bg-[#1E2125] text-white'
+                  : 'text-[#6A7282] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
+          >
+            다음
+          </button>
+        </div>
+      )}
 
       {selectedReportId !== null && (
         <ReviewReportDetailModal

@@ -27,6 +27,8 @@ const STATUS_BADGE_CLS: Record<AdminUser['status'], string> = {
 // YYYY-MM-DDTHH:mm:ss → YYYY-MM-DD 로 표시 (날짜만 필요한 컬럼용)
 const formatDate = (value: string | null) => (value ? value.slice(0, 10) : '-');
 
+const ITEMS_PER_PAGE = 10;
+
 interface Props {
   users: AdminUser[];
 }
@@ -35,13 +37,24 @@ export default function AllUsers({ users }: Props) {
   const router = useRouter();
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('ALL');
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const filtered = users.filter((u) => {
-    const matchesRole = roleFilter === 'ALL' || u.role === roleFilter;
-    const matchesSearch =
-      u.name.includes(search) || u.loginId.includes(search) || u.email.includes(search);
-    return matchesRole && matchesSearch;
-  });
+  const filtered = users
+    .filter((u) => {
+      const matchesRole = roleFilter === 'ALL' || u.role === roleFilter;
+      const matchesSearch =
+        u.name.includes(search) || u.loginId.includes(search) || u.email.includes(search);
+      return matchesRole && matchesSearch;
+    })
+    // 최근 접속일순 (접속 기록이 없는 회원은 맨 뒤로)
+    .sort((a, b) => {
+      if (!a.lastLoginAt) return 1;
+      if (!b.lastLoginAt) return -1;
+      return new Date(b.lastLoginAt).getTime() - new Date(a.lastLoginAt).getTime();
+    });
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paged = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   const FILTERS: { label: string; value: RoleFilter }[] = [
     { label: '전체', value: 'ALL' },
@@ -56,7 +69,10 @@ export default function AllUsers({ users }: Props) {
           {FILTERS.map((f) => (
             <button
               key={f.value}
-              onClick={() => setRoleFilter(f.value)}
+              onClick={() => {
+                setRoleFilter(f.value);
+                setCurrentPage(1);
+              }}
               className={`px-4 py-1.5 rounded-full text-[13px] font-semibold transition-colors cursor-pointer ${
                 roleFilter === f.value
                   ? 'bg-[#1E2125] text-white'
@@ -72,7 +88,10 @@ export default function AllUsers({ users }: Props) {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="이름, 아이디, 이메일 검색"
             className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
           />
@@ -97,19 +116,21 @@ export default function AllUsers({ users }: Props) {
           </tr>
         </thead>
         <tbody>
-          {filtered.length === 0 ? (
+          {paged.length === 0 ? (
             <tr>
               <td colSpan={9} className="py-16 text-center text-[#6A7282]">
                 조건에 맞는 회원이 없습니다.
               </td>
             </tr>
           ) : (
-            filtered.map((u, idx) => (
+            paged.map((u, idx) => (
               <tr
                 key={u.id}
                 className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
               >
-                <td className="py-3 text-center text-[#6A7282]">{idx + 1}</td>
+                <td className="py-3 text-center text-[#6A7282]">
+                  {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
+                </td>
                 <td className="py-3 text-center font-semibold text-[#1E2125]">{u.name}</td>
                 <td className="py-3 text-center text-[#6A7282]">{u.loginId}</td>
                 <td className="py-3 text-center text-[#6A7282]">{u.email}</td>
@@ -146,6 +167,38 @@ export default function AllUsers({ users }: Props) {
           )}
         </tbody>
       </table>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1 mt-6">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
+          >
+            이전
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`w-8 h-8 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
+                currentPage === page
+                  ? 'bg-[#1E2125] text-white'
+                  : 'text-[#6A7282] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
+          >
+            다음
+          </button>
+        </div>
+      )}
     </div>
   );
 }
