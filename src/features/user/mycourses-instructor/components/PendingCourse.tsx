@@ -82,7 +82,7 @@ export default function PendingCourse({ courses, categories }: Props) {
       await logoutAction();
       return;
     } else {
-      alert(result.message);
+      showToast(result.message, 'negative');
     }
     setDeleteLoading(false);
   };
