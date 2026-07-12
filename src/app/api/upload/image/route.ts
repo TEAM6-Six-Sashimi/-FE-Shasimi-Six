@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { fetchUserMe } from '@/services/user.service';
+import { fetchUserMeStrict, UserMeAuthError } from '@/services/user.service';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -8,8 +9,14 @@ export async function POST(req: NextRequest) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const user = await fetchUserMe(accessToken);
-  if (!user || user.role === 'GUEST') {
+  let user;
+  try {
+    user = await fetchUserMeStrict(accessToken);
+  } catch (error) {
+    if (error instanceof UserMeAuthError) {
+      const authMessage = await handleAuthErrorResponse(error.response);
+      if (authMessage) return NextResponse.json({ error: authMessage }, { status: 401 });
+    }
     return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
   }
 

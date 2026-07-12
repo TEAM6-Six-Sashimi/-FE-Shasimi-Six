@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import { fetchUserMe, GUEST_USER } from '@/services/user.service';
+import { fetchUserMeStrict, GUEST_USER } from '@/services/user.service';
 import { fetchMyResume } from '@/services/resume.service';
 import ResumePageClient from '@/features/user/resume/components/ResumePageClient';
 import { fetchMySubscriptionAction } from '@/features/user/payments/actions';
@@ -19,12 +19,21 @@ export default async function ResumePage() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  const [user, savedResume] = await Promise.all([
-    accessToken ? fetchUserMe(accessToken) : Promise.resolve(GUEST_USER),
-    accessToken ? fetchMyResume(accessToken) : Promise.resolve(null),
-  ]);
+  let user = GUEST_USER;
+  let isLoggedIn = false;
+  if (accessToken) {
+    try {
+      user = await fetchUserMeStrict(accessToken);
+      isLoggedIn = true;
+    } catch {
+      // 세션이 죽은 경우 - 이 페이지는 비로그인도 지원하므로 강제 로그아웃하지 않고 게스트로 표시
+    }
+  }
 
-  const mySubscription = await fetchMySubscriptionAction();
+  const [savedResume, mySubscription] = await Promise.all([
+    isLoggedIn ? fetchMyResume(accessToken!) : Promise.resolve(null),
+    fetchMySubscriptionAction(),
+  ]);
 
   return (
     <ResumePageClient
@@ -33,7 +42,7 @@ export default async function ResumePage() {
       userEmail={user.email}
       savedResume={savedResume}
       mySubscription={mySubscription}
-      isLoggedIn={!!accessToken}
+      isLoggedIn={isLoggedIn}
     />
   );
 }
