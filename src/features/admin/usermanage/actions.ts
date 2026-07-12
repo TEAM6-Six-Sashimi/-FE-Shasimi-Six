@@ -8,7 +8,7 @@ import {
   fetchRejectedInstructorApplications,
   approveInstructor,
   rejectInstructor,
-} from '@/services/admin.service';
+} from '@/services/admin-usermanage.service';
 import { AuthSessionError } from '@/features/auth/auth-error';
 
 type InstructorActionResult =
