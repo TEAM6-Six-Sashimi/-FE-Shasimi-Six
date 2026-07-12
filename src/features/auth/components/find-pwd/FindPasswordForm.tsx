@@ -107,7 +107,10 @@ export default function FindPasswordForm() {
   return (
     <>
       <div className="mb-4">
-        <label className="block font-medium mb-2 text-[15px]">아이디</label>
+        <div className="flex">
+          <label className="block font-medium mb-2 text-[15px]">아이디</label>
+          <p className="text-[#FF5F5F]">*</p>
+        </div>
         <input
           type="text"
           value={loginId}
@@ -119,7 +122,10 @@ export default function FindPasswordForm() {
       </div>
 
       <div className="mb-4">
-        <label className="block font-medium mb-2 text-[15px]">이메일</label>
+        <div className="flex">
+          <label className="block font-medium mb-2 text-[15px]">이메일</label>
+          <p className="text-[#FF5F5F]">*</p>
+        </div>
         <div className="flex gap-1.5">
           <input
             type="email"
@@ -147,7 +153,10 @@ export default function FindPasswordForm() {
 
       {isSent && (
         <div className="mb-4">
-          <label className="block font-medium mb-2 text-[15px]">인증번호</label>
+          <div className="flex">
+            <label className="block font-medium mb-2 text-[15px]">인증번호</label>
+            <p className="text-[#FF5F5F]">*</p>
+          </div>
           <div className="flex gap-1.5">
             <input
               type="text"
@@ -208,7 +217,7 @@ export default function FindPasswordForm() {
                 : 'bg-[#FF5F5F] hover:bg-[#D14848] active:scale-[0.99]'
             }`}
           >
-            {isSubmitting ? '변경 중...' : '변경하기'}
+            {isSubmitting ? '변경 중' : '변경하기'}
           </Button>
         </>
       )}

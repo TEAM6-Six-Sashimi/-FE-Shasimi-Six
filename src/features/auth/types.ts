@@ -8,6 +8,19 @@ export interface EmailVerificationRequestResponseDto {
   resendAvailableInSeconds: number;
 }
 
+// POST /auth/find-id/request 응답
+export interface FindIdVerificationRequestResponseDto {
+  email: string;
+  purpose: 'FIND_ID';
+  expiresInSeconds: number;
+  resendAvailableInSeconds: number;
+}
+
+// POST /auth/find-id/confirm 응답
+export interface FindIdConfirmResponseDto {
+  loginId: string;
+}
+
 // POST /verifications/email/confirm 응답
 export interface EmailVerifyResponseDto {
   targetEmail: string;
