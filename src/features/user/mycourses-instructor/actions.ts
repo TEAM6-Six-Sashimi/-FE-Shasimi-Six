@@ -7,6 +7,18 @@ import { AuthSessionError, handleAuthErrorResponse } from '@/features/auth/auth-
 import type { UserMe } from '@/features/auth/types';
 import type { CreateCourseRequest } from '@/features/user/mycourses-instructor/types';
 import type { UpdateCourseRequest } from '@/features/user/mycourses-instructor/types';
+import type {
+  InstructorDashboardSummary,
+  InstructorSalesStatistics,
+  InstructorStudentStatistics,
+  InstructorCompletionRateStatistics,
+} from '@/features/user/mycourses-instructor/types';
+import {
+  fetchInstructorDashboardSummary,
+  fetchInstructorSalesStatistics,
+  fetchInstructorStudentStatistics,
+  fetchInstructorCompletionRateStatistics,
+} from '@/services/instructor.service';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -126,5 +138,51 @@ export async function deleteCourseAction(courseId: number): Promise<CourseAction
       message: error instanceof Error ? error.message : '삭제 처리에 실패했습니다.',
       authError: error instanceof AuthSessionError || undefined,
     };
+  }
+}
+
+// 대시보드 - 요약 카드
+export async function fetchDashboardSummaryAction(
+  year?: number,
+  month?: number,
+): Promise<InstructorDashboardSummary | null> {
+  try {
+    const { accessToken, user } = await getAuthOrThrow();
+    return fetchInstructorDashboardSummary(accessToken, String(user.id), year, month);
+  } catch {
+    return null;
+  }
+}
+
+// 대시보드 - 매출 통계 탭
+export async function fetchSalesStatisticsAction(
+  year?: number,
+  month?: number,
+): Promise<InstructorSalesStatistics | null> {
+  try {
+    const { accessToken, user } = await getAuthOrThrow();
+    return fetchInstructorSalesStatistics(accessToken, String(user.id), year, month);
+  } catch {
+    return null;
+  }
+}
+
+// 대시보드 - 수강생 수 통계 탭
+export async function fetchStudentStatisticsAction(): Promise<InstructorStudentStatistics | null> {
+  try {
+    const { accessToken, user } = await getAuthOrThrow();
+    return fetchInstructorStudentStatistics(accessToken, String(user.id));
+  } catch {
+    return null;
+  }
+}
+
+// 대시보드 - 완강률 통계 탭
+export async function fetchCompletionRateStatisticsAction(): Promise<InstructorCompletionRateStatistics | null> {
+  try {
+    const { accessToken, user } = await getAuthOrThrow();
+    return fetchInstructorCompletionRateStatistics(accessToken, String(user.id));
+  } catch {
+    return null;
   }
 }
