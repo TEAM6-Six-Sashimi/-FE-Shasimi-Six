@@ -35,7 +35,7 @@ export async function loginAction(
     // role 가져오기
     const user = await fetchUserMe(result.accessToken);
     cookieStore.set('role', user.role, {
-      httpOnly: false,
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: maxAgeSeconds,

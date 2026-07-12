@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
+import { fetchCourses } from '@/services/course.service';
 
-const BASE_URL = 'https://sixsashimi.com.market-app.org';
+const BASE_URL = 'https://www.sixsashimi.com.market-app.org';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // 카테고리 목록 조회 (동적 경로 생성용)
@@ -58,18 +59,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
-    {
-      url: `${BASE_URL}/instructor/application`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${BASE_URL}/auth/login`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
   ];
 
   // 동적 카테고리 페이지 (/courses/[category])
@@ -80,5 +69,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  return [...staticPages, ...categoryPages];
+  // 동적 강의 상세 페이지 (/courses/[category]/[courseId])
+  const coursesByCategory = await Promise.all(
+    categoryNames.map((name) => fetchCourses(name)),
+  );
+  const coursePages: MetadataRoute.Sitemap = coursesByCategory.flat().map((course) => ({
+    url: `${BASE_URL}/courses/${encodeURIComponent(course.categoryName)}/${course.courseId}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...categoryPages, ...coursePages];
 }
