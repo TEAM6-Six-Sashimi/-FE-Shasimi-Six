@@ -1,5 +1,5 @@
-import ComingSoon from '@/components/ui/comingSoon';
+import PaymentManagePage from './_components/PaymentManagePage';
 
-export default function PaymentManagePage() {
-  return <ComingSoon />;
+export default function Page() {
+  return <PaymentManagePage />;
 }
