@@ -23,6 +23,15 @@ export function withAgreements(user: UserMe): UserMeWithAgreements {
   };
 }
 
+// GET /api/members/{userId}/instructor-profile
+export interface InstructorProfile {
+  name: string;
+  profileImageUrl: string | null;
+  bio: string;
+  mainCareers: string[];
+  portfolioUrl: string | null;
+}
+
 // 강의 결제 내역
 export interface CoursePaymentItemCourse {
   courseId: number;

@@ -7,8 +7,27 @@ import {
   InstructorStudentStatistics,
   InstructorCompletionRateStatistics,
 } from '@/features/user/mycourses-instructor/types';
+import { InstructorProfile } from '@/features/mypage/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// 강사 프로필 조회 (마이페이지 > 강사 프로필)
+export async function fetchInstructorProfile(
+  userId: number,
+  accessToken: string,
+): Promise<InstructorProfile | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/members/${userId}/instructor-profile`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
 
 function buildYearMonthQuery(year?: number, month?: number): string {
   const query = new URLSearchParams();
