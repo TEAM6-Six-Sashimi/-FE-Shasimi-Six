@@ -7,6 +7,7 @@ import {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const EMPTY_LIST = { items: [], totalElements: 0, totalPages: 0, page: 0, size: 10 };
+const AUTH_ERROR_LIST = { ...EMPTY_LIST, authError: true as const };
 
 function buildQuery(params: AdminPaymentSearchParams): string {
   const query = new URLSearchParams();
@@ -23,6 +24,8 @@ export async function fetchAdminCoursePayments(
   accessToken: string,
   params: AdminPaymentSearchParams,
 ): Promise<AdminCoursePaymentListResponse> {
+  if (!accessToken) return AUTH_ERROR_LIST;
+
   try {
     const res = await fetch(`${API_BASE_URL}/admin/payments/courses?${buildQuery(params)}`, {
       headers: { Authorization: `Bearer ${accessToken}`, Accept: 'application/json' },
@@ -32,7 +35,7 @@ export async function fetchAdminCoursePayments(
     if (!res.ok) {
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchAdminCoursePayments] status=${res.status} body=${errorBody}`);
-      return EMPTY_LIST;
+      return res.status === 401 ? AUTH_ERROR_LIST : EMPTY_LIST;
     }
 
     return res.json();
@@ -47,6 +50,8 @@ export async function fetchAdminSubscriptionPayments(
   accessToken: string,
   params: AdminPaymentSearchParams,
 ): Promise<AdminSubscriptionPaymentListResponse> {
+  if (!accessToken) return AUTH_ERROR_LIST;
+
   try {
     const res = await fetch(`${API_BASE_URL}/admin/payments/subscriptions?${buildQuery(params)}`, {
       headers: { Authorization: `Bearer ${accessToken}`, Accept: 'application/json' },
@@ -56,7 +61,7 @@ export async function fetchAdminSubscriptionPayments(
     if (!res.ok) {
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchAdminSubscriptionPayments] status=${res.status} body=${errorBody}`);
-      return EMPTY_LIST;
+      return res.status === 401 ? AUTH_ERROR_LIST : EMPTY_LIST;
     }
 
     return res.json();

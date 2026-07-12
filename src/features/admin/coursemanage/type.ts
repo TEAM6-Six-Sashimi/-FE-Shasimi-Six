@@ -55,6 +55,7 @@ export interface AdminPrivateCourse {
   ratingAvg: number;
   status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'CLOSED';
   approvedAt: string;
+  privatedAt: string; // 비공개 처리일 (approvedAt + 2년, 서버에서 계산해 내려줌)
 }
 
 // 카테고리 관리

@@ -20,6 +20,7 @@ export interface AdminCoursePaymentListResponse {
   totalPages: number;
   page: number;
   size: number;
+  authError?: true;
 }
 
 // 구독권 결제 내역
@@ -42,6 +43,7 @@ export interface AdminSubscriptionPaymentListResponse {
   totalPages: number;
   page: number;
   size: number;
+  authError?: true;
 }
 
 export interface AdminPaymentSearchParams {

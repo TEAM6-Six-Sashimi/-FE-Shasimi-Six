@@ -14,6 +14,7 @@ export default function CoursePayments() {
   const [items, setItems] = useState<AdminCoursePayment[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [authError, setAuthError] = useState(false);
 
   // 검색어는 디바운스 처리 - 타이핑 중 매번 서버 조회하지 않도록
   useEffect(() => {
@@ -35,12 +36,21 @@ export default function CoursePayments() {
       keyword: debouncedKeyword || undefined,
       page,
       size: 10,
-    }).then((result) => {
-      if (!active) return;
-      setItems(result.items);
-      setTotalPages(result.totalPages);
-      setIsLoading(false);
-    });
+    })
+      .then((result) => {
+        if (!active) return;
+        setItems(result.items);
+        setTotalPages(result.totalPages);
+        setAuthError(!!result.authError);
+      })
+      .catch(() => {
+        if (!active) return;
+        setItems([]);
+        setTotalPages(0);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
     return () => {
       active = false;
     };
@@ -98,6 +108,12 @@ export default function CoursePayments() {
             <tr>
               <td colSpan={7} className="py-16 text-center text-[#6A7282]">
                 불러오는 중...
+              </td>
+            </tr>
+          ) : authError ? (
+            <tr>
+              <td colSpan={7} className="py-16 text-center text-[#FF5E5E]">
+                로그인이 필요합니다. 다시 로그인해주세요.
               </td>
             </tr>
           ) : items.length === 0 ? (

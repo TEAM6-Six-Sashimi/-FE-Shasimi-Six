@@ -65,7 +65,7 @@ export async function approveCourse(accessToken: string, courseId: number) {
   }
 }
 
-// 강의 반려 사유 카테고리 조회
+// 강의 반려 사유 카테고리 조회 (호출부에서 이미 try-catch로 실패를 직접 처리함)
 export async function fetchCourseRejectReasons(
   accessToken: string,
 ): Promise<RejectReasonCategory[]> {
@@ -115,21 +115,28 @@ export async function rejectCourse(
 
 // 강의 반려 이력 조회
 export async function fetchAdminRejectedCourses(accessToken: string): Promise<RejectedCourse[]> {
-  const res = await fetch(`${API_BASE_URL}/admin/courses/rejected`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-    cache: 'no-store',
-  });
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/courses/rejected`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: 'no-store',
+    });
 
-  if (!res.ok) {
-    const errorBody = await res.text().catch(() => '');
-    console.error(`[fetchAdminRejectedCourses] status=${res.status} body=${errorBody}`);
-    throw new Error('반려된 강의 목록을 불러오지 못했습니다.');
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      console.error(`[fetchAdminRejectedCourses] status=${res.status} body=${errorBody}`);
+      return [];
+    }
+
+    return res.json();
+  } catch (e) {
+    console.error('[fetchAdminRejectedCourses] fetch error:', e);
+    return [];
   }
-
-  return res.json();
 }
 
 // 강의 관리 - 비공개된 강의
+type RawAdminPrivateCourse = Omit<AdminPrivateCourse, 'privatedAt'>;
+
 export async function fetchAdminPrivateCourses(accessToken: string): Promise<AdminPrivateCourse[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/admin/courses/closed`, {
@@ -145,9 +152,9 @@ export async function fetchAdminPrivateCourses(accessToken: string): Promise<Adm
       return [];
     }
 
-    const data = await res.json();
+    const data: RawAdminPrivateCourse[] = await res.json();
 
-    return data.map((course: any) => {
+    return data.map((course) => {
       const approvedAt = new Date(course.approvedAt);
 
       const privateDate = new Date(approvedAt);
@@ -175,16 +182,23 @@ export async function fetchAdminPrivateCourses(accessToken: string): Promise<Adm
 
 // 강의 관리 - 카테고리 관리
 export async function fetchAdminCategories(accessToken: string): Promise<AdminCategory[]> {
-  const response = await fetch(`${API_BASE_URL}/admin/categories`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    cache: 'no-store',
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/categories`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: 'no-store',
+    });
 
-  if (!response.ok) {
-    throw new Error('카테고리 조회 실패');
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => '');
+      console.error(`[fetchAdminCategories] status=${response.status} body=${errorBody}`);
+      return [];
+    }
+
+    return response.json();
+  } catch (e) {
+    console.error('[fetchAdminCategories] fetch error:', e);
+    return [];
   }
-
-  return response.json();
 }

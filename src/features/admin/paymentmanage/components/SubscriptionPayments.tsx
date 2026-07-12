@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { fetchSubscriptionPaymentsAction } from '../actions';
 import { AdminSubscriptionPayment, SubscriptionPlanCode } from '../types';
@@ -29,6 +29,8 @@ export default function SubscriptionPayments() {
   const [items, setItems] = useState<AdminSubscriptionPayment[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [authError, setAuthError] = useState(false);
+  const planMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedKeyword(keyword.trim()), 300);
@@ -48,16 +50,39 @@ export default function SubscriptionPayments() {
       keyword: debouncedKeyword || undefined,
       page,
       size: 10,
-    }).then((result) => {
-      if (!active) return;
-      setItems(result.items);
-      setTotalPages(result.totalPages);
-      setIsLoading(false);
-    });
+    })
+      .then((result) => {
+        if (!active) return;
+        setItems(result.items);
+        setTotalPages(result.totalPages);
+        setAuthError(!!result.authError);
+      })
+      .catch(() => {
+        if (!active) return;
+        setItems([]);
+        setTotalPages(0);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
     return () => {
       active = false;
     };
   }, [startDate, endDate, debouncedKeyword, page]);
+
+  // 드롭다운 바깥을 클릭하면 닫기
+  useEffect(() => {
+    if (!planMenuOpen) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (planMenuRef.current && !planMenuRef.current.contains(e.target as Node)) {
+        setPlanMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [planMenuOpen]);
 
   // 플랜 필터는 백엔드 쿼리 파라미터가 아직 없어 현재 페이지 내에서만 보조 필터링
   const filteredItems =
@@ -106,7 +131,7 @@ export default function SubscriptionPayments() {
             <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">회원명</th>
             <th className="py-3 w-[14%] text-center font-semibold text-[#1E2125]">회원 ID</th>
             <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">
-              <div className="relative inline-flex items-center gap-1 justify-center w-full">
+              <div ref={planMenuRef} className="relative inline-flex items-center gap-1 justify-center w-full">
                 <button
                   type="button"
                   onClick={() => setPlanMenuOpen((open) => !open)}
@@ -146,6 +171,12 @@ export default function SubscriptionPayments() {
             <tr>
               <td colSpan={7} className="py-16 text-center text-[#6A7282]">
                 불러오는 중...
+              </td>
+            </tr>
+          ) : authError ? (
+            <tr>
+              <td colSpan={7} className="py-16 text-center text-[#FF5E5E]">
+                로그인이 필요합니다. 다시 로그인해주세요.
               </td>
             </tr>
           ) : filteredItems.length === 0 ? (
