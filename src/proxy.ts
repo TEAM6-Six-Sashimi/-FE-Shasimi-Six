@@ -1,21 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
   const accessToken = request.cookies.get('accessToken')?.value;
 
-  // 비로그인 → 로그인 페이지로
+  // 비로그인 → 로그인 페이지로 (원래 가려던 경로를 redirect 파라미터로 유지)
   if (!accessToken) {
-    if (
-      pathname.startsWith('/mycourses-student') ||
-      pathname.startsWith('/mypage') ||
-      pathname.startsWith('/instructor/application') ||
-      pathname.startsWith('/payments') ||
-      pathname.startsWith('/cart') ||
-      pathname.startsWith('/alarm') 
-    ) {
-      return NextResponse.redirect(new URL('/auth/login', request.url));
-    }
+    const loginUrl = new URL('/auth/login', request.url);
+    loginUrl.searchParams.set('redirect', `${pathname}${search}`);
+    return NextResponse.redirect(loginUrl);
   }
 
   const role = request.cookies.get('role')?.value;
@@ -23,8 +16,7 @@ export function proxy(request: NextRequest) {
   // 강사 전용 페이지
   if (
     pathname.startsWith('/mycourses-instructor') ||
-    pathname.startsWith('/mypage/instructor-profile') ||
-    pathname.startsWith('/mypage/settlements')
+    pathname.startsWith('/mypage/instructor-profile')
   ) {
     if (role !== 'INSTRUCTOR' && role !== 'ADMIN') {
       return NextResponse.redirect(new URL('/', request.url));
@@ -46,10 +38,9 @@ export const config = {
     '/mycourses-student/:path*',
     '/mycourses-instructor/:path*',
     '/mypage/:path*',
-    '/instructor/application/:path*',
+    '/instructor-application/:path*',
     '/admin/:path*',
     '/payments/:path*',
     '/cart/:path*',
-    '/alarm/:path*',
   ],
 };
