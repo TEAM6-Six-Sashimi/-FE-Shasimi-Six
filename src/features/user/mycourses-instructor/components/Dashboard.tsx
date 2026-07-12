@@ -1,19 +1,21 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { MOCK_DASHBOARD_STATS, MOCK_COURSE_REVENUES } from '@/constants/mockInstructorCourses';
-import { Award, CalendarDays, DollarSign, TrendingUp } from 'lucide-react';
+  fetchDashboardSummaryAction,
+  fetchSalesStatisticsAction,
+  fetchStudentStatisticsAction,
+  fetchCompletionRateStatisticsAction,
+} from '../actions';
+import {
+  InstructorDashboardSummary,
+  InstructorSalesStatistics,
+  InstructorStudentStatistics,
+  InstructorCompletionRateStatistics,
+} from '../types';
+import { Award, CalendarDays, DollarSign } from 'lucide-react';
 
 type StatTab = '매출' | '수강생 수' | '완강률';
-
-const PERIOD_OPTIONS = ['이번 달', '최근 3개월', '직접 설정'] as const;
 
 interface SummaryCard {
   icon: ReactNode;
@@ -23,47 +25,100 @@ interface SummaryCard {
   sub: string;
 }
 
+const now = new Date();
+const ITEMS_PER_PAGE = 5;
+
 export default function Dashboard() {
-  const [period, setPeriod] = useState('이번 달');
+  const [year, setYear] = useState(now.getFullYear());
+  const [month, setMonth] = useState(now.getMonth() + 1);
   const [statTab, setStatTab] = useState<StatTab>('매출');
-  const stats = MOCK_DASHBOARD_STATS;
-  const revenues = MOCK_COURSE_REVENUES;
+  const [page, setPage] = useState(1);
+
+  const [summary, setSummary] = useState<InstructorDashboardSummary | null>(null);
+  const [sales, setSales] = useState<InstructorSalesStatistics | null>(null);
+  const [students, setStudents] = useState<InstructorStudentStatistics | null>(null);
+  const [completionRate, setCompletionRate] = useState<InstructorCompletionRateStatistics | null>(
+    null,
+  );
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 매출/요약은 연월에 따라 다시 조회, 수강생 수/완강률은 기간과 무관하게 한 번만 조회
+  useEffect(() => {
+    let active = true;
+    setIsLoading(true);
+    Promise.all([
+      fetchDashboardSummaryAction(year, month),
+      fetchSalesStatisticsAction(year, month),
+      fetchStudentStatisticsAction(),
+      fetchCompletionRateStatisticsAction(),
+    ]).then(([summaryRes, salesRes, studentsRes, completionRateRes]) => {
+      if (!active) return;
+      setSummary(summaryRes);
+      setSales(salesRes);
+      setStudents(studentsRes);
+      setCompletionRate(completionRateRes);
+      setIsLoading(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [year, month]);
+
+  // 탭을 바꾸면 페이지도 처음으로
+  useEffect(() => {
+    setPage(1);
+  }, [statTab, year, month]);
+
+  const handleMonthChange = (value: string) => {
+    const [y, m] = value.split('-').map(Number);
+    if (!y || !m) return;
+    setYear(y);
+    setMonth(m);
+  };
+
+  const sortedCompletionCourses = completionRate
+    ? [...completionRate.courses].sort((a, b) => b.completionRate - a.completionRate)
+    : [];
+
+  const activeListLength =
+    statTab === '매출'
+      ? (sales?.courses.length ?? 0)
+      : statTab === '수강생 수'
+        ? (students?.courses.length ?? 0)
+        : sortedCompletionCourses.length;
+
+  const totalPages = Math.max(1, Math.ceil(activeListLength / ITEMS_PER_PAGE));
+  const pageStart = (page - 1) * ITEMS_PER_PAGE;
+  const pageEnd = pageStart + ITEMS_PER_PAGE;
 
   const SUMMARY_CARDS: SummaryCard[] = [
     {
       icon: <DollarSign size={20} className="text-[#DC2626]" />,
       iconBg: 'bg-[#FFEBEB]',
-      label: '전체 매출',
-      value: stats.totalRevenue.toLocaleString(),
-      sub: '이번 달 총 매출',
-    },
-    {
-      icon: <TrendingUp size={20} className="text-[#3B66B9]" />,
-      iconBg: 'bg-[#EEF4FF]',
-      label: '수수료 30%',
-      value: stats.platformFee.toLocaleString(),
-      sub: '이번 달 플랫폼 수수료',
+      label: '이번 달 매출',
+      value: `${(summary?.totalSales ?? 0).toLocaleString()} 크레딧`,
+      sub: `${year}년 ${month}월 총 매출`,
     },
     {
       icon: <Award size={20} className="text-[#827717]" />,
       iconBg: 'bg-[#F9FBE7]',
-      label: '출금 가능',
-      value: stats.withdrawable.toLocaleString(),
-      sub: '정산 가능 금액',
+      label: `수수료 ${summary?.platformFeeRate ?? 0}%`,
+      value: `${(summary?.platformFee ?? 0).toLocaleString()} 크레딧`,
+      sub: '플랫폼 수수료',
     },
     {
       icon: <CalendarDays size={20} className="text-[#6B7280]" />,
       iconBg: 'bg-[#F9FAFB]',
-      label: '총 정산액',
-      value: stats.totalSettled.toLocaleString(),
-      sub: '누적 정산 금액',
+      label: '정산 예정 금액',
+      value: `${(summary?.settlementAmount ?? 0).toLocaleString()} 크레딧`,
+      sub: '이번 달 정산 예정',
     },
   ];
 
   return (
     <div className="flex flex-col gap-6">
       {/* 요약 카드 */}
-      <div className="grid grid-cols-4 gap-6 px-8 mb-6">
+      <div className="grid grid-cols-3 gap-6 px-8 mb-6">
         {SUMMARY_CARDS.map(({ icon, iconBg, label, value, sub }) => (
           <div
             key={label}
@@ -88,18 +143,12 @@ export default function Dashboard() {
       {/* 기간 설정 */}
       <div className="flex items-center gap-3">
         <span className="text-[14px] font-semibold text-[#1E2125]">기간 설정</span>
-        <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-36 h-9 text-[13px] border-[#D1D5DB] text-[#1E2125]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            {PERIOD_OPTIONS.map((opt) => (
-              <SelectItem key={opt} value={opt} className="text-[13px]">
-                {opt}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <input
+          type="month"
+          value={`${year}-${String(month).padStart(2, '0')}`}
+          onChange={(e) => handleMonthChange(e.target.value)}
+          className="h-9 px-3 rounded-lg border border-[#D1D5DB] text-[13px] text-[#1E2125] outline-none focus:border-[#1E2125] transition-colors [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+        />
       </div>
 
       {/* 통계 탭 */}
@@ -123,79 +172,137 @@ export default function Dashboard() {
 
         {/* 탭 콘텐츠 */}
         <div className="p-5 flex flex-col gap-4">
-          {statTab === '매출' && (
+          {isLoading ? (
+            <p className="text-center text-[13.5px] text-[#6A7282] py-10">불러오는 중...</p>
+          ) : (
             <>
-              <div>
-                <p className="text-[14px] font-bold text-[#1E2125]">매출 통계</p>
-                <p className="text-[12px] text-[#6A7282]">
-                  누적 총 매출: {stats.totalRevenue.toLocaleString()} 크레딧
-                </p>
-              </div>
-              {revenues.map((r) => (
-                <div
-                  key={r.id}
-                  className="flex items-center justify-between py-2 border-b border-[#F3F4F6] last:border-none"
-                >
-                  <span className="text-[13.5px] text-[#1E2125]">{r.title}</span>
-                  <span className="text-[13.5px] font-semibold text-[#FF5E5E]">
-                    {r.revenue.toLocaleString()} 크레딧
-                  </span>
-                </div>
-              ))}
-            </>
-          )}
-
-          {statTab === '수강생 수' && (
-            <>
-              <div>
-                <p className="text-[14px] font-bold text-[#1E2125]">수강생 통계</p>
-                <p className="text-[12px] text-[#6A7282]">
-                  누적 총 수강생 수:{' '}
-                  {revenues.reduce((s, r) => s + r.studentCount, 0).toLocaleString()}명
-                </p>
-              </div>
-              {revenues.map((r) => (
-                <div
-                  key={r.id}
-                  className="flex items-center justify-between py-2 border-b border-[#F3F4F6] last:border-none"
-                >
-                  <span className="text-[13.5px] text-[#1E2125]">{r.title}</span>
-                  <span className="text-[13.5px] font-semibold text-[#5B8DEE]">
-                    {r.studentCount.toLocaleString()}명
-                  </span>
-                </div>
-              ))}
-            </>
-          )}
-
-          {statTab === '완강률' && (
-            <>
-              <div>
-                <p className="text-[14px] font-bold text-[#1E2125]">완강률 통계</p>
-                <p className="text-[12px] text-[#6A7282]">완강 기준: 100%</p>
-              </div>
-              {revenues
-                .sort((a, b) => b.completionRate - a.completionRate)
-                .map((r) => (
-                  <div
-                    key={r.id}
-                    className="flex flex-col gap-1.5 py-2 border-b border-[#F3F4F6] last:border-none"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[13.5px] text-[#1E2125]">{r.title}</span>
-                      <span className="text-[12px] text-[#6A7282]">
-                        ({r.completedCount}명 / {r.totalCount}명){' '}
-                        <span className="font-semibold text-[#1E2125]">{r.completionRate}%</span>
-                      </span>
-                    </div>
-                    <div className="w-full h-2 bg-[#D1D5DB] rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[#CFEE5D] rounded-full"
-                        style={{ width: `${r.completionRate}%` }}
-                      />
-                    </div>
+              {statTab === '매출' && (
+                <>
+                  <div>
+                    <p className="text-[14px] font-bold text-[#1E2125]">매출 통계</p>
+                    <p className="text-[12px] text-[#6A7282]">
+                      {year}년 {month}월 총 매출: {(sales?.totalSales ?? 0).toLocaleString()}{' '}
+                      크레딧
+                    </p>
                   </div>
-                ))}
+                  {sales?.courses.length ? (
+                    sales.courses.slice(pageStart, pageEnd).map((c) => (
+                      <div
+                        key={c.courseId}
+                        className="flex items-center justify-between py-2 border-b border-[#F3F4F6] last:border-none"
+                      >
+                        <span className="text-[13.5px] text-[#1E2125]">{c.title}</span>
+                        <span className="text-[13.5px] font-semibold text-[#FF5E5E]">
+                          {c.salesAmount.toLocaleString()} 크레딧
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-[13px] text-[#6A7282] py-6">
+                      해당 기간에 매출 내역이 없습니다.
+                    </p>
+                  )}
+                </>
+              )}
+
+              {statTab === '수강생 수' && (
+                <>
+                  <div>
+                    <p className="text-[14px] font-bold text-[#1E2125]">수강생 통계</p>
+                    <p className="text-[12px] text-[#6A7282]">
+                      누적 총 수강생 수: {(students?.totalStudentCount ?? 0).toLocaleString()}명
+                    </p>
+                  </div>
+                  {students?.courses.length ? (
+                    students.courses.slice(pageStart, pageEnd).map((c) => (
+                      <div
+                        key={c.courseId}
+                        className="flex items-center justify-between py-2 border-b border-[#F3F4F6] last:border-none"
+                      >
+                        <span className="text-[13.5px] text-[#1E2125]">{c.title}</span>
+                        <span className="text-[13.5px] font-semibold text-[#5B8DEE]">
+                          {c.studentCount.toLocaleString()}명
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-[13px] text-[#6A7282] py-6">
+                      수강생 내역이 없습니다.
+                    </p>
+                  )}
+                </>
+              )}
+
+              {statTab === '완강률' && (
+                <>
+                  <div>
+                    <p className="text-[14px] font-bold text-[#1E2125]">완강률 통계</p>
+                    <p className="text-[12px] text-[#6A7282]">완강 기준: 100%</p>
+                  </div>
+                  {sortedCompletionCourses.length ? (
+                    sortedCompletionCourses
+                      .slice(pageStart, pageEnd)
+                      .map((c) => (
+                        <div
+                          key={c.courseId}
+                          className="flex flex-col gap-1.5 py-2 border-b border-[#F3F4F6] last:border-none"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-[13.5px] text-[#1E2125]">{c.title}</span>
+                            <span className="text-[12px] text-[#6A7282]">
+                              ({c.completedStudentCount}명 / {c.totalStudentCount}명){' '}
+                              <span className="font-semibold text-[#1E2125]">
+                                {c.completionRate}%
+                              </span>
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-[#D1D5DB] rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-[#CFEE5D] rounded-full"
+                              style={{ width: `${c.completionRate}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    <p className="text-center text-[13px] text-[#6A7282] py-6">
+                      완강률 내역이 없습니다.
+                    </p>
+                  )}
+                </>
+              )}
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-1 pt-2">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
+                  >
+                    이전
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPage(p)}
+                      className={`w-8 h-8 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
+                        page === p
+                          ? 'bg-[#1E2125] text-white'
+                          : 'text-[#6A7282] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
+                  >
+                    다음
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
