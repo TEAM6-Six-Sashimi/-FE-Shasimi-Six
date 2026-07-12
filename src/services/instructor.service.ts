@@ -2,9 +2,21 @@ import {
   ApprovedCourse,
   InstructorInProgressCourse,
   PrivateCourse,
+  InstructorDashboardSummary,
+  InstructorSalesStatistics,
+  InstructorStudentStatistics,
+  InstructorCompletionRateStatistics,
 } from '@/features/user/mycourses-instructor/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+function buildYearMonthQuery(year?: number, month?: number): string {
+  const query = new URLSearchParams();
+  if (year) query.set('year', String(year));
+  if (month) query.set('month', String(month));
+  const qs = query.toString();
+  return qs ? `?${qs}` : '';
+}
 
 export async function fetchApprovedCourses(
   accessToken: string,
@@ -106,5 +118,113 @@ export async function fetchClosedCourses(
     return Array.isArray(result) ? result : (result.data ?? []);
   } catch {
     return [];
+  }
+}
+
+// 대시보드 - 요약 조회 (상단 카드 3개)
+export async function fetchInstructorDashboardSummary(
+  accessToken: string,
+  userId: string,
+  year?: number,
+  month?: number,
+): Promise<InstructorDashboardSummary | null> {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/instructor/dashboard/summary${buildYearMonthQuery(year, month)}`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}`, 'X-USER-ID': userId },
+        cache: 'no-store',
+      },
+    );
+
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      console.error(`[fetchInstructorDashboardSummary] status=${res.status} body=${errorBody}`);
+      return null;
+    }
+
+    return res.json();
+  } catch (e) {
+    console.error('[fetchInstructorDashboardSummary] fetch error:', e);
+    return null;
+  }
+}
+
+// 대시보드 - 매출 탭
+export async function fetchInstructorSalesStatistics(
+  accessToken: string,
+  userId: string,
+  year?: number,
+  month?: number,
+): Promise<InstructorSalesStatistics | null> {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/instructor/courses/statistics/sales${buildYearMonthQuery(year, month)}`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}`, 'X-USER-ID': userId },
+        cache: 'no-store',
+      },
+    );
+
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      console.error(`[fetchInstructorSalesStatistics] status=${res.status} body=${errorBody}`);
+      return null;
+    }
+
+    return res.json();
+  } catch (e) {
+    console.error('[fetchInstructorSalesStatistics] fetch error:', e);
+    return null;
+  }
+}
+
+// 대시보드 - 수강생 수 탭
+export async function fetchInstructorStudentStatistics(
+  accessToken: string,
+  userId: string,
+): Promise<InstructorStudentStatistics | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/instructor/courses/statistics/students`, {
+      headers: { Authorization: `Bearer ${accessToken}`, 'X-USER-ID': userId },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      console.error(`[fetchInstructorStudentStatistics] status=${res.status} body=${errorBody}`);
+      return null;
+    }
+
+    return res.json();
+  } catch (e) {
+    console.error('[fetchInstructorStudentStatistics] fetch error:', e);
+    return null;
+  }
+}
+
+// 대시보드 - 완강률 탭
+export async function fetchInstructorCompletionRateStatistics(
+  accessToken: string,
+  userId: string,
+): Promise<InstructorCompletionRateStatistics | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/instructor/courses/statistics/completion-rate`, {
+      headers: { Authorization: `Bearer ${accessToken}`, 'X-USER-ID': userId },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => '');
+      console.error(
+        `[fetchInstructorCompletionRateStatistics] status=${res.status} body=${errorBody}`,
+      );
+      return null;
+    }
+
+    return res.json();
+  } catch (e) {
+    console.error('[fetchInstructorCompletionRateStatistics] fetch error:', e);
+    return null;
   }
 }

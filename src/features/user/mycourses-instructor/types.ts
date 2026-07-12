@@ -138,3 +138,52 @@ export interface PrivateCourse {
   studentCount: number;
   privatedAt?: string; // 비공개 처리일
 }
+
+// 대시보드 - 요약 카드
+export interface InstructorDashboardSummary {
+  year: number;
+  month: number;
+  totalSales: number;
+  platformFee: number;
+  settlementAmount: number;
+  platformFeeRate: number;
+}
+
+// 대시보드 - 매출 통계
+export interface InstructorSalesStatisticsCourse {
+  courseId: number;
+  title: string;
+  salesAmount: number;
+}
+
+export interface InstructorSalesStatistics {
+  year: number;
+  month: number;
+  totalSales: number;
+  courses: InstructorSalesStatisticsCourse[];
+}
+
+// 대시보드 - 수강생 수 통계
+export interface InstructorStudentStatisticsCourse {
+  courseId: number;
+  title: string;
+  studentCount: number;
+}
+
+export interface InstructorStudentStatistics {
+  totalStudentCount: number;
+  courses: InstructorStudentStatisticsCourse[];
+}
+
+// 대시보드 - 완강률 통계
+export interface InstructorCompletionRateCourse {
+  courseId: number;
+  title: string;
+  totalStudentCount: number;
+  completedStudentCount: number;
+  completionRate: number;
+}
+
+export interface InstructorCompletionRateStatistics {
+  courses: InstructorCompletionRateCourse[];
+}

@@ -5,7 +5,7 @@ import {
   fetchAdminRejectedCourses,
   fetchAdminPrivateCourses,
   fetchAdminCategories,
-} from '@/services/admin.service';
+} from '@/services/admin-coursemanage.service';
 import CourseManagePage from './_components/CourseManagePage';
 import { fetchCategories } from '@/services/categories.service';
 

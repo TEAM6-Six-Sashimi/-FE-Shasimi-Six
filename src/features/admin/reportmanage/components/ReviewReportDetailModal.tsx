@@ -32,12 +32,16 @@ export default function ReviewReportDetailModal({ reportId, onClose, onProcessed
   useEffect(() => {
     let active = true;
     setLoading(true);
-    fetchReviewReportDetailAction(reportId).then((data) => {
-      if (active) {
-        setDetail(data);
-        setLoading(false);
-      }
-    });
+    fetchReviewReportDetailAction(reportId)
+      .then((data) => {
+        if (active) setDetail(data);
+      })
+      .catch(() => {
+        if (active) setDetail(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
     return () => {
       active = false;
     };

@@ -6,7 +6,7 @@ import {
   approveCourse,
   fetchCourseRejectReasons,
   rejectCourse,
-} from '@/services/admin.service';
+} from '@/services/admin-coursemanage.service';
 import { AuthSessionError } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;

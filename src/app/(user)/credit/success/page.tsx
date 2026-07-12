@@ -29,15 +29,23 @@ export default function CreditSuccessPage() {
       paymentKey,
       orderId,
       amount: Number(amount),
-    }).then((result) => {
-      if (result.success) {
-        setChargedAmount(result.data.chargedAmount);
-        setState('success');
-      } else {
-        setErrorMessage(result.message);
+    })
+      .then((result) => {
+        if (result.success) {
+          setChargedAmount(result.data.chargedAmount);
+          setState('success');
+        } else {
+          setErrorMessage(result.message);
+          setState('error');
+        }
+      })
+      .catch(() => {
+        // 결제는 이미 완료된 상태일 수 있으므로, 일반 실패 문구와 구분해서 안내
+        setErrorMessage(
+          '결제 승인 확인 중 오류가 발생했습니다. 크레딧이 충전되지 않았다면 고객센터로 문의해주세요.',
+        );
         setState('error');
-      }
-    });
+      });
   }, []);
 
   if (state === 'loading') {
