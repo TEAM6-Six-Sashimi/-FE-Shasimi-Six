@@ -35,12 +35,20 @@ export default function CreditCharges() {
       keyword: debouncedKeyword || undefined,
       page,
       size: 10,
-    }).then((result) => {
-      if (!active) return;
-      setItems(result.items);
-      setTotalPages(result.totalPages);
-      setIsLoading(false);
-    });
+    })
+      .then((result) => {
+        if (!active) return;
+        setItems(result.items);
+        setTotalPages(result.totalPages);
+      })
+      .catch(() => {
+        if (!active) return;
+        setItems([]);
+        setTotalPages(0);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
     return () => {
       active = false;
     };
