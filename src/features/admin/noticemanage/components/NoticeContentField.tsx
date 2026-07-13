@@ -24,9 +24,10 @@ export default function NoticeContentField({ value, onChange }: NoticeContentFie
       return;
     }
 
+    const currentValue = textarea.value;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    onChange(`${value.slice(0, start)}${markdown}${value.slice(end)}`);
+    onChange(`${currentValue.slice(0, start)}${markdown}${currentValue.slice(end)}`);
 
     requestAnimationFrame(() => {
       const pos = start + markdown.length;
