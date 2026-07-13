@@ -4,3 +4,10 @@ export interface AdminDashboardSummary {
   totalSettlementAmount: number;
   platformFeeRate: number;
 }
+
+export interface AdminDashboardStatistics {
+  totalMembers: number;
+  studentCount: number;
+  instructorCount: number;
+  totalCourses: number;
+}

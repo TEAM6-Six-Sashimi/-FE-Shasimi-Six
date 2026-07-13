@@ -1,20 +1,20 @@
 import Image from 'next/image';
-import { AdminDashboardSummary } from './types';
-
-// 관리자 승인 대기 등 실제 API가 아직 없는 값 — 요청대로 더미 데이터로 채움
-const DUMMY_STATUS_STATS = [
-  { label: '전체 회원 수', value: 15234 },
-  { label: '수강생 수', value: 14891 },
-  { label: '강사 수', value: 343 },
-  { label: '전체 강의 수', value: 1248 },
-];
+import { AdminDashboardSummary, AdminDashboardStatistics } from './types';
 
 interface Props {
   summary: AdminDashboardSummary | null;
+  statistics: AdminDashboardStatistics | null;
 }
 
-export default function DashboardSummary({ summary }: Props) {
+export default function DashboardSummary({ summary, statistics }: Props) {
   const format = (value?: number) => (value ?? 0).toLocaleString();
+
+  const statusStats = [
+    { label: '전체 회원 수', value: statistics?.totalMembers },
+    { label: '수강생 수', value: statistics?.studentCount },
+    { label: '강사 수', value: statistics?.instructorCount },
+    { label: '전체 강의 수', value: statistics?.totalCourses },
+  ];
 
   const cards = [
     {
@@ -80,14 +80,14 @@ export default function DashboardSummary({ summary }: Props) {
       <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6">
         <h2 className="text-[18px] font-bold text-[#1E2125] mb-5">현황 요약</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {DUMMY_STATUS_STATS.map((stat) => (
+          {statusStats.map((stat) => (
             <div
               key={stat.label}
               className="min-w-0 bg-[#F9FAFB] rounded-lg border border-[#E5E7EB] py-5 px-2 text-center"
             >
               <p className="text-[13.5px] text-[#6A7282] mb-2">{stat.label}</p>
               <p className="text-[22px] font-bold text-[#1E2125] wrap-break-word">
-                {stat.value.toLocaleString()}
+                {format(stat.value)}
               </p>
             </div>
           ))}
