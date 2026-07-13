@@ -39,7 +39,7 @@ const FEATURE_CARDS = [
 
 export default function FeatureCards() {
   return (
-    <ul className="grid grid-cols-1 md:grid-cols-3 gap-8 px-24 list-none">
+    <ul className="grid grid-cols-1 md:grid-cols-3 gap-8 list-none">
       {FEATURE_CARDS.map(
         ({ href, icon, iconBg, title, isFree, description, buttonLabel, buttonStyle, cardBg }) => (
           <li key={href} className="min-w-13">
@@ -47,14 +47,14 @@ export default function FeatureCards() {
               {/* 아이콘 — 원형 배경, 장식용이라 aria-hidden */}
               <div
                 aria-hidden="true"
-                className={`${iconBg} w-13 h-13 rounded-full flex items-center justify-center shrink-0`}
+                className={`${iconBg} w-12 h-12 rounded-full flex items-center justify-center shrink-0`}
               >
                 <Image src={icon} alt="" width={24} height={24} />
               </div>
 
               {/* 텍스트 */}
               <div className="flex flex-col gap-2 flex-1">
-                <h3 className="text-[#1E2125] text-[20px] font-bold leading-snug flex items-center gap-1.5">
+                <h3 className="text-[#1E2125] text-[19px] font-bold leading-snug flex items-center gap-1.5">
                   {title}
                   {isFree && (
                     <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#FF5E5E] text-white">
@@ -62,7 +62,7 @@ export default function FeatureCards() {
                     </span>
                   )}
                 </h3>
-                <p className="text-[#6A7282] text-[16px] leading-relaxed">{description}</p>
+                <p className="text-[#6A7282] text-[15px] leading-relaxed">{description}</p>
               </div>
 
               {/* 버튼 — 오른쪽 하단 정렬 */}
