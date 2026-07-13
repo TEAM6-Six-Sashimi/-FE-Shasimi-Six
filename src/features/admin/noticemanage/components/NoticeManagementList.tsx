@@ -73,7 +73,7 @@ export default function NoticeManagementList() {
           </span>
         </div>
         <Button
-          onClick={() => router.push('/admin/noticemanage/new')}
+          onClick={() => router.push('/admin/noticemanage/edit')}
           className="h-10 px-4 bg-[#FF5F5F] hover:bg-[#D14848] text-white text-[13px] font-semibold cursor-pointer"
         >
           + 공지사항 작성
@@ -119,8 +119,8 @@ export default function NoticeManagementList() {
                     <Image
                       src="/pin-Icon.svg"
                       alt="고정"
-                      width={12}
-                      height={12}
+                      width={15}
+                      height={15}
                       className="inline-block align-middle ml-1.5 -mt-0.5"
                     />
                   )}

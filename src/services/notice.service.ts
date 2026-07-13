@@ -1,6 +1,8 @@
 import {
   AdminNoticeListResponse,
   AdminNoticeSearchParams,
+  CreateNoticePayload,
+  CreateNoticeResult,
 } from '@/features/admin/noticemanage/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -41,5 +43,40 @@ export async function fetchNotices(
   } catch (e) {
     console.error('[fetchNotices] fetch error:', e);
     return EMPTY_LIST;
+  }
+}
+
+// 공지사항 등록 (관리자 전용)
+export async function createNotice(
+  accessToken: string,
+  payload: CreateNoticePayload,
+): Promise<CreateNoticeResult> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/notices`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => ({}));
+      if (res.status === 403) {
+        return { success: false, message: '접근 권한이 없습니다.' };
+      }
+      return {
+        success: false,
+        message: errorBody.message || '공지사항 등록에 실패했습니다.',
+      };
+    }
+
+    const data = await res.json();
+    return { success: true, data };
+  } catch (e) {
+    console.error('[createNotice] fetch error:', e);
+    return { success: false, message: '공지사항 등록 중 오류가 발생했습니다.' };
   }
 }
