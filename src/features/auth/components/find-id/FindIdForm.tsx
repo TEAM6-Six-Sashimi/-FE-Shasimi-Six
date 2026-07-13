@@ -181,6 +181,7 @@ export default function FindIdForm() {
           cancelLabel="비밀번호 찾기"
           onConfirm={() => router.push('/auth/login')}
           onCancel={() => router.push('/auth/find-pwd')}
+          onClose={() => setShowResultModal(false)}
         />
       )}
     </>
