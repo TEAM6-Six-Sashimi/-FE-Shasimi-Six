@@ -1,3 +1,6 @@
+'use client';
+
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 
 interface OneButtonModalProps {
@@ -13,7 +16,7 @@ export default function OneButtonModal({
   confirmLabel = '확인',
   onConfirm,
 }: OneButtonModalProps) {
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-2xl shadow-xl w-85 p-7 flex flex-col gap-5">
         <div>
@@ -29,6 +32,7 @@ export default function OneButtonModal({
           {confirmLabel}
         </Button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

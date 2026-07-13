@@ -1,3 +1,6 @@
+'use client';
+
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 
 interface TwoButtonModalProps {
@@ -20,7 +23,7 @@ export default function TwoButtonModal({
   onCancel,
   onClose,
 }: TwoButtonModalProps) {
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="relative bg-white rounded-2xl shadow-xl w-90 p-7 flex flex-col gap-5">
         {onClose && (
@@ -53,6 +56,7 @@ export default function TwoButtonModal({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
