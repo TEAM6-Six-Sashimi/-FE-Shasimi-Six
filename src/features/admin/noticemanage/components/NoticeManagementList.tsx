@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { fetchNoticesAction } from '../actions';
@@ -73,7 +74,7 @@ export default function NoticeManagementList() {
           </span>
         </div>
         <Button
-          onClick={() => router.push('/admin/noticemanage/new')}
+          onClick={() => router.push('/admin/noticemanage/edit')}
           className="h-10 px-4 bg-[#FF5F5F] hover:bg-[#D14848] text-white text-[13px] font-semibold cursor-pointer"
         >
           + 공지사항 작성
@@ -113,14 +114,19 @@ export default function NoticeManagementList() {
                 <td className="py-3 text-center text-[#6A7282]">
                   {page * ITEMS_PER_PAGE + idx + 1}
                 </td>
-                <td className="py-3 px-2 text-left font-semibold text-[#1E2125] truncate">
-                  {notice.title}
+                <td className="py-3 px-2 text-left truncate">
+                  <Link
+                    href={`/admin/noticemanage/${notice.noticeId}`}
+                    className="font-semibold text-[#1E2125] hover:text-[#FF5E5E] hover:underline transition-colors"
+                  >
+                    {notice.title}
+                  </Link>
                   {notice.pinned && (
                     <Image
                       src="/pin-Icon.svg"
                       alt="고정"
-                      width={12}
-                      height={12}
+                      width={15}
+                      height={15}
                       className="inline-block align-middle ml-1.5 -mt-0.5"
                     />
                   )}
