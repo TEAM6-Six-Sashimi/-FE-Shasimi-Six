@@ -10,27 +10,6 @@ import NoticeContent from '@/components/notice/NoticeContent';
 import { deleteNoticeAction } from '../actions';
 import { NoticeDetailResult } from '../types';
 
-function TrashIcon() {
-  return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 6h18" />
-      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-      <path d="M10 11v6" />
-      <path d="M14 11v6" />
-    </svg>
-  );
-}
-
 interface Props {
   result: NoticeDetailResult;
 }
@@ -87,12 +66,12 @@ export default function NoticeDetailView({ result }: Props) {
               onClick={() => setShowDeleteModal(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#FF5F5F] text-[#FF5F5F] text-[12.5px] font-semibold hover:bg-[#FFF5F5] transition-colors cursor-pointer"
             >
-              <TrashIcon />
+              <Image src="/delete-Icon-red.svg" alt="" width={13} height={13} />
               삭제
             </button>
           </div>
 
-          <h3 className="text-[20px] font-bold text-[#1E2125] mb-2 break-words">
+          <h3 className="text-[20px] font-bold text-[#1E2125] mb-2 wrap-break-word">
             {result.data.title}
           </h3>
           <p className="text-[13px] text-[#6A7282] mb-6">
