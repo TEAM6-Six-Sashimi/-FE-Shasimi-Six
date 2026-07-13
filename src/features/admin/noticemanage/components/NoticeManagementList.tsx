@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { fetchNoticesAction } from '../actions';
@@ -113,8 +114,13 @@ export default function NoticeManagementList() {
                 <td className="py-3 text-center text-[#6A7282]">
                   {page * ITEMS_PER_PAGE + idx + 1}
                 </td>
-                <td className="py-3 px-2 text-left font-semibold text-[#1E2125] truncate">
-                  {notice.title}
+                <td className="py-3 px-2 text-left truncate">
+                  <Link
+                    href={`/admin/noticemanage/${notice.noticeId}`}
+                    className="font-semibold text-[#1E2125] hover:text-[#FF5E5E] hover:underline transition-colors"
+                  >
+                    {notice.title}
+                  </Link>
                   {notice.pinned && (
                     <Image
                       src="/pin-Icon.svg"
