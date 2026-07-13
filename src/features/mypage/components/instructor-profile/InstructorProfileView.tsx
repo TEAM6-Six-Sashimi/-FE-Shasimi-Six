@@ -59,22 +59,22 @@ export default function InstructorProfileView({ profile }: InstructorProfileView
             </ul>
           </div>
         )}
-      </section>
 
-      {profile.portfolioUrl && (
-        <section className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6">
-          <h2 className="text-[15px] font-bold text-[#1E2125] mb-3">포트폴리오</h2>
-          <a
-            href={toExternalHref(profile.portfolioUrl)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-[13.5px] text-[#FF5E5E] hover:underline w-fit"
-          >
-            <Image src="/chain-link.svg" width={15} height={15} alt="링크" />
-            {profile.portfolioUrl}
-          </a>
-        </section>
-      )}
+        {profile.portfolioUrl && (
+          <div className="pt-5">
+            <h2 className="text-[15px] font-bold text-[#1E2125] mb-3">포트폴리오</h2>
+            <a
+              href={toExternalHref(profile.portfolioUrl)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-[13.5px] text-[#FF5E5E] hover:underline w-fit"
+            >
+              <Image src="/chain-link.svg" width={15} height={15} alt="링크" />
+              {profile.portfolioUrl}
+            </a>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
