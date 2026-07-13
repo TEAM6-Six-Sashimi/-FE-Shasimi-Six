@@ -98,7 +98,7 @@ export default function FitAnalysisSection({ resumeBased, fitAnalysis }: FitAnal
           <p className="text-[14.5px] text-[#6A7282]">
             이력서를 작성하면 역량 일치 정도를 확인할 수 있어요.
           </p>
-          <Link href="/resume">
+          <Link href="/ai-analysis">
             <Button className="h-11 px-6 bg-[#FF5E5E] hover:bg-[#D14848] text-white font-semibold text-[14px] cursor-pointer">
               이력서 작성하고 오기
             </Button>

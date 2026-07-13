@@ -62,8 +62,8 @@ export default function Footer() {
             >
               강의 비교
             </Link>
-            <Link href="/resume" className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]">
-              AI 이력서 평가
+            <Link href="/ai-analysis" className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]">
+              AI 이력서 / 자소서 평가
             </Link>
           </div>
         </div>

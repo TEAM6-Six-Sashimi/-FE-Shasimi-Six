@@ -2,20 +2,21 @@ import { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { fetchUserMeStrict, GUEST_USER } from '@/services/user.service';
 import { fetchMyResume } from '@/services/resume.service';
-import ResumePageClient from '@/features/user/resume/components/ResumePageClient';
+import { fetchMyCoverLetterAction } from '@/features/user/self-introduction/actions';
 import { fetchMySubscriptionAction } from '@/features/user/payments/actions';
+import AiAnalysisPageClient from '@/features/user/ai-analysis/components/AiAnalysisPageClient';
 
 export const metadata: Metadata = {
-  title: 'AI 이력서 작성 & 평가',
-  description: '템플릿으로 이력서를 작성하고 AI가 점수와 개선 방향까지 알려드립니다.',
+  title: 'AI 이력서, 자기소개서 작성 & 평가',
+  description: '템플릿으로 이력서 및 자기소개서를 작성하고 AI가 점수와 개선 방향까지 알려드립니다.',
   openGraph: {
     title: 'AI 이력서 작성 & 평가 | 핏(Fit)-격',
     description: '템플릿으로 이력서를 작성하고 AI가 점수와 개선 방향까지 알려드립니다.',
-    url: '/resume',
+    url: '/ai-analysis',
   },
 };
 
-export default async function ResumePage() {
+export default async function AiAnalysisPage() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
@@ -30,17 +31,19 @@ export default async function ResumePage() {
     }
   }
 
-  const [savedResume, mySubscription] = await Promise.all([
+  const [savedResume, savedCoverLetter, mySubscription] = await Promise.all([
     isLoggedIn ? fetchMyResume(accessToken!) : Promise.resolve(null),
+    isLoggedIn ? fetchMyCoverLetterAction() : Promise.resolve(null),
     fetchMySubscriptionAction(),
   ]);
 
   return (
-    <ResumePageClient
+    <AiAnalysisPageClient
       userName={user.name}
       userPhone={user.phone}
       userEmail={user.email}
       savedResume={savedResume}
+      savedCoverLetter={savedCoverLetter}
       mySubscription={mySubscription}
       isLoggedIn={isLoggedIn}
     />
