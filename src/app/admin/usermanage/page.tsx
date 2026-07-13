@@ -3,7 +3,7 @@ import {
   fetchInstructorApplications,
   fetchAdminUsers,
   fetchRejectedInstructorApplications,
-} from '@/services/admin.service';
+} from '@/services/admin-usermanage.service';
 import UserManagePage from './_components/UserManagePage';
 
 export default async function Page() {

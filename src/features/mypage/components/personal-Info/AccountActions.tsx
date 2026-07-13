@@ -2,51 +2,25 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { UserMeWithAgreements } from '../types';
 import { useToast } from '@/components/ui/ToastContext';
-import Image from 'next/image';
-import { deleteMeAction, updateMeAction } from '../actions';
+import { UserAgreements, UserMeWithAgreements } from '../../types';
+import { deleteMeAction, updateMeAction } from '../../actions';
 import PasswordConfirmModal from '@/components/modals/PasswordConfirmModal';
 import WithdrawAgreementModal from '@/components/modals/WithdrawAgreementModal';
 
-interface MypageMainProps {
+interface AccountActionsProps {
   user: UserMeWithAgreements;
+  agreements: UserAgreements;
 }
-
-const AGREEMENT_ROWS: {
-  key: keyof NonNullable<UserMeWithAgreements['agreements']>;
-  label: string;
-}[] = [
-  { key: 'marketing', label: '마케팅 수신' },
-  { key: 'emailNotice', label: '이메일 수신' },
-  { key: 'aiUsage', label: 'AI 사용' },
-];
 
 type ModalMode = 'edit' | 'withdrawAgreement' | 'withdrawPassword' | null;
 
-export default function MypageMain({ user }: MypageMainProps) {
+export default function AccountActions({ user, agreements }: AccountActionsProps) {
   const router = useRouter();
   const { showToast } = useToast();
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const agreements = user.agreements ?? {
-    privacy: true,
-    marketing: false,
-    emailNotice: false,
-    aiUsage: false,
-  };
-
-  const handleCopyReferralCode = async () => {
-    if (!user.referralCode) return;
-    try {
-      await navigator.clipboard.writeText(user.referralCode);
-      showToast('추천인 코드가 복사되었습니다.');
-    } catch {
-      showToast('복사에 실패했습니다.', 'negative');
-    }
-  };
 
   // 수정하기 클릭 → 비밀번호 입력 → 검증 전용 API가 없으므로
   // PATCH /users/me를 "현재 값 그대로" 호출해 currentPassword만 검증 용도로 사용.
@@ -95,6 +69,7 @@ export default function MypageMain({ user }: MypageMainProps) {
       showToast('성공적으로 탈퇴가 완료되었습니다. 안녕히 가세요.');
       setModalMode(null);
       router.push('/');
+      router.refresh();
     } else {
       setPasswordError(result.message);
     }
@@ -102,76 +77,7 @@ export default function MypageMain({ user }: MypageMainProps) {
   };
 
   return (
-    <div>
-      {/* 상단 프로필 */}
-      <div className="pb-5 border-b border-[#E5E7EB]">
-        <p className="text-[18px] font-bold text-[#1E2125]">{user.name}</p>
-      </div>
-
-      {/* 기본 정보 2열 - 각 행마다 구분선 */}
-      <div className="flex flex-col md:grid md:grid-cols-2 gap-x-10">
-        <InfoRow label="이름" value={user.name} />
-        <InfoRow label="아이디" value={user.loginId} />
-        <InfoRow label="생년월일" value={user.birthDate} />
-        <InfoRow label="가입일" value={user.createdAt.slice(0, 10)} />
-        <InfoRow label="전화번호" value={user.phone} />
-        <InfoRow label="이메일" value={user.email} />
-        <div className="flex items-center gap-6 py-3.5 col-span-2">
-          <span className="w-20 shrink-0 text-[14px] text-[#6A7282] font-semibold">
-            추천인 코드
-          </span>
-          <div className="flex items-center gap-2">
-            <span className="text-[13.5px] font-semibold text-[#FF5E5E]">
-              {user.referralCode || '-'}
-            </span>
-            <button
-              type="button"
-              onClick={handleCopyReferralCode}
-              className="flex items-center gap-1 px-2 py-1 text-[12px] text-[#6A7282] border border-[#D1D5DB] rounded-md hover:bg-[#F9FAFB] cursor-pointer"
-            >
-              <Image src="/copy-Icon.svg" alt="" width={11} height={11} />
-              복사
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 동의 여부 */}
-      <div className="pt-5 mb-4 border-t border-[#E5E7EB]">
-        <p className="text-[13px] text-[#9CA3AF] mb-3">동의 여부</p>
-        <div className="flex flex-col col-span-1 gap-x-10">
-          {/* 필수 항목 - 항상 동의 상태, 변경 불가 (하드코딩) */}
-          <div className="flex items-center justify-between py-3.5 border-b border-[#F3F4F6]">
-            <span className="text-[14px] text-[#6A7282] font-semibold">
-              개인정보 수집 및 이용 (필수)
-            </span>
-            <span className="text-[13px] font-semibold text-[#FF5E5E]">동의</span>
-          </div>
-
-          {AGREEMENT_ROWS.map(({ key, label }, idx) => {
-            const agreed = agreements[key];
-            const isLast = idx === AGREEMENT_ROWS.length - 1;
-            return (
-              <div
-                key={key}
-                className={`flex items-center justify-between py-3.5 ${
-                  isLast ? '' : 'border-b border-[#F3F4F6]'
-                }`}
-              >
-                <span className="text-[14px] text-[#6A7282] font-semibold">{label}</span>
-                <span
-                  className={`text-[13px] font-semibold ${
-                    agreed ? 'text-[#FF5E5E]' : 'text-[#9CA3AF]'
-                  }`}
-                >
-                  {agreed ? '동의' : '미동의'}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
+    <>
       <div className="flex items-center justify-between mt-6">
         <button
           type="button"
@@ -223,15 +129,6 @@ export default function MypageMain({ user }: MypageMainProps) {
           errorMessage={passwordError}
         />
       )}
-    </div>
-  );
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-6 py-3.5 border-b border-[#F3F4F6]">
-      <span className="w-20 shrink-0 text-[14px] text-[#6A7282] font-semibold">{label}</span>
-      <span className="text-[14px] font-medium text-[#1E2125]">{value}</span>
-    </div>
+    </>
   );
 }

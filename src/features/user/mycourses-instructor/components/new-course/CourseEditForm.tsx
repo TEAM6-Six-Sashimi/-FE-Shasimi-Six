@@ -9,6 +9,8 @@ import type {
   UpdateCourseRequest,
 } from '@/features/user/mycourses-instructor/types';
 import { updateCourseAction } from '../../actions';
+import { logoutAction } from '@/features/auth/actions';
+import { useToast } from '@/components/ui/ToastContext';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import FullScreenLoading from '@/components/ui/FullScreenLoading';
 import BasicInfoSection, { TITLE_MAX, DESCRIPTION_MAX } from './sections/BasicInfo';
@@ -68,6 +70,7 @@ interface FieldErrors {
 
 export default function CourseEditForm({ categories, initialData }: CourseEditFormProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('처리 중입니다...');
   const [form, setForm] = useState<CourseEditFormData>(initialData);
@@ -230,6 +233,9 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
 
     if (result.success) {
       router.push('/mycourses-instructor?tab=pending');
+    } else if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
     } else {
       setErrors((prev) => ({
         ...prev,

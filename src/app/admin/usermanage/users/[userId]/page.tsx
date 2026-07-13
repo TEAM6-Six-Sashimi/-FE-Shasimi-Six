@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { fetchAdminUserDetail } from '@/services/admin.service';
+import { fetchAdminUserDetail } from '@/services/admin-usermanage.service';
 import { AdminUserDetail } from '@/features/admin/usermanage/types';
 
 interface PageProps {

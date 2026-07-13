@@ -8,6 +8,7 @@ import {
   deleteReportedReviewAction,
   rejectReportedReviewAction,
 } from '../actions';
+import { logoutAction } from '@/features/auth/actions';
 import {
   ReviewReportDetail,
   REPORT_CATEGORY_LABEL,
@@ -31,12 +32,16 @@ export default function ReviewReportDetailModal({ reportId, onClose, onProcessed
   useEffect(() => {
     let active = true;
     setLoading(true);
-    fetchReviewReportDetailAction(reportId).then((data) => {
-      if (active) {
-        setDetail(data);
-        setLoading(false);
-      }
-    });
+    fetchReviewReportDetailAction(reportId)
+      .then((data) => {
+        if (active) setDetail(data);
+      })
+      .catch(() => {
+        if (active) setDetail(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
     return () => {
       active = false;
     };
@@ -50,6 +55,10 @@ export default function ReviewReportDetailModal({ reportId, onClose, onProcessed
       showToast('신고된 수강평이 삭제되었습니다.');
       onProcessed(reportId);
       onClose();
+    } else if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
+      return;
     } else {
       showToast(result.message, 'negative');
     }
@@ -65,6 +74,10 @@ export default function ReviewReportDetailModal({ reportId, onClose, onProcessed
       showToast('신고가 반려 처리되었습니다.');
       onProcessed(reportId);
       onClose();
+    } else if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
+      return;
     } else {
       showToast(result.message, 'negative');
     }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -41,7 +41,17 @@ export default function Step01Introduction({
   const [profileImageError, setProfileImageError] = useState('');
   const profileImageRef = useRef<HTMLInputElement>(null);
 
-  const previewUrl = form.profileImage ? URL.createObjectURL(form.profileImage) : null;
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!form.profileImage) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(form.profileImage);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [form.profileImage]);
 
   const isProfileImageValid = !!form.profileImage;
   const isIntroductionValid = !!form.introduction.trim();

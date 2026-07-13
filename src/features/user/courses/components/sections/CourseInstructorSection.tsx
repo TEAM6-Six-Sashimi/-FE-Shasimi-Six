@@ -7,6 +7,9 @@ interface CourseInstructorSectionProps {
   instructor: InstructorInfo;
 }
 
+// 프로토콜(https://) 없이 저장된 링크(github.com/... 등)도 외부 링크로 정상 연결되도록 보정
+const toExternalHref = (url: string) => (/^https?:\/\//i.test(url) ? url : `https://${url}`);
+
 export default function CourseInstructorSection({
   instructorName,
   instructor,
@@ -47,7 +50,15 @@ export default function CourseInstructorSection({
         )}
         {instructor.portfolioUrl && (
           <p className="text-[#6A7282] text-[13px] mt-1">
-            포트폴리오 링크: {instructor.portfolioUrl}
+            포트폴리오 링크:{' '}
+            <a
+              href={toExternalHref(instructor.portfolioUrl)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#FF5E5E] font-medium hover:underline"
+            >
+              {instructor.portfolioUrl}
+            </a>
           </p>
         )}
       </div>

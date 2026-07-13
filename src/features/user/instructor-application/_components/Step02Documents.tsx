@@ -96,14 +96,21 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
       if (certFileRef.current) certFileRef.current.value = '';
       return;
     }
-    setCertError('');
-    setForm((prev) => ({
-      ...prev,
-      certifications: [
-        ...prev.certifications,
-        ...files.map((file) => ({ name: file.name.replace(/\.[^/.]+$/, ''), file })),
-      ],
-    }));
+
+    const isDuplicate = (file: File) =>
+      form.certifications.some((cert) => cert.file.name === file.name && cert.file.size === file.size);
+    const newFiles = files.filter((f) => !isDuplicate(f));
+
+    setCertError(newFiles.length < files.length ? '이미 첨부된 파일은 제외했습니다.' : '');
+    if (newFiles.length > 0) {
+      setForm((prev) => ({
+        ...prev,
+        certifications: [
+          ...prev.certifications,
+          ...newFiles.map((file) => ({ name: file.name.replace(/\.[^/.]+$/, ''), file })),
+        ],
+      }));
+    }
     if (certFileRef.current) certFileRef.current.value = '';
   };
 
@@ -189,7 +196,7 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
       >
         <span className={`font-semibold ${isError ? 'text-[#DC2626]' : 'text-[#854D0E]'}`}>ⓘ</span>
         <p className={`text-[13px] ${isError ? 'text-[#DC2626]' : 'text-[#854D0E]'}`}>
-          강사님의 기본 정보를 입력해주세요. 모든 필수 항목을 완료 후 다음 단계로 이동합니다.
+          자격증, 이력서 등 필요한 서류를 첨부해주세요. 모든 필수 항목을 완료 후 지원서를 제출할 수 있습니다.
         </p>
       </div>
 

@@ -2,11 +2,19 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { loginAction } from '../../actions';
 import LoginButton from './LoginButton';
 import { useToast } from '@/components/ui/ToastContext';
+
+// 오픈 리다이렉트 방지: 앱 내부의 상대 경로만 허용
+function getSafeRedirect(target: string | null): string {
+  if (!target || !target.startsWith('/') || target.startsWith('//') || target.includes('\\')) {
+    return '/';
+  }
+  return target;
+}
 
 export default function LoginForm() {
   const [userIdInput, setUserIdInput] = useState('');
@@ -15,6 +23,7 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,7 +46,7 @@ export default function LoginForm() {
 
     if (result.success) {
       showToast(`${result.name}님 환영합니다!`);
-      router.push('/');
+      router.push(getSafeRedirect(searchParams.get('redirect')));
     } else {
       setErrorMessage(result.message || '서버와 연결할 수 없습니다.');
     }

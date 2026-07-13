@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { InstructorApplication } from '../types';
 import { Button } from '@/components/ui/button';
 
+const ITEMS_PER_PAGE = 10;
+
 interface Props {
   applicants: InstructorApplication[];
   setApplicants: React.Dispatch<React.SetStateAction<InstructorApplication[]>>;
@@ -14,12 +16,17 @@ interface Props {
 export default function InstructorApproval({ applicants, setApplicants }: Props) {
   const router = useRouter();
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const safeApplicants = applicants ?? [];
 
-  const filtered = safeApplicants.filter(
-    (a) => (a.name ?? '').includes(search) || (a.loginId ?? '').includes(search),
-  );
+  const filtered = safeApplicants
+    .filter((a) => (a.name ?? '').includes(search) || (a.loginId ?? '').includes(search))
+    // 최신순(신청일)
+    .sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paged = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
@@ -35,7 +42,10 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="이름, 아이디 검색"
             className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
           />
@@ -60,19 +70,21 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
           </tr>
         </thead>
         <tbody>
-          {filtered.length === 0 ? (
+          {paged.length === 0 ? (
             <tr>
               <td colSpan={7} className="py-16 text-center text-[#6A7282]">
                 승인 대기 중인 강사가 없습니다.
               </td>
             </tr>
           ) : (
-            filtered.map((a, idx) => (
+            paged.map((a, idx) => (
               <tr
                 key={a.applicationId}
                 className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
               >
-                <td className="py-3 text-center text-[#6A7282]">{idx + 1}</td>
+                <td className="py-3 text-center text-[#6A7282]">
+                  {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
+                </td>
                 <td className="py-3 text-center font-semibold text-[#1E2125]">{a.name}</td>
                 <td className="py-3 text-center text-[#6A7282]">{a.loginId}</td>
                 <td className="py-3 text-center text-[#6A7282]">{a.email}</td>
@@ -103,6 +115,38 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
           )}
         </tbody>
       </table>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1 mt-6">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
+          >
+            이전
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`w-8 h-8 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
+                currentPage === page
+                  ? 'bg-[#1E2125] text-white'
+                  : 'text-[#6A7282] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
+          >
+            다음
+          </button>
+        </div>
+      )}
     </div>
   );
 }

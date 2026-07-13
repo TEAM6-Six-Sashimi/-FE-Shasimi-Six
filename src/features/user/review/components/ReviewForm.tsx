@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { useToast } from '@/components/ui/ToastContext';
+import { logoutAction } from '@/features/auth/actions';
 import { createReviewAction } from '../actions';
 
 interface ReviewFormProps {
@@ -41,6 +42,10 @@ export default function ReviewForm({ courseId }: ReviewFormProps) {
       setSubmitted(false);
       showToast('리뷰가 등록되었습니다.', 'positive');
       router.refresh();
+    } else if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
+      return;
     } else {
       showToast(result.message, 'negative');
     }
@@ -88,7 +93,7 @@ export default function ReviewForm({ courseId }: ReviewFormProps) {
         role="note"
         className="bg-[#FFEBEB] rounded-lg px-4 py-4 font-medium text-[13px] text-[#FF5E5E]"
       >
-        ⚠ 강의평은 삭제 후 재작성할 수 있으며, 작성 후 수정이 불가합니다.
+        ⚠ 작성한 수강평은 수정할 수 없으며, 삭제 후에도 다시 작성할 수 없습니다.
       </p>
 
       {/* 텍스트 입력 */}
@@ -130,7 +135,9 @@ export default function ReviewForm({ courseId }: ReviewFormProps) {
       {confirmOpen && (
         <TwoButtonModal
           title="리뷰 등록 확인"
-          message={'한 번 리뷰를 등록하시면 수정이 불가합니다.\n리뷰를 등록하시겠습니까?'}
+          message={
+            '한 번 리뷰를 등록하시면 수정할 수 없으며, 삭제 후에도 다시 작성할 수 없습니다.\n리뷰를 등록하시겠습니까?'
+          }
           confirmLabel={isSubmitting ? '등록 중...' : '확인'}
           cancelLabel="취소"
           onConfirm={handleConfirm}

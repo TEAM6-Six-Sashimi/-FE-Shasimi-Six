@@ -101,10 +101,10 @@ export default function InstructorApplicationClient({
           '결과는 사내 평가 후 이메일을 통해\n일주일 이내에 발송됩니다.\n내역의 경우 마이페이지 > 강사 지원 내역 페이지에서 확인 가능합니다',
         isSuccess: true,
       });
-    } catch (error: any) {
+    } catch (error) {
       setResultModal({
         title: '지원 실패',
-        message: error.message || '강사 지원에 실패했습니다.',
+        message: error instanceof Error ? error.message : '강사 지원에 실패했습니다.',
         isSuccess: false,
       });
     } finally {

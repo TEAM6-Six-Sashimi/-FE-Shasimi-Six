@@ -9,13 +9,12 @@ export default function robots(): MetadataRoute.Robots {
         '/mycourses-student',
         '/mycourses-instructor',
         '/mypage',
-        '/instructor/application',
+        '/instructor-application',
         '/admin',
         '/payments',
         '/cart',
-        '/alarm',
       ],
     },
-    sitemap: 'https://sixsashimi.com.market-app.org/sitemap.xml',
+    sitemap: 'https://www.sixsashimi.com.market-app.org/sitemap.xml',
   };
 }
