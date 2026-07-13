@@ -12,7 +12,7 @@ const SIDEBAR_MENUS = [
   { label: '신고 관리', href: '/admin/reportmanage', icon: 'report' },
   { label: '결제 관리', href: '/admin/paymentmanage', icon: 'payments' },
   { label: '크레딧 관리', href: '/admin/creditmanage', icon: 'credits' },
-  { label: '공지사항 관리', href: '/admin/noticemanage', icon: 'communities' },
+  { label: '공지사항 관리', href: '/admin/noticemanage', icon: 'notice' },
 ] as const;
 
 // ---- 메인 컴포넌트 ------------------------------------------------
