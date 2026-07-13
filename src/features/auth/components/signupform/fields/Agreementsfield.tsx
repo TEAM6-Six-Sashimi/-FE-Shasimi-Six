@@ -33,7 +33,7 @@ export const AGREEMENT_ITEMS: AgreementItem[] = [
     key: 'aiUsage',
     title: 'AI 기능 활용 동의 (선택)',
     description:
-      'AI 이력서 평가, 채용공고 기반 맞춤 강의 추천 등 AI 기능 제공을 위해 입력한 이력서 및 개인 학습 정보를 활용하는 것에 동의합니다.',
+      'AI 이력서/자소서 평가, 채용공고 기반 맞춤 강의 추천 등 AI 기능 제공을 위해 입력한 이력서 및 개인 학습 정보를 활용하는 것에 동의합니다.',
     required: false,
   },
 ];

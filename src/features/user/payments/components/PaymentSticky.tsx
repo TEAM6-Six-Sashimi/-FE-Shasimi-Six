@@ -218,14 +218,14 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
           title="구독 시작 완료"
           message={'구독이 시작되었습니다.\n원하시는 페이지로 이동해보세요.'}
           confirmLabel="AI 채용공고 분석"
-          cancelLabel="AI 이력서 평가"
+          cancelLabel="AI 이력서 / 자소서 평가"
           onConfirm={() => {
             setShowCompleteModal(false);
             router.push('/recommendations');
           }}
           onCancel={() => {
             setShowCompleteModal(false);
-            router.push('/resume');
+            router.push('/ai-analysis');
           }}
           onClose={() => {
             setShowCompleteModal(false);

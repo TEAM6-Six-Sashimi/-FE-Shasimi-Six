@@ -25,6 +25,7 @@ export const metadata: Metadata = {
     '역량 분석',
     '맞춤 강의 추천',
     '이력서 평가',
+    '자소서 평가',
     '자격증 추천',
     'AI',
     '취업 지원',
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
     siteName: '핏(Fit)-격',
     title: '핏(Fit)-격 - 당신에게 딱 맞는 자격증을 합격하기 위한 강의가 여기에,',
     description:
-      '취업 준비생의 자격증 취득을 단순 강의 제공을 넘어, 채용공고 기반 역량 분석 → 맞춤형 강의 추천 → AI 이력서 평가 → 취업 지원까지 하나의 흐름으로 연결하는 통합 학습 플랫폼입니다.',
+      '취업 준비생의 자격증 취득을 단순 강의 제공을 넘어, 채용공고 기반 역량 분석 → 맞춤형 강의 추천 → AI 이력서/자소서 평가 → 취업 지원까지 하나의 흐름으로 연결하는 통합 학습 플랫폼입니다.',
     images: [
       {
         url: '/FitGyeok-sharing.png',
@@ -56,7 +57,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: '핏(Fit)-격 - 당신에게 딱 맞는 자격증을 합격하기 위한 강의가 여기에,',
     description:
-      '취업 준비생의 자격증 취득을 단순 강의 제공을 넘어, 채용공고 기반 역량 분석 → 맞춤형 강의 추천 → AI 이력서 평가 → 취업 지원까지 하나의 흐름으로 연결하는 통합 학습 플랫폼입니다.',
+      '취업 준비생의 자격증 취득을 단순 강의 제공을 넘어, 채용공고 기반 역량 분석 → 맞춤형 강의 추천 → AI 이력서/자소서 평가 → 취업 지원까지 하나의 흐름으로 연결하는 통합 학습 플랫폼입니다.',
     images: '/FitGyeok-sharing.png',
     creator: '@Team_Six_Sashimi',
   },
