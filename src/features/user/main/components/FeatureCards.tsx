@@ -25,7 +25,7 @@ const FEATURE_CARDS = [
     cardBg: 'bg-[#F1FFC1]',
   },
   {
-    href: '/resume',
+    href: '/ai-analysis',
     icon: '/main/resume-Icon-white.svg',
     iconBg: 'bg-[#FF5E5E]',
     title: 'AI 이력서, 자기소개서 작성 & 평가',
