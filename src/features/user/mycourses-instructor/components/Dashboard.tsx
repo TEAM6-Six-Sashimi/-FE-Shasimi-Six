@@ -1,6 +1,7 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import {
   fetchDashboardSummaryAction,
   fetchSalesStatisticsAction,
@@ -13,12 +14,11 @@ import {
   InstructorStudentStatistics,
   InstructorCompletionRateStatistics,
 } from '../types';
-import { Award, CalendarDays, DollarSign } from 'lucide-react';
 
 type StatTab = '매출' | '수강생 수' | '완강률';
 
 interface SummaryCard {
-  icon: ReactNode;
+  iconSrc: string;
   iconBg: string;
   label: string;
   value: string;
@@ -93,22 +93,22 @@ export default function Dashboard() {
 
   const SUMMARY_CARDS: SummaryCard[] = [
     {
-      icon: <DollarSign size={20} className="text-[#DC2626]" />,
-      iconBg: 'bg-[#FFEBEB]',
+      iconSrc: '/dashboard/sales.svg',
+      iconBg: 'bg-[#EEF4FF]',
       label: '이번 달 매출',
       value: `${(summary?.totalSales ?? 0).toLocaleString()} 크레딧`,
       sub: `${year}년 ${month}월 총 매출`,
     },
     {
-      icon: <Award size={20} className="text-[#827717]" />,
-      iconBg: 'bg-[#F9FBE7]',
+      iconSrc: '/dashboard/profit.svg',
+      iconBg: 'bg-[#FEF3C7]',
       label: `수수료 ${summary?.platformFeeRate ?? 0}%`,
       value: `${(summary?.platformFee ?? 0).toLocaleString()} 크레딧`,
       sub: '플랫폼 수수료',
     },
     {
-      icon: <CalendarDays size={20} className="text-[#6B7280]" />,
-      iconBg: 'bg-[#F9FAFB]',
+      iconSrc: '/dashboard/settlement.svg',
+      iconBg: 'bg-[#F9FBE7]',
       label: '정산 예정 금액',
       value: `${(summary?.settlementAmount ?? 0).toLocaleString()} 크레딧`,
       sub: '이번 달 정산 예정',
@@ -119,21 +119,21 @@ export default function Dashboard() {
     <div className="flex flex-col gap-6">
       {/* 요약 카드 */}
       <div className="grid grid-cols-3 gap-6 px-8 mb-6">
-        {SUMMARY_CARDS.map(({ icon, iconBg, label, value, sub }) => (
+        {SUMMARY_CARDS.map(({ iconSrc, iconBg, label, value, sub }) => (
           <div
             key={label}
-            className="bg-white rounded-xl border-2 border-[#E5E7EB] p-7 flex flex-col gap-3"
+            className="min-w-0 bg-white rounded-xl border-2 border-[#E5E7EB] p-7 flex flex-col gap-3"
           >
             <div className="flex items-center gap-2">
               <span
-                className={`w-10.5 h-10.5 rounded-full ${iconBg} flex items-center justify-center text-[16px]`}
+                className={`w-10.5 h-10.5 rounded-full ${iconBg} flex items-center justify-center shrink-0`}
               >
-                {icon}
+                <Image src={iconSrc} alt="" width={20} height={20} />
               </span>
               <span className="text-[15px] text-[#6A7282] font-semibold">{label}</span>
             </div>
             <div>
-              <p className="text-[22px] px-3 font-bold text-[#1E2125]">{value}</p>
+              <p className="text-[22px] px-3 font-bold text-[#1E2125] wrap-break-word">{value}</p>
               <p className="text-[12px] px-3 text-[#6A7282]">{sub}</p>
             </div>
           </div>
