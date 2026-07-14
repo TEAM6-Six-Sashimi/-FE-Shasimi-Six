@@ -10,6 +10,7 @@ import {
   RejectedInstructorApplication,
 } from '@/features/admin/usermanage/types';
 import AllUsers from '@/features/admin/usermanage/components/AllUsers';
+import { useToast } from '@/components/ui/ToastContext';
 
 type Tab = 'all' | 'approval' | 'rejected';
 
@@ -24,6 +25,7 @@ const VALID_TABS: Tab[] = ['all', 'approval', 'rejected'];
 export default function UserManagePage({ applications, users, rejected }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { showToast } = useToast();
 
   const tabFromUrl = searchParams.get('tab');
   const initialTab: Tab = VALID_TABS.includes(tabFromUrl as Tab) ? (tabFromUrl as Tab) : 'all';
@@ -42,6 +44,25 @@ export default function UserManagePage({ applications, users, rejected }: Props)
       setTab('all');
     }
   }, [tabFromUrl]);
+
+  // 강사 신청 승인/반려 후 리다이렉트로 전달된 ?toast= 파라미터를 읽어 토스트 표시
+  const toastParam = searchParams.get('toast');
+  useEffect(() => {
+    if (toastParam === 'approved') {
+      showToast('강사 신청이 승인되었습니다.', 'positive');
+    } else if (toastParam === 'rejected') {
+      showToast('강사 신청이 반려되었습니다.', 'positive');
+    } else {
+      return;
+    }
+
+    // 새로고침/뒤로가기 시 중복 표시되지 않도록 toast 파라미터만 제거
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('toast');
+    const query = params.toString();
+    router.replace(`/admin/usermanage${query ? `?${query}` : ''}`, { scroll: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [toastParam]);
 
   const handleTabChange = (next: Tab) => {
     setTab(next);
