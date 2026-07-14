@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { AdminDashboardSummary, AdminDashboardStatistics } from './types';
+import { AdminDashboardSummary, AdminDashboardStatistics } from '../types';
 
 interface Props {
   summary: AdminDashboardSummary | null;
