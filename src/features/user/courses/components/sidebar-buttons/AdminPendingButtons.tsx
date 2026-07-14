@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import TwoButtonModal from '@/components/modals/TwoButtonModal';
+import ApproveConfirmModal from '@/components/modals/ApproveConfirmModal';
 import RejectModal from '@/components/modals/RejectModal';
 import { useToast } from '@/components/ui/ToastContext';
 import {
@@ -29,6 +29,12 @@ export default function AdminPendingButtons({ courseId, courseTitle }: AdminPend
   const [isLoading, setIsLoading] = useState(false);
   const [rejectCategories, setRejectCategories] = useState<RejectReasonCategory[]>([]);
   const [categoryLoadState, setCategoryLoadState] = useState<CategoryLoadState>('idle');
+
+  // label → code (RejectModal이 label을 콜백으로 넘기므로 백엔드 전송 전 역매핑용)
+  const categoryValueMap = useMemo(
+    () => Object.fromEntries(rejectCategories.map((c) => [c.label, c.code])),
+    [rejectCategories],
+  );
 
   const loadRejectCategories = async () => {
     setCategoryLoadState('loading');
@@ -66,9 +72,10 @@ export default function AdminPendingButtons({ courseId, courseTitle }: AdminPend
     setIsLoading(false);
   };
 
-  // RejectModal에는 code 기준 옵션을 넘기고, 콜백도 code를 그대로 받음
-  const handleReject = async (categoryCode: string, detail: string) => {
+  // RejectModal은 선택된 값을 label로 변환해 콜백에 넘기므로, 백엔드 전송 전 code로 역매핑한다.
+  const handleReject = async (categoryLabel: string, detail: string) => {
     setIsLoading(true);
+    const categoryCode = categoryValueMap[categoryLabel] ?? categoryLabel;
     const result = await rejectCourseAction(courseId, categoryCode, detail);
 
     if (result.success) {
@@ -117,13 +124,15 @@ export default function AdminPendingButtons({ courseId, courseTitle }: AdminPend
       </Button>
 
       {showApproveModal && (
-        <TwoButtonModal
-          title="승인 확인"
-          message="해당 강의를 승인하시겠습니까?"
-          confirmLabel={isLoading ? '처리 중...' : '승인'}
-          cancelLabel="취소"
+        <ApproveConfirmModal
+          title="강의 승인"
+          targetLabel="승인 대상"
+          targetName={courseTitle}
+          description="해당 강의를 승인하시겠습니까?"
+          confirmLabel="승인"
           onConfirm={handleApprove}
           onCancel={() => !isLoading && setShowApproveModal(false)}
+          loading={isLoading}
         />
       )}
 
