@@ -55,6 +55,8 @@ export default function CareerCounselingButton() {
           aria-label="진로 상담 챗봇 열기"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
+          onFocus={() => setIsHovered(true)}
+          onBlur={() => setIsHovered(false)}
           className={`h-14 min-w-14 rounded-full bg-[#EEF4FF] text-[#1E2125] inline-flex items-center justify-center shrink-0 transition-all duration-300 ease-out cursor-pointer overflow-hidden shadow-lg ${
             isHovered ? 'max-w-95 px-5 gap-2' : 'max-w-15 px-0'
           }`}
