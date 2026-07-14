@@ -3,6 +3,7 @@ import Footer from '@/components/layout/Footer';
 import Menubar from '@/components/layout/Menubar';
 import { fetchCategories } from '@/services/categories.service';
 import { fetchUserMe } from '@/services/user.service';
+import CareerCounselingButton from '@/features/user/main/components/CareerCounselingButton';
 
 export default async function UserLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
@@ -20,6 +21,8 @@ export default async function UserLayout({ children }: { children: React.ReactNo
       <Menubar categories={categories} role={role} />
       <main className="flex-1">{children}</main>
       <Footer />
+      {/* 진로 상담 챗봇 버튼 - 커피챗/강사지원 페이지에서는 컴포넌트 자체에서 숨김 처리 */}
+      <CareerCounselingButton />
     </div>
   );
 }
