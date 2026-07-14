@@ -40,7 +40,7 @@ export default function NoticeContent({ content }: NoticeContentProps) {
   const parts = useMemo(() => parseContent(content), [content]);
 
   return (
-    <div className="text-[14px] text-[#1E2125] leading-relaxed break-words">
+    <div className="text-[14px] text-[#1E2125] leading-relaxed wrap-break-word">
       {parts.map((part, idx) => {
         if (part.type === 'text') {
           return (
