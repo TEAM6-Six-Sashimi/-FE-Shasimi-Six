@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
@@ -22,6 +22,7 @@ interface SelfIntroMainProps {
   userEmail: string;
   savedCoverLetter: CoverLetterResponse | null;
   isLoggedIn: boolean;
+  onDirtyStateChange?: (isDirty: boolean) => void;
 }
 
 export default function SelfIntroMain({
@@ -30,6 +31,7 @@ export default function SelfIntroMain({
   userEmail,
   savedCoverLetter,
   isLoggedIn,
+  onDirtyStateChange,
 }: SelfIntroMainProps) {
   const router = useRouter();
   const { showToast } = useToast();
@@ -45,6 +47,10 @@ export default function SelfIntroMain({
   const isDirty = currentSnapshot !== lastSavedSnapshot;
   const hasAnyContent = Object.values(form).some((value) => value.trim() !== '');
   const canSave = hasAnyContent && isDirty;
+
+  useEffect(() => {
+    onDirtyStateChange?.(isDirty);
+  }, [isDirty, onDirtyStateChange]);
 
   const updateField = (key: keyof SelfIntroductionFormData, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));

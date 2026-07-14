@@ -11,3 +11,25 @@ export interface AdminDashboardStatistics {
   instructorCount: number;
   totalCourses: number;
 }
+
+export type LoginStatsPeriod = 'hourly' | 'daily';
+
+export interface AdminLoginStatPoint {
+  label: string;
+  count: number;
+}
+
+export type AdminLoginStatsResult =
+  | { success: true; data: AdminLoginStatPoint[] }
+  | { success: false; message: string };
+
+export interface AdminAiUsageStatPoint {
+  label: string;
+  job_analysis: number;
+  resume_evaluate: number;
+  cover_letter_review: number;
+}
+
+export type AdminAiUsageStatsResult =
+  | { success: true; data: AdminAiUsageStatPoint[] }
+  | { success: false; message: string };
