@@ -71,7 +71,7 @@ export default function SelfIntroMain({
         await logoutAction();
         return;
       } else {
-        showToast('자기소개서 저장에 실패했습니다.', 'negative');
+        showToast(result.message ?? '자기소개서 저장에 실패했습니다.', 'negative');
       }
     } finally {
       setIsSaving(false);

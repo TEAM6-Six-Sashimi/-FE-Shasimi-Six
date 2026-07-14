@@ -45,12 +45,18 @@ export async function saveCoverLetter(
     if (!res.ok) {
       const authMessage = await handleAuthErrorResponse(res);
       if (authMessage) return { success: false, authError: true, message: authMessage };
-      return { success: false };
+
+      const errorBody = await res.json().catch(() => ({}));
+      console.error(
+        `[saveCoverLetter] status=${res.status} errorCode=${errorBody.errorCode ?? '-'} traceId=${errorBody.traceId ?? '-'} message=${errorBody.message ?? '-'}`,
+      );
+      return { success: false, message: errorBody.message };
     }
 
     const data: CoverLetterResponse = await res.json();
     return { success: true, data };
-  } catch {
+  } catch (error) {
+    console.error('[saveCoverLetter] request failed:', error);
     return { success: false };
   }
 }
