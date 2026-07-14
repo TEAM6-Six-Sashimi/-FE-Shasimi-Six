@@ -1,12 +1,16 @@
+'use client';
+
+import { useState } from 'react';
 import SelfIntroMain from './SelfIntroMain';
 import SelfIntroSidebar from './SelfIntroSidebar';
-import { CoverLetterResponse } from '../types';
+import { CoverLetterResponse, CoverLetterReviewDetail } from '../types';
 
 interface SelfIntroPageClientProps {
   userName: string;
   userPhone: string;
   userEmail: string;
   savedCoverLetter: CoverLetterResponse | null;
+  latestCoverLetterReview: CoverLetterReviewDetail | null;
   isLoggedIn: boolean;
 }
 
@@ -15,8 +19,11 @@ export default function SelfIntroPageClient({
   userPhone,
   userEmail,
   savedCoverLetter,
+  latestCoverLetterReview,
   isLoggedIn,
 }: SelfIntroPageClientProps) {
+  const [isDirty, setIsDirty] = useState(false);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-10 items-start">
       <div className="min-w-0">
@@ -26,10 +33,11 @@ export default function SelfIntroPageClient({
           userEmail={userEmail}
           savedCoverLetter={savedCoverLetter}
           isLoggedIn={isLoggedIn}
+          onDirtyStateChange={setIsDirty}
         />
       </div>
       <div className="sticky top-4">
-        <SelfIntroSidebar />
+        <SelfIntroSidebar initialReview={latestCoverLetterReview} isDirty={isDirty} />
       </div>
     </div>
   );

@@ -1,8 +1,13 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { fetchMyCoverLetter, saveCoverLetter } from '@/services/self-introduction.service';
-import { CoverLetterResponse, CoverLetterSavePayload } from './types';
+import {
+  fetchLatestCoverLetterReview,
+  fetchMyCoverLetter,
+  requestCoverLetterReview,
+  saveCoverLetter,
+} from '@/services/self-introduction.service';
+import { CoverLetterResponse, CoverLetterReviewDetail, CoverLetterSavePayload } from './types';
 
 export async function fetchMyCoverLetterAction(): Promise<CoverLetterResponse | null> {
   const cookieStore = await cookies();
@@ -20,4 +25,27 @@ export async function saveCoverLetterAction(payload: CoverLetterSavePayload) {
   if (!accessToken) return { success: false as const };
 
   return saveCoverLetter(accessToken, payload);
+}
+
+export async function requestCoverLetterReviewAction() {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+
+  if (!accessToken) {
+    return {
+      success: false as const,
+      error: { errorCode: 'NO_TOKEN', message: '로그인이 필요합니다.' },
+    };
+  }
+
+  return requestCoverLetterReview(accessToken);
+}
+
+export async function fetchLatestCoverLetterReviewAction(): Promise<CoverLetterReviewDetail | null> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+
+  if (!accessToken) return null;
+
+  return fetchLatestCoverLetterReview(accessToken);
 }

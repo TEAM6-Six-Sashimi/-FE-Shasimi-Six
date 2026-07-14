@@ -5,9 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import FeatureHeader from '@/components/layout/FeatureHeader';
 import ResumePageClient from '@/features/user/resume/components/ResumePageClient';
 import SelfIntroPageClient from '@/features/user/self-introduction/components/SelfIntroPageClient';
+import SelfIntroReviewDetail from '@/features/user/self-introduction/components/SelfIntroReviewDetail';
 import { SavedResume } from '@/features/user/resume/types';
 import { MySubscription } from '@/features/user/payments/types';
-import { CoverLetterResponse } from '@/features/user/self-introduction/types';
+import {
+  CoverLetterResponse,
+  CoverLetterReviewDetail,
+} from '@/features/user/self-introduction/types';
 
 type AiAnalysisTab = 'resume' | 'self-intro';
 
@@ -19,6 +23,7 @@ interface AiAnalysisPageClientProps {
   userEmail: string;
   savedResume: SavedResume | null;
   savedCoverLetter: CoverLetterResponse | null;
+  latestCoverLetterReview: CoverLetterReviewDetail | null;
   mySubscription: MySubscription | null;
   isLoggedIn: boolean;
 }
@@ -29,6 +34,7 @@ export default function AiAnalysisPageClient({
   userEmail,
   savedResume,
   savedCoverLetter,
+  latestCoverLetterReview,
   mySubscription,
   isLoggedIn,
 }: AiAnalysisPageClientProps) {
@@ -36,6 +42,8 @@ export default function AiAnalysisPageClient({
   const searchParams = useSearchParams();
 
   const tabFromUrl = searchParams.get('tab');
+  const reviewIdFromUrl = searchParams.get('reviewId');
+  const reviewId = reviewIdFromUrl ? Number(reviewIdFromUrl) : null;
   const initialTab: AiAnalysisTab = VALID_TABS.includes(tabFromUrl as AiAnalysisTab)
     ? (tabFromUrl as AiAnalysisTab)
     : 'resume';
@@ -111,15 +119,19 @@ export default function AiAnalysisPageClient({
             />
           )}
 
-          {tab === 'self-intro' && (
-            <SelfIntroPageClient
-              userName={userName}
-              userPhone={userPhone}
-              userEmail={userEmail}
-              savedCoverLetter={savedCoverLetter}
-              isLoggedIn={isLoggedIn}
-            />
-          )}
+          {tab === 'self-intro' &&
+            (reviewId !== null && !Number.isNaN(reviewId) ? (
+              <SelfIntroReviewDetail reviewId={reviewId} />
+            ) : (
+              <SelfIntroPageClient
+                userName={userName}
+                userPhone={userPhone}
+                userEmail={userEmail}
+                savedCoverLetter={savedCoverLetter}
+                latestCoverLetterReview={latestCoverLetterReview}
+                isLoggedIn={isLoggedIn}
+              />
+            ))}
         </div>
       </div>
     </div>
