@@ -113,3 +113,41 @@ export function toSavePayload(form: SelfIntroductionFormData): CoverLetterSavePa
     })),
   };
 }
+
+// POST /cover-letters/review 응답
+export interface CoverLetterReviewSummary {
+  completedCount: number;
+  totalCount: number;
+  needRevisionCount: number;
+  recommendedCount: number;
+  spellingCorrectionCount: number;
+  repeatedExpressionCount: number;
+  averageSentenceLength: number;
+  overallComment: string;
+}
+
+export interface CoverLetterReviewResult {
+  reviewId: number;
+  summary: CoverLetterReviewSummary;
+}
+
+export interface CoverLetterReviewError {
+  errorCode: string;
+  message: string;
+  authError?: true;
+}
+
+export type CoverLetterReviewResponse =
+  | { success: true; data: CoverLetterReviewResult }
+  | { success: false; error: CoverLetterReviewError };
+
+// GET /cover-letters/reviews/latest/summary 응답
+export interface CoverLetterReviewDetail {
+  reviewId: number;
+  createdAt: string;
+  summary: CoverLetterReviewSummary;
+}
+
+export interface LatestCoverLetterReviewResponse {
+  review: CoverLetterReviewDetail | null;
+}

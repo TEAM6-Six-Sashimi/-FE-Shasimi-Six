@@ -2,7 +2,10 @@ import { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { fetchUserMeStrict, GUEST_USER } from '@/services/user.service';
 import { fetchMyResume } from '@/services/resume.service';
-import { fetchMyCoverLetterAction } from '@/features/user/self-introduction/actions';
+import {
+  fetchLatestCoverLetterReviewAction,
+  fetchMyCoverLetterAction,
+} from '@/features/user/self-introduction/actions';
 import { fetchMySubscriptionAction } from '@/features/user/payments/actions';
 import AiAnalysisPageClient from '@/features/user/ai-analysis/components/AiAnalysisPageClient';
 
@@ -31,11 +34,13 @@ export default async function AiAnalysisPage() {
     }
   }
 
-  const [savedResume, savedCoverLetter, mySubscription] = await Promise.all([
-    isLoggedIn ? fetchMyResume(accessToken!) : Promise.resolve(null),
-    isLoggedIn ? fetchMyCoverLetterAction() : Promise.resolve(null),
-    fetchMySubscriptionAction(),
-  ]);
+  const [savedResume, savedCoverLetter, latestCoverLetterReview, mySubscription] =
+    await Promise.all([
+      isLoggedIn ? fetchMyResume(accessToken!) : Promise.resolve(null),
+      isLoggedIn ? fetchMyCoverLetterAction() : Promise.resolve(null),
+      isLoggedIn ? fetchLatestCoverLetterReviewAction() : Promise.resolve(null),
+      fetchMySubscriptionAction(),
+    ]);
 
   return (
     <AiAnalysisPageClient
@@ -44,6 +49,7 @@ export default async function AiAnalysisPage() {
       userEmail={user.email}
       savedResume={savedResume}
       savedCoverLetter={savedCoverLetter}
+      latestCoverLetterReview={latestCoverLetterReview}
       mySubscription={mySubscription}
       isLoggedIn={isLoggedIn}
     />
