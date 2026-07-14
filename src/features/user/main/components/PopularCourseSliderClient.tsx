@@ -29,7 +29,7 @@ export default function PopularCourseSliderClient({ courses }: PopularCourseSlid
   const next = () => setCurrent((p) => Math.min(slides.length - 1, p + 1));
 
   return (
-    <section className="py-20 px-6">
+    <section className="px-6">
       <div className="mb-6">
         <h2 className="text-[26px] font-bold text-[#1E2125]">
           <span className="text-[#FF5E5E]">인기</span> 강의

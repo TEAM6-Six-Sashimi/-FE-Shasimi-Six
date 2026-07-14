@@ -1,5 +1,5 @@
-export default function NoticePage() {
+export default function NoticeListPage() {
     return (
-        <div>공지사항</div>
+        <div>공지사항 목록</div>
     );
 }
