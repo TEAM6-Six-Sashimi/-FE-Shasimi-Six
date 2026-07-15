@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import { sendChatbotMessageAction } from '../actions';
+import { ChatbotHistoryItem } from '../types';
 
 interface ChatMessage {
   id: number;
@@ -32,10 +34,6 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   },
 ];
 
-// 실제 AI 응답 연동 전까지 임시로 보여줄 응답 (UI만 우선 배치, 연동은 추후 진행)
-const PLACEHOLDER_REPLY =
-  '좋은 질문이에요! 해당 고민에 대해 함께 생각해 볼게요. 조금 더 구체적으로 말씀해 주시면 더 도움이 될 것 같아요 😊';
-
 function BotAvatar() {
   return (
     <span className="mr-1.5">
@@ -51,6 +49,7 @@ interface Props {
 export default function CareerCounselingChatPanel({ onClose }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
+  const [isSending, setIsSending] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
   // 새 메시지가 추가되면 항상 맨 아래로 스크롤
@@ -58,16 +57,31 @@ export default function CareerCounselingChatPanel({ onClose }: Props) {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const trimmed = input.trim();
-    if (!trimmed) return;
+    if (!trimmed || isSending) return;
+
+    // 안내용 초기 메시지는 실제 대화가 아니므로 history에서 제외
+    const history: ChatbotHistoryItem[] = messages.slice(INITIAL_MESSAGES.length).map((m) => ({
+      role: m.role === 'bot' ? 'assistant' : 'user',
+      content: m.text,
+    }));
 
     setInput('');
+    setIsSending(true);
+    setMessages((prev) => [...prev, { id: Date.now(), role: 'user', text: trimmed }]);
+
+    const result = await sendChatbotMessageAction(trimmed, history);
+
     setMessages((prev) => [
       ...prev,
-      { id: Date.now(), role: 'user', text: trimmed },
-      { id: Date.now() + 1, role: 'bot', text: PLACEHOLDER_REPLY },
+      {
+        id: Date.now() + 1,
+        role: 'bot',
+        text: result.success ? result.reply : result.message,
+      },
     ]);
+    setIsSending(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -119,19 +133,21 @@ export default function CareerCounselingChatPanel({ onClose }: Props) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="진로 고민을 편하게 입력해보세요"
-          className="flex-1 h-10 px-4 rounded-lg border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors"
+          maxLength={2000}
+          disabled={isSending}
+          className="flex-1 h-10 px-4 rounded-lg border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors disabled:opacity-60"
         />
         <button
           type="button"
           aria-label="메시지 보내기"
           onClick={handleSend}
-          disabled={!input.trim()}
-          className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
-            input.trim() ? 'bg-[#5B8DEE]' : 'bg-[#E5E7EB]'
+          disabled={!input.trim() || isSending}
+          className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 cursor-pointer transition-colors disabled:cursor-not-allowed ${
+            input.trim() && !isSending ? 'bg-[#5B8DEE]' : 'bg-[#E5E7EB]'
           }`}
         >
           <Image
-            src={input.trim() ? '/chat/send-active.svg' : '/chat/send-inactive.svg'}
+            src={input.trim() && !isSending ? '/chat/send-active.svg' : '/chat/send-inactive.svg'}
             alt="전송"
             width={18}
             height={18}
