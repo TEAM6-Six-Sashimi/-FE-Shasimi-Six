@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import Link from 'next/link';
 import { fetchCoverLetterReviewByIdAction } from '../actions';
 import {
   CoverLetterReviewDetailResult,
@@ -14,53 +14,6 @@ interface SelfIntroReviewDetailProps {
 }
 
 const CORRECTIONS_PREVIEW_COUNT = 5;
-
-function MyCoverLetterModal({
-  questions,
-  onClose,
-}: {
-  questions: CoverLetterReviewQuestion[];
-  onClose: () => void;
-}) {
-  return createPortal(
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between px-7 pt-7 pb-5 shrink-0">
-          <h2 className="text-[19px] font-bold text-[#1E2125]">나의 자기소개서</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-[#9CA3AF] hover:text-[#1E2125] transition-colors cursor-pointer text-[18px]"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="flex-1 min-h-0 overflow-y-auto px-7 pb-7 flex flex-col gap-5">
-          {questions.map((question) => (
-            <div key={question.questionNumber}>
-              <p className="text-[13px] text-[#6A7282] mb-1.5">
-                {question.questionTitle} ({question.maxLength}자)
-              </p>
-              <p className="text-[13.5px] text-[#1E2125] leading-relaxed border border-[#E5E7EB] rounded-lg px-4 py-3 whitespace-pre-line wrap-break-word min-h-16">
-                {question.originalContent || (
-                  <span className="text-[#9CA3AF]">작성된 내용이 없습니다.</span>
-                )}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>,
-    document.body,
-  );
-}
 
 function QuestionCard({ question }: { question: CoverLetterReviewQuestion }) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -167,7 +120,6 @@ export default function SelfIntroReviewDetail({ reviewId }: SelfIntroReviewDetai
   const [review, setReview] = useState<CoverLetterReviewDetailResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [isMyCoverLetterOpen, setIsMyCoverLetterOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -193,14 +145,12 @@ export default function SelfIntroReviewDetail({ reviewId }: SelfIntroReviewDetai
     <div className="bg-white rounded-xl shadow-md p-6 flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h2 className="text-[20px] font-extrabold text-[#1E2125]">AI 첨삭 상세 결과</h2>
-        <button
-          type="button"
-          onClick={() => setIsMyCoverLetterOpen(true)}
-          disabled={!review}
-          className="px-4 py-2 rounded-lg border border-[#D1D5DB] text-[13px] font-semibold text-[#1E2125] hover:bg-[#F9FAFB] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+        <Link
+          href="/ai-analysis?tab=self-intro"
+          className="px-4 py-2 rounded-lg border border-[#D1D5DB] text-[13px] font-semibold text-[#1E2125] hover:bg-[#F9FAFB] transition-colors"
         >
           나의 자기소개서 보기
-        </button>
+        </Link>
       </div>
 
       {isLoading ? (
@@ -215,13 +165,6 @@ export default function SelfIntroReviewDetail({ reviewId }: SelfIntroReviewDetai
             <QuestionCard key={question.questionNumber} question={question} />
           ))}
         </div>
-      )}
-
-      {isMyCoverLetterOpen && review && (
-        <MyCoverLetterModal
-          questions={review.questions}
-          onClose={() => setIsMyCoverLetterOpen(false)}
-        />
       )}
     </div>
   );
