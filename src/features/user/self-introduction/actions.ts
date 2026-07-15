@@ -2,12 +2,18 @@
 
 import { cookies } from 'next/headers';
 import {
+  fetchCoverLetterReviewById,
   fetchLatestCoverLetterReview,
   fetchMyCoverLetter,
   requestCoverLetterReview,
   saveCoverLetter,
 } from '@/services/self-introduction.service';
-import { CoverLetterResponse, CoverLetterReviewDetail, CoverLetterSavePayload } from './types';
+import {
+  CoverLetterResponse,
+  CoverLetterReviewDetail,
+  CoverLetterReviewDetailResult,
+  CoverLetterSavePayload,
+} from './types';
 
 export async function fetchMyCoverLetterAction(): Promise<CoverLetterResponse | null> {
   const cookieStore = await cookies();
@@ -48,4 +54,15 @@ export async function fetchLatestCoverLetterReviewAction(): Promise<CoverLetterR
   if (!accessToken) return null;
 
   return fetchLatestCoverLetterReview(accessToken);
+}
+
+export async function fetchCoverLetterReviewByIdAction(
+  reviewId: number,
+): Promise<CoverLetterReviewDetailResult | null> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+
+  if (!accessToken) return null;
+
+  return fetchCoverLetterReviewById(accessToken, reviewId);
 }
