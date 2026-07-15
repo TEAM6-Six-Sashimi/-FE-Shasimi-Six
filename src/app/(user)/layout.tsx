@@ -21,7 +21,7 @@ export default async function UserLayout({ children }: { children: React.ReactNo
       <Menubar categories={categories} role={role} />
       <main className="flex-1">{children}</main>
       <Footer />
-      {/* 진로 상담 챗봇 버튼 - 커피챗/강사지원 페이지에서는 컴포넌트 자체에서 숨김 처리 */}
+      {/* 진로 상담 챗봇 버튼 */}
       <CareerCounselingButton />
     </div>
   );
