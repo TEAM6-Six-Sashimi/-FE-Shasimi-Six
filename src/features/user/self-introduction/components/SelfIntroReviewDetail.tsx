@@ -102,8 +102,8 @@ function QuestionCard({ question }: { question: CoverLetterReviewQuestion }) {
               {question.feedback}
             </p>
             {question.improvedExample && (
-              <div className="bg-[#F7FEE7] border border-[#ECFCCB] rounded-lg p-4">
-                <p className="text-[12.5px] font-bold text-[#65A30D] mb-1.5">AI 개선 예시</p>
+              <div className="bg-[#FEF3C7] border border-[#ECFCCB] rounded-lg p-4">
+                <p className="text-[12.5px] font-bold text-[#92400E] mb-1.5">AI 개선 예시</p>
                 <p className="text-[12.5px] text-[#1E2125] leading-relaxed whitespace-pre-line">
                   {question.improvedExample}
                 </p>
