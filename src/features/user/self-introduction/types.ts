@@ -151,3 +151,46 @@ export interface CoverLetterReviewDetail {
 export interface LatestCoverLetterReviewResponse {
   review: CoverLetterReviewDetail | null;
 }
+
+export type CoverLetterQuestionStatus = 'GOOD' | 'RECOMMENDED' | 'NEEDS_REVISION' | 'EMPTY';
+
+export interface CoverLetterSpellingCorrection {
+  original: string;
+  corrected: string;
+}
+
+export interface CoverLetterReviewQuestion {
+  questionNumber: number;
+  questionKey: CoverLetterQuestionKey;
+  questionTitle: string;
+  maxLength: number;
+  status: CoverLetterQuestionStatus;
+  summaryFeedback: string;
+  spellingCorrectionCount: number;
+  expressionImprovementCount: number;
+  flowImprovementCount: number;
+  originalContent: string;
+  spellingCorrections: CoverLetterSpellingCorrection[];
+  feedback: string;
+  improvedExample: string | null;
+}
+
+// GET /cover-letters/reviews/{reviewId} 응답
+export interface CoverLetterReviewDetailResult {
+  reviewId: number;
+  questions: CoverLetterReviewQuestion[];
+}
+
+const QUESTION_STATUS_META: Record<
+  CoverLetterQuestionStatus,
+  { label: string; bg: string; text: string }
+> = {
+  GOOD: { label: '양호', bg: 'bg-[#EEF4FF]', text: 'text-[#5B8DEE]' },
+  RECOMMENDED: { label: '보완 권장', bg: 'bg-[#FEF3C7]', text: 'text-[#92400E]' },
+  NEEDS_REVISION: { label: '수정 필요', bg: 'bg-[#FFEBEB]', text: 'text-[#FF5E5E]' },
+  EMPTY: { label: '내용 없음', bg: 'bg-[#F3F4F6]', text: 'text-[#6A7282]' },
+};
+
+export function getQuestionStatusMeta(status: CoverLetterQuestionStatus) {
+  return QUESTION_STATUS_META[status];
+}

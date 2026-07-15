@@ -1,6 +1,7 @@
 import {
   CoverLetterResponse,
   CoverLetterReviewDetail,
+  CoverLetterReviewDetailResult,
   CoverLetterReviewResponse,
   CoverLetterReviewResult,
   CoverLetterSavePayload,
@@ -122,6 +123,29 @@ export async function fetchLatestCoverLetterReview(
 
     const data: LatestCoverLetterReviewResponse = await res.json();
     return data.review;
+  } catch {
+    return null;
+  }
+}
+
+// 자기소개서 AI 첨삭 상세 결과 조회 (문항별 맞춤법 수정/피드백/개선 예시)
+export async function fetchCoverLetterReviewById(
+  accessToken: string,
+  reviewId: number,
+): Promise<CoverLetterReviewDetailResult | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/cover-letters/reviews/${reviewId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) return null;
+
+    return await res.json();
   } catch {
     return null;
   }
