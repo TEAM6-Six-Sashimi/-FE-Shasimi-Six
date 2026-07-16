@@ -257,34 +257,82 @@ const PROTECTED_PREFIXES = [
 // (안 그러면 무한 리다이렉트 or 점검 중 로그인이 안 됨)
 const MAINTENANCE_EXCLUDED_PATHS = ['/maintenance', '/auth/login'];
 
+// prefix가 실제 경로 세그먼트 경계에서 끝나는지까지 확인한다.
+// 단순 pathname.startsWith(prefix)만 쓰면 '/mypage-public'처럼 이름만 겹치는
+// 전혀 다른 경로까지 같이 매치돼버린다.
+function matchesPath(pathname: string, prefix: string): boolean {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
 let maintenanceCache: { checkedAt: number; enabled: boolean; message: string } = {
   checkedAt: 0,
   enabled: false,
   message: '',
 };
 const MAINTENANCE_CACHE_TTL_MS = 5000; // 백엔드 Cache-Control max-age와 맞추기
+const MAINTENANCE_CHECK_TIMEOUT_MS = 1500; // 이 요청은 거의 모든 경로에서 매번 걸리므로 짧게 끊어야 함
 
 async function checkMaintenance(): Promise<{ enabled: boolean; message: string }> {
   const now = Date.now();
   if (now - maintenanceCache.checkedAt < MAINTENANCE_CACHE_TTL_MS) return maintenanceCache;
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/maintenance/status`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/maintenance/status`, {
+      signal: AbortSignal.timeout(MAINTENANCE_CHECK_TIMEOUT_MS),
+    });
     const data = await res.json();
     maintenanceCache = { checkedAt: now, enabled: data.enabled, message: data.message };
   } catch {
-    maintenanceCache = { checkedAt: now, enabled: false, message: '' }; // fail-open: 상태 조회 자체가 실패하면 평소대로 통과
+    // fail-open: 상태 조회 자체가 실패하거나(네트워크 오류) 타임아웃이 나면 평소대로 통과
+    // (타임아웃도 이 catch에서 함께 처리됨 - AbortSignal.timeout()이 abort하면 fetch가 reject됨)
+    maintenanceCache = { checkedAt: now, enabled: false, message: '' };
   }
 
   return maintenanceCache;
 }
 
+// ⚠️ 별도 보안 이슈 수정: role 쿠키는 로그인 시점에 값만 복사해서 저장해둔
+// 평문 쿠키라, 서명 검증이 없다. httpOnly라 브라우저 JS(XSS)는 못 읽지만,
+// 브라우저 devtools나 직접 만든 HTTP 요청으로는 값 자체를 얼마든지 바꿔치기할 수 있다.
+// 즉 로그인만 되어있으면 누구든 role 쿠키값을 'ADMIN'으로 바꿔서 /admin,
+// /mycourses-instructor 보호를 우회할 수 있는 상태다 (이번 점검모드 작업 이전부터
+// 있던 문제이지만, 같은 파일을 건드리는 김에 같이 고친다).
+//
+// 고치는 방법: accessToken(JWT)이 HS512(대칭키) 서명이라, 미들웨어가 직접 서명
+// 검증을 하려면 백엔드의 서명 비밀키를 프론트 환경변수에도 넣어줘야 한다 —
+// 이러면 그 비밀키가 노출되는 지점이 하나 늘어나는 셈이라 권장하지 않는다.
+// 대신 이미 있는 GET /users/me(accessToken을 백엔드가 직접 검증해서 실제 role을
+// 내려주는 엔드포인트)를 재사용한다. 새 백엔드 작업이 필요 없을 가능성이 높다.
+//
+// 단, 점검모드의 ADMIN 예외 판단(위 1번)에는 이 검증을 안 쓴다 — 그건 전체 경로에서
+// 매번 도는 체크라 매번 백엔드를 호출하고 싶지 않고, 여기서 우회당해도 "점검 중에도
+// 사이트가 정상적으로 보인다" 정도라 리스크가 낮다. 반면 /admin, /mycourses-instructor는
+// 진짜 권한 경계라 검증이 필요하다.
+async function verifyRole(accessToken: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      signal: AbortSignal.timeout(2000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.role ?? null;
+  } catch {
+    // fail-closed: 점검모드 체크와 반대로, 검증 자체가 실패하면 "권한 없음"으로 취급한다.
+    // (여기서 fail-open으로 하면 백엔드가 잠깐 느려지기만 해도 권한 체크가 그냥 뚫려버린다)
+    return null;
+  }
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  const role = request.cookies.get('role')?.value;
+  const role = request.cookies.get('role')?.value; // 점검모드 ADMIN 예외 판단에만 사용 (아래 설명 참고)
 
-  // 1) 점검모드 체크 — 전체 경로 대상, ADMIN과 예외 경로는 건너뜀
-  if (role !== 'ADMIN' && !MAINTENANCE_EXCLUDED_PATHS.includes(pathname)) {
+  // 1) 점검모드 체크 — 전체 경로 대상, ADMIN·예외 경로·API 라우트는 건너뜀
+  // (/api/**는 fetch()로 JSON 응답을 기대하고 호출되므로, HTML 페이지로
+  // 리다이렉트해버리면 호출부의 res.json()이 그대로 깨진다)
+  const isApiPath = matchesPath(pathname, '/api');
+  if (role !== 'ADMIN' && !isApiPath && !MAINTENANCE_EXCLUDED_PATHS.includes(pathname)) {
     const { enabled } = await checkMaintenance();
     if (enabled) {
       return NextResponse.redirect(new URL('/maintenance', request.url));
@@ -292,7 +340,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // 2) 기존 로그인/권한 체크 — matcher가 아니라 여기서 "보호된 경로인지" 직접 판단
-  const isProtectedPath = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  const isProtectedPath = PROTECTED_PREFIXES.some((prefix) => matchesPath(pathname, prefix));
   if (!isProtectedPath) {
     return NextResponse.next();
   }
@@ -304,17 +352,25 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (
-    pathname.startsWith('/mycourses-instructor') ||
-    pathname.startsWith('/mypage/instructor-profile')
-  ) {
-    if (role !== 'INSTRUCTOR' && role !== 'ADMIN') {
+  // 강사/관리자 전용 경로는 role 쿠키 대신, 백엔드가 검증한 진짜 role로 판단한다.
+  const needsVerifiedRole =
+    matchesPath(pathname, '/mycourses-instructor') ||
+    matchesPath(pathname, '/mypage/instructor-profile') ||
+    matchesPath(pathname, '/admin');
+
+  if (needsVerifiedRole) {
+    const verifiedRole = await verifyRole(accessToken);
+
+    if (
+      (matchesPath(pathname, '/mycourses-instructor') ||
+        matchesPath(pathname, '/mypage/instructor-profile')) &&
+      verifiedRole !== 'INSTRUCTOR' &&
+      verifiedRole !== 'ADMIN'
+    ) {
       return NextResponse.redirect(new URL('/', request.url));
     }
-  }
 
-  if (pathname.startsWith('/admin')) {
-    if (role !== 'ADMIN') {
+    if (matchesPath(pathname, '/admin') && verifiedRole !== 'ADMIN') {
       return NextResponse.redirect(new URL('/', request.url));
     }
   }
@@ -328,6 +384,8 @@ export const config = {
 ```
 
 **참고**: `maintenanceCache`는 모듈 스코프 변수라 서버리스/엣지 환경에서 인스턴스가 재생성되면 초기화될 수 있습니다. 이 프로젝트가 Docker standalone 배포라 인스턴스가 오래 유지되는 구조라면 문제없을 것으로 예상되나, 실제로 같은 인스턴스에서 5초 이내 반복 요청 시 `/maintenance/status`를 재호출 안 하는지 로그로 확인 권장.
+
+**백엔드 확인 필요**: `GET /users/me` 응답에 `role` 필드가 항상 안정적으로 포함되는지, 그리고 `/admin`·`/mycourses-instructor` 진입마다 이 호출이 늘어나는 걸 백엔드가 부담 없이 받아줄 수 있는지 확인 요청. 응답이 무겁다면(role 확인 목적에 비해 다른 정보가 많다면) role만 가볍게 확인하는 전용 엔드포인트를 새로 만드는 것도 고려.
 
 ---
 
@@ -450,6 +508,9 @@ if (result.success) {
 - [ ] 6번 항목의 8~10곳 각각에서 저장/결제 등 시도 시 화면 전환되는지
 - [ ] 점검모드 OFF 요청 후 정상 복귀되는지
 - [ ] (선택) 같은 서버 인스턴스에서 5초 이내 재접속 시 `/maintenance/status`가 재호출 안 되는지 로그로 확인
+- [ ] **★추가된 항목(role 검증)**: 일반 STUDENT 계정으로 로그인한 상태에서 브라우저 devtools로 `role` 쿠키 값을 `ADMIN`으로 직접 바꾼 뒤 `/admin` 진입 시 — 이제는 `verifyRole()`이 실제 role을 다시 확인하므로 여전히 튕겨나가는지 확인 (이게 이번에 고치는 핵심 시나리오)
+- [ ] 정상 INSTRUCTOR/ADMIN 계정으로는 `/mycourses-instructor`, `/admin`에 평소처럼 잘 들어가지는지 (역할 검증 추가로 인한 회귀 없는지)
+- [ ] `/users/me` 응답이 느리거나 실패하는 상황을 강제로 만들어(네트워크 쓰로틀링 등) `/admin` 접근 시 fail-closed(로그인 페이지로)로 막히는지 확인 — 뚫리면 안 됨
 
 ---
 
@@ -459,6 +520,8 @@ if (result.success) {
 
 ---
 
-## 9. 백엔드 쪽에서 추가로 바꿀 건 없음
+## 9. 백엔드 쪽 확인/변경 사항
 
-위 내용은 전부 프론트엔드 내부 구조 문제(Next.js 16 네이밍, 우리 사이트 라우팅 구조, 기존 에러 처리 컨벤션)를 바로잡는 것입니다. 백엔드가 이미 준 API 스펙(`GET /maintenance/status`, 503 + `COMMON_900`)은 그대로 쓰면 됩니다.
+점검모드 자체(`GET /maintenance/status`, 503 + `COMMON_900`)는 전부 프론트엔드 내부 구조 문제(Next.js 16 네이밍, 우리 사이트 라우팅 구조, 기존 에러 처리 컨벤션)를 바로잡는 것이라 백엔드가 이미 준 API 스펙 그대로 쓰면 됩니다.
+
+다만 이번에 **같은 파일을 건드리는 김에 role 쿠키 위변조 문제도 같이 고쳤습니다** (4장의 `verifyRole()` 부분). 이건 점검모드랑 무관한, 원래부터 있던 `/admin`·`/mycourses-instructor` 보호의 보안 이슈입니다. 이 부분만 백엔드 확인이 필요합니다 — 4장의 "백엔드 확인 필요" 문단 참고 (`GET /users/me`가 role을 안정적으로 내려주는지, 호출 빈도가 늘어나도 괜찮은지).
