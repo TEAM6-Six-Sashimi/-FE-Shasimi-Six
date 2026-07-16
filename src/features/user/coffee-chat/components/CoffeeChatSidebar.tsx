@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { UserMe } from '@/features/auth/types';
 import Image from 'next/image';
+import ChatRoomList from './ChatRoomList';
+import RequestList from './RequestList';
+import { InstructorPendingChat, StudentChatRoom } from '../types';
 
 type CoffeeChatTab = 'requests' | 'rooms';
 
@@ -28,9 +31,19 @@ const ALL_TABS: {
 
 interface CoffeeChatSidebarProps {
   role: UserMe['role'];
+  studentChatRooms: StudentChatRoom[];
+  instructorPendingChats: InstructorPendingChat[];
+  selectedChatId: number | null;
+  onSelectChat: (chatId: number) => void;
 }
 
-export default function CoffeeChatSidebar({ role }: CoffeeChatSidebarProps) {
+export default function CoffeeChatSidebar({
+  role,
+  studentChatRooms,
+  instructorPendingChats,
+  selectedChatId,
+  onSelectChat,
+}: CoffeeChatSidebarProps) {
   const isInstructor = role === 'INSTRUCTOR';
   const tabs = isInstructor ? ALL_TABS : ALL_TABS.filter((tab) => tab.key !== 'requests');
 
@@ -73,8 +86,14 @@ export default function CoffeeChatSidebar({ role }: CoffeeChatSidebarProps) {
         })}
       </div>
 
-      {/* TODO: activeTab === 'requests' ? RequestList : ChatRoomList */}
-      <div className="flex-1 overflow-y-auto" />
+      {activeTab === 'requests' && <RequestList requests={instructorPendingChats} />}
+      {activeTab === 'rooms' && (
+        <ChatRoomList
+          rooms={studentChatRooms}
+          selectedChatId={selectedChatId}
+          onSelect={onSelectChat}
+        />
+      )}
 
       <div className="p-6 bg-[#FFFDEB]">
         <h3 className="text-[18px] font-bold text-[#1E2125] mb-1">핏격 커피챗</h3>
