@@ -59,9 +59,25 @@ export default function CourseReviewReports({ reports, setReports }: Props) {
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
-      <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-6">신고된 수강평 목록</h2>
+      <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-4">신고된 수강평 목록</h2>
 
       <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="relative w-72">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="작성자 ID, 강의명 검색"
+            className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
+          />
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6A7282]">
+            <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
+          </span>
+        </div>
+
         <div className="flex items-center gap-2">
           {(['전체', '처리전', '처리됨'] as FilterType[]).map((f) => (
             <button
@@ -79,22 +95,6 @@ export default function CourseReviewReports({ reports, setReports }: Props) {
               {f}
             </button>
           ))}
-        </div>
-
-        <div className="relative w-72">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder="작성자 ID, 강의명 검색"
-            className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
-          />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6A7282]">
-            <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
-          </span>
         </div>
       </div>
 

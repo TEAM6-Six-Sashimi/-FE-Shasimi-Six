@@ -47,7 +47,7 @@ export default function PendingCourses({ courses, categories }: Props) {
             <th className="py-3 w-[25%] text-center font-semibold text-[#1E2125]">강의명</th>
             <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">강사명</th>
             <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">강사 ID</th>
-            <th className="py-3 w-[22%] text-center font-semibold text-[#1E2125]">
+            <th className="py-3 w-[22%] text-center font-semibold text-[#1E2125] break-keep">
               카테고리 &gt; 세부카테고리
             </th>
             <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125]">승인 요청일</th>
@@ -75,7 +75,7 @@ export default function PendingCourses({ courses, categories }: Props) {
                   {c.instructorName}
                 </td>
                 <td className="py-3 text-center text-[#6A7282]">{c.instructorLoginId}</td>
-                <td className="py-3 text-center text-[#6A7282]">
+                <td className="py-3 px-2 text-center text-[#6A7282] break-keep">
                   {getMainCategory(c.categoryName)} &gt; {c.categoryName}
                 </td>
                 <td className="py-3 text-center text-[#6A7282]">{c.createdAt.slice(0, 10)}</td>

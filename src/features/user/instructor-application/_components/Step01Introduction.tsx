@@ -116,10 +116,7 @@ export default function Step01Introduction({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <svg viewBox="0 0 24 24" className="w-9 h-9 fill-none stroke-current stroke-[1.5]">
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 20c0-4 3.5-7 8-7s8 3 8 7" strokeLinecap="round" />
-              </svg>
+              <Image src="/chat/basic-profile-gray.svg" alt="" width={30} height={30} />
             )}
           </div>
           <input

@@ -90,9 +90,22 @@ export default function SubscriptionPayments() {
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
-      <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-6">전체 구독권 결제 내역</h2>
+      <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-4">전체 구독권 결제 내역</h2>
 
       <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="relative w-72">
+          <input
+            type="text"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder="회원명, 회원 ID, 주문번호 검색"
+            className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
+          />
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6A7282]">
+            <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
+          </span>
+        </div>
+
         <div className="flex items-center gap-2">
           <input
             type="date"
@@ -107,19 +120,6 @@ export default function SubscriptionPayments() {
             onChange={(e) => setEndDate(e.target.value)}
             className="h-11 px-3 rounded-lg border border-[#D1D5DB] bg-[#F9FAFB] text-[13px] text-[#1E2125] outline-none focus:border-[#1E2125] transition-colors"
           />
-        </div>
-
-        <div className="relative w-72">
-          <input
-            type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="회원명, 회원 ID, 주문번호 검색"
-            className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
-          />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6A7282]">
-            <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
-          </span>
         </div>
       </div>
 
@@ -192,11 +192,18 @@ export default function SubscriptionPayments() {
                 className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
               >
                 <td className="py-3 text-center text-[#6A7282]">{payment.rowNumber}</td>
-                <td className="py-3 text-center text-[#6A7282]">{payment.orderNo}</td>
-                <td className="py-3 text-center font-semibold text-[#1E2125]">
+                <td
+                  className="py-3 px-2 text-center text-[#6A7282] truncate"
+                  title={payment.orderNo}
+                >
+                  {payment.orderNo}
+                </td>
+                <td className="py-3 px-2 text-center font-semibold text-[#1E2125] truncate">
                   {payment.userName}
                 </td>
-                <td className="py-3 text-center text-[#6A7282]">{payment.loginId}</td>
+                <td className="py-3 px-2 text-center text-[#6A7282] truncate">
+                  {payment.loginId}
+                </td>
                 <td className="py-3 text-center">
                   <span
                     className={`inline-block px-2.5 py-1 rounded-full text-[11.5px] font-semibold ${PLAN_BADGE_STYLE[payment.planCode]}`}
@@ -204,7 +211,7 @@ export default function SubscriptionPayments() {
                     {payment.planName}
                   </span>
                 </td>
-                <td className="py-3 text-center font-bold text-[#1E2125]">
+                <td className="py-3 text-center font-bold text-[#1E2125] break-keep">
                   {payment.amount.toLocaleString()} 크레딧
                 </td>
                 <td className="py-3 text-center text-[#6A7282]">{payment.paidAt.slice(0, 10)}</td>
