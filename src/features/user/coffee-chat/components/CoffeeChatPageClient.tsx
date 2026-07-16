@@ -7,18 +7,20 @@ import ChatPanel from './ChatPanel';
 import { useCoffeeChatSocket } from '../hooks/useCoffeeChatSocket';
 import { fetchChatMessagesAction } from '../actions';
 import { UserMe } from '@/features/auth/types';
-import { StudentChatRoom } from '../types';
+import { InstructorPendingChat, StudentChatRoom } from '../types';
 
 interface CoffeeChatPageClientProps {
   role: UserMe['role'];
   userId: number;
   studentChatRooms: StudentChatRoom[];
+  instructorPendingChats: InstructorPendingChat[];
 }
 
 export default function CoffeeChatPageClient({
   role,
   userId,
   studentChatRooms,
+  instructorPendingChats,
 }: CoffeeChatPageClientProps) {
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
   const { isConnected, subscribe, sendMessage } = useCoffeeChatSocket();
@@ -38,6 +40,7 @@ export default function CoffeeChatPageClient({
         <CoffeeChatSidebar
           role={role}
           studentChatRooms={studentChatRooms}
+          instructorPendingChats={instructorPendingChats}
           selectedChatId={selectedChatId}
           onSelectChat={handleSelectChat}
         />

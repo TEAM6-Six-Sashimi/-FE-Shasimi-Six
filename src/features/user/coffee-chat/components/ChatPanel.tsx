@@ -5,22 +5,11 @@ import { useToast } from '@/components/ui/ToastContext';
 import { fetchChatMessagesAction } from '../actions';
 import { ChatMessage, StudentChatRoom } from '../types';
 import Image from 'next/image';
+import { getThumbnailUrl } from '@/lib/thumbnail';
 
 // 채팅방의 첫 메시지는 강사 요청 목록 반영 등 서버 쪽 추가 처리가 붙어서
 // 이후 메시지보다 왕복이 더 걸리는 경우가 있어, 여유를 두고 6초로 잡는다.
 const SEND_TIMEOUT_MS = 6000;
-
-function avatarGradient(seed: number) {
-  const AVATAR_GRADIENTS = [
-    ['#FBCFE8', '#7DD3FC'],
-    ['#BFDBFE', '#3B5B92'],
-    ['#D9F2D0', '#86C97C'],
-    ['#D9F2D0', '#5FA854'],
-    ['#FDE9C8', '#3B5B92'],
-  ];
-  const [from, to] = AVATAR_GRADIENTS[seed % AVATAR_GRADIENTS.length];
-  return `linear-gradient(135deg, ${from} 50%, ${to} 50%)`;
-}
 
 function formatDateDivider(iso: string) {
   return iso.slice(0, 10);
@@ -42,6 +31,7 @@ export default function ChatPanel({
   sendMessage,
 }: ChatPanelProps) {
   const { showToast } = useToast();
+  const profileImageUrl = getThumbnailUrl(room.profileImagePath);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [pendingContent, setPendingContent] = useState<string | null>(null);
@@ -121,10 +111,21 @@ export default function ChatPanel({
   return (
     <div className="flex-1 flex flex-col bg-white h-full">
       <div className="flex items-center gap-3 px-6 py-4 border-b border-[#E5E7EB]">
-        <div
-          className="w-9 h-9 rounded-full shrink-0"
-          style={{ background: avatarGradient(room.instructorId) }}
-        />
+        <div className="w-9 h-9 rounded-full bg-[#E5E7EB] shrink-0 overflow-hidden flex items-center justify-center relative">
+          {profileImageUrl ? (
+            <Image
+              src={profileImageUrl}
+              alt={`${room.instructorName} 프로필 사진`}
+              fill
+              unoptimized
+              className="object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-[#6A7282] text-[7px] text-center px-0.5 leading-tight">
+              프로필 사진 없음
+            </div>
+          )}
+        </div>
         <h2 className="text-[15px] font-bold text-[#1E2125]">
           {room.instructorName} 강사 - {room.courseTitle}
         </h2>

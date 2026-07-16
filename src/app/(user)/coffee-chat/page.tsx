@@ -1,7 +1,10 @@
 import { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { fetchUserMeStrict, GUEST_USER } from '@/services/user.service';
-import { fetchStudentChatRoomsAction } from '@/features/user/coffee-chat/actions';
+import {
+  fetchInstructorPendingChatsAction,
+  fetchStudentChatRoomsAction,
+} from '@/features/user/coffee-chat/actions';
 import CoffeeChatPageClient from '@/features/user/coffee-chat/components/CoffeeChatPageClient';
 
 export const metadata: Metadata = {
@@ -22,13 +25,16 @@ export default async function CoffeeChatPage() {
     }
   }
 
-  const studentChatRooms = user.role !== 'INSTRUCTOR' ? await fetchStudentChatRoomsAction() : [];
+  const isInstructor = user.role === 'INSTRUCTOR';
+  const studentChatRooms = isInstructor ? [] : await fetchStudentChatRoomsAction();
+  const instructorPendingChats = isInstructor ? await fetchInstructorPendingChatsAction() : [];
 
   return (
     <CoffeeChatPageClient
       role={user.role}
       userId={user.id}
       studentChatRooms={studentChatRooms}
+      instructorPendingChats={instructorPendingChats}
     />
   );
 }
