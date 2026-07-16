@@ -13,7 +13,7 @@ async function fetchWsToken(): Promise<string | null> {
     const res = await fetch('/api/ws-token');
     if (!res.ok) return null;
     const data = await res.json();
-    return data.accessToken as string;
+    return data.wsTicket as string;
   } catch {
     return null; // 오프라인 등 네트워크 자체 실패 - 호출부에서 재시도하도록 null 리턴
   }
@@ -36,10 +36,10 @@ export function useCoffeeChatSocket() {
     }
 
     async function connect() {
-      const accessToken = await fetchWsToken();
+      const wsTicket = await fetchWsToken();
       if (cancelled) return;
 
-      if (!accessToken) {
+      if (!wsTicket) {
         // 토큰 조회 자체가 실패(오프라인, 서버 오류 등) - 잠시 후 재시도
         scheduleReconnect();
         return;
@@ -47,7 +47,7 @@ export function useCoffeeChatSocket() {
 
       const client = new Client({
         brokerURL: `${WS_BASE_URL}/ws-coffeechat`,
-        connectHeaders: { Authorization: `Bearer ${accessToken}` },
+        connectHeaders: { Authorization: `Bearer ${wsTicket}` },
         reconnectDelay: 0, // 재연결은 아래 onWebSocketClose에서 직접 제어
         onConnect: () => {
           hasRetriedReissueRef.current = false;
