@@ -1,4 +1,4 @@
-import { ChatbotHistoryItem, ChatbotMessageResponse } from '@/features/user/main/types';
+import { ChatbotHistoryItem, ChatbotMessageResponse } from '@/features/user/ai-chatbot/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
