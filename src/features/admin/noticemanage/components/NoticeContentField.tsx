@@ -8,11 +8,43 @@ interface NoticeContentFieldProps {
   onChange: (value: string) => void;
 }
 
+const FONT_SIZE_OPTIONS = [
+  { label: '작게', value: '12' },
+  { label: '보통', value: '14' },
+  { label: '크게', value: '18' },
+  { label: '아주 크게', value: '24' },
+];
+
 export default function NoticeContentField({ value, onChange }: NoticeContentFieldProps) {
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageError, setImageError] = useState('');
+
+  // 선택한 텍스트(없으면 placeholder)를 before/after 문법으로 감싸고, 감싼 부분이 다시 선택되도록 커서 위치 복원
+  const wrapSelection = (before: string, after: string, placeholder: string) => {
+    const textarea = contentRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = value.slice(start, end) || placeholder;
+    const nextValue = `${value.slice(0, start)}${before}${selected}${after}${value.slice(end)}`;
+    onChange(nextValue);
+
+    requestAnimationFrame(() => {
+      textarea.focus();
+      const selectionStart = start + before.length;
+      textarea.setSelectionRange(selectionStart, selectionStart + selected.length);
+    });
+  };
+
+  const handleBold = () => wrapSelection('**', '**', '볼드 텍스트');
+
+  const handleFontSize = (size: string) => {
+    if (!size) return;
+    wrapSelection(`[size=${size}]`, '[/size]', '텍스트');
+  };
 
   // 업로드된 이미지 URL을 현재 커서 위치에 마크다운 이미지로 삽입
   const insertImageMarkdown = (url: string) => {
@@ -86,6 +118,34 @@ export default function NoticeContentField({ value, onChange }: NoticeContentFie
       <div className="flex mb-2">
         <p className="text-[15px] font-semibold text-[#1E2125]">내용</p>
         <p className="text-[#FF5F5F]">*</p>
+      </div>
+      <div className="flex items-center gap-2 mb-2">
+        <button
+          type="button"
+          onClick={handleBold}
+          aria-label="굵게"
+          className="w-8 h-8 flex items-center justify-center rounded-md border border-[#D1D5DB] text-[13px] font-bold text-[#1E2125] hover:bg-[#F9FAFB] transition-colors cursor-pointer"
+        >
+          B
+        </button>
+        <select
+          onChange={(e) => {
+            handleFontSize(e.target.value);
+            e.target.value = '';
+          }}
+          defaultValue=""
+          aria-label="글씨 크기"
+          className="h-8 px-2 rounded-md border border-[#D1D5DB] bg-white text-[12.5px] text-[#1E2125] outline-none cursor-pointer"
+        >
+          <option value="" disabled>
+            글씨 크기
+          </option>
+          {FONT_SIZE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </div>
       <textarea
         ref={contentRef}
