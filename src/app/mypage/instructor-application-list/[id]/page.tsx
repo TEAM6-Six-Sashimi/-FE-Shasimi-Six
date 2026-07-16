@@ -15,7 +15,7 @@ export default async function InstructorApplicationDetailPage({ params }: Props)
 
   if (!accessToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-[#6A7282]">
+      <div className="min-h-[calc(100vh-3rem)] flex items-center justify-center text-[#6A7282]">
         로그인이 필요합니다.
       </div>
     );
@@ -29,7 +29,7 @@ export default async function InstructorApplicationDetailPage({ params }: Props)
 
   if (!detail) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-[#6A7282]">
+      <div className="min-h-[calc(100vh-3rem)] flex items-center justify-center text-[#6A7282]">
         지원 내역을 불러올 수 없습니다.
       </div>
     );

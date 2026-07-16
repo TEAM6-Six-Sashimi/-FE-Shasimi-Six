@@ -133,7 +133,7 @@ export default function NoticeManagementList() {
                 </td>
                 <td className="py-3 text-center">
                   {notice.pinned ? (
-                    <span className="inline-block px-2.5 py-1 rounded-sm text-[11.5px] font-semibold bg-[#FEE2E2] text-[#B91C1C]">
+                    <span className="inline-block px-2.5 py-1 rounded-sm text-[11.5px] font-semibold bg-[#FEE2E2] text-[#FF5E5E]">
                       고정
                     </span>
                   ) : (

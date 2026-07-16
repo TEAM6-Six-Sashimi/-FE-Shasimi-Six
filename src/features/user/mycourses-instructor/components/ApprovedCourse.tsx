@@ -21,9 +21,12 @@ interface Props {
   categories: Category[];
 }
 
+const ITEMS_PER_PAGE = 5;
+
 export default function ApprovedCourse({ courses = [], categories = [] }: Props) {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortOption>('최신순');
+  const [page, setPage] = useState(1);
 
   const getCategoryName = (categoryId: number) => {
     if (!categories || categories.length === 0) return String(categoryId);
@@ -43,6 +46,9 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
       return b.courseId - a.courseId; // 최신순
     });
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const paged = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
   return (
     <div className="flex flex-col gap-6">
       {/* 검색 + 정렬 + 강의 신청 버튼 */}
@@ -53,7 +59,10 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               placeholder="강의 검색..."
               className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
             />
@@ -63,7 +72,13 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
           </div>
 
           {/* 정렬 드롭다운 */}
-          <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+          <Select
+            value={sort}
+            onValueChange={(v) => {
+              setSort(v as SortOption);
+              setPage(1);
+            }}
+          >
             <SelectTrigger className="h-11 w-28 text-[13.5px] border-[#D1D5DB] bg-[#F9FAFB] rounded-full cursor-pointer">
               <SelectValue />
             </SelectTrigger>
@@ -91,7 +106,7 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
             {search ? '검색 결과가 없습니다.' : '승인된 강의가 없습니다.'}
           </div>
         ) : (
-          filtered.map((course) => {
+          paged.map((course) => {
             return (
               <div
                 key={course.courseId}
@@ -141,6 +156,38 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
           })
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
+          >
+            이전
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPage(p)}
+              className={`w-8 h-8 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
+                page === p
+                  ? 'bg-[#1E2125] text-white'
+                  : 'text-[#6A7282] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
+          >
+            다음
+          </button>
+        </div>
+      )}
     </div>
   );
 }

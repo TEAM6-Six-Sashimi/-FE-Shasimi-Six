@@ -193,7 +193,7 @@ export default function CareerCounselingChatPanel({ onClose }: Props) {
   };
 
   return (
-    <div className="fixed bottom-25 right-8 z-50 w-105 max-w-[calc(100vw-2rem)] min-h-[min(25rem,calc(100vh-8rem))] max-h-[min(39.75rem,calc(100vh-7.5rem))] bg-white rounded-xl shadow-2xl border border-[#E5E7EB] flex flex-col overflow-hidden">
+    <div className="fixed bottom-25 right-8 z-50 w-105 max-w-[calc(100vw-2rem)] h-[min(39.75rem,calc(100vh-7.5rem))] bg-white rounded-xl shadow-2xl border border-[#E5E7EB] flex flex-col overflow-hidden">
       {/* 헤더 */}
       <div className="flex items-center gap-3 px-5 py-3 border-b border-[#F3F4F6] shrink-0">
         <Image src="/main/ai-chatbot-2.png" alt="" width={35} height={35} className="shrink-0" />

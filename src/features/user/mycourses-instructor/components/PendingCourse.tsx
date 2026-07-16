@@ -39,6 +39,23 @@ interface RejectionModalData {
   rejectReason: string;
 }
 
+const ITEMS_PER_PAGE = 5;
+
+// 이 API는 카테고리 라벨이 별도 필드 없이 "카테고리: 상세 사유" 형태로 rejectReason에 합쳐져 내려온다.
+// rejectCategory가 비어 있으면 첫 ": " 기준으로 분리해 관리자 화면과 동일하게 나눠서 보여준다.
+const splitRejectReason = (category: string | null, reason: string | null) => {
+  const rawReason = reason ?? '';
+  if (category) return { category, detail: rawReason };
+
+  const separatorIndex = rawReason.indexOf(': ');
+  if (separatorIndex === -1) return { category: '', detail: rawReason };
+
+  return {
+    category: rawReason.slice(0, separatorIndex),
+    detail: rawReason.slice(separatorIndex + 2),
+  };
+};
+
 export default function PendingCourse({ courses, categories }: Props) {
   const { showToast } = useToast();
   const [search, setSearch] = useState('');
@@ -47,6 +64,7 @@ export default function PendingCourse({ courses, categories }: Props) {
   const [localCourses, setLocalCourses] = useState(courses);
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [page, setPage] = useState(1);
 
   const getCategoryName = (categoryId: number) => {
     for (const cat of categories) {
@@ -67,6 +85,9 @@ export default function PendingCourse({ courses, categories }: Props) {
       (filter === '반려' && statusLabel === '반려');
     return matchSearch && matchFilter;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const paged = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   const handleDelete = async () => {
     if (deleteTargetId === null) return;
@@ -95,7 +116,10 @@ export default function PendingCourse({ courses, categories }: Props) {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder="강의 검색..."
             className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
           />
@@ -115,7 +139,10 @@ export default function PendingCourse({ courses, categories }: Props) {
         {(['전체', '대기', '보관', '반려'] as FilterType[]).map((f) => (
           <button
             key={f}
-            onClick={() => setFilter(f)}
+            onClick={() => {
+              setFilter(f);
+              setPage(1);
+            }}
             className={`px-4 py-1.5 rounded-full text-[13px] font-medium border transition-colors cursor-pointer ${
               filter === f
                 ? 'bg-[#FF5E5E] border-[#FF5E5E] text-white'
@@ -138,7 +165,7 @@ export default function PendingCourse({ courses, categories }: Props) {
             해당하는 강의가 없습니다.
           </div>
         ) : (
-          filtered.map((course) => {
+          paged.map((course) => {
             const statusLabel = STATUS_LABEL[course.status] ?? course.status;
             const isPending = course.status === 'PENDING';
             const isDeleteDisabled = isPending || deleteLoading;
@@ -156,14 +183,18 @@ export default function PendingCourse({ courses, categories }: Props) {
                     </span>
                     {course.status === 'REJECTED' && course.rejectReason && (
                       <button
-                        onClick={() =>
+                        onClick={() => {
+                          const { category, detail } = splitRejectReason(
+                            course.rejectCategory,
+                            course.rejectReason,
+                          );
                           setRejectionModal({
                             courseTitle: course.title,
-                            rejectedAt: course.updatedAt ?? '',
-                            rejectCategory: course.rejectCategory ?? '',
-                            rejectReason: course.rejectReason ?? '',
-                          })
-                        }
+                            rejectedAt: course.updatedAt?.slice(0, 10) ?? '',
+                            rejectCategory: category,
+                            rejectReason: detail,
+                          });
+                        }}
                         className="text-[11.5px] text-[#FF5E5E] font-semibold underline cursor-pointer"
                       >
                         반려 사유 보기
@@ -224,6 +255,38 @@ export default function PendingCourse({ courses, categories }: Props) {
           })
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
+          >
+            이전
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPage(p)}
+              className={`w-8 h-8 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
+                page === p
+                  ? 'bg-[#1E2125] text-white'
+                  : 'text-[#6A7282] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
+          >
+            다음
+          </button>
+        </div>
+      )}
 
       {/* 반려 사유 모달 (공용) */}
       {rejectionModal !== null && (
