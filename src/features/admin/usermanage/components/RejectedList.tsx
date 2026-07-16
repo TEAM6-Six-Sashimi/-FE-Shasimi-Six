@@ -70,7 +70,17 @@ export default function RejectedList({ rejected }: Props) {
                 </td>
                 <td className="py-3 text-center font-semibold text-[#1E2125]">{r.name}</td>
                 <td className="py-3 text-center text-[#6A7282]">{r.loginId}</td>
-                <td className="py-3 text-center text-[#6A7282]">{r.email}</td>
+                <td className="py-3 px-2 text-center text-[#6A7282] wrap-break-word">
+                  {r.email.includes('@') ? (
+                    <>
+                      {r.email.slice(0, r.email.indexOf('@') + 1)}
+                      <wbr />
+                      {r.email.slice(r.email.indexOf('@') + 1)}
+                    </>
+                  ) : (
+                    r.email
+                  )}
+                </td>
                 <td className="py-3 text-center text-[#6A7282]">{r.rejectedAt.slice(0, 10)}</td>
                 <td className="py-3 text-center">
                   <span className="inline-block px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-[#FFEBEB] text-[#FF5E5E]">

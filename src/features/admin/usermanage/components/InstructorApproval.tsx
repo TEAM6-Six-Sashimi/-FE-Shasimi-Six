@@ -30,14 +30,15 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
+      <div className="flex items-baseline gap-2 mb-4">
+        <h2 className="text-[18px] font-extrabold text-[#1E2125]">강사 승인 대기</h2>
+        <span className="text-[12.5px] text-[#6A7282]">
+          현재 승인 대기{' '}
+          <span className="text-[#FF5E5E] font-semibold">{safeApplicants.length}건</span>
+        </span>
+      </div>
+
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-baseline gap-2">
-          <h2 className="text-[18px] font-extrabold text-[#1E2125]">강사 승인 대기</h2>
-          <span className="text-[12.5px] text-[#6A7282]">
-            현재 승인 대기{' '}
-            <span className="text-[#FF5E5E] font-semibold">{safeApplicants.length}건</span>
-          </span>
-        </div>
         <div className="relative w-64">
           <input
             type="text"
@@ -53,6 +54,15 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
             <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
           </span>
         </div>
+        <Button
+          type="button"
+          onClick={() => {
+            // TODO: 자격증 진위 확인용 엑셀 다운로드 API 연동 예정
+          }}
+          className="h-10 px-4 border border-[#FF5F5F] bg-white hover:bg-[#FFEBEB] text-[#FF5F5F] text-[13px] font-semibold cursor-pointer"
+        >
+          자격증 진위확인 엑셀 다운로드
+        </Button>
       </div>
 
       <table className="w-full text-[13px] table-fixed">
@@ -87,7 +97,17 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
                 </td>
                 <td className="py-3 text-center font-semibold text-[#1E2125]">{a.name}</td>
                 <td className="py-3 text-center text-[#6A7282]">{a.loginId}</td>
-                <td className="py-3 text-center text-[#6A7282]">{a.email}</td>
+                <td className="py-3 px-2 text-center text-[#6A7282] wrap-break-word">
+                  {a.email.includes('@') ? (
+                    <>
+                      {a.email.slice(0, a.email.indexOf('@') + 1)}
+                      <wbr />
+                      {a.email.slice(a.email.indexOf('@') + 1)}
+                    </>
+                  ) : (
+                    a.email
+                  )}
+                </td>
                 <td className="py-3 text-center font-semibold text-[#1E2125]">{a.categoryName}</td>
                 <td className="py-3 text-center text-[#6A7282]">{a.createdAt?.slice(0, 10)}</td>
                 <td className="py-3 text-center">

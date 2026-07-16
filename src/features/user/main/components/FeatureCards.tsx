@@ -54,10 +54,10 @@ export default function FeatureCards() {
 
               {/* 텍스트 */}
               <div className="flex flex-col gap-2 flex-1">
-                <h3 className="text-[#1E2125] text-[19px] font-bold leading-snug flex items-center gap-1.5">
+                <h3 className="text-[#1E2125] text-[19px] font-bold leading-snug">
                   {title}
                   {isFree && (
-                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#FF5E5E] text-white">
+                    <span className="ml-1.5 inline-block whitespace-nowrap align-middle text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#FF5E5E] text-white">
                       무료
                     </span>
                   )}

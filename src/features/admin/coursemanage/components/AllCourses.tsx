@@ -124,7 +124,7 @@ export default function AllCourses({ courses, categories }: Props) {
             <th className="py-3 w-[28%] text-center font-semibold text-[#1E2125]">강의명</th>
             <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">강사명</th>
             <th className="py-3 w-[22%] text-center font-semibold text-[#1E2125]">
-              <div className="flex items-center text-center justify-center gap-1">
+              <div className="flex items-center text-center justify-center gap-1 break-keep">
                 카테고리 &gt; 세부카테고리
                 <div className="relative">
                   <button
@@ -190,7 +190,7 @@ export default function AllCourses({ courses, categories }: Props) {
                   </Link>
                 </td>
                 <td className="py-3 text-center text-[#6A7282]">{c.instructorName}</td>
-                <td className="py-3 text-center text-[#6A7282]">
+                <td className="py-3 px-2 text-center text-[#6A7282] break-keep">
                   {getMainCategory(c.categoryName)} &gt; {c.categoryName}
                 </td>
                 <td className="py-3 text-center text-[#6A7282]">

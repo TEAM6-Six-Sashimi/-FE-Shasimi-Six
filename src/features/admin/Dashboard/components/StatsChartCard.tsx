@@ -3,6 +3,7 @@
 import { ReactNode } from 'react';
 import { LoginStatsPeriod } from '../types';
 import PeriodToggle from './PeriodToggle';
+import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
 
 interface Props {
   title: string;
@@ -37,7 +38,7 @@ export default function StatsChartCard({
       <div className="h-72">
         {isLoading ? (
           <div className="flex items-center justify-center h-full text-[13px] text-[#6A7282]">
-            불러오는 중...
+            <InlineDotsLoading />
           </div>
         ) : error ? (
           <div className="flex items-center justify-center h-full text-[13px] text-[#6A7282]">

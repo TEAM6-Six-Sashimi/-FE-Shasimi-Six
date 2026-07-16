@@ -31,8 +31,6 @@ export interface InstructorApplication {
 }
 
 export interface CertificationFile {
-  certificationName: string;
-  issuedBy: string;
   fileUrl: string;
 }
 

@@ -156,8 +156,6 @@ export type InstructorApplicationRejectionCategory =
   | 'INAPPROPRIATE_CAREER_INCLUDED';
 
 export interface InstructorApplicationCertification {
-  certificationName: string;
-  issuedBy: string;
   fileUrl: string;
 }
 

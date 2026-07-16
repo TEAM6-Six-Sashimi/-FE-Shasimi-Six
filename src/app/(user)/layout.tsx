@@ -3,7 +3,7 @@ import Footer from '@/components/layout/Footer';
 import Menubar from '@/components/layout/Menubar';
 import { fetchCategories } from '@/services/categories.service';
 import { fetchUserMe } from '@/services/user.service';
-import CareerCounselingButton from '@/features/user/main/components/CareerCounselingButton';
+import CareerCounselingButton from '@/features/user/ai-chatbot/components/CareerCounselingButton';
 
 export default async function UserLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();

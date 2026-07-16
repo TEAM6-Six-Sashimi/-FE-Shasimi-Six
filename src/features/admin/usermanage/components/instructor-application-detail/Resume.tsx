@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { buildDownloadHref } from '@/lib/file-url';
 
 interface ResumeProps {
@@ -13,7 +14,7 @@ export default function Resume({ resumeFileUrl, mainCareers }: ResumeProps) {
       <h2 className="text-[15px] font-bold text-[#1E2125] mb-4">이력서</h2>
       <div className="flex items-center justify-between px-4 py-3 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] mb-5">
         <div className="flex items-center gap-2.5">
-          <span className="text-[#6A7282]">📄</span>
+          <Image src="/ai-recommendation/text-inactive.svg" alt="" width={16} height={16} />
           <p className="text-[13px] font-medium text-[#1E2125]">이력서 파일</p>
         </div>
         <a

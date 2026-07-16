@@ -58,7 +58,7 @@ export default function NoticeManagementList() {
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
-      <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-6">전체 공지사항 목록</h2>
+      <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-4">전체 공지사항 목록</h2>
 
       <div className="flex items-center justify-between mb-6">
         <div className="relative w-72">
@@ -133,7 +133,7 @@ export default function NoticeManagementList() {
                 </td>
                 <td className="py-3 text-center">
                   {notice.pinned ? (
-                    <span className="inline-block px-2.5 py-1 rounded-sm text-[11.5px] font-semibold bg-[#FEE2E2] text-[#B91C1C]">
+                    <span className="inline-block px-2.5 py-1 rounded-sm text-[11.5px] font-semibold bg-[#FEE2E2] text-[#FF5E5E]">
                       고정
                     </span>
                   ) : (

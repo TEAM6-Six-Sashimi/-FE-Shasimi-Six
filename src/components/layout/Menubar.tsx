@@ -51,7 +51,7 @@ export default function Menubar({ categories, role }: MenubarProps) {
           aria-expanded={open}
           aria-haspopup="true"
           className={`
-            flex items-center gap-2 h-full pr-4 mr-2
+            flex items-center gap-2 h-full pr-3 xl:pr-4 mr-1 xl:mr-2
             border-r border-white/10
             text-[13px] font-semibold whitespace-nowrap
             bg-transparent cursor-pointer transition-colors duration-150
@@ -61,7 +61,7 @@ export default function Menubar({ categories, role }: MenubarProps) {
           <span className="flex items-center shrink-0">
             <Image src="/menubar/menu-Icon.svg" alt="메뉴" width={16} height={16} />
           </span>
-          자격증 카테고리(전체 자격증)
+          <span className="hidden xl:inline">자격증 카테고리(전체 자격증)</span>
           <ChevronIcon open={open} />
         </button>
 
@@ -73,7 +73,8 @@ export default function Menubar({ categories, role }: MenubarProps) {
               <Link
                 key={id}
                 href={href}
-                className={`group flex items-center gap-1.5 h-9 px-3 rounded-md text-[13px] font-medium tracking-tight whitespace-nowrap transition-colors duration-150 hover:text-[#CFEE5D] hover:bg-white/5 ${isActive ? 'text-[#CFEE5D]' : 'text-[#F9FAFB]'}`}
+                title={label}
+                className={`group flex items-center gap-1.5 h-9 px-2 min-[900px]:px-3 rounded-md text-[13px] font-medium tracking-tight whitespace-nowrap transition-colors duration-150 hover:text-[#CFEE5D] hover:bg-white/5 ${isActive ? 'text-[#CFEE5D]' : 'text-[#F9FAFB]'}`}
               >
                 <span className="relative flex items-center shrink-0 w-4 h-4">
                   <Image
@@ -91,7 +92,7 @@ export default function Menubar({ categories, role }: MenubarProps) {
                     className={`absolute transition-opacity duration-150 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                   />
                 </span>
-                {label}
+                <span className="hidden min-[750px]:inline">{label}</span>
               </Link>
             );
           })}
@@ -108,41 +109,40 @@ export default function Menubar({ categories, role }: MenubarProps) {
           ${open ? 'max-h-140 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}
         `}
       >
-        <div
-          className={`grid px-5 py-6`}
-          style={{ gridTemplateColumns: `repeat(${categories.length}, 1fr)` }}
-        >
-          {categories.map((cat, i) => (
-            <div
-              key={cat.name}
-              className={`px-3.5 ${i === 0 ? 'pl-1' : ''} ${i === categories.length - 1 ? 'border-r-0 pr-1' : 'border-r border-white/10'}`}
-            >
-              {/* 카테고리 타이틀 */}
-              <div className="text-[#CFEE5D] text-[13.5px] font-extrabold tracking-tight leading-snug mb-3 pb-2.5 border-b border-white/10 cursor-default">
-                {cat.name}
-              </div>
+        <div className="overflow-x-auto px-5 py-6">
+          <div className="flex min-w-max">
+            {categories.map((cat, i) => (
+              <div
+                key={cat.name}
+                className={`w-40 shrink-0 px-3.5 ${i === 0 ? 'pl-1' : ''} ${i === categories.length - 1 ? 'border-r-0 pr-1' : 'border-r border-white/10'}`}
+              >
+                {/* 카테고리 타이틀 */}
+                <div className="text-[#CFEE5D] text-[13.5px] font-extrabold tracking-tight leading-snug mb-3 pb-2.5 border-b border-white/10 cursor-default">
+                  {cat.name}
+                </div>
 
-              {/* 서브 항목 */}
-              {[{ id: 0, name: '전체' }, ...cat.options].map((item) => (
-                <Link
-                  key={item.id}
-                  href={
-                    item.name === '전체'
-                      ? `/courses/${encodeURIComponent(cat.name)}`
-                      : `/courses/${encodeURIComponent(cat.name)}?sub=${item.id}`
-                  }
-                  onClick={() => setOpen(false)}
-                  className={`
-                    block text-[12.5px] tracking-tight py-1.5 transition-colors duration-150
-                    text-[#F9FAFB] hover:text-[#CFEE5D]
-                    ${item.name === '전체' ? 'font-semibold mb-0.5' : 'font-normal'}
-                  `}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-          ))}
+                {/* 서브 항목 */}
+                {[{ id: 0, name: '전체' }, ...cat.options].map((item) => (
+                  <Link
+                    key={item.id}
+                    href={
+                      item.name === '전체'
+                        ? `/courses/${encodeURIComponent(cat.name)}`
+                        : `/courses/${encodeURIComponent(cat.name)}?sub=${item.id}`
+                    }
+                    onClick={() => setOpen(false)}
+                    className={`
+                      block text-[12.5px] tracking-tight py-1.5 transition-colors duration-150
+                      text-[#F9FAFB] hover:text-[#CFEE5D]
+                      ${item.name === '전체' ? 'font-semibold mb-0.5' : 'font-normal'}
+                    `}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </nav>
