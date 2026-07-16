@@ -177,7 +177,11 @@ export default function CareerCounselingChatPanel({ onClose }: Props) {
 
     setIsWaitingReply(false);
     setMessages((prev) => [...prev, { id: replyId, role: 'bot', text: '' }]);
-    startTyping(replyId, fullReply, () => setIsSending(false));
+    startTyping(replyId, fullReply, () => {
+      setIsSending(false);
+      // 전송 중 disabled로 인해 빠졌던 포커스를 입력창에 복원
+      textareaRef.current?.focus();
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
