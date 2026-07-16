@@ -10,6 +10,7 @@ interface ChatMessage {
   id: number;
   role: 'bot' | 'user';
   text: string;
+  isIntro?: boolean;
 }
 
 const INITIAL_MESSAGES: ChatMessage[] = [
@@ -38,6 +39,12 @@ const INITIAL_MESSAGES: ChatMessage[] = [
 // 입력창 최소/최대 높이 - 한 줄일 땐 전송 버튼과 높이를 맞추고, 두 줄 분량부터는 그 이상 늘어나지 않고 내부 스크롤
 const TEXTAREA_MIN_HEIGHT = 40;
 const TEXTAREA_MAX_HEIGHT = 61;
+
+// 답변을 타이핑치듯이 스트리밍으로 보여주기 위한 속도 설정
+const TYPING_CHARS_PER_TICK = 2;
+const TYPING_INTERVAL_MS = 45;
+// 하드코딩된 안내 메시지들 사이의 간격
+const INTRO_MESSAGE_GAP_MS = 400;
 
 // **로 감싼 부분만 굵게 렌더링 (초기 안내 메시지의 강조 표시용)
 function renderMessageText(text: string) {
@@ -75,16 +82,19 @@ interface Props {
 }
 
 export default function CareerCounselingChatPanel({ onClose }: Props) {
-  const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [isWaitingReply, setIsWaitingReply] = useState(false);
+  const [streamingId, setStreamingId] = useState<number | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const intervalsRef = useRef<Set<ReturnType<typeof setInterval>>>(new Set());
 
-  // 새 메시지가 추가되거나 로딩 인디케이터가 뜨면 항상 맨 아래로 스크롤
+  // 새 메시지가 추가/갱신되거나 로딩 인디케이터가 뜨면 항상 맨 아래로 스크롤
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
-  }, [messages, isSending]);
+  }, [messages, isWaitingReply]);
 
   // 기본 한 줄 높이(전송 버튼과 동일)에서 시작해 두 줄 분량까지 자동으로 늘어나고, 그 이상은 내부 스크롤
   useEffect(() => {
@@ -96,31 +106,78 @@ export default function CareerCounselingChatPanel({ onClose }: Props) {
     el.style.overflowY = needsScroll ? 'auto' : 'hidden';
   }, [input]);
 
+  // 특정 메시지의 text를 한 글자씩 채워가며 타이핑치듯이 보여줌
+  const startTyping = (id: number, fullText: string, onDone?: () => void) => {
+    setStreamingId(id);
+    let index = 0;
+    const timer = setInterval(() => {
+      index = Math.min(fullText.length, index + TYPING_CHARS_PER_TICK);
+      const revealed = fullText.slice(0, index);
+      setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, text: revealed } : m)));
+
+      if (index >= fullText.length) {
+        clearInterval(timer);
+        intervalsRef.current.delete(timer);
+        setStreamingId((current) => (current === id ? null : current));
+        onDone?.();
+      }
+    }, TYPING_INTERVAL_MS);
+    intervalsRef.current.add(timer);
+  };
+
+  // 하드코딩된 안내 메시지도 한 번에 뜨지 않고 순서대로 스트리밍으로 표시
+  useEffect(() => {
+    let cancelled = false;
+    const intervals = intervalsRef.current;
+    // React StrictMode에서 이 effect가 두 번 실행되는 경우를 대비해, 이번 실행에서 추가한 메시지만 기록해두고
+    // cleanup 시 되돌린다 (그렇지 않으면 안내 메시지가 중복된 id로 두 번 쌓임)
+    const addedIds: number[] = [];
+
+    const playNext = (index: number) => {
+      if (cancelled || index >= INITIAL_MESSAGES.length) return;
+      const intro = INITIAL_MESSAGES[index];
+      addedIds.push(intro.id);
+      setMessages((prev) => [...prev, { id: intro.id, role: 'bot', text: '', isIntro: true }]);
+      startTyping(intro.id, intro.text, () => {
+        if (!cancelled) setTimeout(() => playNext(index + 1), INTRO_MESSAGE_GAP_MS);
+      });
+    };
+
+    playNext(0);
+
+    return () => {
+      cancelled = true;
+      intervals.forEach(clearInterval);
+      intervals.clear();
+      setMessages((prev) => prev.filter((m) => !addedIds.includes(m.id)));
+      setStreamingId((current) => (current !== null && addedIds.includes(current) ? null : current));
+    };
+  }, []);
+
   const handleSend = async () => {
     const trimmed = input.trim();
     if (!trimmed || isSending) return;
 
     // 안내용 초기 메시지는 실제 대화가 아니므로 history에서 제외
-    const history: ChatbotHistoryItem[] = messages.slice(INITIAL_MESSAGES.length).map((m) => ({
-      role: m.role === 'bot' ? 'assistant' : 'user',
-      content: m.text,
-    }));
+    const history: ChatbotHistoryItem[] = messages
+      .filter((m) => !m.isIntro)
+      .map((m) => ({
+        role: m.role === 'bot' ? 'assistant' : 'user',
+        content: m.text,
+      }));
 
     setInput('');
     setIsSending(true);
+    setIsWaitingReply(true);
     setMessages((prev) => [...prev, { id: Date.now(), role: 'user', text: trimmed }]);
 
     const result = await sendChatbotMessageAction(trimmed, history);
+    const fullReply = result.success ? result.reply : result.message;
+    const replyId = Date.now() + 1;
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now() + 1,
-        role: 'bot',
-        text: result.success ? result.reply : result.message,
-      },
-    ]);
-    setIsSending(false);
+    setIsWaitingReply(false);
+    setMessages((prev) => [...prev, { id: replyId, role: 'bot', text: '' }]);
+    startTyping(replyId, fullReply, () => setIsSending(false));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -152,6 +209,9 @@ export default function CareerCounselingChatPanel({ onClose }: Props) {
               <BotAvatar />
               <p className="max-w-68 bg-[#F3F4F6] text-[#1E2125] text-[13px] border leading-relaxed rounded-2xl rounded-tl-sm px-4 py-2.5 mt-2 whitespace-pre-line wrap-break-word">
                 {renderMessageText(msg.text)}
+                {msg.id === streamingId && (
+                  <span className="inline-block w-1 h-3.5 bg-[#9CA3AF] ml-0.5 align-middle animate-pulse" />
+                )}
               </p>
             </div>
           ) : (
@@ -162,7 +222,7 @@ export default function CareerCounselingChatPanel({ onClose }: Props) {
             </div>
           ),
         )}
-        {isSending && <TypingIndicator />}
+        {isWaitingReply && <TypingIndicator />}
       </div>
 
       {/* 입력창 */}
