@@ -1,35 +1,74 @@
 'use client';
 
-import { useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { getThumbnailUrl } from '@/lib/thumbnail';
 
-// 공지사항 content에 ![alt](url) 형태로 삽입된 이미지를 실제 <img>로 렌더링
-const IMAGE_MARKDOWN_REGEX = /!\[([^\]]*)\]\(([^)]+)\)/g;
+// 공지사항 content에 들어간 간단한 서식 문법을 렌더링
+// - ![alt](url) : 이미지
+// - [size=N]text[/size] : 글씨 크기 (내부에 **볼드**도 중첩 가능)
+// - **text** : 볼드
+const INLINE_PATTERN =
+  '!\\[([^\\]]*)\\]\\(([^)]+)\\)' + // 1: alt, 2: url
+  '|\\[size=(\\d+)\\]([\\s\\S]*?)\\[/size\\]' + // 3: px, 4: inner
+  '|\\*\\*([^*]+)\\*\\*'; // 5: bold text
 
-interface ContentPart {
-  type: 'text' | 'image';
-  value: string;
-  alt?: string;
-}
-
-function parseContent(content: string): ContentPart[] {
-  const parts: ContentPart[] = [];
+function renderInline(text: string, keyPrefix: string): ReactNode[] {
+  const regex = new RegExp(INLINE_PATTERN, 'g');
+  const nodes: ReactNode[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
+  let idx = 0;
 
-  IMAGE_MARKDOWN_REGEX.lastIndex = 0;
-  while ((match = IMAGE_MARKDOWN_REGEX.exec(content)) !== null) {
+  while ((match = regex.exec(text)) !== null) {
     if (match.index > lastIndex) {
-      parts.push({ type: 'text', value: content.slice(lastIndex, match.index) });
+      nodes.push(
+        <span key={`${keyPrefix}-t${idx++}`} className="whitespace-pre-wrap">
+          {text.slice(lastIndex, match.index)}
+        </span>,
+      );
     }
-    parts.push({ type: 'image', value: match[2], alt: match[1] });
-    lastIndex = IMAGE_MARKDOWN_REGEX.lastIndex;
-  }
-  if (lastIndex < content.length) {
-    parts.push({ type: 'text', value: content.slice(lastIndex) });
+
+    const [, alt, url, sizePx, sizeInner, boldText] = match;
+
+    if (url !== undefined) {
+      const resolvedUrl = getThumbnailUrl(url);
+      if (resolvedUrl) {
+        nodes.push(
+          // eslint-disable-next-line @next/next/no-img-element -- 첨부 이미지는 크기를 알 수 없어 비율 유지가 필요, next/image는 부적합
+          <img
+            key={`${keyPrefix}-img${idx++}`}
+            src={resolvedUrl}
+            alt={alt || '공지 이미지'}
+            className="block max-w-full h-auto rounded-lg border border-[#E5E7EB] my-3"
+          />,
+        );
+      }
+    } else if (sizeInner !== undefined) {
+      nodes.push(
+        <span key={`${keyPrefix}-sz${idx}`} style={{ fontSize: `${sizePx}px` }}>
+          {renderInline(sizeInner, `${keyPrefix}-sz${idx++}`)}
+        </span>,
+      );
+    } else if (boldText !== undefined) {
+      nodes.push(
+        <strong key={`${keyPrefix}-b${idx++}`} className="whitespace-pre-wrap">
+          {boldText}
+        </strong>,
+      );
+    }
+
+    lastIndex = regex.lastIndex;
   }
 
-  return parts;
+  if (lastIndex < text.length) {
+    nodes.push(
+      <span key={`${keyPrefix}-t${idx++}`} className="whitespace-pre-wrap">
+        {text.slice(lastIndex)}
+      </span>,
+    );
+  }
+
+  return nodes;
 }
 
 interface NoticeContentProps {
@@ -37,32 +76,7 @@ interface NoticeContentProps {
 }
 
 export default function NoticeContent({ content }: NoticeContentProps) {
-  const parts = useMemo(() => parseContent(content), [content]);
+  const nodes = useMemo(() => renderInline(content, 'root'), [content]);
 
-  return (
-    <div className="text-[14px] text-[#1E2125] leading-relaxed wrap-break-word">
-      {parts.map((part, idx) => {
-        if (part.type === 'text') {
-          return (
-            <span key={idx} className="whitespace-pre-wrap">
-              {part.value}
-            </span>
-          );
-        }
-
-        const resolvedUrl = getThumbnailUrl(part.value);
-        if (!resolvedUrl) return null;
-
-        return (
-          // eslint-disable-next-line @next/next/no-img-element -- 첨부 이미지는 크기를 알 수 없어 비율 유지가 필요, next/image는 부적합
-          <img
-            key={idx}
-            src={resolvedUrl}
-            alt={part.alt || '공지 이미지'}
-            className="block max-w-full h-auto rounded-lg border border-[#E5E7EB] my-3"
-          />
-        );
-      })}
-    </div>
-  );
+  return <div className="text-[14px] text-[#1E2125] leading-relaxed wrap-break-word">{nodes}</div>;
 }
