@@ -1,17 +1,6 @@
+import Image from 'next/image';
+import { getThumbnailUrl } from '@/lib/thumbnail';
 import { StudentChatRoom } from '../types';
-
-const AVATAR_GRADIENTS = [
-  ['#FBCFE8', '#7DD3FC'],
-  ['#BFDBFE', '#3B5B92'],
-  ['#D9F2D0', '#86C97C'],
-  ['#D9F2D0', '#5FA854'],
-  ['#FDE9C8', '#3B5B92'],
-];
-
-function avatarGradient(seed: number) {
-  const [from, to] = AVATAR_GRADIENTS[seed % AVATAR_GRADIENTS.length];
-  return `linear-gradient(135deg, ${from} 50%, ${to} 50%)`;
-}
 
 function formatDate(iso: string | null) {
   return iso ? iso.slice(0, 10) : '';
@@ -34,7 +23,10 @@ export default function ChatRoomList({ rooms, selectedChatId, onSelect }: ChatRo
 
   return (
     <ul className="flex-1 overflow-y-auto">
-      {rooms.map((room) => (
+      {rooms.map((room) => {
+        const profileImageUrl = getThumbnailUrl(room.profileImagePath);
+
+        return (
         <li key={room.chatId} className="border-b border-[#E5E7EB]">
           <button
             type="button"
@@ -43,10 +35,21 @@ export default function ChatRoomList({ rooms, selectedChatId, onSelect }: ChatRo
               selectedChatId === room.chatId ? 'bg-[#F9FAFB]' : ''
             }`}
           >
-            <div
-              className="w-11 h-11 rounded-full shrink-0"
-              style={{ background: avatarGradient(room.instructorId) }}
-            />
+            <div className="w-11 h-11 rounded-full bg-[#D1D5DB] shrink-0 overflow-hidden flex items-center justify-center relative">
+              {profileImageUrl ? (
+                <Image
+                  src={profileImageUrl}
+                  alt={`${room.instructorName} 프로필 사진`}
+                  fill
+                  unoptimized
+                  className="object-cover"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center text-[#6A7282] text-[9px] text-center px-1 leading-tight">
+                  프로필 사진 없음
+                </div>
+              )}
+            </div>
 
             <div className="flex-1 min-w-0">
               <p className="text-[14px] font-bold text-[#1E2125] truncate">
@@ -67,7 +70,8 @@ export default function ChatRoomList({ rooms, selectedChatId, onSelect }: ChatRo
             </div>
           </button>
         </li>
-      ))}
+        );
+      })}
     </ul>
   );
 }

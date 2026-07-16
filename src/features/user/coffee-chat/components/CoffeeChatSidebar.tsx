@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { UserMe } from '@/features/auth/types';
 import Image from 'next/image';
 import ChatRoomList from './ChatRoomList';
-import { StudentChatRoom } from '../types';
+import RequestList from './RequestList';
+import { InstructorPendingChat, StudentChatRoom } from '../types';
 
 type CoffeeChatTab = 'requests' | 'rooms';
 
@@ -31,6 +32,7 @@ const ALL_TABS: {
 interface CoffeeChatSidebarProps {
   role: UserMe['role'];
   studentChatRooms: StudentChatRoom[];
+  instructorPendingChats: InstructorPendingChat[];
   selectedChatId: number | null;
   onSelectChat: (chatId: number) => void;
 }
@@ -38,6 +40,7 @@ interface CoffeeChatSidebarProps {
 export default function CoffeeChatSidebar({
   role,
   studentChatRooms,
+  instructorPendingChats,
   selectedChatId,
   onSelectChat,
 }: CoffeeChatSidebarProps) {
@@ -83,7 +86,7 @@ export default function CoffeeChatSidebar({
         })}
       </div>
 
-      {/* TODO: 강사용 RequestList */}
+      {activeTab === 'requests' && <RequestList requests={instructorPendingChats} />}
       {activeTab === 'rooms' && (
         <ChatRoomList
           rooms={studentChatRooms}
