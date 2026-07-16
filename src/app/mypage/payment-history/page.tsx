@@ -12,7 +12,7 @@ export default async function PaymentHistoryPage() {
 
   if (!accessToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-[#6A7282]">
+      <div className="min-h-[calc(100vh-3rem)] flex items-center justify-center text-[#6A7282]">
         로그인이 필요합니다.
       </div>
     );

@@ -26,7 +26,7 @@ export default function NoticeDetailView({ result }: Props) {
           <h3 className="text-[20px] font-bold text-[#1E2125] mb-2 wrap-break-word">
             {result.data.title}
             {result.data.pinned && (
-              <span className="inline-flex items-center gap-1 align-middle ml-2 px-2.5 py-1 mb-1.5 rounded-sm text-[11.5px] font-semibold bg-[#FEE2E2] text-[#B91C1C]">
+              <span className="inline-flex items-center gap-1 align-middle ml-2 px-2.5 py-1 mb-1.5 rounded-sm text-[11.5px] font-semibold bg-[#FEE2E2] text-[#FF5E5E]">
                 <Image src="/pin-Icon.svg" alt="" width={11} height={11} />
                 고정
               </span>

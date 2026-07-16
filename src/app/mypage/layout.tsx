@@ -11,7 +11,7 @@ export default async function UserMypageLayout({ children }: { children: React.R
 
   if (!accessToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-[#6A7282]">
+      <div className="min-h-[calc(100vh-3rem)] flex items-center justify-center text-[#6A7282]">
         로그인이 필요합니다.
       </div>
     );
@@ -21,8 +21,8 @@ export default async function UserMypageLayout({ children }: { children: React.R
     const user = await fetchUserMeStrict(accessToken);
 
     return (
-      <div className="min-h-screen flex flex-col">
-        <div className="flex flex-row flex-1">
+      <div className="flex flex-col">
+        <div className="flex flex-row flex-1 min-h-screen">
           <UserSidebar role={user.role} />
           <main className="flex-1 px-4 py-8 bg-[#F9FAFB]">{children}</main>
         </div>
