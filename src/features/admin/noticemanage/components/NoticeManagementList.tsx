@@ -58,7 +58,7 @@ export default function NoticeManagementList() {
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
-      <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-6">전체 공지사항 목록</h2>
+      <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-4">전체 공지사항 목록</h2>
 
       <div className="flex items-center justify-between mb-6">
         <div className="relative w-72">

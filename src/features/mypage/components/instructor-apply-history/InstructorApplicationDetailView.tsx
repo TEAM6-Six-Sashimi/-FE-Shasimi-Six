@@ -38,7 +38,7 @@ function FileRow({ url, name }: { url: string; name: string }) {
   return (
     <div className="flex items-center justify-between px-4 py-3 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB]">
       <div className="flex items-center gap-2.5">
-        <span className="text-[#9CA3AF]">📄</span>
+        <Image src="/ai-recommendation/text-inactive.svg" alt="" width={16} height={16} />
         <div>
           <p className="text-[13px] font-medium text-[#1E2125]">{name}</p>
           <p className="text-[11px] text-[#9CA3AF]">{fileExtFromUrl(url)}</p>
@@ -47,7 +47,7 @@ function FileRow({ url, name }: { url: string; name: string }) {
       <a
         href={url}
         download={name}
-        className="px-3 py-1.5 rounded-md border border-[#D1D5DB] text-[12px] font-semibold text-[#1E2125] hover:bg-white transition-colors"
+        className="px-3 py-1.5 rounded-md border border-[#D1D5DB] text-[12px] font-medium text-[#1E2125] hover:bg-white transition-colors"
       >
         다운로드
       </a>
@@ -98,10 +98,7 @@ export default function InstructorApplicationDetailView({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <svg viewBox="0 0 24 24" className="w-12 h-12 fill-none stroke-current stroke-[1.2]">
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 20c0-4 3.5-7 8-7s8 3 8 7" strokeLinecap="round" />
-              </svg>
+              <Image src="/chat/basic-profile-gray.svg" alt="" width={48} height={48} />
             )}
           </div>
 
@@ -178,22 +175,6 @@ export default function InstructorApplicationDetailView({
             name={fileNameFromUrl(cert.fileUrl)}
           />
         ))}
-        {certifications.length > 0 && (
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 mt-2">
-            <p className="text-[12px] font-semibold text-[#6A7282]">자격증명</p>
-            <p className="text-[12px] font-semibold text-[#6A7282]">발급 기관</p>
-            {certifications.map((cert, idx) => (
-              <Fragment key={idx}>
-                <p className="text-[13.5px] text-[#1E2125] border border-[#E5E7EB] rounded-lg px-4 py-2.5">
-                  {cert.certificationName}
-                </p>
-                <p className="text-[13.5px] text-[#1E2125] border border-[#E5E7EB] rounded-lg px-4 py-2.5">
-                  {cert.issuedBy}
-                </p>
-              </Fragment>
-            ))}
-          </div>
-        )}
       </SectionCard>
 
       <SectionCard title="이력서">

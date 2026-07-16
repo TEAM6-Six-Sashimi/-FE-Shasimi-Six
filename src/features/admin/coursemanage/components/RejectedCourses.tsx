@@ -51,7 +51,7 @@ export default function RejectedCourses({ courses, categories }: Props) {
             <th className="py-3 w-[6%] text-center font-semibold text-[#1E2125]">#</th>
             <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">강의명</th>
             <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">강사명</th>
-            <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125]">
+            <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125] break-keep">
               카테고리 &gt; 세부카테고리
             </th>
             <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">반려일</th>
@@ -81,7 +81,7 @@ export default function RejectedCourses({ courses, categories }: Props) {
                 </td>
                 <td className="py-3 px-4 text-left font-semibold text-[#1E2125]">{c.title}</td>
                 <td className="py-3 text-center text-[#6A7282]">{c.instructorName}</td>
-                <td className="py-3 text-center text-[#6A7282]">
+                <td className="py-3 px-2 text-center text-[#6A7282] break-keep">
                   {getMainCategory(c.categoryName)} &gt; {c.categoryName}
                 </td>
                 <td className="py-3 text-center text-[#6A7282]">

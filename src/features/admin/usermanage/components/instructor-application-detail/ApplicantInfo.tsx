@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { InstructorApplicationDetail } from '@/features/admin/usermanage/types';
 import { buildDownloadHref } from '@/lib/file-url';
 
@@ -29,10 +30,7 @@ export default function ApplicantInfo({ detail }: ApplicantInfoProps) {
               className="w-full h-full object-cover"
             />
           ) : (
-            <svg viewBox="0 0 24 24" className="w-12 h-12 fill-none stroke-current stroke-[1.2]">
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 20c0-4 3.5-7 8-7s8 3 8 7" strokeLinecap="round" />
-            </svg>
+            <Image src="/chat/basic-profile-gray.svg" alt="" width={48} height={48} />
           )}
         </div>
 
