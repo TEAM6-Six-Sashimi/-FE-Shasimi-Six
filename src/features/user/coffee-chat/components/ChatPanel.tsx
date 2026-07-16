@@ -6,7 +6,9 @@ import { fetchChatMessagesAction } from '../actions';
 import { ChatMessage, StudentChatRoom } from '../types';
 import Image from 'next/image';
 
-const SEND_TIMEOUT_MS = 4000;
+// 채팅방의 첫 메시지는 강사 요청 목록 반영 등 서버 쪽 추가 처리가 붙어서
+// 이후 메시지보다 왕복이 더 걸리는 경우가 있어, 여유를 두고 6초로 잡는다.
+const SEND_TIMEOUT_MS = 6000;
 
 function avatarGradient(seed: number) {
   const AVATAR_GRADIENTS = [
