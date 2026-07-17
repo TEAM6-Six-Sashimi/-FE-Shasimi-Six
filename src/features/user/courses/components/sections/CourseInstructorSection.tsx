@@ -47,17 +47,17 @@ export default function CourseInstructorSection({
           </div>
         )}
         {instructor.portfolioUrl && (
-          <p className="text-[#6A7282] text-[13px] mt-1">
-            포트폴리오 링크:{' '}
+          <div className="flex flex-col gap-1 mt-1">
+            <span className="text-[#1E2125] text-[13px] font-semibold">포트폴리오 링크</span>
             <a
               href={toExternalHref(instructor.portfolioUrl)}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#FF5E5E] font-medium hover:underline"
+              className="text-[#FF5E5E] text-[13px] font-medium hover:underline w-fit"
             >
               {instructor.portfolioUrl}
             </a>
-          </p>
+          </div>
         )}
       </div>
     </div>
