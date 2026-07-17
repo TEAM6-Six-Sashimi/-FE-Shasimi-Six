@@ -67,8 +67,21 @@ export default function VideoPlayer({
     }
   };
 
-  // 같은 세션(같은 videoUrl)으로 t 값만 바뀌어 재진입한 경우 - src가 안 바뀌어
-  // loadedmetadata가 다시 발생하지 않으므로, 이미 로드된 영상이면 직접 위치를 옮겨줌
+  // 마운트 시점에 이미 메타데이터가 있으면 즉시 반영
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video && video.readyState >= 1 && Number.isFinite(video.duration)) {
+      setDuration(video.duration);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src]);
+
+  const handleDurationChange = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    setDuration(e.currentTarget.duration);
+  };
+
+  // 같은 세션(같은 videoUrl)으로 t 값만 바뀌어 재진입한 경우
+  // src가 안 바뀌어 loadedmetadata가 다시 발생하지 않으므로, 이미 로드된 영상이면 직접 위치를 옮겨줌
   useEffect(() => {
     const video = videoRef.current;
     if (!video || startSeconds <= 0) return;
@@ -87,6 +100,7 @@ export default function VideoPlayer({
         className="w-full h-full"
         onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
         onLoadedMetadata={handleLoadedMetadata}
+        onDurationChange={handleDurationChange}
         onPlay={() => updatePlaying(true)}
         onPause={() => updatePlaying(false)}
         onEnded={onEnded}
