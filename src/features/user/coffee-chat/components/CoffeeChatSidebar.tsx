@@ -36,6 +36,7 @@ interface CoffeeChatSidebarProps {
   instructorActiveChats: InstructorChatRoom[];
   selectedChatId: number | null;
   onSelectChat: (chatId: number) => void;
+  onTabChange?: () => void;
 }
 
 export default function CoffeeChatSidebar({
@@ -45,6 +46,7 @@ export default function CoffeeChatSidebar({
   instructorActiveChats,
   selectedChatId,
   onSelectChat,
+  onTabChange,
 }: CoffeeChatSidebarProps) {
   const isInstructor = role === 'INSTRUCTOR';
   const tabs = isInstructor ? ALL_TABS : ALL_TABS.filter((tab) => tab.key !== 'requests');
@@ -52,7 +54,9 @@ export default function CoffeeChatSidebar({
   const [activeTab, setActiveTab] = useState<CoffeeChatTab>(isInstructor ? 'requests' : 'rooms');
 
   const handleTabChange = (tab: CoffeeChatTab) => {
+    if (tab === activeTab) return;
     setActiveTab(tab);
+    onTabChange?.();
   };
 
   const tabButtonCls = (tab: CoffeeChatTab) =>
