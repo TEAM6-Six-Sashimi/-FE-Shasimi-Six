@@ -20,10 +20,11 @@ const ChevronIcon = ({ open }: { open: boolean }) => (
 interface MenubarProps {
   categories: Category[];
   role?: 'STUDENT' | 'INSTRUCTOR' | 'GUEST';
+  hasCoffeeChatAlert?: boolean;
 }
 
 // ---- 메인 컴포넌트 ---------------------------------------------
-export default function Menubar({ categories, role }: MenubarProps) {
+export default function Menubar({ categories, role, hasCoffeeChatAlert = false }: MenubarProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -69,6 +70,7 @@ export default function Menubar({ categories, role }: MenubarProps) {
         <div className="flex items-center gap-0.5 ml-auto">
           {NAV_LINKS.map(({ id, label, icon, href }) => {
             const isActive = pathname.startsWith(href);
+            const showAlert = id === 'coffee-chat' && hasCoffeeChatAlert;
             return (
               <Link
                 key={id}
@@ -91,6 +93,9 @@ export default function Menubar({ categories, role }: MenubarProps) {
                     height={16}
                     className={`absolute transition-opacity duration-150 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                   />
+                  {showAlert && (
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#DC2626]" />
+                  )}
                 </span>
                 <span className="hidden min-[750px]:inline">{label}</span>
               </Link>

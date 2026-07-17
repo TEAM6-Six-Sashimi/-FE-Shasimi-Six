@@ -32,7 +32,16 @@ export default function ChatPanel({
 }: ChatPanelProps) {
   const { showToast } = useToast();
   const profileImageUrl = getThumbnailUrl(room.profileImagePath);
+  const statusNotice =
+    room.status === 'REJECTED'
+      ? '커피챗 요청이 강사에 의해 거절되었습니다. 다시 메시지를 보내시면 재요청이 가능합니다.'
+      : room.status === 'LEFT'
+        ? `${room.instructorName} 강사가 채팅방을 떠났습니다. 다시 메시지를 보내시면 재요청이 가능합니다.`
+        : null;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // 방 진입 시점까지의 히스토리 개수. 거절/나가기 안내 문구는 이 지점 뒤에 고정하고,
+  // 그 이후 실시간으로 도착한 메시지(재요청)는 안내 문구 아래에 쌓이도록 한다.
+  const [historyCount, setHistoryCount] = useState(0);
   const [input, setInput] = useState('');
   const [pendingContent, setPendingContent] = useState<string | null>(null);
   const listEndRef = useRef<HTMLDivElement>(null);
@@ -49,10 +58,22 @@ export default function ChatPanel({
   useEffect(() => {
     let cancelled = false;
     setMessages([]);
+    setHistoryCount(0);
     setPendingContent(null);
 
     fetchChatMessagesAction(room.chatId).then((history) => {
-      if (!cancelled) setMessages(history);
+      if (cancelled) return;
+
+      // 히스토리 응답이 오기 전에 소켓으로 먼저 도착한 실시간 메시지가 있을 수 있어서,
+      // 그대로 덮어쓰지 않고 messageId 기준으로 병합한다 (안 그러면 그 메시지가 사라짐).
+      setMessages((prev) => {
+        const merged = [...history];
+        for (const message of prev) {
+          if (!merged.some((m) => m.messageId === message.messageId)) merged.push(message);
+        }
+        return merged.sort((a, b) => a.messageId - b.messageId);
+      });
+      setHistoryCount(history.length);
     });
 
     return () => {
@@ -110,7 +131,7 @@ export default function ChatPanel({
 
   return (
     <div className="flex-1 flex flex-col bg-white h-full">
-      <div className="flex items-center gap-3 px-6 py-4 border-b border-[#E5E7EB]">
+      <div className="flex items-center gap-3 px-6 py-3.5 border-b border-[#E5E7EB]">
         <div className="w-9 h-9 rounded-full bg-[#E5E7EB] shrink-0 overflow-hidden flex items-center justify-center relative">
           {profileImageUrl ? (
             <Image
@@ -169,9 +190,24 @@ export default function ChatPanel({
                   </div>
                 </div>
               </div>
+
+              {statusNotice && idx === historyCount - 1 && (
+                <div className="flex items-center gap-3 my-4">
+                  <div className="flex-1 h-px bg-[#E5E7EB]" />
+                  <span className="text-[12px] text-[#9CA3AF]">{statusNotice}</span>
+                  <div className="flex-1 h-px bg-[#E5E7EB]" />
+                </div>
+              )}
             </div>
           );
         })}
+        {statusNotice && historyCount === 0 && (
+          <div className="flex items-center gap-3 my-4">
+            <div className="flex-1 h-px bg-[#E5E7EB]" />
+            <span className="text-[12px] text-[#9CA3AF]">{statusNotice}</span>
+            <div className="flex-1 h-px bg-[#E5E7EB]" />
+          </div>
+        )}
         <div ref={listEndRef} />
       </div>
 

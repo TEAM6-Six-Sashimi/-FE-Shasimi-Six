@@ -9,3 +9,10 @@ export interface ChatbotHistoryItem {
 export interface ChatbotMessageResponse {
   reply: string;
 }
+
+export interface ChatMessage {
+  id: number;
+  role: 'bot' | 'user';
+  text: string;
+  isIntro?: boolean;
+}
