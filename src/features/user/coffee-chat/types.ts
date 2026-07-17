@@ -9,16 +9,17 @@ export interface StudentChatRoom {
   status: CoffeeChatStatus;
   createdAt: string;
   acceptedAt: string | null;
-  hasUnreadMessages: boolean;
+  unreadMessageCount: number;
   lastMessagePreview: string | null;
   lastMessageAt: string | null;
   profileImagePath: string | null;
 }
 
-// 강사 - 요청 목록(대기 중인 커피챗) 조회 응답
-export interface InstructorPendingChat {
+// 강사 - 커피챗 조회 응답 (요청 목록 / 채팅방 목록 공통 형태)
+export interface InstructorChatRoom {
   chatId: number;
   studentId: number;
+  studentLoginId: string;
   courseId: number;
   courseTitle: string;
   status: CoffeeChatStatus;

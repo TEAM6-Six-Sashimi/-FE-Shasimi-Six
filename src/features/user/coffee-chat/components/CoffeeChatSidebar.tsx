@@ -5,7 +5,7 @@ import { UserMe } from '@/features/auth/types';
 import Image from 'next/image';
 import ChatRoomList from './ChatRoomList';
 import RequestList from './RequestList';
-import { InstructorPendingChat, StudentChatRoom } from '../types';
+import { InstructorChatRoom, StudentChatRoom } from '../types';
 
 type CoffeeChatTab = 'requests' | 'rooms';
 
@@ -32,7 +32,8 @@ const ALL_TABS: {
 interface CoffeeChatSidebarProps {
   role: UserMe['role'];
   studentChatRooms: StudentChatRoom[];
-  instructorPendingChats: InstructorPendingChat[];
+  instructorPendingChats: InstructorChatRoom[];
+  instructorActiveChats: InstructorChatRoom[];
   selectedChatId: number | null;
   onSelectChat: (chatId: number) => void;
 }
@@ -41,6 +42,7 @@ export default function CoffeeChatSidebar({
   role,
   studentChatRooms,
   instructorPendingChats,
+  instructorActiveChats,
   selectedChatId,
   onSelectChat,
 }: CoffeeChatSidebarProps) {
@@ -65,6 +67,7 @@ export default function CoffeeChatSidebar({
       <div className="flex items-center border-b border-[#E5E7EB]">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
+          const count = tab.key === 'requests' ? instructorPendingChats.length : null;
           return (
             <button
               key={tab.key}
@@ -81,13 +84,27 @@ export default function CoffeeChatSidebar({
                 />
               </span>
               {tab.label}
+              {count !== null && ` (${count})`}
             </button>
           );
         })}
       </div>
 
-      {activeTab === 'requests' && <RequestList requests={instructorPendingChats} />}
-      {activeTab === 'rooms' && (
+      {activeTab === 'requests' && (
+        <RequestList
+          requests={instructorPendingChats}
+          selectedChatId={selectedChatId}
+          onSelect={onSelectChat}
+        />
+      )}
+      {activeTab === 'rooms' && isInstructor && (
+        <RequestList
+          requests={instructorActiveChats}
+          selectedChatId={selectedChatId}
+          onSelect={onSelectChat}
+        />
+      )}
+      {activeTab === 'rooms' && !isInstructor && (
         <ChatRoomList
           rooms={studentChatRooms}
           selectedChatId={selectedChatId}

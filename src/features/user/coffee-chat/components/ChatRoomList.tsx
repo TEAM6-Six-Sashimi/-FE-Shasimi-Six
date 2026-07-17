@@ -31,8 +31,8 @@ export default function ChatRoomList({ rooms, selectedChatId, onSelect }: ChatRo
           <button
             type="button"
             onClick={() => onSelect(room.chatId)}
-            className={`w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-[#F9FAFB] transition-colors cursor-pointer ${
-              selectedChatId === room.chatId ? 'bg-[#F9FAFB]' : ''
+            className={`w-full flex items-center gap-3 px-5 py-4 text-left transition-colors cursor-pointer ${
+              selectedChatId === room.chatId ? 'bg-[#FFEBEB]' : 'hover:bg-[#F9FAFB]'
             }`}
           >
             <div className="w-11 h-11 rounded-full bg-[#D1D5DB] shrink-0 overflow-hidden flex items-center justify-center relative">
@@ -64,8 +64,10 @@ export default function ChatRoomList({ rooms, selectedChatId, onSelect }: ChatRo
               <span className="text-[11.5px] text-[#9CA3AF]">
                 {formatDate(room.lastMessageAt)}
               </span>
-              {room.hasUnreadMessages && (
-                <span className="w-4.5 h-4.5 rounded-full bg-[#FF5E5E]" />
+              {room.unreadMessageCount > 0 && (
+                <span className="min-w-4.5 h-4.5 px-1 rounded-full bg-[#FF5E5E] flex items-center justify-center text-[10px] leading-none text-white font-semibold">
+                  {room.unreadMessageCount}
+                </span>
               )}
             </div>
           </button>
