@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { useToast } from '@/components/ui/ToastContext';
 import {
   acceptInstructorChatAction,
@@ -40,6 +41,7 @@ export default function InstructorChatPanel({
   const [input, setInput] = useState('');
   const [pendingContent, setPendingContent] = useState<string | null>(null);
   const [isResponding, setIsResponding] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const listEndRef = useRef<HTMLDivElement>(null);
 
   const pendingContentRef = useRef<string | null>(null);
@@ -139,6 +141,7 @@ export default function InstructorChatPanel({
 
   const handleLeave = async () => {
     if (isResponding) return;
+    setShowLeaveConfirm(false);
     setIsResponding(true);
     const success = await leaveInstructorChatAction(room.chatId);
     setIsResponding(false);
@@ -163,7 +166,7 @@ export default function InstructorChatPanel({
         {!isPending && (
           <button
             type="button"
-            onClick={handleLeave}
+            onClick={() => setShowLeaveConfirm(true)}
             disabled={isResponding}
             className="h-9 px-4 rounded-md bg-[#FF5E5E] text-white text-[13px] font-semibold shrink-0 cursor-pointer hover:bg-[#D14848] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
@@ -275,6 +278,17 @@ export default function InstructorChatPanel({
             />
           </button>
         </form>
+      )}
+
+      {showLeaveConfirm && (
+        <TwoButtonModal
+          title="채팅방 나가기"
+          message="채팅방을 떠나시겠습니까?"
+          confirmLabel={isResponding ? '처리 중...' : '확인'}
+          cancelLabel="취소"
+          onConfirm={handleLeave}
+          onCancel={() => setShowLeaveConfirm(false)}
+        />
       )}
     </div>
   );
