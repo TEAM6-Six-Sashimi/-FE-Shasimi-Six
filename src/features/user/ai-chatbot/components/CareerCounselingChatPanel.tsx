@@ -57,6 +57,11 @@ function renderMessageText(text: string) {
   );
 }
 
+// TTS로 읽을 때는 강조용 **를 그대로 읽지 않도록 제거
+function stripMarkdown(text: string) {
+  return text.replace(/\*\*([^*]+)\*\*/g, '$1');
+}
+
 function BotAvatar() {
   return (
     <span className="mr-1.5">
@@ -70,7 +75,7 @@ function TypingIndicator() {
   return (
     <div className="flex items-start gap-2">
       <BotAvatar />
-      <div className="bg-[#F3F4F6] border rounded-2xl rounded-tl-sm px-4 py-2 mt-2">
+      <div className="bg-[#F3F4F6] border rounded-2xl rounded-bl-sm px-4 py-2">
         <InlineDotsLoading />
       </div>
     </div>
@@ -87,9 +92,27 @@ export default function CareerCounselingChatPanel({ onClose }: Props) {
   const [isSending, setIsSending] = useState(false);
   const [isWaitingReply, setIsWaitingReply] = useState(false);
   const [streamingId, setStreamingId] = useState<number | null>(null);
+  const [isIntroPlaying, setIsIntroPlaying] = useState(true);
+  const [hasTTSSupport, setHasTTSSupport] = useState(false);
+  const [speakingMessageId, setSpeakingMessageId] = useState<number | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const intervalsRef = useRef<Set<ReturnType<typeof setInterval>>>(new Set());
+
+  // 브라우저의 TTS(SpeechSynthesis) 지원 여부 체크
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (typeof window.speechSynthesis !== 'undefined') {
+      setHasTTSSupport(true);
+    }
+  }, []);
+
+  // 채팅창을 닫거나 컴포넌트가 사라지면 읽던 음성도 함께 중단
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis?.cancel();
+    };
+  }, []);
 
   // 새 메시지가 추가/갱신되거나 로딩 인디케이터가 뜨면 항상 맨 아래로 스크롤
   useEffect(() => {
@@ -134,7 +157,13 @@ export default function CareerCounselingChatPanel({ onClose }: Props) {
     const addedIds: number[] = [];
 
     const playNext = (index: number) => {
-      if (cancelled || index >= INITIAL_MESSAGES.length) return;
+      if (cancelled) return;
+      if (index >= INITIAL_MESSAGES.length) {
+        // 안내 메시지 사이 대기 시간(INTRO_MESSAGE_GAP_MS) 동안에는 streamingId가 잠깐 null이 되므로,
+        // 전체 안내 시퀀스가 끝났는지는 이 플래그로 따로 표시한다
+        setIsIntroPlaying(false);
+        return;
+      }
       const intro = INITIAL_MESSAGES[index];
       addedIds.push(intro.id);
       setMessages((prev) => [...prev, { id: intro.id, role: 'bot', text: '', isIntro: true }]);
@@ -154,9 +183,14 @@ export default function CareerCounselingChatPanel({ onClose }: Props) {
     };
   }, []);
 
+  // 하드코딩된 안내 메시지 시퀀스 전체(isIntroPlaying, 메시지 사이 대기 시간 포함)와
+  // 실제 응답을 기다리거나 타이핑하는 동안(isSending) 모두 "응답 중"으로 보고,
+  // 이 시간에는 전송만 막는다 (입력창 자체는 계속 타이핑 가능하게 열어둠)
+  const isResponding = isSending || isIntroPlaying || streamingId !== null;
+
   const handleSend = async () => {
     const trimmed = input.trim();
-    if (!trimmed || isSending) return;
+    if (!trimmed || isResponding) return;
 
     // 안내용 초기 메시지는 실제 대화가 아니므로 history에서 제외
     const history: ChatbotHistoryItem[] = messages
@@ -192,6 +226,33 @@ export default function CareerCounselingChatPanel({ onClose }: Props) {
     }
   };
 
+  // 스피커 아이콘 클릭 시 해당 메시지를 TTS로 읽어주고, 읽는 중인 메시지를 다시 누르면 중지
+  const handleToggleSpeak = (msg: ChatMessage) => {
+    if (!hasTTSSupport) return;
+
+    const synth = window.speechSynthesis;
+
+    if (speakingMessageId === msg.id) {
+      synth.cancel();
+      setSpeakingMessageId(null);
+      return;
+    }
+
+    synth.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(stripMarkdown(msg.text).trim());
+    utterance.lang = 'ko-KR';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    utterance.voice = synth.getVoices()[12];
+    utterance.onstart = () => setSpeakingMessageId(msg.id);
+    utterance.onend = () => setSpeakingMessageId((current) => (current === msg.id ? null : current));
+    utterance.onerror = () => setSpeakingMessageId((current) => (current === msg.id ? null : current));
+
+    synth.speak(utterance);
+  };
+
   return (
     <div className="fixed bottom-25 right-8 z-50 w-105 max-w-[calc(100vw-2rem)] h-[min(39.75rem,calc(100vh-7.5rem))] bg-white rounded-xl shadow-2xl border border-[#E5E7EB] flex flex-col overflow-hidden">
       {/* 헤더 */}
@@ -206,21 +267,40 @@ export default function CareerCounselingChatPanel({ onClose }: Props) {
       </div>
 
       {/* 메시지 목록 */}
-      <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-1.5 bg-[#F9FAFB]">
+      <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 bg-[#F9FAFB]">
         {messages.map((msg) =>
           msg.role === 'bot' ? (
-            <div key={msg.id} className="flex items-start gap-2">
+            <div key={msg.id} className="flex items-end gap-2">
               <BotAvatar />
-              <p className="max-w-68 bg-[#F3F4F6] text-[#1E2125] text-[13px] border leading-relaxed rounded-2xl rounded-tl-sm px-4 py-2.5 mt-2 whitespace-pre-line wrap-break-word">
+              <p className="max-w-68 bg-[#F3F4F6] text-[#1E2125] text-[13px] border leading-relaxed rounded-2xl rounded-bl-sm px-4 py-2.5 whitespace-pre-line wrap-break-word">
                 {renderMessageText(msg.text)}
                 {msg.id === streamingId && (
                   <span className="inline-block w-1 h-3.5 bg-[#9CA3AF] ml-0.5 align-middle animate-pulse" />
                 )}
               </p>
+              {hasTTSSupport && msg.text && msg.id !== streamingId && (
+                <button
+                  type="button"
+                  aria-label={speakingMessageId === msg.id ? '읽기 중지' : '텍스트 읽어주기'}
+                  onClick={() => handleToggleSpeak(msg)}
+                  className="shrink-0 cursor-pointer"
+                >
+                  <Image
+                    src={
+                      speakingMessageId === msg.id
+                        ? '/chat/speaker-stop.svg'
+                        : '/chat/speaker-active.svg'
+                    }
+                    alt=""
+                    width={13}
+                    height={13}
+                  />
+                </button>
+              )}
             </div>
           ) : (
             <div key={msg.id} className="flex justify-end">
-              <p className="max-w-70 bg-[#5B8DEE] text-white text-[13.5px] leading-relaxed rounded-2xl rounded-tr-sm px-4 py-2.5 whitespace-pre-line wrap-break-word">
+              <p className="max-w-70 bg-[#5B8DEE] text-white text-[13.5px] leading-relaxed rounded-2xl rounded-br-sm px-4 py-2.5 whitespace-pre-line wrap-break-word">
                 {msg.text}
               </p>
             </div>
@@ -238,21 +318,20 @@ export default function CareerCounselingChatPanel({ onClose }: Props) {
           onKeyDown={handleKeyDown}
           placeholder="진로 고민을 편하게 입력해보세요"
           maxLength={2000}
-          disabled={isSending}
           rows={1}
-          className="flex-1 resize-none overflow-hidden py-2 px-4 rounded-lg border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors disabled:opacity-60"
+          className="flex-1 resize-none overflow-hidden py-2 px-4 rounded-lg border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors"
         />
         <button
           type="button"
           aria-label="메시지 보내기"
           onClick={handleSend}
-          disabled={!input.trim() || isSending}
+          disabled={!input.trim() || isResponding}
           className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 cursor-pointer transition-colors disabled:cursor-not-allowed ${
-            input.trim() && !isSending ? 'bg-[#5B8DEE]' : 'bg-[#E5E7EB]'
+            input.trim() && !isResponding ? 'bg-[#5B8DEE]' : 'bg-[#E5E7EB]'
           }`}
         >
           <Image
-            src={input.trim() && !isSending ? '/chat/send-active.svg' : '/chat/send-inactive.svg'}
+            src={input.trim() && !isResponding ? '/chat/send-active.svg' : '/chat/send-inactive.svg'}
             alt="전송"
             width={18}
             height={18}
