@@ -40,7 +40,11 @@ export function useSpeechSynthesis() {
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
-    utterance.voice = synth.getVoices()[12];
+    // 한국어 음성을 찾아 지정 (없으면 브라우저 기본 음성 사용)
+    const koreanVoice = synth.getVoices().find((voice) => voice.lang.toLowerCase().startsWith('ko'));
+    if (koreanVoice) {
+      utterance.voice = koreanVoice;
+    }
     utterance.onstart = () => setSpeakingMessageId(msg.id);
     utterance.onend = () => setSpeakingMessageId((current) => (current === msg.id ? null : current));
     utterance.onerror = () => setSpeakingMessageId((current) => (current === msg.id ? null : current));
