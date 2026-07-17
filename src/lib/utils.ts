@@ -19,3 +19,8 @@ export function formatYearMonthDay(value: string): string {
   if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
   return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
 }
+
+// TTS로 읽을 때는 강조용 **를 그대로 읽지 않도록 제거
+export function stripMarkdown(text: string) {
+  return text.replace(/\*\*([^*]+)\*\*/g, '$1');
+}
