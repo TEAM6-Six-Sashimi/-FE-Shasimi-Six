@@ -59,11 +59,13 @@ export default function CoffeeChatPageClient({
           instructorActiveChats={instructorActiveChats}
           selectedChatId={selectedChatId}
           onSelectChat={handleSelectChat}
+          onTabChange={() => setSelectedChatId(null)}
         />
       </div>
 
       {selectedStudentRoom && (
         <ChatPanel
+          key={selectedStudentRoom.chatId}
           room={selectedStudentRoom}
           myUserId={userId}
           isConnected={isConnected}
@@ -73,6 +75,7 @@ export default function CoffeeChatPageClient({
       )}
       {selectedInstructorChat && (
         <InstructorChatPanel
+          key={selectedInstructorChat.chatId}
           room={selectedInstructorChat}
           myUserId={userId}
           isConnected={isConnected}

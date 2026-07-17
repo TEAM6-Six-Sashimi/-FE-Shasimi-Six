@@ -62,10 +62,18 @@ export default function ChatPanel({
     setPendingContent(null);
 
     fetchChatMessagesAction(room.chatId).then((history) => {
-      if (!cancelled) {
-        setMessages(history);
-        setHistoryCount(history.length);
-      }
+      if (cancelled) return;
+
+      // 히스토리 응답이 오기 전에 소켓으로 먼저 도착한 실시간 메시지가 있을 수 있어서,
+      // 그대로 덮어쓰지 않고 messageId 기준으로 병합한다 (안 그러면 그 메시지가 사라짐).
+      setMessages((prev) => {
+        const merged = [...history];
+        for (const message of prev) {
+          if (!merged.some((m) => m.messageId === message.messageId)) merged.push(message);
+        }
+        return merged.sort((a, b) => a.messageId - b.messageId);
+      });
+      setHistoryCount(history.length);
     });
 
     return () => {
