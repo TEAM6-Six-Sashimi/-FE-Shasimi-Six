@@ -115,11 +115,11 @@ export default function Menubar({ categories, role, hasCoffeeChatAlert = false }
         `}
       >
         <div className="overflow-x-auto px-5 py-6">
-          <div className="flex min-w-max">
+          <div className="flex w-full">
             {categories.map((cat, i) => (
               <div
                 key={cat.name}
-                className={`w-40 shrink-0 px-3.5 ${i === 0 ? 'pl-1' : ''} ${i === categories.length - 1 ? 'border-r-0 pr-1' : 'border-r border-white/10'}`}
+                className={`flex-1 min-w-40 px-3.5 ${i === 0 ? 'pl-1' : ''} ${i === categories.length - 1 ? 'border-r-0 pr-1' : 'border-r border-white/10'}`}
               >
                 {/* 카테고리 타이틀 */}
                 <div className="text-[#CFEE5D] text-[13.5px] font-extrabold tracking-tight leading-snug mb-3 pb-2.5 border-b border-white/10 cursor-default">

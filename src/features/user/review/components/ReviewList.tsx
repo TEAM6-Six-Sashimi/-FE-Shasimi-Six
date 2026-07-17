@@ -206,14 +206,17 @@ export default function ReviewList({
                     삭제
                   </button>
                 ) : (
-                  <button
-                    type="button"
-                    aria-label="수강평 신고"
-                    onClick={() => setReportTarget(review)}
-                    className="text-[#6A7282] text-[12px] hover:text-[#FF5E5E] transition-colors shrink-0 cursor-pointer flex items-center gap-0.5"
-                  >
-                    <span aria-hidden="true">⚠</span> 신고
-                  </button>
+                  // 비로그인 게스트는 신고할 수 없으므로(서버 인증 필요) 버튼 자체를 노출하지 않음
+                  currentUserLoginId && (
+                    <button
+                      type="button"
+                      aria-label="수강평 신고"
+                      onClick={() => setReportTarget(review)}
+                      className="text-[#6A7282] text-[12px] hover:text-[#FF5E5E] transition-colors shrink-0 cursor-pointer flex items-center gap-0.5"
+                    >
+                      <span aria-hidden="true">⚠</span> 신고
+                    </button>
+                  )
                 )}
               </div>
               <p className="text-[#1E2125] text-[13px] leading-relaxed pl-10">{review.content}</p>
