@@ -104,60 +104,72 @@ function QuestionCard({ question }: { question: CoverLetterReviewQuestion }) {
         </span>
       </div>
 
-      <div className="border border-[#E5E7EB] rounded-lg overflow-hidden grid grid-cols-1 md:grid-cols-2 md:divide-x md:divide-[#E5E7EB]">
-        {/* 맞춤법·오타 수정 */}
-        <div className="p-5 flex flex-col max-h-80">
-          <h4 className="shrink-0 text-[13.5px] font-bold text-[#1E2125] mb-3">
-            맞춤법·오타 수정 (총 {question.spellingCorrectionCount}건)
-          </h4>
-          {question.spellingCorrections.length === 0 ? (
-            <p className="text-[12.5px] text-[#9CA3AF]">수정할 맞춤법·오타가 없습니다.</p>
-          ) : (
-            <div className="flex-1 min-h-0 overflow-y-auto pr-1 divide-y divide-[#F3F4F6]">
-              {visibleCorrections.map((correction, idx) => (
-                <div key={idx} className="grid grid-cols-2 gap-3 py-2 text-[12.5px]">
-                  <span className="text-[#9CA3AF] line-through truncate">
-                    {correction.original}
-                  </span>
-                  <span className="text-[#1E2125] truncate">{correction.corrected}</span>
+      <div className="border border-[#E5E7EB] rounded-lg overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:divide-x md:divide-[#E5E7EB]">
+          {/* 맞춤법·오타 수정 */}
+          <div className="p-5 flex flex-col max-h-80">
+            <h4 className="shrink-0 text-[13.5px] font-bold text-[#1E2125] mb-3">
+              맞춤법·오타 수정 (총 {question.spellingCorrectionCount}건)
+            </h4>
+            {question.spellingCorrections.length === 0 ? (
+              <p className="text-[12.5px] text-[#9CA3AF]">수정할 맞춤법·오타가 없습니다.</p>
+            ) : (
+              <>
+                <div className="shrink-0 grid grid-cols-2 gap-3 pb-2 text-[12px] font-semibold text-[#6A7282]">
+                  <span>원문</span>
+                  <span>수정문</span>
                 </div>
-              ))}
-            </div>
-          )}
-          {hiddenCount > 0 && (
-            <button
-              type="button"
-              onClick={() => setIsExpanded((prev) => !prev)}
-              className="shrink-0 w-full flex items-center justify-center gap-1 mt-2 py-1.5 text-[12px] text-[#6A7282] hover:text-[#1E2125] cursor-pointer transition-colors"
-            >
-              {isExpanded ? '접기' : `외 ${hiddenCount}건 보기`}
-              <span
-                className="inline-block transition-transform"
-                style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }}
+                <div className="flex-1 min-h-0 overflow-y-auto pr-1 divide-y divide-[#F3F4F6]">
+                  {visibleCorrections.map((correction, idx) => (
+                    <div key={idx} className="grid grid-cols-2 gap-3 py-2 text-[12.5px]">
+                      <span className="text-[#9CA3AF] truncate">
+                        {correction.original}
+                      </span>
+                      <span className="text-[#1E2125] truncate">{correction.corrected}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+            {hiddenCount > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsExpanded((prev) => !prev)}
+                className="shrink-0 w-full flex items-center justify-center gap-1 mt-2 py-1.5 text-[12px] text-[#6A7282] hover:text-[#1E2125] cursor-pointer transition-colors"
               >
-                ⌄
-              </span>
-            </button>
-          )}
-        </div>
-
-        {/* 종합 첨삭 피드백 */}
-        <div className="p-5 flex flex-col max-h-80">
-          <h4 className="shrink-0 text-[13.5px] font-bold text-[#1E2125] mb-3">종합 첨삭 피드백</h4>
-          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
-            <p className="text-[12.5px] text-[#374151] leading-relaxed whitespace-pre-line mb-4">
-              {question.feedback}
-            </p>
-            {question.improvedExample && (
-              <div className="bg-[#FEF3C7] border border-[#ECFCCB] rounded-lg p-4">
-                <p className="text-[12.5px] font-bold text-[#92400E] mb-1.5">AI 개선 예시</p>
-                <p className="text-[12.5px] text-[#1E2125] leading-relaxed whitespace-pre-line">
-                  {question.improvedExample}
-                </p>
-              </div>
+                {isExpanded ? '접기' : `외 ${hiddenCount}건 보기`}
+                <span
+                  className="inline-block transition-transform"
+                  style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }}
+                >
+                  ⌄
+                </span>
+              </button>
             )}
           </div>
+
+          {/* 종합 첨삭 피드백 */}
+          <div className="p-5 flex flex-col max-h-80">
+            <h4 className="shrink-0 text-[13.5px] font-bold text-[#1E2125] mb-3">종합 첨삭 피드백</h4>
+            <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+              <p className="text-[12.5px] text-[#374151] leading-relaxed whitespace-pre-line">
+                {question.feedback}
+              </p>
+            </div>
+          </div>
         </div>
+
+        {/* AI 개선 예시 */}
+        {question.improvedExample && (
+          <div className="px-5 pt-2 pb-5">
+            <div className="bg-[#FEF3C7] border border-[#ECFCCB] rounded-lg p-4">
+              <p className="text-[12.5px] font-bold text-[#92400E] mb-1.5">AI 개선 예시</p>
+              <p className="text-[12.5px] text-[#1E2125] leading-relaxed whitespace-pre-line">
+                {question.improvedExample}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -191,16 +203,21 @@ export default function SelfIntroReviewDetail({ reviewId }: SelfIntroReviewDetai
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-[20px] font-extrabold text-[#1E2125]">AI 첨삭 상세 결과</h2>
-        <button
-          type="button"
-          onClick={() => setIsMyCoverLetterOpen(true)}
-          disabled={!review}
-          className="px-4 py-2 rounded-lg border border-[#D1D5DB] text-[13px] font-semibold text-[#1E2125] hover:bg-[#F9FAFB] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          나의 자기소개서 보기
-        </button>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-[20px] font-extrabold mt-2 text-[#1E2125]">AI 첨삭 상세 결과</h2>
+          <button
+            type="button"
+            onClick={() => setIsMyCoverLetterOpen(true)}
+            disabled={!review}
+            className="px-4 py-2 rounded-lg border border-[#D1D5DB] text-[13px] font-semibold text-[#1E2125] hover:bg-[#F9FAFB] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            나의 자기소개서 보기
+          </button>
+        </div>
+        <p className="text-[12px] text-[#DC2626]">
+          AI가 생성한 첨삭 결과이며 실제와 다를 수 있으니 참고용으로 확인해주세요.
+        </p>
       </div>
 
       {isLoading ? (
