@@ -22,8 +22,8 @@ export default async function UserLayout({ children }: { children: React.ReactNo
   const role = user?.role === 'STUDENT' || user?.role === 'INSTRUCTOR' ? user.role : 'GUEST';
 
   // 상단 메뉴 "커피챗" 아이콘에 안읽음 알림 점을 띄우기 위한 체크.
-  // 학생은 안읽은 메시지가 있는 방이 있는지, 강사는 대기 중인 요청이 있거나
-  // 안읽은 메시지가 있는 채팅방이 있는지로 판단한다.
+  // 학생/강사 모두 안읽은 메시지가 있는 방(요청 목록 포함)이 있는지로만 판단한다.
+  // (강사의 경우, 처리 안 한 요청이 있어도 메시지를 이미 다 읽었으면 알림 안 띄움)
   let hasCoffeeChatAlert = false;
   if (role === 'STUDENT') {
     const rooms = await fetchStudentChatRoomsAction();
@@ -33,8 +33,9 @@ export default async function UserLayout({ children }: { children: React.ReactNo
       fetchInstructorPendingChatsAction(),
       fetchInstructorActiveChatsAction(),
     ]);
-    hasCoffeeChatAlert =
-      pendingChats.length > 0 || activeChats.some((chat) => chat.unreadMessageCount > 0);
+    hasCoffeeChatAlert = [...pendingChats, ...activeChats].some(
+      (chat) => chat.unreadMessageCount > 0,
+    );
   }
 
   return (

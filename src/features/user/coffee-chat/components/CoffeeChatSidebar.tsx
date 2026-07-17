@@ -66,12 +66,18 @@ export default function CoffeeChatSidebar({
         : 'border-transparent text-[#9CA3AF] hover:text-[#6A7282]'
     }`;
 
+  // "채팅방" 탭에 안읽음 알림 점 표시 (강사의 "요청 목록" 탭은 제외)
+  const hasRoomsTabAlert = isInstructor
+    ? instructorActiveChats.some((chat) => chat.unreadMessageCount > 0)
+    : studentChatRooms.some((room) => room.unreadMessageCount > 0);
+
   return (
     <div className="flex flex-col h-full border-r border-[#E5E7EB]">
       <div className="flex items-center border-b border-[#E5E7EB]">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
           const count = tab.key === 'requests' ? instructorPendingChats.length : null;
+          const showAlert = tab.key === 'rooms' && hasRoomsTabAlert;
           return (
             <button
               key={tab.key}
@@ -86,6 +92,9 @@ export default function CoffeeChatSidebar({
                   width={16}
                   height={16}
                 />
+                {showAlert && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#DC2626]" />
+                )}
               </span>
               {tab.label}
               {count !== null && ` (${count})`}
