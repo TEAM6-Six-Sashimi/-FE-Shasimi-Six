@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import { useToast } from '@/components/ui/ToastContext';
 import { logoutAction } from '@/features/auth/actions';
@@ -69,7 +70,12 @@ export default function SelfIntroSidebar({ initialReview, isDirty }: SelfIntroSi
           AI 자기소개서 평가
         </h2>
 
-        {!summary ? (
+        {isEvaluating ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-10">
+            <InlineDotsLoading dotColor="#5B8DEE" />
+            <p className="text-[13px] text-[#6A7282]">AI가 자기소개서를 분석하고 있어요...</p>
+          </div>
+        ) : !summary ? (
           <p className="text-[13px] text-[#6A7282] leading-relaxed">
             저장된 자기소개서를 AI가 분석하고 개선 방향을 제안해드립니다.
           </p>
