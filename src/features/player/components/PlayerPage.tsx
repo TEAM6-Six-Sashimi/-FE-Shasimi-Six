@@ -7,6 +7,7 @@ import { CourseDetailFromAPI, CourseSession } from '@/features/user/courses/type
 import { useToast } from '@/components/ui/ToastContext';
 import { AuthSessionError } from '@/features/auth/errors';
 import { logoutAction } from '@/features/auth/actions';
+import { buildDownloadHref } from '@/lib/file-url';
 import { saveSessionProgressAction } from '../actions';
 import PlayerTopBar from './PlayerTopBar';
 import VideoPlayer from './VideoPlayer';
@@ -39,9 +40,12 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
   })();
 
   const loggedOutRef = useRef(false);
+  // 실제 수강생(구매자)만 진행률 저장 대상 - 미리보기(PUBLIC)는 저장 API 호출 대상이 아님
+  const isEnrolled = course.viewerType !== 'PUBLIC';
 
   const saveProgress = useCallback(
     async (positionSeconds: number): Promise<'success' | 'authError' | 'error'> => {
+      if (!isEnrolled) return 'success';
       try {
         await saveSessionProgressAction(courseId, sessionId, Math.floor(positionSeconds));
         return 'success';
@@ -58,7 +62,7 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
         return 'error';
       }
     },
-    [courseId, sessionId, showToast],
+    [isEnrolled, courseId, sessionId, showToast],
   );
 
   useEffect(() => {
@@ -82,7 +86,7 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
     setIsEnding(true);
     const result = await saveProgress(videoRef.current?.currentTime ?? 0);
 
-    if (result === 'success') {
+    if (result === 'success' && isEnrolled) {
       showToast('학습 진행 상황이 저장되었습니다.', 'positive');
     } else if (result === 'error') {
       showToast('저장에 실패했습니다. 잠시 후 다시 시도해주세요.', 'negative');
@@ -119,6 +123,7 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
     <div className="lg:h-full lg:overflow-hidden flex flex-col">
       <PlayerTopBar
         isEnding={isEnding}
+        endLabel={isEnrolled ? '학습 종료' : '미리보기 종료'}
         onBack={() => router.back()}
         onEndLearning={handleEndLearning}
       />
@@ -143,7 +148,7 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
             </div>
             {currentSession.attachmentUrl && (
               <a
-                href={currentSession.attachmentUrl}
+                href={buildDownloadHref(currentSession.attachmentUrl)}
                 download={currentSession.attachmentName || undefined}
                 target="_blank"
                 rel="noopener noreferrer"
