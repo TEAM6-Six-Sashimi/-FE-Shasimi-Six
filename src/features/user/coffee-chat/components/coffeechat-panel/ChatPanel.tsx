@@ -26,15 +26,8 @@ export default function ChatPanel({
   onBack,
 }: ChatPanelProps) {
   const profileImageUrl = getThumbnailUrl(room.profileImagePath);
-  const statusNotice =
-    room.status === 'REJECTED'
-      ? '커피챗 요청이 강사에 의해 거절되었습니다. 다시 메시지를 보내시면 재요청이 가능합니다.'
-      : room.status === 'LEFT'
-        ? `${room.instructorName} 강사가 채팅방을 떠났습니다. 다시 메시지를 보내시면 재요청이 가능합니다.`
-        : null;
 
-  const { messages, historyCount, input, setInput, pendingContent, listEndRef, handleSend } =
-    useChatMessages({
+  const { messages, input, setInput, pendingContent, listEndRef, handleSend } = useChatMessages({
       chatId: room.chatId,
       myUserId,
       fetchMessages: fetchChatMessagesAction,
@@ -86,13 +79,7 @@ export default function ChatPanel({
         </h2>
       </div>
 
-      <ChatMessageList
-        messages={messages}
-        myUserId={myUserId}
-        listEndRef={listEndRef}
-        notice={statusNotice}
-        noticeAfterIndex={historyCount - 1}
-      />
+      <ChatMessageList messages={messages} myUserId={myUserId} listEndRef={listEndRef} />
 
       <ChatMessageInput
         value={input}

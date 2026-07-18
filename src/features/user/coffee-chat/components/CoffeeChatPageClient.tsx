@@ -8,7 +8,7 @@ import InstructorChatPanel from './coffeechat-panel/InstructorChatPanel';
 import { useCoffeeChatSocket } from '../hooks/useCoffeeChatSocket';
 import { fetchChatMessagesAction, fetchInstructorMessagesAction } from '../actions';
 import { UserMe } from '@/features/auth/types';
-import { ChatMessage, InstructorChatRoom, StudentChatRoom } from '../types';
+import { ChatMessageEvent, InstructorChatRoom, StudentChatRoom } from '../types';
 
 interface CoffeeChatPageClientProps {
   role: UserMe['role'];
@@ -29,7 +29,7 @@ interface UnreadTrackable {
 function applyIncomingMessage<T extends UnreadTrackable>(
   list: T[],
   chatId: number,
-  message: ChatMessage,
+  message: ChatMessageEvent,
 ): T[] {
   return list.map((item) =>
     item.chatId === chatId
@@ -115,6 +115,7 @@ export default function CoffeeChatPageClient({
 
     const unsubscribers = backgroundChatIds.map((chatId) =>
       subscribe(chatId, (message) => {
+        if (message.eventType === 'READ') return; // 읽음 이벤트는 안읽음 배지에 영향 없음
         if (message.senderId === userId) return; // 내가 보낸 메시지는 안읽음으로 세지 않는다
 
         if (isInstructor) {

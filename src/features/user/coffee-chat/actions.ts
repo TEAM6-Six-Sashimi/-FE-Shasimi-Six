@@ -11,7 +11,7 @@ import {
   leaveInstructorChat,
   rejectInstructorChat,
 } from '@/services/coffee-chat.service';
-import { ChatMessage, InstructorChatRoom, StudentChatRoom } from './types';
+import { ChatMessageEvent, InstructorChatRoom, StudentChatRoom } from './types';
 
 export async function fetchStudentChatRoomsAction(): Promise<StudentChatRoom[]> {
   const cookieStore = await cookies();
@@ -40,7 +40,7 @@ export async function fetchInstructorActiveChatsAction(): Promise<InstructorChat
   return fetchInstructorActiveChats(accessToken);
 }
 
-export async function fetchChatMessagesAction(chatId: number): Promise<ChatMessage[]> {
+export async function fetchChatMessagesAction(chatId: number): Promise<ChatMessageEvent[]> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
@@ -49,7 +49,7 @@ export async function fetchChatMessagesAction(chatId: number): Promise<ChatMessa
   return fetchChatMessages(accessToken, chatId);
 }
 
-export async function fetchInstructorMessagesAction(chatId: number): Promise<ChatMessage[]> {
+export async function fetchInstructorMessagesAction(chatId: number): Promise<ChatMessageEvent[]> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
