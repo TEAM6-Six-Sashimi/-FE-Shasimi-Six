@@ -19,7 +19,7 @@ export default async function Header() {
         <Image
           src="/header/FitGyeok-logo.png"
           alt="FitGyeok 로고"
-          width={120}
+          width={95}
           height={40}
           className="object-contain"
         />

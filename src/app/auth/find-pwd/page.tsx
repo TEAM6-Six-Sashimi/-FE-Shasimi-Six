@@ -2,7 +2,7 @@ import FindPasswordForm from '@/features/auth/components/find-pwd/FindPasswordFo
 
 export default function FindPwdPage() {
   return (
-    <section className="flex flex-col justify-between items-center w-full min-h-[calc(100vh-48px)] py-16 px-4 bg-[#F9FAFB]">
+    <section className="flex flex-col justify-center items-center gap-12 w-full min-h-[calc(100vh-48px)] py-16 px-4 bg-[#F9FAFB]">
       <article className="bg-white w-full max-w-lg rounded-2xl p-10 shadow-md">
         <h1 className="text-[29px] font-bold text-center mb-10">비밀번호 찾기</h1>
         <FindPasswordForm />

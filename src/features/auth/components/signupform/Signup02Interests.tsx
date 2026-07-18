@@ -12,6 +12,7 @@ interface InterestsProps {
   initialCategories: number[];
   initialReferralCode: string;
   initialReferralChecked: boolean;
+  isSubmitting: boolean;
   onPrev: (selectedCategories: number[], referral_code: string, isReferralChecked: boolean) => void;
   onSubmit: (
     selectedCategories: number[],
@@ -24,6 +25,7 @@ export default function Signup02Interests({
   initialCategories,
   initialReferralCode,
   initialReferralChecked,
+  isSubmitting,
   onPrev,
   onSubmit,
 }: InterestsProps) {
@@ -77,7 +79,7 @@ export default function Signup02Interests({
     onSubmit(selectedCategoryIds, referral_code, agreements);
   };
 
-  const isSubmitEnabled = agreements.privacy;
+  const isSubmitEnabled = agreements.privacy && !isSubmitting;
 
   if (isLoading)
     return <div className="text-center py-10 text-sm text-gray-500">카테고리를 불러오는 중...</div>;
@@ -107,6 +109,7 @@ export default function Signup02Interests({
         <Button
           type="button"
           variant="outline"
+          disabled={isSubmitting}
           onClick={() => onPrev(selectedCategoryIds, referral_code, isReferralChecked)}
           className="flex-1 px-4 py-2 h-auto border border-[#6B7280] text-[#6B7280] hover:bg-[#F9FAFB] hover:text-[#6B7280] cursor-pointer"
         >

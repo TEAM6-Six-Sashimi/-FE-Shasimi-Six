@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { sendEmailVerification, verifyEmailCode } from '@/services/auth.service';
+import { useEmailVerification } from '../../hooks/useEmailVerification';
 import { SignupFormData, SignupStatusData } from '../../types';
+import EmailVerifyField from '../EmailVerifyField';
 import NameField from './fields/Namefield';
 import BirthdateField from './fields/Birthdatefield';
 import PhoneField from './fields/Phonefield';
-import EmailVerifyField from './fields/Emailverifyfield';
 import LoginIdField from './fields/Idfield';
 import PasswordFields from './fields/Passwordfield';
 
@@ -22,30 +24,37 @@ export default function Signup01Introduction({
   onNext,
 }: IntroductionProps) {
   const [formData, setFormData] = useState<SignupFormData>(initialFormData);
-  const [email_verified, setEmail_verified] = useState(initialStatusData.email_verified);
   const [isIdChecked, setIsIdChecked] = useState(initialStatusData.isIdChecked);
   const [isIdAvailable, setIsIdAvailable] = useState(initialStatusData.isIdAvailable);
-  const [isVerificationSent, setIsVerificationSent] = useState(
-    initialStatusData.isVerificationSent,
-  );
   const [isPasswordMatched, setIsPasswordMatched] = useState(false);
+
+  const verification = useEmailVerification({
+    sendCode: (email) => sendEmailVerification(email),
+    verifyCode: (email, code) => verifyEmailCode(email, code),
+    initialEmail: initialFormData.email,
+    initialIsSent: initialStatusData.isVerificationSent,
+    initialIsVerified: initialStatusData.email_verified,
+  });
 
   const handleNextStep = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid) return;
-    onNext(formData, {
-      email_verified,
-      isIdChecked,
-      isIdAvailable,
-      isVerificationSent,
-    });
+    onNext(
+      { ...formData, email: verification.email },
+      {
+        email_verified: verification.isVerified,
+        isIdChecked,
+        isIdAvailable,
+        isVerificationSent: verification.isSent,
+      },
+    );
   };
 
   const isFormValid =
     formData.name.trim() !== '' &&
     formData.birth_date.trim() !== '' &&
     formData.phone.trim() !== '' &&
-    email_verified &&
+    verification.isVerified &&
     isIdChecked &&
     isIdAvailable &&
     isPasswordMatched;
@@ -68,14 +77,7 @@ export default function Signup01Introduction({
           onChange={(value) => setFormData((prev) => ({ ...prev, phone: value }))}
         />
 
-        <EmailVerifyField
-          email={formData.email}
-          onEmailChange={(value) => setFormData((prev) => ({ ...prev, email: value }))}
-          verified={email_verified}
-          onVerifiedChange={setEmail_verified}
-          isVerificationSent={isVerificationSent}
-          onVerificationSentChange={setIsVerificationSent}
-        />
+        <EmailVerifyField verification={verification} labelVariant="semibold" />
 
         <LoginIdField
           value={formData.login_id}
