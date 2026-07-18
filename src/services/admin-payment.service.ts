@@ -3,6 +3,7 @@ import {
   AdminSubscriptionPaymentListResponse,
   AdminPaymentSearchParams,
 } from '@/features/admin/paymentmanage/types';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -33,9 +34,12 @@ export async function fetchAdminCoursePayments(
     });
 
     if (!res.ok) {
+      const authMessage = await handleAuthErrorResponse(res);
+      if (authMessage) return AUTH_ERROR_LIST;
+
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchAdminCoursePayments] status=${res.status} body=${errorBody}`);
-      return res.status === 401 ? AUTH_ERROR_LIST : EMPTY_LIST;
+      return EMPTY_LIST;
     }
 
     return res.json();
@@ -59,9 +63,12 @@ export async function fetchAdminSubscriptionPayments(
     });
 
     if (!res.ok) {
+      const authMessage = await handleAuthErrorResponse(res);
+      if (authMessage) return AUTH_ERROR_LIST;
+
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchAdminSubscriptionPayments] status=${res.status} body=${errorBody}`);
-      return res.status === 401 ? AUTH_ERROR_LIST : EMPTY_LIST;
+      return EMPTY_LIST;
     }
 
     return res.json();

@@ -5,6 +5,7 @@ import {
   AdminLoginStatsResult,
   AdminAiUsageStatsResult,
 } from '@/features/admin/Dashboard/types';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -75,6 +76,9 @@ export async function fetchAdminLoginStats(
     });
 
     if (!res.ok) {
+      const authMessage = await handleAuthErrorResponse(res);
+      if (authMessage) return { success: false, authError: true, message: authMessage };
+
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchAdminLoginStats] status=${res.status} body=${errorBody}`);
       if (res.status === 503) {
@@ -109,6 +113,9 @@ export async function fetchAdminAiUsageStats(
     });
 
     if (!res.ok) {
+      const authMessage = await handleAuthErrorResponse(res);
+      if (authMessage) return { success: false, authError: true, message: authMessage };
+
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchAdminAiUsageStats] status=${res.status} body=${errorBody}`);
       if (res.status === 503) {

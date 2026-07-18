@@ -1,4 +1,5 @@
 import { handleAuthErrorResponse } from '@/features/auth/auth-error';
+import { parseMaintenanceMessage, MaintenanceError } from '@/services/maintenance.service';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -60,6 +61,9 @@ export async function createReview(
   if (!res.ok) {
     const authMessage = await handleAuthErrorResponse(res);
     if (authMessage) throw new ReviewApiError(authMessage, res.status, true);
+
+    const maintenanceMessage = await parseMaintenanceMessage(res);
+    if (maintenanceMessage) throw new MaintenanceError(maintenanceMessage);
 
     // REVIEW_001 -> 이미 해당 강의에 리뷰를 작성한 경우
     const errorCode = await parseErrorCode(res.clone());

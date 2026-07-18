@@ -11,7 +11,13 @@ import { ResumePayload, SavedResume } from './types';
 
 export async function saveResumeAction(
   payload: ResumePayload,
-): Promise<{ success: boolean; resumeId?: number; authError?: true; message?: string }> {
+): Promise<{
+  success: boolean;
+  resumeId?: number;
+  authError?: true;
+  maintenance?: true;
+  message?: string;
+}> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
@@ -22,6 +28,9 @@ export async function saveResumeAction(
   if ('authError' in result) {
     return { success: false, authError: true, message: result.message };
   }
+  if ('maintenance' in result) {
+    return { success: false, maintenance: true, message: result.message };
+  }
 
   return { success: true, resumeId: result.resumeId };
 }
@@ -30,7 +39,7 @@ export async function saveResumeAction(
 export async function updateResumeAction(
   resumeId: number,
   payload: ResumePayload,
-): Promise<{ success: boolean; authError?: true; message?: string }> {
+): Promise<{ success: boolean; authError?: true; maintenance?: true; message?: string }> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 

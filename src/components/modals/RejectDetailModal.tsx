@@ -46,7 +46,7 @@ export default function RejectDetailModal({
           {fields.map((field) => (
             <div key={field.label}>
               <p className="text-[11.5px] text-[#9CA3AF] mb-0.5">{field.label}</p>
-              <p className="text-[14.5px] font-bold text-[#1E2125] break-words">{field.value}</p>
+              <p className="text-[14.5px] font-bold text-[#1E2125] wrap-break-word">{field.value}</p>
             </div>
           ))}
         </div>
@@ -62,7 +62,7 @@ export default function RejectDetailModal({
         {/* 상세 내용 */}
         <div>
           <p className="text-[13px] text-[#6A7282] mb-1.5">{detailLabel}</p>
-          <p className="text-[13.5px] text-[#1E2125] leading-relaxed border border-[#E5E7EB] rounded-lg px-4 py-3 break-words">
+          <p className="text-[13.5px] text-[#1E2125] leading-relaxed border border-[#E5E7EB] rounded-lg px-4 py-3 wrap-break-word">
             {detail}
           </p>
         </div>

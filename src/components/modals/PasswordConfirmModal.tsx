@@ -72,7 +72,7 @@ export default function PasswordConfirmModal({
           </button>
         </div>
         {errorMessage && (
-          <p className="text-[12px] text-[#FF5E5E] mb-3 break-words">{errorMessage}</p>
+          <p className="text-[12px] text-[#FF5E5E] mb-3 wrap-break-word">{errorMessage}</p>
         )}
 
         <div className="grid grid-cols-2 gap-3 mt-4">

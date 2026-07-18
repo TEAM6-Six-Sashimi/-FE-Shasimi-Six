@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/ToastContext';
+import { logoutAction } from '@/features/auth/actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import NoticeContentField from './NoticeContentField';
 import { createNoticeAction } from '../actions';
@@ -35,6 +36,10 @@ export default function NoticeEditForm() {
     if (result.success) {
       showToast('공지사항이 등록되었습니다.');
       router.push('/admin/noticemanage');
+    } else if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
+      return;
     } else {
       showToast(result.message, 'negative');
     }

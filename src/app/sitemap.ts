@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { fetchCourses } from '@/services/course.service';
+import { fetchNotices } from '@/services/notice.service';
 
 const BASE_URL = 'https://www.sixsashimi.com.market-app.org';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -59,6 +60,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
+    {
+      url: `${BASE_URL}/coffee-chat`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/notice`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
   ];
 
   // 동적 카테고리 페이지 (/courses/[category])
@@ -80,5 +93,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...categoryPages, ...coursePages];
+  // 동적 공지사항 상세 페이지 (/notice/[id]) - 로그인 불필요한 공개 게시판
+  const noticeList = await fetchNotices({ page: 0, size: 100 });
+  const noticePages: MetadataRoute.Sitemap = noticeList.items.map((notice) => ({
+    url: `${BASE_URL}/notice/${notice.noticeId}`,
+    lastModified: new Date(notice.createdDate),
+    changeFrequency: 'monthly' as const,
+    priority: 0.5,
+  }));
+
+  return [...staticPages, ...categoryPages, ...coursePages, ...noticePages];
 }

@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { fetchSubscriptionPaymentsAction } from '../actions';
 import { AdminSubscriptionPayment, SubscriptionPlanCode } from '../types';
+import { useToast } from '@/components/ui/ToastContext';
+import { logoutAction } from '@/features/auth/actions';
 
 type PlanFilter = 'ALL' | SubscriptionPlanCode;
 
@@ -19,6 +21,7 @@ const PLAN_BADGE_STYLE: Record<SubscriptionPlanCode, string> = {
 };
 
 export default function SubscriptionPayments() {
+  const { showToast } = useToast();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [keyword, setKeyword] = useState('');
@@ -29,7 +32,6 @@ export default function SubscriptionPayments() {
   const [items, setItems] = useState<AdminSubscriptionPayment[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [authError, setAuthError] = useState(false);
   const planMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,11 +53,15 @@ export default function SubscriptionPayments() {
       page,
       size: 10,
     })
-      .then((result) => {
+      .then(async (result) => {
         if (!active) return;
+        if (result.authError) {
+          showToast('다른 기기에서 로그인되어 자동 로그아웃 되었습니다.', 'alarm');
+          await logoutAction();
+          return;
+        }
         setItems(result.items);
         setTotalPages(result.totalPages);
-        setAuthError(!!result.authError);
       })
       .catch(() => {
         if (!active) return;
@@ -68,7 +74,7 @@ export default function SubscriptionPayments() {
     return () => {
       active = false;
     };
-  }, [startDate, endDate, debouncedKeyword, page]);
+  }, [startDate, endDate, debouncedKeyword, page, showToast]);
 
   // 드롭다운 바깥을 클릭하면 닫기
   useEffect(() => {
@@ -171,12 +177,6 @@ export default function SubscriptionPayments() {
             <tr>
               <td colSpan={7} className="py-16 text-center text-[#6A7282]">
                 불러오는 중...
-              </td>
-            </tr>
-          ) : authError ? (
-            <tr>
-              <td colSpan={7} className="py-16 text-center text-[#FF5E5E]">
-                로그인이 필요합니다. 다시 로그인해주세요.
               </td>
             </tr>
           ) : filteredItems.length === 0 ? (

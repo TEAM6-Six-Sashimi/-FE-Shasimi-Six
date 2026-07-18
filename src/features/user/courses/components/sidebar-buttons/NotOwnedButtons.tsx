@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CourseDetailFromAPI } from '@/features/user/courses/types';
 import { addCartItemAction } from '../../../cart/actions';
-import OneButtonModal from '@/components/modals/OneButtonModal';
+import { useMaintenance } from '@/components/system/MaintenanceProvider';
+import { useToast } from '@/components/ui/ToastContext';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 
 interface NotOwnedButtonsProps {
@@ -15,33 +16,40 @@ interface NotOwnedButtonsProps {
 
 export default function NotOwnedButtons({ course }: NotOwnedButtonsProps) {
   const router = useRouter();
+  const { setMaintenance } = useMaintenance();
+  const { showToast } = useToast();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showCartModal, setShowCartModal] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [showErrorModal, setShowErrorModal] = useState(false);
 
   const handleAddToCart = async () => {
     if (isAddingToCart) return;
     setIsAddingToCart(true);
     try {
-      await addCartItemAction(course.courseId);
-      setShowCartModal(true);
-      router.refresh();
-    } catch (err) {
-      const code = err instanceof Error ? err.message : '';
-      if (code === 'UNAUTHORIZED') {
+      const result = await addCartItemAction(course.courseId);
+
+      if (result.success) {
+        setShowCartModal(true);
+        router.refresh();
+        return;
+      }
+
+      if (result.maintenance) {
+        setMaintenance(true, result.message);
+        return;
+      }
+
+      if (result.code === 'UNAUTHORIZED') {
         router.push('/auth/login');
         return;
       }
-      if (code === 'CART_002') {
-        setErrorMessage('이미 장바구니에 담긴 강의입니다.');
-      } else if (code === 'PAYMENT_001') {
-        setErrorMessage('이미 수강 중인 강의입니다.');
+      if (result.code === 'CART_002') {
+        showToast('이미 장바구니에 담긴 강의입니다.', 'alarm');
+      } else if (result.code === 'ENROLLMENT_001') {
+        showToast('이미 수강 중인 강의입니다.', 'alarm');
       } else {
-        setErrorMessage('장바구니 추가에 실패했습니다. 다시 시도해주세요.');
+        showToast('장바구니 추가에 실패했습니다. 다시 시도해주세요.', 'negative');
       }
-      setShowErrorModal(true);
     } finally {
       setIsAddingToCart(false);
     }
@@ -89,15 +97,6 @@ export default function NotOwnedButtons({ course }: NotOwnedButtonsProps) {
             router.push('/cart');
           }}
           onCancel={() => setShowCartModal(false)}
-        />
-      )}
-
-      {showErrorModal && (
-        <OneButtonModal
-          title="알림"
-          message={errorMessage}
-          confirmLabel="확인"
-          onConfirm={() => setShowErrorModal(false)}
         />
       )}
     </>

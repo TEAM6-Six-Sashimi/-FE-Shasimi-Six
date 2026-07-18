@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { CourseFromAPI } from '../types';
 import { addCartItemAction } from '../../cart/actions';
 import { checkAlreadyEnrolledAction } from '../actions';
+import { useMaintenance } from '@/components/system/MaintenanceProvider';
+import { useToast } from '@/components/ui/ToastContext';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
-import OneButtonModal from '@/components/modals/OneButtonModal';
 import Image from 'next/image';
 import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 
@@ -37,6 +38,8 @@ const LABEL_TEXT: Record<string, string> = {
 
 export default function CourseCard({ course, category, priority = false }: CourseCardProps) {
   const router = useRouter();
+  const { setMaintenance } = useMaintenance();
+  const { showToast } = useToast();
   const thumbnailUrl = getThumbnailUrl(course.thumbnail);
   const approvedDateLabel = formatApprovedDate(course.approvedAt);
   const courseHref = `/courses/${encodeURIComponent(category)}/${course.courseId}`;
@@ -45,8 +48,6 @@ export default function CourseCard({ course, category, priority = false }: Cours
   const [isCheckingPurchase, setIsCheckingPurchase] = useState(false);
   const [showCartModal, setShowCartModal] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [showErrorModal, setShowErrorModal] = useState(false);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -57,18 +58,21 @@ export default function CourseCard({ course, category, priority = false }: Cours
       const result = await addCartItemAction(course.courseId);
 
       if (!result.success) {
+        if (result.maintenance) {
+          setMaintenance(true, result.message);
+          return;
+        }
         if (result.code === 'UNAUTHORIZED') {
           router.push('/login');
           return;
         }
         if (result.code === 'CART_002') {
-          setErrorMessage('이미 장바구니에 담긴 강의입니다.');
+          showToast('이미 장바구니에 담긴 강의입니다.', 'alarm');
         } else if (result.code === 'PAYMENT_001' || result.code === 'ENROLLMENT_001') {
-          setErrorMessage('이미 수강 중인 강의입니다.');
+          showToast('이미 수강 중인 강의입니다.', 'alarm');
         } else {
-          setErrorMessage('장바구니 추가에 실패했습니다.');
+          showToast('장바구니 추가에 실패했습니다.', 'negative');
         }
-        setShowErrorModal(true);
         return;
       }
 
@@ -87,8 +91,7 @@ export default function CourseCard({ course, category, priority = false }: Cours
     try {
       const alreadyEnrolled = await checkAlreadyEnrolledAction(course.courseId);
       if (alreadyEnrolled) {
-        setErrorMessage('이미 수강 중인 강의입니다.');
-        setShowErrorModal(true);
+        showToast('이미 수강 중인 강의입니다.', 'alarm');
         return;
       }
       setShowPurchaseModal(true);
@@ -214,15 +217,6 @@ export default function CourseCard({ course, category, priority = false }: Cours
             router.push('/cart');
           }}
           onCancel={() => setShowCartModal(false)}
-        />
-      )}
-
-      {showErrorModal && (
-        <OneButtonModal
-          title="알림"
-          message={errorMessage}
-          confirmLabel="확인"
-          onConfirm={() => setShowErrorModal(false)}
         />
       )}
     </>

@@ -3,6 +3,7 @@ import './globals.css';
 import { Geist } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { ToastProvider } from '@/components/ui/ToastContext';
+import { MaintenanceProvider } from '@/components/system/MaintenanceProvider';
 import Header from '@/components/layout/Header';
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
@@ -71,10 +72,12 @@ export default function RootLayout({
   return (
     <html lang="ko" className={cn('font-sans', geist.variable)}>
       <body className="flex-1">
-        <ToastProvider>
-          <Header />
-          <main>{children}</main>
-        </ToastProvider>
+        <MaintenanceProvider>
+          <ToastProvider>
+            <Header />
+            <main>{children}</main>
+          </ToastProvider>
+        </MaintenanceProvider>
       </body>
     </html>
   );
