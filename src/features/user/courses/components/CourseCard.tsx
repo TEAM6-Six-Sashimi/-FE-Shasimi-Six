@@ -63,7 +63,7 @@ export default function CourseCard({ course, category, priority = false }: Cours
           return;
         }
         if (result.code === 'UNAUTHORIZED') {
-          router.push('/login');
+          router.push('/auth/login');
           return;
         }
         if (result.code === 'CART_002') {

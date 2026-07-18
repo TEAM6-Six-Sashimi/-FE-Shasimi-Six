@@ -105,7 +105,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
       }
 
       if (result.code === 'UNAUTHORIZED') {
-        router.push('/login');
+        router.push('/auth/login');
         setIsLoading(false);
         return;
       }

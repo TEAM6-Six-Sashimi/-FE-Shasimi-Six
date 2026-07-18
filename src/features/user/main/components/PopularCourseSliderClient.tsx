@@ -63,15 +63,17 @@ export default function PopularCourseSliderClient({ courses }: PopularCourseSlid
   const slides = Array.from({ length: Math.ceil(courses.length / itemsPerSlide) }, (_, i) =>
     courses.slice(i * itemsPerSlide, i * itemsPerSlide + itemsPerSlide),
   );
+  // slides가 빈 배열이면 slides.length - 1이 -1이 되어 인덱스 계산이 어긋나므로 0으로 바닥을 깐다
+  const lastIndex = Math.max(0, slides.length - 1);
 
   // 뷰포트가 바뀌어 슬라이드 개수가 달라지면 범위를 벗어난 인덱스에 머물지 않도록 보정
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCurrent((p) => Math.min(p, slides.length - 1));
-  }, [slides.length]);
+    setCurrent((p) => Math.min(p, lastIndex));
+  }, [lastIndex]);
 
   const prev = () => setCurrent((p) => Math.max(0, p - 1));
-  const next = () => setCurrent((p) => Math.min(slides.length - 1, p + 1));
+  const next = () => setCurrent((p) => Math.min(lastIndex, p + 1));
 
   return (
     <section className="px-6">
@@ -115,7 +117,7 @@ export default function PopularCourseSliderClient({ courses }: PopularCourseSlid
         <button
           type="button"
           onClick={next}
-          disabled={current === slides.length - 1}
+          disabled={current === lastIndex}
           aria-label="다음 슬라이드"
           className="absolute -right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-[#D1D5DB] shadow-md flex items-center justify-center text-[#1E2125] hover:bg-[#F9FAFB] disabled:opacity-30 transition-all cursor-pointer"
         >

@@ -38,7 +38,7 @@ export default function StatsChartCard({
       <div className="h-72">
         {isLoading ? (
           <div className="flex items-center justify-center h-full text-[13px] text-[#6A7282]">
-            <InlineDotsLoading />
+            <InlineDotsLoading dotColor="#5B8DEE"/>
           </div>
         ) : error ? (
           <div className="flex items-center justify-center h-full text-[13px] text-[#6A7282]">
