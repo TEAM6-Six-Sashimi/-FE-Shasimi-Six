@@ -13,6 +13,9 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
+  // jest 유닛/컴포넌트/통합 테스트(tests/**/*.test.ts)와 같은 tests/ 루트를 공유하므로
+  // Playwright는 .spec.ts만 실행하도록 제한
+  testMatch: '**/*.spec.ts',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
