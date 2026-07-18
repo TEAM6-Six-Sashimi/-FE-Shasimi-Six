@@ -66,16 +66,33 @@ async function verifyRole(accessToken: string): Promise<string | null> {
 
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  const role = request.cookies.get('role')?.value; // 점검모드 ADMIN 예외 판단에만 사용 (아래 설명 참고)
+  const accessToken = request.cookies.get('accessToken')?.value;
 
-  // 1) 점검모드 체크 — 전체 경로 대상, ADMIN·예외 경로·API 라우트는 건너뜀
+  // 이 요청 안에서 role 검증이 여러 번 필요해도(점검모드 ADMIN 예외 + 강사/관리자 경로 체크)
+  // verifyRole()은 최대 한 번만 호출되도록 메모이즈한다.
+  let verifiedRole: string | null | undefined;
+  const getVerifiedRole = async () => {
+    if (verifiedRole === undefined) {
+      verifiedRole = accessToken ? await verifyRole(accessToken) : null;
+    }
+    return verifiedRole;
+  };
+
+  // 1) 점검모드 체크 — 전체 경로 대상, 예외 경로·API 라우트는 건너뜀
   // (/api/**는 fetch()로 JSON 응답을 기대하고 호출되므로, HTML 페이지로
   // 리다이렉트해버리면 호출부의 res.json()이 그대로 깨진다)
+  // 점검 여부부터 먼저 확인(캐시돼 있어 저렴함) — 점검 중이 아니면 검증 비용이 드는
+  // verifyRole()을 아예 호출하지 않는다. ADMIN 여부는 클라이언트가 쓸 수 있는 role
+  // 쿠키가 아니라 백엔드가 검증한 값으로만 판단한다(role 쿠키는 httpOnly가 아니라
+  // 누구나 role=ADMIN으로 조작해 점검모드를 우회할 수 있었음).
   const isApiPath = matchesPath(pathname, '/api');
-  if (role !== 'ADMIN' && !isApiPath && !MAINTENANCE_EXCLUDED_PATHS.includes(pathname)) {
+  if (!isApiPath && !MAINTENANCE_EXCLUDED_PATHS.includes(pathname)) {
     const { enabled } = await checkMaintenance();
     if (enabled) {
-      return NextResponse.redirect(new URL('/maintenance', request.url));
+      const role = await getVerifiedRole();
+      if (role !== 'ADMIN') {
+        return NextResponse.redirect(new URL('/maintenance', request.url));
+      }
     }
   }
 
@@ -85,7 +102,6 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const accessToken = request.cookies.get('accessToken')?.value;
   if (!accessToken) {
     const loginUrl = new URL('/auth/login', request.url);
     loginUrl.searchParams.set('redirect', `${pathname}${search}`);
@@ -99,18 +115,18 @@ export async function proxy(request: NextRequest) {
     matchesPath(pathname, '/admin');
 
   if (needsVerifiedRole) {
-    const verifiedRole = await verifyRole(accessToken);
+    const role = await getVerifiedRole();
 
     if (
       (matchesPath(pathname, '/mycourses-instructor') ||
         matchesPath(pathname, '/mypage/instructor-profile')) &&
-      verifiedRole !== 'INSTRUCTOR' &&
-      verifiedRole !== 'ADMIN'
+      role !== 'INSTRUCTOR' &&
+      role !== 'ADMIN'
     ) {
       return NextResponse.redirect(new URL('/', request.url));
     }
 
-    if (matchesPath(pathname, '/admin') && verifiedRole !== 'ADMIN') {
+    if (matchesPath(pathname, '/admin') && role !== 'ADMIN') {
       return NextResponse.redirect(new URL('/', request.url));
     }
   }
