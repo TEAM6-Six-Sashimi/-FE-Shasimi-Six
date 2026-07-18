@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import Checkbox from '@/components/ui/Checkbox';
 import { useToast } from '@/components/ui/ToastContext';
 import { logoutAction } from '@/features/auth/actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
@@ -67,25 +68,7 @@ export default function NoticeEditForm() {
       <NoticeContentField value={content} onChange={setContent} />
 
       <label className="flex items-center gap-2 w-fit cursor-pointer mb-1 mt-8">
-        <span className="relative inline-flex items-center justify-center w-4 h-4 shrink-0">
-          <input
-            type="checkbox"
-            checked={pinned}
-            onChange={(e) => setPinned(e.target.checked)}
-            className="peer appearance-none w-4 h-4 rounded border border-[#D1D5DB] checked:bg-[#FF5F5F] checked:border-[#FF5F5F] cursor-pointer transition-colors"
-          />
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="pointer-events-none absolute w-2.5 h-2.5 opacity-0 peer-checked:opacity-100"
-          >
-            <path d="M5 13l4 4L19 7" />
-          </svg>
-        </span>
+        <Checkbox checked={pinned} onChange={setPinned} color="#FF5F5F" />
         <span className="text-[13.5px] font-semibold text-[#DC2626]">공지사항 고정하기</span>
       </label>
       <p className="text-[12px] text-[#6A7282] mb-6">

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 interface TwoButtonModalProps {
   title: string;
-  message: string;
+  message: React.ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   onConfirm: () => void;
@@ -38,7 +38,9 @@ export default function TwoButtonModal({
         )}
         <div>
           <h2 className="text-[20px] font-bold text-[#1E2125] mb-5">{title}</h2>
-          <p className="text-[15px] text-[#6A7282] whitespace-pre-line wrap-break-word">{message}</p>
+          <div className="text-[15px] text-[#6A7282] whitespace-pre-line wrap-break-word">
+            {message}
+          </div>
         </div>
         <div className="flex gap-3">
           <Button
