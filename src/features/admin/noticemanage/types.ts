@@ -35,10 +35,12 @@ export interface AdminNoticeDetail {
 
 export type CreateNoticeResult =
   | { success: true; data: AdminNoticeDetail }
-  | { success: false; message: string };
+  | { success: false; message: string; authError?: true };
 
 export type NoticeDetailResult =
   | { success: true; data: AdminNoticeDetail }
   | { success: false; message: string };
 
-export type DeleteNoticeResult = { success: true } | { success: false; message: string };
+export type DeleteNoticeResult =
+  | { success: true }
+  | { success: false; message: string; authError?: true };

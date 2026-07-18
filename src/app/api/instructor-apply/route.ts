@@ -82,6 +82,14 @@ export async function POST(req: NextRequest) {
       const backendMessage: string | undefined = parsed?.message || parsed?.error;
       const backendCode: string | undefined = parsed?.errorCode || parsed?.code;
 
+      // 점검모드(503 + COMMON_900) - 다른 500대 오류와 섞이지 않도록 가장 먼저 분기
+      if (res.status === 503 && backendCode === 'COMMON_900') {
+        return NextResponse.json(
+          { error: backendMessage ?? '점검 중입니다.', maintenance: true },
+          { status: 503 },
+        );
+      }
+
       const alreadyApplied =
         backendCode === 'INSTRUCTOR_APPLICATION_DUPLICATE' ||
         /이미\s*지원/.test(backendMessage ?? '') ||

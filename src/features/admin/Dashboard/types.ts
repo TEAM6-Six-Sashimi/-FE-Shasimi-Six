@@ -21,7 +21,7 @@ export interface AdminLoginStatPoint {
 
 export type AdminLoginStatsResult =
   | { success: true; data: AdminLoginStatPoint[] }
-  | { success: false; message: string };
+  | { success: false; message: string; authError?: true };
 
 export interface AdminAiUsageStatPoint {
   label: string;
@@ -32,4 +32,4 @@ export interface AdminAiUsageStatPoint {
 
 export type AdminAiUsageStatsResult =
   | { success: true; data: AdminAiUsageStatPoint[] }
-  | { success: false; message: string };
+  | { success: false; message: string; authError?: true };

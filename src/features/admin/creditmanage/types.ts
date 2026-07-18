@@ -14,6 +14,7 @@ export interface AdminCreditChargeListResponse {
   totalPages: number;
   page: number;
   size: number;
+  authError?: true;
 }
 
 export interface AdminCreditSearchParams {

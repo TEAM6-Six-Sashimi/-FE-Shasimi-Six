@@ -6,6 +6,7 @@ import {
   CreditConfirmResponse,
 } from '@/features/user/credit/types';
 import { CreditChargeHistoryResponse } from '@/features/mypage/types';
+import { parseMaintenanceMessage, MaintenanceError } from '@/services/maintenance.service';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -61,6 +62,9 @@ export async function confirmCreditCharge(
   });
 
   if (!res.ok) {
+    const maintenanceMessage = await parseMaintenanceMessage(res);
+    if (maintenanceMessage) throw new MaintenanceError(maintenanceMessage);
+
     const errorBody = await res.json().catch(() => ({}));
     throw new Error(errorBody.message || '충전 승인에 실패했습니다.');
   }

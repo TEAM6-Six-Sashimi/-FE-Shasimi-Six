@@ -10,6 +10,7 @@ import { Category } from '@/features/categories/types';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import FullScreenLoading from '@/components/ui/FullScreenLoading';
+import { useMaintenance } from '@/components/system/MaintenanceProvider';
 
 const STEPS = [{ label: '강사 정보' }, { label: '서류 제출' }];
 
@@ -40,6 +41,7 @@ export default function InstructorApplicationClient({
   hasPendingApplication,
 }: InstructorApplicationClientProps) {
   const router = useRouter();
+  const { setMaintenance } = useMaintenance();
   const [showPendingModal, setShowPendingModal] = useState(hasPendingApplication);
   const [step, setStep] = useState(1);
   const [step01Data, setStep01Data] = useState<Step01Data>(DEFAULT_STEP01);
@@ -83,6 +85,10 @@ export default function InstructorApplicationClient({
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
+        if (errorData.maintenance) {
+          setMaintenance(true, errorData.error);
+          return;
+        }
         if (errorData.alreadyApplied) {
           setResultModal({
             title: '이미 지원 내역이 있습니다',

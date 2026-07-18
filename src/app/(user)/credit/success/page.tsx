@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { confirmCreditChargeAction } from '@/features/user/credit/actions';
+import { useMaintenance } from '@/components/system/MaintenanceProvider';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 
 type ConfirmState = 'loading' | 'success' | 'error';
@@ -10,6 +11,7 @@ type ConfirmState = 'loading' | 'success' | 'error';
 export default function CreditSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { setMaintenance } = useMaintenance();
   const [state, setState] = useState<ConfirmState>('loading');
   const [chargedAmount, setChargedAmount] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
@@ -34,6 +36,8 @@ export default function CreditSuccessPage() {
         if (result.success) {
           setChargedAmount(result.data.chargedAmount);
           setState('success');
+        } else if (result.maintenance) {
+          setMaintenance(true, result.message);
         } else {
           setErrorMessage(result.message);
           setState('error');
@@ -46,6 +50,7 @@ export default function CreditSuccessPage() {
         );
         setState('error');
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (state === 'loading') {

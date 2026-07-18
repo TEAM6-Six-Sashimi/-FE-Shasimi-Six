@@ -1,5 +1,6 @@
 // 장바구니 서비스(cart/payment)
 import { CartResponse } from '@/features/user/cart/types';
+import { parseMaintenanceMessage, MaintenanceError } from '@/services/maintenance.service';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -51,6 +52,9 @@ export async function addCartItem(
 
   if (!response.ok) {
     if (response.status === 401) throw new Error('UNAUTHORIZED');
+
+    const maintenanceMessage = await parseMaintenanceMessage(response);
+    if (maintenanceMessage) throw new MaintenanceError(maintenanceMessage);
 
     const errorBody: ApiErrorResponse = await response.json().catch(() => ({}) as ApiErrorResponse);
     const errorCode = errorBody?.errorCode ?? '';

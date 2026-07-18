@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { readyCreditCharge, confirmCreditCharge } from '@/services/credit.service';
+import { MaintenanceError } from '@/services/maintenance.service';
 import { CreditReadyResponse, CreditConfirmResponse } from '@/features/user/credit/types';
 
 // 크레딧 충전 준비 — Toss 결제창 호출 직전, 주문 정보 생성
@@ -32,7 +33,8 @@ export async function confirmCreditChargeAction(params: {
   orderId: string;
   amount: number;
 }): Promise<
-  { success: true; data: CreditConfirmResponse } | { success: false; message: string }
+  | { success: true; data: CreditConfirmResponse }
+  | { success: false; maintenance?: true; message: string }
 > {
   try {
     const cookieStore = await cookies();
@@ -45,6 +47,9 @@ export async function confirmCreditChargeAction(params: {
     const data = await confirmCreditCharge(accessToken, params);
     return { success: true, data };
   } catch (error) {
+    if (error instanceof MaintenanceError) {
+      return { success: false, maintenance: true, message: error.message };
+    }
     return {
       success: false,
       message: error instanceof Error ? error.message : '충전 승인에 실패했습니다.',

@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { PaymentSummary } from '../types';
 import { checkoutAction } from '../actions';
+import { useMaintenance } from '@/components/system/MaintenanceProvider';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ const ERROR_MAP: Record<string, string> = {
 
 export function PaymentSticky({ summary }: PaymentStickyProps) {
   const router = useRouter();
+  const { setMaintenance } = useMaintenance();
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [agreedToRefund, setAgreedToRefund] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -96,6 +98,11 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
     if (result.success) {
       setShowCompleteModal(true);
     } else {
+      if (result.maintenance) {
+        setMaintenance(true, result.message);
+        return;
+      }
+
       if (result.code === 'UNAUTHORIZED') {
         router.push('/login');
         setIsLoading(false);

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { useToast } from '@/components/ui/ToastContext';
+import { useMaintenance } from '@/components/system/MaintenanceProvider';
 import {
   EducationItem,
   CareerItem,
@@ -73,6 +74,7 @@ export default function ResumeMain({
 }: ResumeMainProps) {
   const router = useRouter();
   const { showToast } = useToast();
+  const { setMaintenance } = useMaintenance();
   const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
 
   // 저장된 이력서가 있으면 그 값으로, 없으면 빈 배열로 초기화
@@ -354,6 +356,9 @@ export default function ResumeMain({
         if (result.success) {
           setLastSavedSnapshot(currentSnapshot);
           showToast('이력서가 저장되었습니다.');
+        } else if (result.maintenance) {
+          setMaintenance(true, result.message);
+          return;
         } else if (result.authError) {
           showToast(result.message ?? '다른 기기에서 로그인되어 자동 로그아웃 되었습니다.', 'alarm');
           await logoutAction();
@@ -368,6 +373,9 @@ export default function ResumeMain({
           setResumeId(result.resumeId ?? null);
           setLastSavedSnapshot(currentSnapshot);
           showToast('이력서가 저장되었습니다.');
+        } else if (result.maintenance) {
+          setMaintenance(true, result.message);
+          return;
         } else if (result.authError) {
           showToast(result.message ?? '다른 기기에서 로그인되어 자동 로그아웃 되었습니다.', 'alarm');
           await logoutAction();
