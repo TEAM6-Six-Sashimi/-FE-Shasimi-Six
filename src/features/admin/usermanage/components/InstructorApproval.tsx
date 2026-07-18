@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { InstructorApplication } from '../types';
 import { Button } from '@/components/ui/button';
+import Checkbox from '@/components/ui/Checkbox';
+import { useToast } from '@/components/ui/ToastContext';
+import TwoButtonModal from '@/components/modals/TwoButtonModal';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -13,10 +16,32 @@ interface Props {
   setApplicants: React.Dispatch<React.SetStateAction<InstructorApplication[]>>;
 }
 
+// Content-Disposition 헤더에서 파일명 추출 (filename*=UTF-8''... 또는 filename="..." 둘 다 대응)
+function extractFilename(contentDisposition: string | null): string {
+  const fallback = '자격증_진위확인_명단.xlsx';
+  if (!contentDisposition) return fallback;
+
+  const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match) {
+    try {
+      return decodeURIComponent(utf8Match[1]);
+    } catch {
+      return fallback;
+    }
+  }
+
+  const plainMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
+  return plainMatch ? plainMatch[1] : fallback;
+}
+
 export default function InstructorApproval({ applicants, setApplicants }: Props) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const safeApplicants = applicants ?? [];
 
@@ -27,6 +52,64 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  const isAllPagedSelected = paged.length > 0 && paged.every((a) => selectedIds.has(a.applicationId));
+
+  const toggleSelect = (applicationId: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(applicationId)) next.delete(applicationId);
+      else next.add(applicationId);
+      return next;
+    });
+  };
+
+  const toggleSelectAllOnPage = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (isAllPagedSelected) {
+        paged.forEach((a) => next.delete(a.applicationId));
+      } else {
+        paged.forEach((a) => next.add(a.applicationId));
+      }
+      return next;
+    });
+  };
+
+  const handleSubmitVerificationList = async () => {
+    if (selectedIds.size === 0 || isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      const idsParam = Array.from(selectedIds).join(',');
+      const res = await fetch(`/api/admin/verification/excel?applicationIds=${idsParam}`);
+
+      if (!res.ok) {
+        const errorBody = await res.json().catch(() => ({}));
+        showToast(errorBody.error ?? '진위확인 명단 제출에 실패했습니다.', 'negative');
+        return;
+      }
+
+      const blob = await res.blob();
+      const filename = extractFilename(res.headers.get('content-disposition'));
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      showToast('진위확인 명단이 제출되었습니다.', 'positive');
+      setSelectedIds(new Set());
+      router.refresh();
+    } catch {
+      showToast('진위확인 명단 제출 중 오류가 발생했습니다.', 'negative');
+    } finally {
+      setIsSubmitting(false);
+      setShowSubmitModal(false);
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
@@ -56,26 +139,31 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
         </div>
         <Button
           type="button"
-          onClick={() => {
-            // TODO: 자격증 진위 확인용 엑셀 다운로드 API 연동 예정
-          }}
-          className="h-10 px-4 border border-[#FF5F5F] bg-white hover:bg-[#FFEBEB] text-[#FF5F5F] text-[13px] font-semibold cursor-pointer"
+          disabled={selectedIds.size === 0}
+          onClick={() => setShowSubmitModal(true)}
+          className="h-10 px-4 border border-[#FF5F5F] bg-white hover:bg-[#FFEBEB] text-[#FF5F5F] text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white"
         >
-          자격증 진위확인 엑셀 다운로드
+          진위확인 명단 제출{selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}
         </Button>
       </div>
 
       <table className="w-full text-[13px] table-fixed">
         <thead>
           <tr className="border-b border-[#E5E7EB]">
-            <th className="py-3 w-[6%] text-center font-semibold text-[#1E2125]">#</th>
-            <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">이름</th>
-            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">회원 ID</th>
-            <th className="py-3 w-[22%] text-center font-semibold text-[#1E2125]">이메일</th>
-            <th className="py-3 w-[16%] text-center font-semibold text-[#1E2125]">
+            <th className="py-3 w-[6%] text-center font-semibold text-[#1E2125]">
+              <Checkbox
+                checked={isAllPagedSelected}
+                onChange={toggleSelectAllOnPage}
+                ariaLabel="이 페이지 전체 선택"
+              />
+            </th>
+            <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">이름</th>
+            <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">회원 ID</th>
+            <th className="py-3 w-[20%] text-center font-semibold text-[#1E2125]">이메일</th>
+            <th className="py-3 w-[14%] text-center font-semibold text-[#1E2125]">
               지원 카테고리명
             </th>
-            <th className="py-3 w-[14%] text-center font-semibold text-[#1E2125]">신청일</th>
+            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">신청일</th>
             <th className="py-3 w-[14%] text-center font-semibold text-[#1E2125]">서류</th>
           </tr>
         </thead>
@@ -87,13 +175,17 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
               </td>
             </tr>
           ) : (
-            paged.map((a, idx) => (
+            paged.map((a) => (
               <tr
                 key={a.applicationId}
                 className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
               >
-                <td className="py-3 text-center text-[#6A7282]">
-                  {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
+                <td className="py-3 text-center">
+                  <Checkbox
+                    checked={selectedIds.has(a.applicationId)}
+                    onChange={() => toggleSelect(a.applicationId)}
+                    ariaLabel={`${a.name} 선택`}
+                  />
                 </td>
                 <td className="py-3 text-center font-semibold text-[#1E2125]">{a.name}</td>
                 <td className="py-3 text-center text-[#6A7282]">{a.loginId}</td>
@@ -166,6 +258,28 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
             다음
           </button>
         </div>
+      )}
+
+      {showSubmitModal && (
+        <TwoButtonModal
+          title="진위확인 명단 제출"
+          message={
+            <div className="flex flex-col gap-3">
+              <p className="text-[15px] text-[#1E2125] font-medium leading-relaxed">
+                선택된 <span className="text-[#FF5E5E]">{selectedIds.size}건</span>을 진위확인
+                명단으로 제출하시겠습니까?
+              </p>
+              <p className="flex items-start gap-1.5 text-[12.5px] text-[#6A7282] leading-relaxed bg-[#F9FAFB] rounded-lg px-3 py-2.5">
+                <span aria-hidden="true">ℹ</span>
+                제출 후 엑셀 파일이 다운로드되며, 제출 상태로 변경됩니다.
+              </p>
+            </div>
+          }
+          confirmLabel={isSubmitting ? '제출 중...' : '제출'}
+          cancelLabel="취소"
+          onConfirm={handleSubmitVerificationList}
+          onCancel={() => !isSubmitting && setShowSubmitModal(false)}
+        />
       )}
     </div>
   );

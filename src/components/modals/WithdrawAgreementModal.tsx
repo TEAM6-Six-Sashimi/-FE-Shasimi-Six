@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import Checkbox from '@/components/ui/Checkbox';
 
 interface WithdrawAgreementModalProps {
   onConfirm: () => void;
@@ -35,12 +36,7 @@ export default function WithdrawAgreementModal({
         </div>
 
         <label className="flex items-center gap-2.5 mb-5 cursor-pointer w-fit">
-          <input
-            type="checkbox"
-            checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            className="w-4 h-4 accent-[#CFEE5D] cursor-pointer"
-          />
+          <Checkbox checked={agreed} onChange={setAgreed} color="#CFEE5D" checkColor="#1E2125" />
           <span className="text-[13.5px] text-[#1E2125]">위 내용에 동의합니다.</span>
         </label>
 

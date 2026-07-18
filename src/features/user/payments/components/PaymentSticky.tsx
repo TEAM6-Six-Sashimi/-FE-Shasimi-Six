@@ -8,6 +8,7 @@ import { useMaintenance } from '@/components/system/MaintenanceProvider';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import { Button } from '@/components/ui/button';
+import Checkbox from '@/components/ui/Checkbox';
 import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
 
 interface PaymentStickyProps {
@@ -300,34 +301,14 @@ function CheckboxAgreement({
 }) {
   return (
     <label htmlFor={id} className="flex items-start gap-3 cursor-pointer group">
-      <div className="relative shrink-0 mt-0.5">
-        <input
-          type="checkbox"
-          id={id}
-          checked={checked}
-          onChange={(e) => onChange(e.target.checked)}
-          className="sr-only"
-        />
-        <div
-          className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${
-            checked
-              ? 'bg-[#FF5F5F] border-[#FF5F5F]'
-              : 'bg-white border-[#D1D5DB] group-hover:border-[#6A7282]'
-          }`}
-        >
-          {checked && (
-            <svg
-              className="w-3 h-3 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={3}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          )}
-        </div>
-      </div>
+      <Checkbox
+        id={id}
+        checked={checked}
+        onChange={onChange}
+        color="#FF5F5F"
+        size="md"
+        className="mt-0.5"
+      />
       <span className="text-xs text-gray-500 leading-relaxed">{label}</span>
     </label>
   );

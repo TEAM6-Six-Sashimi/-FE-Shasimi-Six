@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import Checkbox from '@/components/ui/Checkbox';
 import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
 import { getVideoDuration } from '../utils/getVideoDuration';
 import type { Session } from '@/features/user/mycourses-instructor/types';
@@ -288,11 +289,11 @@ export default function SessionItem({
       </div>
 
       <label className="flex items-center gap-2 cursor-pointer w-fit">
-        <input
-          type="checkbox"
+        <Checkbox
           checked={session.preview ?? false}
-          onChange={(e) => onUpdate(session.id, 'preview', e.target.checked)}
-          className="w-4 h-4 accent-[#CFEE5D] cursor-pointer"
+          onChange={(checked) => onUpdate(session.id, 'preview', checked)}
+          color="#CFEE5D"
+          checkColor="#1E2125"
         />
         <span className="text-[13px] text-[#1E2125]">무료 공개</span>
       </label>

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import Checkbox from '@/components/ui/Checkbox';
 import { Input } from '@/components/ui/input';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { useToast } from '@/components/ui/ToastContext';
@@ -43,26 +44,7 @@ function CheckboxItem({
 }) {
   return (
     <label htmlFor={id} className="flex items-center gap-2.5 cursor-pointer w-fit">
-      <span className="relative w-4 h-4 shrink-0">
-        <input
-          id={id}
-          type="checkbox"
-          checked={checked}
-          onChange={(e) => onChange(e.target.checked)}
-          className="peer absolute inset-0 w-4 h-4 opacity-0 cursor-pointer"
-        />
-        <span
-          className={`absolute inset-0 rounded border flex items-center justify-center transition-colors ${
-            checked ? 'bg-[#CFEE5D] border-[#CFEE5D]' : 'bg-white border-[#D1D5DB]'
-          }`}
-        >
-          {checked && (
-            <svg viewBox="0 0 12 12" className="w-2.5 h-2.5 fill-none stroke-[#1E2125] stroke-2">
-              <path d="M2 6L5 9L10 3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
-        </span>
-      </span>
+      <Checkbox id={id} checked={checked} onChange={onChange} color="#CFEE5D" checkColor="#1E2125" />
       <span className="text-[13px] text-[#1E2125]">{children}</span>
     </label>
   );
