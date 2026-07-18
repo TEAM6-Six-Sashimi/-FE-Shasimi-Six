@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { InstructorChatRoom } from '../types';
+import { InstructorChatRoom } from '../../types';
 
 function formatDate(iso: string | null) {
   return iso ? iso.slice(0, 10) : '';

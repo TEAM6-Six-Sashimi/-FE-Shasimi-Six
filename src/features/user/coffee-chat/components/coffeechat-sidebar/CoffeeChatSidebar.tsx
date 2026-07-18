@@ -5,7 +5,7 @@ import { UserMe } from '@/features/auth/types';
 import Image from 'next/image';
 import ChatRoomList from './ChatRoomList';
 import RequestList from './RequestList';
-import { InstructorChatRoom, StudentChatRoom } from '../types';
+import { InstructorChatRoom, StudentChatRoom } from '../../types';
 
 type CoffeeChatTab = 'requests' | 'rooms';
 
