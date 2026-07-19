@@ -8,6 +8,7 @@ import {
   InstructorCompletionRateStatistics,
 } from '@/features/user/mycourses-instructor/types';
 import { InstructorProfile } from '@/features/mypage/types';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -22,7 +23,10 @@ export async function fetchInstructorProfile(
       cache: 'no-store',
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
+      return null;
+    }
     return res.json();
   } catch {
     return null;
@@ -53,6 +57,7 @@ export async function fetchApprovedCourses(
     });
 
     if (!response.ok) {
+      await handleAuthErrorResponse(response);
       const errorBody = await response.text();
       return [];
     }
@@ -78,7 +83,10 @@ export async function fetchInProgressCourses(
       },
       cache: 'no-store',
     });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      await handleAuthErrorResponse(res);
+      return [];
+    }
     return res.json();
   } catch {
     return [];
@@ -102,6 +110,7 @@ export async function fetchCourseDetail(
     });
 
     if (!res.ok) {
+      await handleAuthErrorResponse(res);
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchCourseDetail] status=${res.status} body=${errorBody}`);
       return null;
@@ -130,6 +139,7 @@ export async function fetchClosedCourses(
     });
 
     if (!response.ok) {
+      await handleAuthErrorResponse(response);
       return [];
     }
 
@@ -157,6 +167,7 @@ export async function fetchInstructorDashboardSummary(
     );
 
     if (!res.ok) {
+      await handleAuthErrorResponse(res);
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchInstructorDashboardSummary] status=${res.status} body=${errorBody}`);
       return null;
@@ -186,6 +197,7 @@ export async function fetchInstructorSalesStatistics(
     );
 
     if (!res.ok) {
+      await handleAuthErrorResponse(res);
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchInstructorSalesStatistics] status=${res.status} body=${errorBody}`);
       return null;
@@ -210,6 +222,7 @@ export async function fetchInstructorStudentStatistics(
     });
 
     if (!res.ok) {
+      await handleAuthErrorResponse(res);
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchInstructorStudentStatistics] status=${res.status} body=${errorBody}`);
       return null;
@@ -234,6 +247,7 @@ export async function fetchInstructorCompletionRateStatistics(
     });
 
     if (!res.ok) {
+      await handleAuthErrorResponse(res);
       const errorBody = await res.text().catch(() => '');
       console.error(
         `[fetchInstructorCompletionRateStatistics] status=${res.status} body=${errorBody}`,

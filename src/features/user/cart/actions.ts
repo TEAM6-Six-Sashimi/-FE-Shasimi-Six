@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers';
 import { deleteCartItems, addCartItem } from '@/services/cart.service';
 import { MaintenanceError } from '@/services/maintenance.service';
+import { AuthSessionError } from '@/features/auth/errors';
 
 // 장바구니 아이템 추가
 export async function addCartItemAction(
@@ -20,6 +21,9 @@ export async function addCartItemAction(
     await addCartItem(accessToken, courseId);
     return { success: true };
   } catch (error) {
+    if (error instanceof AuthSessionError) {
+      return { success: false, code: 'AUTH_SESSION_EXPIRED', message: error.message };
+    }
     if (error instanceof MaintenanceError) {
       return { success: false, code: 'MAINTENANCE', maintenance: true, message: error.message };
     }

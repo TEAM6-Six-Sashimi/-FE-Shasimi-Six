@@ -4,6 +4,8 @@ import {
   CancelSubscriptionResponse,
   SubscriptionMeResponse,
 } from '@/features//mypage/types';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
+import { AuthSessionError } from '@/features/auth/errors';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -17,6 +19,8 @@ export async function fetchCoursePaymentHistory(
   });
 
   if (!res.ok) {
+    await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
+
     const errorBody = await res.text().catch(() => '');
     console.error(`[fetchCoursePaymentHistory] status=${res.status} body=${errorBody}`);
     return { items: [] };
@@ -38,6 +42,8 @@ export async function fetchSubscriptionPaymentHistory(
   });
 
   if (!res.ok) {
+    await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
+
     const errorBody = await res.text().catch(() => '');
     console.error(`[fetchSubscriptionPaymentHistory] status=${res.status} body=${errorBody}`);
     return { items: [], page: 0, size, totalElements: 0, totalPages: 0 };
@@ -56,6 +62,8 @@ export async function fetchSubscriptionMe(
   });
 
   if (!res.ok) {
+    await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
+
     const errorBody = await res.text().catch(() => '');
     console.error(`[fetchSubscriptionMe] status=${res.status} body=${errorBody}`);
     return null;
@@ -69,6 +77,11 @@ export async function cancelSubscription(accessToken: string): Promise<CancelSub
     method: 'POST',
     headers: { Authorization: `Bearer ${accessToken}` },
   });
+
+  if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+  }
 
   const rawText = await res.text();
 

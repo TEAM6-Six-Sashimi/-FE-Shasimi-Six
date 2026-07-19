@@ -3,6 +3,7 @@ import {
   InstructorChatRoom,
   StudentChatRoom,
 } from '@/features/user/coffee-chat/types';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -18,7 +19,10 @@ export async function fetchStudentChatRooms(accessToken: string): Promise<Studen
       cache: 'no-store',
     });
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
+      return [];
+    }
 
     return await res.json();
   } catch {
@@ -40,7 +44,10 @@ export async function fetchInstructorPendingChats(
       cache: 'no-store',
     });
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      await handleAuthErrorResponse(res);
+      return [];
+    }
 
     return await res.json();
   } catch {
@@ -62,7 +69,10 @@ export async function fetchInstructorActiveChats(
       cache: 'no-store',
     });
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      await handleAuthErrorResponse(res);
+      return [];
+    }
 
     return await res.json();
   } catch {
@@ -85,6 +95,8 @@ export async function acceptInstructorChat(
       cache: 'no-store',
     });
 
+    if (!res.ok) await handleAuthErrorResponse(res);
+
     return res.ok;
   } catch {
     return false;
@@ -106,6 +118,8 @@ export async function rejectInstructorChat(
       cache: 'no-store',
     });
 
+    if (!res.ok) await handleAuthErrorResponse(res);
+
     return res.ok;
   } catch {
     return false;
@@ -126,6 +140,8 @@ export async function leaveInstructorChat(
       },
       cache: 'no-store',
     });
+
+    if (!res.ok) await handleAuthErrorResponse(res);
 
     return res.ok;
   } catch {
@@ -156,7 +172,10 @@ export async function fetchInstructorMessages(
       },
     );
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      await handleAuthErrorResponse(res);
+      return [];
+    }
 
     return await res.json();
   } catch {
@@ -182,7 +201,10 @@ export async function fetchChatMessages(
       },
     );
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      await handleAuthErrorResponse(res);
+      return [];
+    }
 
     return await res.json();
   } catch {

@@ -1,6 +1,8 @@
 // 장바구니 서비스(cart/payment)
 import { CartResponse } from '@/features/user/cart/types';
 import { parseMaintenanceMessage, MaintenanceError } from '@/services/maintenance.service';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
+import { AuthSessionError } from '@/features/auth/errors';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -26,6 +28,9 @@ export async function fetchCart(accessToken: string): Promise<CartResponse> {
   });
 
   if (!response.ok) {
+    const authMessage = await handleAuthErrorResponse(response);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     console.log('fetchCart status:', response.status);
     throw new Error('장바구니 조회에 실패했습니다.');
   }
@@ -51,6 +56,9 @@ export async function addCartItem(
   });
 
   if (!response.ok) {
+    const authMessage = await handleAuthErrorResponse(response);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     if (response.status === 401) throw new Error('UNAUTHORIZED');
 
     const maintenanceMessage = await parseMaintenanceMessage(response);
@@ -81,6 +89,9 @@ export async function deleteCartItems(accessToken: string, cartItemIds: number[]
   });
 
   if (!response.ok) {
+    const authMessage = await handleAuthErrorResponse(response);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     throw new Error('장바구니 삭제에 실패했습니다.');
   }
 }

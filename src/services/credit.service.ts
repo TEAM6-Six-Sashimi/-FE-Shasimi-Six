@@ -7,6 +7,8 @@ import {
 } from '@/features/user/credit/types';
 import { CreditChargeHistoryResponse } from '@/features/mypage/types';
 import { parseMaintenanceMessage, MaintenanceError } from '@/services/maintenance.service';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
+import { AuthSessionError } from '@/features/auth/errors';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -18,6 +20,9 @@ export async function fetchCreditBalance(accessToken: string): Promise<CreditBal
   });
 
   if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     const errorBody = await res.json().catch(() => ({}));
     throw new Error(errorBody.message || '크레딧 잔액 조회에 실패했습니다.');
   }
@@ -40,6 +45,9 @@ export async function readyCreditCharge(
   });
 
   if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     const errorBody = await res.json().catch(() => ({}));
     throw new Error(errorBody.message || '충전 준비에 실패했습니다.');
   }
@@ -62,6 +70,9 @@ export async function confirmCreditCharge(
   });
 
   if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     const maintenanceMessage = await parseMaintenanceMessage(res);
     if (maintenanceMessage) throw new MaintenanceError(maintenanceMessage);
 
@@ -86,6 +97,8 @@ export async function fetchCreditChargeHistory(
   });
 
   if (!res.ok) {
+    await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
+
     const errorBody = await res.text().catch(() => '');
     console.error(`[fetchCreditChargeHistory] status=${res.status} body=${errorBody}`);
     return { items: [], totalElements: 0, totalPages: 0, page: 0, size };

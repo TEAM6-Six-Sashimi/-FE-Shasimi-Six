@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers';
 import { UserMeWithAgreements } from './types';
 import { cancelSubscription } from '@/services/payment.service';
+import { AuthSessionError } from '@/features/auth/errors';
 import { CancelSubscriptionResponse } from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -168,7 +169,7 @@ export async function deleteMeAction(currentPassword: string): Promise<DeleteMeA
 // 결제 내역
 export type CancelSubscriptionActionResult =
   | { success: true; data: CancelSubscriptionResponse }
-  | { success: false; message: string };
+  | { success: false; authError?: true; message: string };
 
 export async function cancelSubscriptionAction(): Promise<CancelSubscriptionActionResult> {
   try {
@@ -182,6 +183,9 @@ export async function cancelSubscriptionAction(): Promise<CancelSubscriptionActi
     const data = await cancelSubscription(accessToken);
     return { success: true, data };
   } catch (error) {
+    if (error instanceof AuthSessionError) {
+      return { success: false, authError: true, message: error.message };
+    }
     return {
       success: false,
       message: error instanceof Error ? error.message : '구독 해지에 실패했습니다.',
