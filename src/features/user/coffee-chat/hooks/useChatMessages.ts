@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useToast } from '@/components/ui/ToastContext';
-import { ChatMessage } from '../types';
+import { ChatMessage, ChatMessageEvent } from '../types';
 
 // 채팅방의 첫 메시지는 강사 요청 목록 반영 등 서버 쪽 추가 처리가 붙어서
 // 이후 메시지보다 왕복이 더 걸리는 경우가 있어, 여유를 두고 6초로 잡는다.
@@ -11,7 +11,7 @@ const SEND_TIMEOUT_MS = 6000;
 interface UseChatMessagesParams {
   chatId: number;
   myUserId: number;
-  fetchMessages: (chatId: number) => Promise<ChatMessage[]>;
+  fetchMessages: (chatId: number) => Promise<ChatMessageEvent[]>;
   isConnected: boolean;
   subscribe: (chatId: number, onMessage: (message: ChatMessage) => void) => () => void;
   sendMessage: (chatId: number, content: string) => boolean;
@@ -28,10 +28,7 @@ export function useChatMessages({
   sendMessage,
 }: UseChatMessagesParams) {
   const { showToast } = useToast();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  // 방 진입 시점까지의 히스토리 개수. 거절/나가기 안내 문구는 이 지점 뒤에 고정하고,
-  // 그 이후 실시간으로 도착한 메시지(재요청)는 안내 문구 아래에 쌓이도록 한다.
-  const [historyCount, setHistoryCount] = useState(0);
+  const [messages, setMessages] = useState<ChatMessageEvent[]>([]);
   const [input, setInput] = useState('');
   const [pendingContent, setPendingContent] = useState<string | null>(null);
   const listEndRef = useRef<HTMLDivElement>(null);
@@ -48,7 +45,6 @@ export function useChatMessages({
   useEffect(() => {
     let cancelled = false;
     setMessages([]);
-    setHistoryCount(0);
     setPendingContent(null);
 
     fetchMessages(chatId).then((history) => {
@@ -63,7 +59,6 @@ export function useChatMessages({
         }
         return merged.sort((a, b) => a.messageId - b.messageId);
       });
-      setHistoryCount(history.length);
     });
 
     return () => {
@@ -76,6 +71,19 @@ export function useChatMessages({
     if (!isConnected) return;
 
     const unsubscribe = subscribe(chatId, (message) => {
+      if (message.eventType === 'READ') {
+        // 읽음 이벤트는 새 메시지로 그리지 않고, 내가 보낸 메시지 중 lastReadMessageId
+        // 이하인 것들의 읽음 표시만 갱신한다.
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.senderId === myUserId && m.messageId <= message.lastReadMessageId
+              ? { ...m, isRead: true }
+              : m,
+          ),
+        );
+        return;
+      }
+
       setMessages((prev) =>
         prev.some((m) => m.messageId === message.messageId) ? prev : [...prev, message],
       );
@@ -119,5 +127,5 @@ export function useChatMessages({
     setInput('');
   };
 
-  return { messages, historyCount, input, setInput, pendingContent, listEndRef, handleSend };
+  return { messages, input, setInput, pendingContent, listEndRef, handleSend };
 }
