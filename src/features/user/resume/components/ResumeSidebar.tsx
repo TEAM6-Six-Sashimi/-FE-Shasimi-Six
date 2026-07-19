@@ -5,16 +5,18 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { RadialBar, RadialBarChart, PolarAngleAxis } from 'recharts';
+import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { requestAiReviewAction } from '../actions';
 import { logoutAction } from '@/features/auth/actions';
 import { useToast } from '@/components/ui/ToastContext';
-import { AiReviewResult, getGradeColor } from '../types';
+import { AiReviewResult, LatestAiReviewDetail, getGradeColor } from '../types';
 
 interface ResumeSidebarProps {
   isSaved: boolean;
   resumeId: number | null;
+  initialReview: LatestAiReviewDetail | null;
 }
 
 function ScoreCircle({ score }: { score: number }) {
@@ -47,11 +49,13 @@ function ScoreCircle({ score }: { score: number }) {
   );
 }
 
-export default function ResumeSidebar({ isSaved, resumeId }: ResumeSidebarProps) {
+export default function ResumeSidebar({ isSaved, resumeId, initialReview }: ResumeSidebarProps) {
   const router = useRouter();
   const { showToast } = useToast();
   const [isEvaluating, setIsEvaluating] = useState(false);
-  const [evaluationResult, setEvaluationResult] = useState<AiReviewResult | null>(null);
+  const [evaluationResult, setEvaluationResult] = useState<AiReviewResult | null>(
+    initialReview ?? null,
+  );
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
 
@@ -96,7 +100,12 @@ export default function ResumeSidebar({ isSaved, resumeId }: ResumeSidebarProps)
             AI 이력서 평가
           </h2>
 
-          {!evaluationResult ? (
+          {isEvaluating ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-10">
+              <InlineDotsLoading dotColor="#5B8DEE" />
+              <p className="text-[13px] text-[#6A7282]">AI가 이력서를 분석하고 있어요...</p>
+            </div>
+          ) : !evaluationResult ? (
             <p className="text-[13px] text-[#6A7282] leading-relaxed">
               저장된 이력서를 AI가 분석하고 개선 방향을 제안해드립니다.
             </p>

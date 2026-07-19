@@ -7,14 +7,7 @@ import Image from 'next/image';
 import { loginAction } from '../../actions';
 import LoginButton from './LoginButton';
 import { useToast } from '@/components/ui/ToastContext';
-
-// 오픈 리다이렉트 방지: 앱 내부의 상대 경로만 허용
-function getSafeRedirect(target: string | null): string {
-  if (!target || !target.startsWith('/') || target.startsWith('//') || target.includes('\\')) {
-    return '/';
-  }
-  return target;
-}
+import { getSafeRedirect } from '@/lib/safe-redirect';
 
 export default function LoginForm() {
   const [userIdInput, setUserIdInput] = useState('');

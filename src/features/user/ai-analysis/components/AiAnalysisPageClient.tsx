@@ -6,7 +6,7 @@ import FeatureHeader from '@/components/layout/FeatureHeader';
 import ResumePageClient from '@/features/user/resume/components/ResumePageClient';
 import SelfIntroPageClient from '@/features/user/self-introduction/components/SelfIntroPageClient';
 import SelfIntroReviewDetail from '@/features/user/self-introduction/components/SelfIntroReviewDetail';
-import { SavedResume } from '@/features/user/resume/types';
+import { LatestAiReviewDetail, SavedResume } from '@/features/user/resume/types';
 import { MySubscription } from '@/features/user/payments/types';
 import {
   CoverLetterResponse,
@@ -24,6 +24,7 @@ interface AiAnalysisPageClientProps {
   savedResume: SavedResume | null;
   savedCoverLetter: CoverLetterResponse | null;
   latestCoverLetterReview: CoverLetterReviewDetail | null;
+  latestAiReview: LatestAiReviewDetail | null;
   mySubscription: MySubscription | null;
   isLoggedIn: boolean;
 }
@@ -35,6 +36,7 @@ export default function AiAnalysisPageClient({
   savedResume,
   savedCoverLetter,
   latestCoverLetterReview,
+  latestAiReview,
   mySubscription,
   isLoggedIn,
 }: AiAnalysisPageClientProps) {
@@ -115,6 +117,7 @@ export default function AiAnalysisPageClient({
               userPhone={userPhone}
               userEmail={userEmail}
               savedResume={savedResume}
+              latestAiReview={latestAiReview}
               isLoggedIn={isLoggedIn}
             />
           )}

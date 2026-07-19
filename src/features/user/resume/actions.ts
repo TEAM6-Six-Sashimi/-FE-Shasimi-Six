@@ -6,8 +6,9 @@ import {
   updateResume,
   fetchMyResume,
   requestAiReview,
+  fetchLatestAiReview,
 } from '@/services/resume.service';
-import { ResumePayload, SavedResume } from './types';
+import { LatestAiReviewDetail, ResumePayload, SavedResume } from './types';
 
 export async function saveResumeAction(
   payload: ResumePayload,
@@ -69,4 +70,16 @@ export async function requestAiReviewAction(resumeId: number) {
   }
 
   return requestAiReview(accessToken, resumeId);
+}
+
+// 이력서 AI 평가 결과 중 최신 결과 1개 조회
+export async function fetchLatestAiReviewAction(
+  resumeId: number,
+): Promise<LatestAiReviewDetail | null> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+
+  if (!accessToken) return null;
+
+  return fetchLatestAiReview(accessToken, resumeId);
 }

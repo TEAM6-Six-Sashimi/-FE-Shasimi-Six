@@ -6,6 +6,7 @@ import {
   fetchLatestCoverLetterReviewAction,
   fetchMyCoverLetterAction,
 } from '@/features/user/self-introduction/actions';
+import { fetchLatestAiReviewAction } from '@/features/user/resume/actions';
 import { fetchMySubscriptionAction } from '@/features/user/payments/actions';
 import AiAnalysisPageClient from '@/features/user/ai-analysis/components/AiAnalysisPageClient';
 
@@ -42,6 +43,9 @@ export default async function AiAnalysisPage() {
       fetchMySubscriptionAction(),
     ]);
 
+  const latestAiReview =
+    isLoggedIn && savedResume ? await fetchLatestAiReviewAction(savedResume.resumeId) : null;
+
   return (
     <AiAnalysisPageClient
       userName={user.name}
@@ -50,6 +54,7 @@ export default async function AiAnalysisPage() {
       savedResume={savedResume}
       savedCoverLetter={savedCoverLetter}
       latestCoverLetterReview={latestCoverLetterReview}
+      latestAiReview={latestAiReview}
       mySubscription={mySubscription}
       isLoggedIn={isLoggedIn}
     />

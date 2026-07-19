@@ -202,3 +202,14 @@ export interface AiReviewError {
 export type AiReviewResponse =
   | { success: true; data: AiReviewResult }
   | { success: false; error: AiReviewError };
+
+// GET /resumes/{resumeId}/ai-review/latest 응답의 review 필드
+export interface LatestAiReviewDetail extends AiReviewResult {
+  reviewId: number;
+  createdAt: string;
+}
+
+export interface LatestAiReviewResponse {
+  resumeId: number;
+  review: LatestAiReviewDetail | null;
+}

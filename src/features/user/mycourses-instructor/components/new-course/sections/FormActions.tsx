@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
 
 interface FormActionButtonsProps {
-  mode: 'create' | 'edit';
   isLoading: boolean;
   isSubmitDisabled: boolean;
   onSave: () => void;
@@ -13,15 +12,12 @@ interface FormActionButtonsProps {
 }
 
 export default function FormActionButtons({
-  mode,
   isLoading,
   isSubmitDisabled,
   onSave,
   onSubmit,
   onCancel,
 }: FormActionButtonsProps) {
-  const primaryLabel = mode === 'create' ? '임시 저장' : '수정 완료';
-
   return (
     <nav aria-label="강의 등록 양식 제출" className="flex items-center justify-between pt-2">
       <Button
@@ -34,7 +30,7 @@ export default function FormActionButtons({
             : 'bg-[#FF5E5E] hover:bg-[#D14848] text-white cursor-pointer'
         }`}
       >
-        {isLoading ? <InlineDotsLoading /> : primaryLabel}
+        {isLoading ? <InlineDotsLoading /> : '임시 저장'}
       </Button>
       <div className="flex gap-3">
         <Button

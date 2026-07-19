@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import ResumeMain from './ResumeMain';
 import ResumeSidebar from './ResumeSidebar';
-import { SavedResume } from '../types';
+import { LatestAiReviewDetail, SavedResume } from '../types';
 
 interface ResumePageClientProps {
   userName: string;
   userPhone: string;
   userEmail: string;
   savedResume: SavedResume | null;
+  latestAiReview: LatestAiReviewDetail | null;
   isLoggedIn: boolean;
 }
 
@@ -18,6 +19,7 @@ export default function ResumePageClient({
   userPhone,
   userEmail,
   savedResume,
+  latestAiReview,
   isLoggedIn,
 }: ResumePageClientProps) {
   const [isSaved, setIsSaved] = useState(!!savedResume);
@@ -39,7 +41,7 @@ export default function ResumePageClient({
         />
       </div>
       <div className="sticky top-4">
-        <ResumeSidebar isSaved={isSaved} resumeId={resumeId} />
+        <ResumeSidebar isSaved={isSaved} resumeId={resumeId} initialReview={latestAiReview} />
       </div>
     </div>
   );

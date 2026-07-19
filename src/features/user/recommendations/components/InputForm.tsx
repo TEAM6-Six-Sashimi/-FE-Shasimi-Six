@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { useToast } from '@/components/ui/ToastContext';
 import { logoutAction } from '@/features/auth/actions';
-import { RecommendationInputType } from '../types';
+import { LatestJobPostingRecommendation, RecommendationInputType } from '../types';
 import { analyzeJobPostingAction, validateUrlAction } from '../actions';
 
 const TABS: {
@@ -35,14 +36,18 @@ interface InputFormProps {
   resumeId: number | null;
   hasSubscription: boolean;
   isLoggedIn: boolean;
+  latestRecommendation: LatestJobPostingRecommendation | null;
   onAnalyzeSuccess: (recommendationId: number) => void;
+  onSelectHistory: (recommendationId: number) => void;
 }
 
 export default function InputForm({
   resumeId,
   hasSubscription,
   isLoggedIn,
+  latestRecommendation,
   onAnalyzeSuccess,
+  onSelectHistory,
 }: InputFormProps) {
   const router = useRouter();
   const { showToast } = useToast();
@@ -54,6 +59,34 @@ export default function InputForm({
   const [showInvalidUrlModal, setShowInvalidUrlModal] = useState(false);
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
   const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleInputFocus = () => {
+    if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+    if (latestRecommendation) setShowHistory(true);
+  };
+
+  const handleInputBlur = () => {
+    // 드롭다운 항목 클릭 이벤트가 먼저 처리되도록 약간의 지연 후 닫기
+    blurTimeoutRef.current = setTimeout(() => setShowHistory(false), 150);
+  };
+
+  const handleUrlChange = (value: string) => {
+    setUrl(value);
+    setShowHistory(false);
+  };
+
+  const handleTextChange = (value: string) => {
+    setText(value);
+    setShowHistory(false);
+  };
+
+  const handleSelectHistory = () => {
+    if (!latestRecommendation) return;
+    setShowHistory(false);
+    onSelectHistory(latestRecommendation.recommendationId);
+  };
 
   const isInputFilled = activeTab === 'URL' ? !!url.trim() : !!text.trim();
   const isAnalyzeDisabled = !isInputFilled || isAnalyzing;
@@ -152,15 +185,25 @@ export default function InputForm({
         {/* URL 입력 탭 */}
         {activeTab === 'URL' && (
           <div className="flex flex-col gap-2">
-            <input
-              type="text"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="채용공고 URL을 입력해 주세요."
-              className={`w-full h-12 px-4 rounded-xl border bg-white text-[14px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors ${
-                errorMessage ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]'
-              }`}
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={url}
+                onChange={(e) => handleUrlChange(e.target.value)}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                placeholder="채용공고 URL을 입력해 주세요."
+                className={`w-full h-12 px-4 rounded-xl border bg-white text-[14px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors ${
+                  errorMessage ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]'
+                }`}
+              />
+              {showHistory && latestRecommendation && (
+                <HistoryDropdown
+                  recommendation={latestRecommendation}
+                  onSelect={handleSelectHistory}
+                />
+              )}
+            </div>
             <p className="text-[12.5px] text-[#6A7282] leading-relaxed">
               URL을 입력하면 자동으로 공고 내용을 불러옵니다.
               <br />
@@ -173,17 +216,27 @@ export default function InputForm({
         {/* 텍스트 직접 입력 탭 */}
         {activeTab === 'TEXT' && (
           <div className="flex flex-col gap-2">
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder={
-                '채용공고 내용을 첨부해주세요.\n(채용공고 중 여러 분야를 한번에 모집하는 경우 현재 모델에서는 지원되지 않습니다. 입력할 때 참고 부탁드립니다.)\n직무, 주요 업무, 필수 사항, 우대 사항 내용이 필수로 포함되어야 합니다.'
-              }
-              rows={8}
-              className={`w-full px-4 py-3 rounded-xl border bg-white text-[14px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors resize-none ${
-                errorMessage ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]'
-              }`}
-            />
+            <div className="relative">
+              <textarea
+                value={text}
+                onChange={(e) => handleTextChange(e.target.value)}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                placeholder={
+                  '채용공고 내용을 첨부해주세요.\n(채용공고 중 여러 분야를 한번에 모집하는 경우 현재 모델에서는 지원되지 않습니다. 입력할 때 참고 부탁드립니다.)\n직무, 주요 업무, 필수 사항, 우대 사항 내용이 필수로 포함되어야 합니다.'
+                }
+                rows={8}
+                className={`w-full px-4 py-3 rounded-xl border bg-white text-[14px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors resize-none ${
+                  errorMessage ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]'
+                }`}
+              />
+              {showHistory && latestRecommendation && (
+                <HistoryDropdown
+                  recommendation={latestRecommendation}
+                  onSelect={handleSelectHistory}
+                />
+              )}
+            </div>
           </div>
         )}
 
@@ -244,5 +297,29 @@ export default function InputForm({
         />
       )}
     </>
+  );
+}
+
+function HistoryDropdown({
+  recommendation,
+  onSelect,
+}: {
+  recommendation: LatestJobPostingRecommendation;
+  onSelect: () => void;
+}) {
+  return (
+    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-[#E5E7EB] py-2 z-10">
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={onSelect}
+        className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-[#F9FAFB] transition-colors cursor-pointer"
+      >
+        <History className="w-4 h-4 text-[#9CA3AF] shrink-0" />
+        <span className="flex-1 min-w-0 text-[13.5px] text-[#1E2125] truncate">
+          {recommendation.summary?.jobRole ?? '최근 분석한 채용공고'}
+        </span>
+      </button>
+    </div>
   );
 }

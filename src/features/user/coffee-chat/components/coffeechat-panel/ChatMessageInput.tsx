@@ -36,8 +36,8 @@ export default function ChatMessageInput({
         type="submit"
         aria-label="메시지 보내기"
         disabled={!canSend}
-        className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 cursor-pointer hover:bg-[#D14848] transition-colors disabled:cursor-not-allowed ${
-          canSend ? 'bg-[#FF5E5E]' : 'bg-[#E5E7EB]'
+        className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 cursor-pointer transition-colors disabled:cursor-not-allowed ${
+          canSend ? 'bg-[#FF5E5E] hover:bg-[#D14848]' : 'bg-[#E5E7EB] hover:bg-[#E5E7EB]'
         }`}
       >
         <Image

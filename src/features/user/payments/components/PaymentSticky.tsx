@@ -9,7 +9,7 @@ import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import { Button } from '@/components/ui/button';
 import Checkbox from '@/components/ui/Checkbox';
-import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
+import FullScreenLoading from '@/components/ui/FullScreenLoading';
 
 interface PaymentStickyProps {
   summary: PaymentSummary;
@@ -188,10 +188,13 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
                 : 'bg-[#E5E7EB] text-gray-400 hover:bg-[#E5E7EB] cursor-not-allowed'
             }`}
           >
-            {isLoading ? <InlineDotsLoading /> : '결 제'}
+            {isLoading ? '결제 중...' : '결 제'}
           </Button>
         </div>
       </div>
+
+      {/* 결제 처리 중 전체 화면 로딩 - 처리 도중 다른 곳으로 이탈하지 못하게 막는다 */}
+      {isLoading && <FullScreenLoading message="결제를 처리하고 있어요..." />}
 
       {/* 크레딧 부족 모달 */}
       {showInsufficientModal && (

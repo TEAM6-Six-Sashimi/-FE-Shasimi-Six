@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from 'react';
 import Checkbox from '@/components/ui/Checkbox';
 import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
 import { getVideoDuration } from '../utils/getVideoDuration';
+import { getThumbnailUrl } from '@/lib/thumbnail';
 import type { Session } from '@/features/user/mycourses-instructor/types';
 
 export const SESSION_TITLE_MAX = 50;
@@ -57,7 +58,9 @@ export default function SessionItem({
   }, [session.videoFile]);
 
   // 기존 파일 데이터 (수정 시 이미 등록된 회차) — 새 파일을 고르지 않았으면 이걸로 표시
-  const existingVideoUrl = !session.videoFile && session.videoUrl ? session.videoUrl : '';
+  // videoUrl은 업로드 API가 내려주는 상대 경로(key)일 수 있어 getThumbnailUrl로 절대 URL로 변환한다.
+  const existingVideoUrl =
+    !session.videoFile && session.videoUrl ? (getThumbnailUrl(session.videoUrl) ?? '') : '';
   const existingMaterialName =
     !session.materialFile && session.materialName ? session.materialName : '';
   const existingMaterialSize =
@@ -139,6 +142,8 @@ export default function SessionItem({
     onUpdate(session.id, 'materialFile', null);
     onUpdate(session.id, 'materialName', '');
     onUpdate(session.id, 'materialUrl', '');
+    onUpdate(session.id, 'materialType', '');
+    onUpdate(session.id, 'materialSize', 0);
     if (materialInputRef.current) materialInputRef.current.value = '';
   };
 

@@ -6,7 +6,6 @@ import AdminPendingButtons from './sidebar-buttons/AdminPendingButtons';
 import AdminApprovedButtons from './sidebar-buttons/AdminApprovedButtons';
 import NotOwnedButtons from './sidebar-buttons/NotOwnedButtons';
 import StudentOwnedButtons from './sidebar-buttons/StudentOwnedButtons';
-import InstructorButtons from './sidebar-buttons/InstructorButtons';
 
 interface CourseActionSlotProps {
   course: CourseDetailFromAPI;
@@ -37,11 +36,10 @@ export default function CourseActionSlot({ course, actionType }: CourseActionSlo
     }
 
     case 'manage':
+      // 강사 본인 강의(OWNER)의 운영관리 페이지는 없앴으므로, ADMIN만 버튼을 본다.
       return course.viewerType === 'ADMIN' ? (
         <AdminApprovedButtons courseId={course.courseId} />
-      ) : (
-        <InstructorButtons courseId={course.courseId} />
-      );
+      ) : null;
 
     case 'approve-reject':
       return <AdminPendingButtons courseId={course.courseId} courseTitle={course.title} />;
