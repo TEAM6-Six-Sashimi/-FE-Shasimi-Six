@@ -3,6 +3,8 @@ import {
   AiReviewResult,
   SavedResume,
   AiReviewResponse,
+  LatestAiReviewDetail,
+  LatestAiReviewResponse,
 } from '@/features/user/resume/types';
 import { handleAuthErrorResponse } from '@/features/auth/auth-error';
 import { parseMaintenanceMessage } from '@/services/maintenance.service';
@@ -143,5 +145,29 @@ export async function requestAiReview(
       success: false,
       error: { errorCode: 'NETWORK_ERROR', message: '네트워크 오류가 발생했습니다.' },
     };
+  }
+}
+
+// 이력서 AI 평가 결과 중 최신 결과 1개 조회
+export async function fetchLatestAiReview(
+  accessToken: string,
+  resumeId: number,
+): Promise<LatestAiReviewDetail | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/resumes/${resumeId}/ai-review/latest`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) return null;
+
+    const data: LatestAiReviewResponse = await res.json();
+    return data.review;
+  } catch {
+    return null;
   }
 }

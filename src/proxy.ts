@@ -11,12 +11,9 @@ const PROTECTED_PREFIXES = [
 ];
 
 // 로그인 페이지 자체와 점검 안내 페이지는 점검모드 리다이렉트 대상에서 제외
-// (안 그러면 무한 리다이렉트 or 점검 중 로그인이 안 됨)
 const MAINTENANCE_EXCLUDED_PATHS = ['/maintenance', '/auth/login'];
 
 // prefix가 실제 경로 세그먼트 경계에서 끝나는지까지 확인한다.
-// 단순 pathname.startsWith(prefix)만 쓰면 '/mypage-public'처럼 이름만 겹치는
-// 전혀 다른 경로까지 같이 매치돼버린다.
 function matchesPath(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
@@ -28,21 +25,39 @@ let maintenanceCache: { checkedAt: number; enabled: boolean; message: string } =
 };
 const MAINTENANCE_CACHE_TTL_MS = 5000; // 백엔드 Cache-Control max-age와 맞추기
 const MAINTENANCE_CHECK_TIMEOUT_MS = 1500; // 이 요청은 거의 모든 경로에서 매번 걸리므로 짧게 끊어야 함
+const MAINTENANCE_RETRY_DELAY_MS = 400; // 순간적인 지연과 완전한 다운을 구분하기 위한 재시도 전 대기
+
+async function fetchMaintenanceStatus(): Promise<{ enabled: boolean; message: string }> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/maintenance/status`, {
+    signal: AbortSignal.timeout(MAINTENANCE_CHECK_TIMEOUT_MS),
+  });
+  if (!res.ok) throw new Error(`maintenance status check failed: ${res.status}`);
+  const data = await res.json();
+  return { enabled: data.enabled, message: data.message };
+}
 
 async function checkMaintenance(): Promise<{ enabled: boolean; message: string }> {
   const now = Date.now();
   if (now - maintenanceCache.checkedAt < MAINTENANCE_CACHE_TTL_MS) return maintenanceCache;
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/maintenance/status`, {
-      signal: AbortSignal.timeout(MAINTENANCE_CHECK_TIMEOUT_MS),
-    });
-    const data = await res.json();
-    maintenanceCache = { checkedAt: now, enabled: data.enabled, message: data.message };
+    maintenanceCache = { checkedAt: now, ...(await fetchMaintenanceStatus()) };
+    return maintenanceCache;
   } catch {
-    // fail-open: 상태 조회 자체가 실패하거나(네트워크 오류) 타임아웃이 나면 평소대로 통과
-    // (타임아웃도 이 catch에서 함께 처리됨 - AbortSignal.timeout()이 abort하면 fetch가 reject됨)
-    maintenanceCache = { checkedAt: now, enabled: false, message: '' };
+    // 1차 실패 - 네트워크 순간 지연일 수 있으니 짧게 대기 후 한 번 더 시도
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, MAINTENANCE_RETRY_DELAY_MS));
+
+  try {
+    maintenanceCache = { checkedAt: now, ...(await fetchMaintenanceStatus()) };
+  } catch {
+    // 재시도까지 실패하면 배포/장애 등으로 백엔드가 완전히 다운된 것으로 보고 fail-closed 처리
+    maintenanceCache = {
+      checkedAt: now,
+      enabled: true,
+      message: '서버 점검 또는 일시적인 장애로 서비스 이용이 어렵습니다. 잠시 후 다시 시도해주세요.',
+    };
   }
 
   return maintenanceCache;
@@ -59,7 +74,6 @@ async function verifyRole(accessToken: string): Promise<string | null> {
     return data.role ?? null;
   } catch {
     // fail-closed: 점검모드 체크와 반대로, 검증 자체가 실패하면 "권한 없음"으로 취급한다.
-    // (여기서 fail-open으로 하면 백엔드가 잠깐 느려지기만 해도 권한 체크가 그냥 뚫려버린다)
     return null;
   }
 }
@@ -79,19 +93,16 @@ export async function proxy(request: NextRequest) {
   };
 
   // 1) 점검모드 체크 — 전체 경로 대상, 예외 경로·API 라우트는 건너뜀
-  // (/api/**는 fetch()로 JSON 응답을 기대하고 호출되므로, HTML 페이지로
-  // 리다이렉트해버리면 호출부의 res.json()이 그대로 깨진다)
-  // 점검 여부부터 먼저 확인(캐시돼 있어 저렴함) — 점검 중이 아니면 검증 비용이 드는
-  // verifyRole()을 아예 호출하지 않는다. ADMIN 여부는 클라이언트가 쓸 수 있는 role
-  // 쿠키가 아니라 백엔드가 검증한 값으로만 판단한다(role 쿠키는 httpOnly가 아니라
-  // 누구나 role=ADMIN으로 조작해 점검모드를 우회할 수 있었음).
   const isApiPath = matchesPath(pathname, '/api');
   if (!isApiPath && !MAINTENANCE_EXCLUDED_PATHS.includes(pathname)) {
     const { enabled } = await checkMaintenance();
     if (enabled) {
       const role = await getVerifiedRole();
       if (role !== 'ADMIN') {
-        return NextResponse.redirect(new URL('/maintenance', request.url));
+        // 점검이 끝나면 홈이 아니라 원래 가려던 곳으로 돌아갈 수 있도록 경로를 남겨둔다.
+        const maintenanceUrl = new URL('/maintenance', request.url);
+        maintenanceUrl.searchParams.set('redirect', `${pathname}${search}`);
+        return NextResponse.redirect(maintenanceUrl);
       }
     }
   }
@@ -136,6 +147,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf)$).*)',
+    '/((?!api/|_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf)$).*)',
   ],
 };

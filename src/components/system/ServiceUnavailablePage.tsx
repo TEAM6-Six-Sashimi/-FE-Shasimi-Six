@@ -1,13 +1,55 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { fetchMaintenanceStatus } from '@/services/maintenance.service';
+import { getSafeRedirect } from '@/lib/safe-redirect';
 
-export default function ServiceUnavailablePage({ message }: { message: string }) {
+const POLL_INTERVAL_MS = 5000; // 미들웨어의 점검 상태 캐시 TTL과 맞춤
+
+interface ServiceUnavailablePageProps {
+  message: string;
+  /** 점검 종료가 감지되면 이동할 경로. 안 주면 홈으로. (독립된 /maintenance 페이지에서 사용) */
+  redirectTo?: string;
+  /** 점검 종료가 감지됐을 때 이동 대신 직접 처리하고 싶은 경우(이미 렌더돼 있던 페이지를 그대로 복귀시키는 용도) */
+  onRecovered?: () => void;
+}
+
+export default function ServiceUnavailablePage({
+  message,
+  redirectTo,
+  onRecovered,
+}: ServiceUnavailablePageProps) {
+  const router = useRouter();
+
   useEffect(() => {
-    const timer = setTimeout(() => window.location.reload(), 20000); // 20초 후 자동 새로고침
-    return () => clearTimeout(timer);
-  }, []);
+    let cancelled = false;
+
+    const checkAndRecover = async () => {
+      try {
+        const status = await fetchMaintenanceStatus();
+        if (cancelled || status.enabled) return;
+
+        if (onRecovered) {
+          onRecovered();
+        } else {
+          const safeTarget = getSafeRedirect(redirectTo);
+          router.replace(safeTarget === '/maintenance' ? '/' : safeTarget);
+        }
+      } catch {
+        // 상태 조회 자체가 실패하면(백엔드가 아직 안 올라옴 등) 다음 폴링에서 다시 시도
+      }
+    };
+
+    checkAndRecover();
+    const timer = setInterval(checkAndRecover, POLL_INTERVAL_MS);
+
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [router, redirectTo, onRecovered]);
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 bg-white">

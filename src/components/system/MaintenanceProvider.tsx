@@ -31,7 +31,11 @@ export function MaintenanceProvider({ children }: { children: ReactNode }) {
       });
   }, []);
 
-  if (isBlocked) return <ServiceUnavailablePage message={message} />;
+  if (isBlocked) {
+    return (
+      <ServiceUnavailablePage message={message} onRecovered={() => setMaintenance(false)} />
+    );
+  }
 
   return (
     <MaintenanceContext.Provider value={{ isBlocked, message, setMaintenance }}>

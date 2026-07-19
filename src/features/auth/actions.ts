@@ -58,13 +58,23 @@ export async function loginAction(
   }
 }
 
-export async function logoutAction(): Promise<void> {
+async function clearAuthCookies() {
   const cookieStore = await cookies();
   cookieStore.delete('accessToken');
   cookieStore.delete('refreshToken');
   cookieStore.delete('role'); // role도 삭제
   cookieStore.delete('accessTokenExpiresAt');
+}
+
+export async function logoutAction(): Promise<void> {
+  await clearAuthCookies();
   redirect('/');
+}
+
+// 토큰 만료 등으로 세션이 끊겨 재로그인이 필요한 경우 - 홈이 아니라 로그인 페이지로 바로 이동시킨다.
+export async function logoutToLoginAction(): Promise<void> {
+  await clearAuthCookies();
+  redirect('/auth/login');
 }
 
 // 토큰 재발급(연장하기)

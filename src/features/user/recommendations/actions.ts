@@ -5,6 +5,7 @@ import {
   postJobPostingRecommendation,
   checkUrlReachable,
   fetchJobPostingRecommendation,
+  fetchLatestJobPostingRecommendation,
 } from '@/services/recommendation.service';
 import { fetchCoursesByIds } from '@/services/course.service';
 import { JobPostingRecommendationRequest, AnalyzeResult } from './types';
@@ -44,4 +45,14 @@ export async function fetchJobPostingRecommendationAction(recommendationId: numb
 // 추천 결과의 추천 강의 상세 정보 한 번에 조회
 export async function fetchCourseDetailsAction(courseIds: number[]) {
   return fetchCoursesByIds(courseIds);
+}
+
+// 채용공고 분석 결과 중 최신 결과 1개 조회
+export async function fetchLatestJobPostingRecommendationAction() {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+
+  if (!accessToken) return null;
+
+  return fetchLatestJobPostingRecommendation(accessToken);
 }

@@ -1,11 +1,12 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import FeatureHeader from '@/components/layout/FeatureHeader';
 import FullScreenLoading from '@/components/ui/FullScreenLoading';
 import InputForm from './InputForm';
 import RecomResult from './RecomResult';
-import { JobPostingRecommendationResult } from '../types';
+import RecomResultSkeleton from './RecomResultSkeleton';
+import { JobPostingRecommendationResult, LatestJobPostingRecommendation } from '../types';
 import { fetchJobPostingRecommendationAction, fetchCourseDetailsAction } from '../actions';
 import { MySubscription } from '../../payments/types';
 import { CourseFromAPI } from '../../courses/types';
@@ -13,6 +14,7 @@ import { CourseFromAPI } from '../../courses/types';
 interface RecommendationPageClientProps {
   resumeId: number | null;
   mySubscription: MySubscription | null;
+  latestRecommendation: LatestJobPostingRecommendation | null;
   isLoggedIn: boolean;
 }
 
@@ -23,6 +25,7 @@ const MAX_POLLING_ATTEMPTS = 40; // 최대 대기 1 * 40초(40초)
 export default function RecommendationPageClient({
   resumeId,
   mySubscription,
+  latestRecommendation,
   isLoggedIn,
 }: RecommendationPageClientProps) {
   const [result, setResult] = useState<JobPostingRecommendationResult | null>(null);
@@ -34,6 +37,12 @@ export default function RecommendationPageClient({
 
   // 컴포넌트가 사라진 후에도 polling이 계속되는 것을 막기 위한 ref
   const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // courseId 배열로 강의 상세 정보를 조회해서 courseDetails에 채움
   const loadCourseDetails = async (recommendation: JobPostingRecommendationResult) => {
@@ -91,6 +100,20 @@ export default function RecommendationPageClient({
     await pollResult(recommendationId);
   };
 
+  // 최근 분석 기록 드롭다운에서 항목 선택 시 - 해당 결과를 바로 조회해서 표시
+  const handleSelectHistory = async (recommendationId: number) => {
+    setAnalysisError('');
+    const data = await fetchJobPostingRecommendationAction(recommendationId);
+
+    if (!data) {
+      setAnalysisError('분석 결과를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    setResult(data);
+    await loadCourseDetails(data);
+  };
+
   const subscriptionText = mySubscription?.subscribed
     ? `${mySubscription.planName} / 갱신일 : ${mySubscription.expiresAt?.slice(0, 10)}`
     : '보유한 구독권이 없습니다.';
@@ -99,7 +122,7 @@ export default function RecommendationPageClient({
     <div className="bg-[#F9FAFB]">
       <FeatureHeader
         icon="ai"
-        title="AI 맞춤 강의 추천 (Beta)"
+        title="AI 맞춤 강의 추천"
         description="채용공고를 등록하고 나에게 필요한 강의를 추천받아보세요."
         right={subscriptionText}
         rightHighlight={!mySubscription?.subscribed}
@@ -111,15 +134,20 @@ export default function RecommendationPageClient({
             resumeId={resumeId}
             hasSubscription={!!mySubscription?.subscribed}
             isLoggedIn={isLoggedIn}
+            latestRecommendation={latestRecommendation}
             onAnalyzeSuccess={handleAnalyzeSuccess}
+            onSelectHistory={handleSelectHistory}
           />
 
           {analysisError && (
             <p className="text-center text-[13.5px] text-[#FF5E5E] mt-6">⚠ {analysisError}</p>
           )}
 
+          {/* polling 중에는 풀스크린 로딩 뒤로 결과 모양의 스켈레톤을 미리 보여준다 */}
+          {isPolling && <RecomResultSkeleton />}
+
           {/* analysisStatus === 'COMPLETED' 일 때만 결과 렌더링 */}
-          {result && result.analysisStatus === 'COMPLETED' && (
+          {!isPolling && result && result.analysisStatus === 'COMPLETED' && (
             <RecomResult result={result} courseDetails={courseDetails} />
           )}
         </div>

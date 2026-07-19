@@ -3,6 +3,8 @@ import {
   JobPostingRecommendationResponse,
   JobPostingRecommendationResult,
   AnalyzeResult,
+  LatestJobPostingRecommendation,
+  LatestJobPostingRecommendationResponse,
 } from '@/features/user/recommendations/types';
 import { handleAuthErrorResponse } from '@/features/auth/auth-error';
 
@@ -69,6 +71,29 @@ export async function fetchJobPostingRecommendation(
 
     if (!res.ok) return null;
     return res.json();
+  } catch {
+    return null;
+  }
+}
+
+// 채용공고 분석 결과 중 최신 결과 1개 조회
+export async function fetchLatestJobPostingRecommendation(
+  accessToken: string,
+): Promise<LatestJobPostingRecommendation | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/recommendations/job-posting/latest`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) return null;
+
+    const data: LatestJobPostingRecommendationResponse = await res.json();
+    return data.recommendation;
   } catch {
     return null;
   }

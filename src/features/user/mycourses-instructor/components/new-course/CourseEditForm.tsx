@@ -43,16 +43,19 @@ const DEFAULT_SESSION: Omit<Session, 'id'> = {
 
 const MODAL_CONFIG = {
   save: {
-    title: '변경된 정보를 임시 저장 하시겠습니까?',
-    message: '강의가 보관 상태로 저장되며 목록으로 돌아갑니다.',
+    title: '임시 저장 확인',
+    message:
+      '변경된 정보를 임시 저장 하시겠습니까? 강의가 보관 상태로 저장되며 목록으로 돌아갑니다.',
   },
   submit: {
-    title: '변경된 내용으로 강의 승인을 요청하시겠습니까?',
-    message: '승인 요청 후 관리자 검토를 거쳐 수강생에게 공개됩니다.',
+    title: '승인 요청 확인',
+    message:
+      '변경된 내용으로 강의 승인을 요청하시겠습니까? 승인 요청 후 관리자 검토를 거쳐 수강생에게 공개됩니다.',
   },
   cancel: {
-    title: '작성 중인 내용이 있습니다.\n페이지를 나가시겠습니까?',
-    message: '저장되지 않은 내용은 사라집니다.',
+    title: '작성 취소',
+    message:
+      '작성 중인 내용이 있습니다.\n페이지를 나가시겠습니까? 저장되지 않은 내용은 사라집니다.',
   },
 };
 
@@ -301,7 +304,6 @@ export default function CourseEditForm({ categories, initialData }: CourseEditFo
         />
 
         <FormActionButtons
-          mode="edit"
           isLoading={isLoading}
           isSubmitDisabled={isSubmitDisabled}
           onSave={() => setConfirmModal({ type: 'save' })}

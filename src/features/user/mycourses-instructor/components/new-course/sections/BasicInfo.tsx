@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
+import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
 import type { Category } from '@/features/categories/types';
 
 const LEVELS = ['초급', '중급', '고급'] as const;
@@ -80,9 +81,9 @@ export default function BasicInfoSection({
   const fieldErrorCls = 'text-[12px] text-[#FF5E5E] mt-1';
   const borderCls = (hasError?: string) => (hasError ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]');
 
-  // 새로 선택한 파일(thumbnailPreviewUrl, blob URL)일 때만 미리보기를 보여준다.
-  // 기존에 등록된 thumbnail(백엔드 경로)은 미리보기 대상에서 제외.
-  const hasExistingThumbnail = !thumbnailPreviewUrl && !!thumbnail;
+  // 새로 선택한 파일(thumbnailPreviewUrl, blob URL)이 없을 때는 기존에 등록된 thumbnail을 보여준다.
+  // thumbnail은 상대 경로(key)로 내려올 수 있어 getThumbnailUrl로 절대 URL로 변환해야 한다.
+  const existingThumbnailUrl = !thumbnailPreviewUrl ? getThumbnailUrl(thumbnail) : null;
 
   return (
     <section aria-labelledby="basic-info-heading" className="flex flex-col gap-5">
@@ -251,23 +252,17 @@ export default function BasicInfoSection({
         </Button>
         {errors.thumbnail && <p className={fieldErrorCls}>{errors.thumbnail}</p>}
 
-        {/* 새로 선택한 파일일 때만 미리보기 표시 */}
-        {thumbnailPreviewUrl && (
+        {/* 새로 선택한 파일 미리보기 (blob URL) 또는 기존에 등록된 이미지 미리보기 */}
+        {(thumbnailPreviewUrl || existingThumbnailUrl) && (
           <figure className="relative mt-2 w-full h-40 rounded-lg border border-[#E5E7EB] overflow-hidden bg-[#F3F4F6]">
             <Image
-              src={thumbnailPreviewUrl}
+              src={thumbnailPreviewUrl || (existingThumbnailUrl as string)}
               alt="썸네일 미리보기"
               fill
-              unoptimized
+              unoptimized={!!thumbnailPreviewUrl || isLocalhostUrl(existingThumbnailUrl ?? '')}
               className="object-cover"
             />
           </figure>
-        )}
-        {hasExistingThumbnail && (
-          <p className="text-[11.5px] text-[#9CA3AF] mt-1.5">
-            ℹ 기존 등록 이미지는 미리보기를 제공하지 않습니다. 새 이미지로 변경 시 미리보기가
-            표시됩니다.
-          </p>
         )}
       </div>
     </section>
