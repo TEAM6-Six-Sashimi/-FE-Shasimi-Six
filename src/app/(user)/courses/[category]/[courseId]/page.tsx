@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: `/courses/${encodeURIComponent(course.categoryName)}/${courseId}`,
       images: thumbnailUrl
         ? [{ url: thumbnailUrl, width: 1200, height: 630, alt: course.title }]
-        : [{url: '/FitGyeok-sharing.png', width: 1200, height: 630, alt: '핏(Fit)-격 로고' }],
+        : [{url: '/FitGyeok-share2.png', width: 1200, height: 630, alt: '핏(Fit)-격 로고' }],
     },
   };
 }
