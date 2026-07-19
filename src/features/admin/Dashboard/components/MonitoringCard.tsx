@@ -2,6 +2,8 @@
 
 import { Button } from '@/components/ui/button';
 
+const GRAFANA_URL = process.env.NEXT_PUBLIC_GRAFANA_URL;
+
 export default function MonitoringCard() {
   return (
     <div className="flex flex-col gap-4">
@@ -14,7 +16,7 @@ export default function MonitoringCard() {
           className="h-9 w-22 px-4 border-[1.5px] border-[#D1D5DB] text-[#1E2125] text-[13px] font-semibold hover:bg-[#F9FAFB] hover:border-[#6A7282] cursor-pointer"
         >
           <a
-            href="http://54.116.209.165:3000/d/sashimi-overview/sashimi-overview?orgId=1&refresh=10s"
+            href={`${GRAFANA_URL}/d/sashimi-overview/sashimi-overview?orgId=1&refresh=10s`}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -32,7 +34,7 @@ export default function MonitoringCard() {
           className="h-9 w-22 px-4 border-[1.5px] border-[#D1D5DB] text-[#1E2125] text-[13px] font-semibold hover:bg-[#F9FAFB] hover:border-[#6A7282] cursor-pointer"
         >
           <a
-            href="http://54.116.209.165:3000/d/sashimi-business/sashimi-business?orgId=1&refresh=30s"
+            href={`${GRAFANA_URL}/d/sashimi-business/sashimi-business?orgId=1&refresh=30s`}
             target="_blank"
             rel="noopener noreferrer"
           >
