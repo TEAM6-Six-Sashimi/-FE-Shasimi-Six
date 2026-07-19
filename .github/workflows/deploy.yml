@@ -28,6 +28,7 @@ jobs:
           build-args: |
             API_URL=${{ secrets.API_URL }}
             TOSS_CLIENT_KEY=${{ secrets.TOSS_CLIENT_KEY }}
+            GRAFANA_URL=${{ secrets.GRAFANA_URL }}
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ vars.APP_NAME }}:latest
 

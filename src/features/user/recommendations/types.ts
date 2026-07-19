@@ -82,3 +82,22 @@ export interface RecommendationApiErrorBody {
 export type AnalyzeResult =
   | { success: true; data: JobPostingRecommendationResponse }
   | { success: false; error: RecommendationApiErrorBody };
+
+// GET /recommendations/job-posting/latest 응답 - 입력창 포커스 시 드롭다운에 보여줄 최근 분석 기록 1건
+export interface LatestJobPostingRecommendation {
+  recommendationId: number;
+  resumeId: number | null;
+  inputType: RecommendationInputType;
+  sourceUrl: string | null;
+  rawContent: string | null;
+  analysisStatus: AnalysisStatus;
+  resumeBased: boolean;
+  summary: JobPostingSummary | null;
+  fitAnalysis: FitAnalysis | null;
+  certificates: RecommendedCertificate[];
+  courses: RecommendedCourse[];
+}
+
+export interface LatestJobPostingRecommendationResponse {
+  recommendation: LatestJobPostingRecommendation | null;
+}
