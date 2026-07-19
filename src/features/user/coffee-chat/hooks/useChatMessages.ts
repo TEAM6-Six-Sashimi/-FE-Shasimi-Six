@@ -41,11 +41,28 @@ export function useChatMessages({
     pendingContentRef.current = pendingContent;
   }, [pendingContent]);
 
+  // READ 이벤트가 히스토리 응답이나 대상 MESSAGE보다 먼저 도착할 수 있어서,
+  // 그 시점에 존재하는 메시지에만 적용하고 버리면 이후 병합/도착하는 메시지가 다시
+  // "읽지 않음"으로 보인다. 마지막으로 읽힌 지점을 워터마크로 따로 들고 있다가
+  // 메시지 목록이 갱신될 때마다 함께 적용한다.
+  const lastReadMessageIdRef = useRef(0);
+
+  function applyReadWatermark(list: ChatMessageEvent[]) {
+    const watermark = lastReadMessageIdRef.current;
+    if (watermark <= 0) return list;
+    return list.map((m) =>
+      m.senderId === myUserId && m.messageId <= watermark && !m.isRead
+        ? { ...m, isRead: true }
+        : m,
+    );
+  }
+
   // 방 진입 시 히스토리 로드
   useEffect(() => {
     let cancelled = false;
     setMessages([]);
     setPendingContent(null);
+    lastReadMessageIdRef.current = 0;
 
     fetchMessages(chatId).then((history) => {
       if (cancelled) return;
@@ -57,13 +74,14 @@ export function useChatMessages({
         for (const message of prev) {
           if (!merged.some((m) => m.messageId === message.messageId)) merged.push(message);
         }
-        return merged.sort((a, b) => a.messageId - b.messageId);
+        return applyReadWatermark(merged.sort((a, b) => a.messageId - b.messageId));
       });
     });
 
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatId, fetchMessages]);
 
   // 연결되면 실시간 구독
@@ -74,19 +92,18 @@ export function useChatMessages({
       if (message.eventType === 'READ') {
         // 읽음 이벤트는 새 메시지로 그리지 않고, 내가 보낸 메시지 중 lastReadMessageId
         // 이하인 것들의 읽음 표시만 갱신한다.
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.senderId === myUserId && m.messageId <= message.lastReadMessageId
-              ? { ...m, isRead: true }
-              : m,
-          ),
+        lastReadMessageIdRef.current = Math.max(
+          lastReadMessageIdRef.current,
+          message.lastReadMessageId,
         );
+        setMessages((prev) => applyReadWatermark(prev));
         return;
       }
 
-      setMessages((prev) =>
-        prev.some((m) => m.messageId === message.messageId) ? prev : [...prev, message],
-      );
+      setMessages((prev) => {
+        if (prev.some((m) => m.messageId === message.messageId)) return prev;
+        return applyReadWatermark([...prev, message]);
+      });
 
       if (message.senderId === myUserId && message.content === pendingContentRef.current) {
         setPendingContent(null);
@@ -102,6 +119,7 @@ export function useChatMessages({
     if (!pendingContent) return;
 
     const timer = setTimeout(() => {
+      setInput(pendingContent);
       setPendingContent(null);
       showToast('메시지 전송에 실패했습니다. 다시 시도해주세요.', 'negative');
     }, SEND_TIMEOUT_MS);
