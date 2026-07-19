@@ -10,6 +10,7 @@ import { SignupFormData, SignupStatusData, SignupPayloadDto } from '@/features/a
 import { AgreementState } from '@/features/auth/components/signupform/fields/Agreementsfield';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import OneButtonModal from '@/components/modals/OneButtonModal';
+import FullScreenLoading from '@/components/ui/FullScreenLoading';
 
 const STEPS = [
   { id: 1, label: '회원정보 입력' },
@@ -22,6 +23,7 @@ export default function SignupPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [modalState, setModalState] = useState<ModalState>('none');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState<SignupFormData>({
     name: '',
@@ -82,16 +84,20 @@ export default function SignupPage() {
       aiConsent: agreements.aiUsage,
     };
 
+    setIsSubmitting(true);
     try {
       const success = await registerUser(finalPayload);
       setModalState(success ? 'success' : 'fail');
     } catch {
       setModalState('fail');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <>
+      {isSubmitting && <FullScreenLoading message="회원가입 처리 중입니다..." />}
       <div className="flex flex-col items-center w-full min-h-[calc(100vh-48px)] py-10 px-4 bg-[#F9FAFB]">
         <StepIndicator currentStep={step} steps={STEPS} />
         <div className="bg-white w-full max-w-xl rounded-2xl p-10 shadow-md">
@@ -108,6 +114,7 @@ export default function SignupPage() {
               initialCategories={selectedCategories}
               initialReferralCode={referralCode}
               initialReferralChecked={isReferralChecked}
+              isSubmitting={isSubmitting}
               onPrev={prevStep}
               onSubmit={handleSignupSubmit}
             />

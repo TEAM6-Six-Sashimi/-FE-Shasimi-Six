@@ -31,8 +31,8 @@ export default function ReportModal({
   const [submitted, setSubmitted] = useState(false);
 
   const isCategoryValid = !!category;
-  // '기타'를 제외한 카테고리는 상세 내용 입력이 필수
-  const isReasonRequired = category !== '' && category !== 'OTHER';
+  // '기타'는 사유가 명확하지 않으므로 상세 내용 입력이 필수, 나머지 카테고리는 선택
+  const isReasonRequired = category === 'OTHER';
   const isReasonValid = !isReasonRequired || !!reason.trim();
   const isValid = isCategoryValid && isReasonValid;
   const isError = submitted && !isValid;
@@ -79,6 +79,14 @@ export default function ReportModal({
         )}
 
         <div className="mb-2">
+          <label className="block text-[13px] font-semibold text-[#1E2125] mb-1.5">
+            상세 내용{' '}
+            {isReasonRequired ? (
+              <span className="text-[#FF5E5E]">*</span>
+            ) : (
+              <span className="text-[12px] text-[#9CA3AF] font-normal">(선택)</span>
+            )}
+          </label>
           <textarea
             value={reason}
             onChange={(e) => setReason(e.target.value.slice(0, 200))}

@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { getThumbnailUrl } from '@/lib/thumbnail';
-import { StudentChatRoom } from '../types';
+import { StudentChatRoom } from '../../types';
 
 function formatDate(iso: string | null) {
   return iso ? iso.slice(0, 10) : '';

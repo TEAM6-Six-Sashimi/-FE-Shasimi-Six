@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import CoffeeChatSidebar from './CoffeeChatSidebar';
-import ChatPanel from './ChatPanel';
-import InstructorChatPanel from './InstructorChatPanel';
+import CoffeeChatSidebar from './coffeechat-sidebar/CoffeeChatSidebar';
+import ChatPanel from './coffeechat-panel/ChatPanel';
+import InstructorChatPanel from './coffeechat-panel/InstructorChatPanel';
 import { useCoffeeChatSocket } from '../hooks/useCoffeeChatSocket';
 import { fetchChatMessagesAction, fetchInstructorMessagesAction } from '../actions';
 import { UserMe } from '@/features/auth/types';
-import { ChatMessage, InstructorChatRoom, StudentChatRoom } from '../types';
+import { ChatMessageEvent, InstructorChatRoom, StudentChatRoom } from '../types';
 
 interface CoffeeChatPageClientProps {
   role: UserMe['role'];
@@ -29,7 +29,7 @@ interface UnreadTrackable {
 function applyIncomingMessage<T extends UnreadTrackable>(
   list: T[],
   chatId: number,
-  message: ChatMessage,
+  message: ChatMessageEvent,
 ): T[] {
   return list.map((item) =>
     item.chatId === chatId
@@ -115,6 +115,7 @@ export default function CoffeeChatPageClient({
 
     const unsubscribers = backgroundChatIds.map((chatId) =>
       subscribe(chatId, (message) => {
+        if (message.eventType === 'READ') return; // 읽음 이벤트는 안읽음 배지에 영향 없음
         if (message.senderId === userId) return; // 내가 보낸 메시지는 안읽음으로 세지 않는다
 
         if (isInstructor) {
@@ -146,9 +147,15 @@ export default function CoffeeChatPageClient({
     }
   };
 
+  const hasSelection = !!selectedStudentRoom || !!selectedInstructorChat;
+
   return (
-    <div className="flex bg-white h-[calc(100vh-140px)] min-h-[670px]">
-      <div className="shrink-0 w-[500px]">
+    <div className="flex flex-col lg:flex-row bg-white h-[calc(100vh-180px)] lg:h-[calc(100vh-140px)] min-h-[500px] lg:min-h-[670px]">
+      <div
+        className={`w-full lg:w-[420px] xl:w-[500px] shrink-0 flex-1 lg:flex-none ${
+          hasSelection ? 'hidden lg:block' : ''
+        }`}
+      >
         <CoffeeChatSidebar
           role={role}
           studentChatRooms={rooms}
@@ -168,6 +175,7 @@ export default function CoffeeChatPageClient({
           isConnected={isConnected}
           subscribe={subscribe}
           sendMessage={sendMessage}
+          onBack={() => setSelectedChatId(null)}
         />
       )}
       {selectedInstructorChat && (
@@ -178,10 +186,11 @@ export default function CoffeeChatPageClient({
           isConnected={isConnected}
           subscribe={subscribe}
           sendMessage={sendMessage}
+          onBack={() => setSelectedChatId(null)}
         />
       )}
-      {!selectedStudentRoom && !selectedInstructorChat && (
-        <div className="flex-1 flex flex-col items-center justify-center gap-2 bg-[#F9FAFB]">
+      {!hasSelection && (
+        <div className="hidden lg:flex flex-1 flex-col items-center justify-center gap-2 bg-[#F9FAFB]">
           <Image src="/chat/chat-inactive.svg" alt="" width={50} height={50} />
           <p className="text-[14px] text-[#9CA3AF]">시작할 채팅을 선택해주세요.</p>
         </div>

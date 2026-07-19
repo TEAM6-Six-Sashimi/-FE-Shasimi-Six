@@ -6,6 +6,7 @@ import {
   NoticeDetailResult,
   DeleteNoticeResult,
 } from '@/features/admin/noticemanage/types';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -65,6 +66,9 @@ export async function createNotice(
     });
 
     if (!res.ok) {
+      const authMessage = await handleAuthErrorResponse(res);
+      if (authMessage) return { success: false, authError: true, message: authMessage };
+
       const errorBody = await res.json().catch(() => ({}));
       if (res.status === 403) {
         return { success: false, message: '접근 권한이 없습니다.' };
@@ -121,6 +125,9 @@ export async function deleteNotice(
     });
 
     if (!res.ok) {
+      const authMessage = await handleAuthErrorResponse(res);
+      if (authMessage) return { success: false, authError: true, message: authMessage };
+
       if (res.status === 404) {
         return { success: false, message: '공지사항을 찾을 수 없습니다.' };
       }

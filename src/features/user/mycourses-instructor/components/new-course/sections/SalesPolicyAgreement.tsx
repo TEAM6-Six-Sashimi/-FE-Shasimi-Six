@@ -1,3 +1,5 @@
+import Checkbox from '@/components/ui/Checkbox';
+
 interface SalesPolicyAgreementProps {
   agreed: boolean;
   isLoading: boolean;
@@ -20,12 +22,12 @@ export default function SalesPolicyAgreement({
         강의 판매 정책 동의
       </h2>
       <label className="flex items-center gap-2.5 cursor-pointer w-fit">
-        <input
-          type="checkbox"
+        <Checkbox
           checked={agreed}
-          onChange={(e) => onChange(e.target.checked)}
+          onChange={onChange}
           disabled={isLoading}
-          className="w-4 h-4 accent-[#CFEE5D] cursor-pointer"
+          color="#CFEE5D"
+          checkColor="#1E2125"
         />
         <span className="text-[13.5px] font-semibold text-[#1E2125]">
           강의 판매 정책에 동의합니다. <span className="text-[#FF5E5E]">(필수)</span>

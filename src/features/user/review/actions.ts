@@ -11,6 +11,7 @@ import {
   CreateReviewRequest,
   ReportReviewRequest,
 } from '@/services/review.service';
+import { MaintenanceError } from '@/services/maintenance.service';
 
 function isAuthError(error: unknown): boolean {
   return error instanceof AuthSessionError || (error instanceof ReviewApiError && !!error.isAuthError);
@@ -35,7 +36,10 @@ async function getAuthOrThrow() {
 export async function createReviewAction(
   courseId: number,
   body: CreateReviewRequest,
-): Promise<{ success: true } | { success: false; message: string; authError?: true }> {
+): Promise<
+  | { success: true }
+  | { success: false; message: string; authError?: true; maintenance?: true }
+> {
   try {
     const { accessToken, user } = await getAuthOrThrow();
     await createReview(accessToken, user.id, courseId, body);
@@ -45,6 +49,7 @@ export async function createReviewAction(
       success: false,
       message: error instanceof Error ? error.message : '리뷰 등록에 실패했습니다.',
       authError: isAuthError(error) || undefined,
+      maintenance: error instanceof MaintenanceError || undefined,
     };
   }
 }

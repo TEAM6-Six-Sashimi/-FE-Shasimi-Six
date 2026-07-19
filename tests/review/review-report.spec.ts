@@ -44,7 +44,7 @@ test.describe("수강평 신고", () => {
 
   });
 
-  test("욕설 선택 후 내용을 입력하지 않으면 신고할 수 없다.", async ({ page }) => {
+  test("욕설 선택 후 내용 없이도 신고할 수 있다.", async ({ page }) => {
 
     await page.getByLabel("수강평 신고").first().click();
 
@@ -55,12 +55,12 @@ test.describe("수강평 신고", () => {
       .click();
 
     await expect(
-      page.getByText("상세 사유를 입력해주세요.")
+      page.getByText("신고가 접수되었습니다.")
     ).toBeVisible();
 
   });
 
-  test("기타는 내용 없이 신고할 수 있다.", async ({ page }) => {
+  test("기타는 내용을 입력하지 않으면 신고할 수 없다.", async ({ page }) => {
 
     await page.getByLabel("수강평 신고").first().click();
 
@@ -71,7 +71,7 @@ test.describe("수강평 신고", () => {
       .click();
 
     await expect(
-      page.getByText("신고가 접수되었습니다.")
+      page.getByText("상세 사유를 입력해주세요.")
     ).toBeVisible();
 
   });

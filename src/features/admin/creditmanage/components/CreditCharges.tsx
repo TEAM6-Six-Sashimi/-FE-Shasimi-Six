@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { fetchCreditChargesAction } from '../actions';
 import { AdminCreditCharge } from '../types';
+import { useToast } from '@/components/ui/ToastContext';
+import { logoutAction } from '@/features/auth/actions';
 
 export default function CreditCharges() {
+  const { showToast } = useToast();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [keyword, setKeyword] = useState('');
@@ -36,8 +39,13 @@ export default function CreditCharges() {
       page,
       size: 10,
     })
-      .then((result) => {
+      .then(async (result) => {
         if (!active) return;
+        if (result.authError) {
+          showToast('다른 기기에서 로그인되어 자동 로그아웃 되었습니다.', 'alarm');
+          await logoutAction();
+          return;
+        }
         setItems(result.items);
         setTotalPages(result.totalPages);
       })
@@ -52,7 +60,7 @@ export default function CreditCharges() {
     return () => {
       active = false;
     };
-  }, [startDate, endDate, debouncedKeyword, page]);
+  }, [startDate, endDate, debouncedKeyword, page, showToast]);
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">

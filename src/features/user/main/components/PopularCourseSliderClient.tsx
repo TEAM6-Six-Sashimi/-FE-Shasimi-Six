@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { CourseFromAPI } from '../../courses/types';
 import { checkAlreadyEnrolledAction } from '../../courses/actions';
 import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
+import { useToast } from '@/components/ui/ToastContext';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
-import OneButtonModal from '@/components/modals/OneButtonModal';
 
 interface CourseWithCategory extends CourseFromAPI {
   categoryName: string;
@@ -18,15 +18,62 @@ interface PopularCourseSliderClientProps {
   courses: CourseWithCategory[];
 }
 
+// 뷰포트 너비에 따른 한 슬라이드당 카드 개수 (모바일 1 / 태블릿 2 / 데스크톱 3)
+function getItemsPerSlide(width: number): number {
+  if (width < 640) return 1;
+  if (width < 1024) return 2;
+  return 3;
+}
+
+const GRID_COLS_CLASS: Record<number, string> = {
+  1: 'grid-cols-1',
+  2: 'grid-cols-2',
+  3: 'grid-cols-3',
+};
+
+// 리사이즈 중 매 픽셀마다 재계산하지 않도록 가벼운 디바운스만 적용
+function useItemsPerSlide(): number {
+  const [itemsPerSlide, setItemsPerSlide] = useState(3);
+
+  useEffect(() => {
+    // window는 클라이언트에서만 접근 가능하므로 마운트 후 이펙트에서 초기값을 잡아야 함
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setItemsPerSlide(getItemsPerSlide(window.innerWidth));
+
+    let timer: ReturnType<typeof setTimeout>;
+    const handleResize = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => setItemsPerSlide(getItemsPerSlide(window.innerWidth)), 150);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  return itemsPerSlide;
+}
+
 export default function PopularCourseSliderClient({ courses }: PopularCourseSliderClientProps) {
+  const itemsPerSlide = useItemsPerSlide();
   const [current, setCurrent] = useState(0);
 
-  const slides = Array.from({ length: Math.ceil(courses.length / 3) }, (_, i) =>
-    courses.slice(i * 3, i * 3 + 3),
+  const slides = Array.from({ length: Math.ceil(courses.length / itemsPerSlide) }, (_, i) =>
+    courses.slice(i * itemsPerSlide, i * itemsPerSlide + itemsPerSlide),
   );
+  // slides가 빈 배열이면 slides.length - 1이 -1이 되어 인덱스 계산이 어긋나므로 0으로 바닥을 깐다
+  const lastIndex = Math.max(0, slides.length - 1);
+
+  // 뷰포트가 바뀌어 슬라이드 개수가 달라지면 범위를 벗어난 인덱스에 머물지 않도록 보정
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrent((p) => Math.min(p, lastIndex));
+  }, [lastIndex]);
 
   const prev = () => setCurrent((p) => Math.max(0, p - 1));
-  const next = () => setCurrent((p) => Math.min(slides.length - 1, p + 1));
+  const next = () => setCurrent((p) => Math.min(lastIndex, p + 1));
 
   return (
     <section className="px-6">
@@ -46,7 +93,10 @@ export default function PopularCourseSliderClient({ courses }: PopularCourseSlid
             style={{ transform: `translateX(-${current * 100}%)` }}
           >
             {slides.map((group, gIdx) => (
-              <div key={gIdx} className="min-w-full grid grid-cols-3 gap-5">
+              <div
+                key={gIdx}
+                className={`min-w-full grid ${GRID_COLS_CLASS[itemsPerSlide]} gap-5`}
+              >
                 {group.map((course) => (
                   <SliderCourseCard key={course.courseId} course={course} />
                 ))}
@@ -67,7 +117,7 @@ export default function PopularCourseSliderClient({ courses }: PopularCourseSlid
         <button
           type="button"
           onClick={next}
-          disabled={current === slides.length - 1}
+          disabled={current === lastIndex}
           aria-label="다음 슬라이드"
           className="absolute -right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-[#D1D5DB] shadow-md flex items-center justify-center text-[#1E2125] hover:bg-[#F9FAFB] disabled:opacity-30 transition-all cursor-pointer"
         >
@@ -100,13 +150,12 @@ export default function PopularCourseSliderClient({ courses }: PopularCourseSlid
 
 function SliderCourseCard({ course }: { course: CourseWithCategory }) {
   const router = useRouter();
+  const { showToast } = useToast();
   const thumbnailUrl = getThumbnailUrl(course.thumbnail);
   const courseHref = `/courses/${encodeURIComponent(course.categoryName)}/${course.courseId}`;
 
   const [isCheckingPurchase, setIsCheckingPurchase] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [showErrorModal, setShowErrorModal] = useState(false);
 
   const handlePurchase = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -116,8 +165,7 @@ function SliderCourseCard({ course }: { course: CourseWithCategory }) {
     try {
       const alreadyEnrolled = await checkAlreadyEnrolledAction(course.courseId);
       if (alreadyEnrolled) {
-        setErrorMessage('이미 수강 중인 강의입니다.');
-        setShowErrorModal(true);
+        showToast('이미 수강 중인 강의입니다.', 'alarm');
         return;
       }
       setShowPurchaseModal(true);
@@ -195,15 +243,6 @@ function SliderCourseCard({ course }: { course: CourseWithCategory }) {
             router.push(`/payments?courseIds=${course.courseId}`);
           }}
           onCancel={() => setShowPurchaseModal(false)}
-        />
-      )}
-
-      {showErrorModal && (
-        <OneButtonModal
-          title="알림"
-          message={errorMessage}
-          confirmLabel="확인"
-          onConfirm={() => setShowErrorModal(false)}
         />
       )}
     </>

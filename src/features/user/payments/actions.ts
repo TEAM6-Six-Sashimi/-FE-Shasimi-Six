@@ -9,6 +9,7 @@ import {
   MySubscription,
   SubscriptionPaymentsResponse,
 } from './types';
+import { parseMaintenanceMessage, MaintenanceError } from '@/services/maintenance.service';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -17,7 +18,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export async function checkoutAction(
   payload: CheckoutRequest,
   idempotencyKey: string,
-): Promise<{ success: true; data: CheckoutResponse } | { success: false; code: string }> {
+): Promise<
+  | { success: true; data: CheckoutResponse }
+  | { success: false; code: string; maintenance?: true; message?: string }
+> {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken')?.value;
@@ -45,12 +49,18 @@ export async function checkoutAction(
     });
 
     if (!res.ok) {
+      const maintenanceMessage = await parseMaintenanceMessage(res);
+      if (maintenanceMessage) throw new MaintenanceError(maintenanceMessage);
+
       const errorBody = await res.json().catch(() => null);
       throw new Error(errorBody?.errorCode ?? 'CHECKOUT_FAILED');
     }
 
     return { success: true, data: await res.json() };
   } catch (error) {
+    if (error instanceof MaintenanceError) {
+      return { success: false, code: 'MAINTENANCE', maintenance: true, message: error.message };
+    }
     return {
       success: false,
       code: error instanceof Error ? error.message : 'CHECKOUT_FAILED',

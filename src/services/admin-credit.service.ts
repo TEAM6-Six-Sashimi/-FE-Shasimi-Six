@@ -2,10 +2,12 @@ import {
   AdminCreditChargeListResponse,
   AdminCreditSearchParams,
 } from '@/features/admin/creditmanage/types';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const EMPTY_LIST = { items: [], totalElements: 0, totalPages: 0, page: 0, size: 10 };
+const AUTH_ERROR_LIST = { ...EMPTY_LIST, authError: true as const };
 
 function buildQuery(params: AdminCreditSearchParams): string {
   const query = new URLSearchParams();
@@ -29,6 +31,9 @@ export async function fetchAdminCreditCharges(
     });
 
     if (!res.ok) {
+      const authMessage = await handleAuthErrorResponse(res);
+      if (authMessage) return AUTH_ERROR_LIST;
+
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchAdminCreditCharges] status=${res.status} body=${errorBody}`);
       return EMPTY_LIST;

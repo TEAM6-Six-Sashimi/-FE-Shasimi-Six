@@ -5,12 +5,14 @@ import {
   AiReviewResponse,
 } from '@/features/user/resume/types';
 import { handleAuthErrorResponse } from '@/features/auth/auth-error';
+import { parseMaintenanceMessage } from '@/services/maintenance.service';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export type SaveResumeResult =
   | { resumeId: number }
   | { authError: true; message: string }
+  | { maintenance: true; message: string }
   | null;
 
 // 이력서 신규 작성
@@ -31,6 +33,10 @@ export async function saveResume(
     if (!res.ok) {
       const authMessage = await handleAuthErrorResponse(res);
       if (authMessage) return { authError: true, message: authMessage };
+
+      const maintenanceMessage = await parseMaintenanceMessage(res);
+      if (maintenanceMessage) return { maintenance: true, message: maintenanceMessage };
+
       return null;
     }
 
@@ -40,7 +46,9 @@ export async function saveResume(
   }
 }
 
-export type UpdateResumeResult = { success: true } | { success: false; authError?: true; message?: string };
+export type UpdateResumeResult =
+  | { success: true }
+  | { success: false; authError?: true; maintenance?: true; message?: string };
 
 // 이력서 수정
 export async function updateResume(
@@ -61,6 +69,10 @@ export async function updateResume(
     if (!res.ok) {
       const authMessage = await handleAuthErrorResponse(res);
       if (authMessage) return { success: false, authError: true, message: authMessage };
+
+      const maintenanceMessage = await parseMaintenanceMessage(res);
+      if (maintenanceMessage) return { success: false, maintenance: true, message: maintenanceMessage };
+
       return { success: false };
     }
 

@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { fetchCoursePaymentsAction } from '../actions';
 import { AdminCoursePayment } from '../types';
+import { useToast } from '@/components/ui/ToastContext';
+import { logoutAction } from '@/features/auth/actions';
 
 export default function CoursePayments() {
+  const { showToast } = useToast();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [keyword, setKeyword] = useState('');
@@ -14,7 +17,6 @@ export default function CoursePayments() {
   const [items, setItems] = useState<AdminCoursePayment[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [authError, setAuthError] = useState(false);
 
   // 검색어는 디바운스 처리 - 타이핑 중 매번 서버 조회하지 않도록
   useEffect(() => {
@@ -37,11 +39,15 @@ export default function CoursePayments() {
       page,
       size: 10,
     })
-      .then((result) => {
+      .then(async (result) => {
         if (!active) return;
+        if (result.authError) {
+          showToast('다른 기기에서 로그인되어 자동 로그아웃 되었습니다.', 'alarm');
+          await logoutAction();
+          return;
+        }
         setItems(result.items);
         setTotalPages(result.totalPages);
-        setAuthError(!!result.authError);
       })
       .catch(() => {
         if (!active) return;
@@ -54,7 +60,7 @@ export default function CoursePayments() {
     return () => {
       active = false;
     };
-  }, [startDate, endDate, debouncedKeyword, page]);
+  }, [startDate, endDate, debouncedKeyword, page, showToast]);
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
@@ -108,12 +114,6 @@ export default function CoursePayments() {
             <tr>
               <td colSpan={7} className="py-16 text-center text-[#6A7282]">
                 불러오는 중...
-              </td>
-            </tr>
-          ) : authError ? (
-            <tr>
-              <td colSpan={7} className="py-16 text-center text-[#FF5E5E]">
-                로그인이 필요합니다. 다시 로그인해주세요.
               </td>
             </tr>
           ) : items.length === 0 ? (

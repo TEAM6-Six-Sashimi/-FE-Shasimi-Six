@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
+import FieldLabel, { FieldLabelVariant } from "@/features/auth/components/FieldLabel"
 
 export const PASSWORD_REGEX =
   /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,16}$/;
@@ -15,6 +16,7 @@ interface PasswordFieldsProps {
   label?: string;
   confirmLabel?: string;
   inputHeightClass?: string;
+  labelVariant?: FieldLabelVariant;
 }
 
 export default function PasswordFields({
@@ -26,6 +28,7 @@ export default function PasswordFields({
   label = '비밀번호',
   confirmLabel = '비밀번호 확인',
   inputHeightClass = 'h-9',
+  labelVariant = 'semibold',
 }: PasswordFieldsProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
@@ -62,10 +65,7 @@ export default function PasswordFields({
   return (
     <>
       <div className="mb-4">
-        <div className="flex mb-1">
-          <p className="text-[15px] font-semibold text-[#1E2125]">{label}</p>
-          <p className="text-[#FF5F5F]">*</p>
-        </div>
+        <FieldLabel label={label} variant={labelVariant} />
         <div className="relative">
           <input
             type={showPassword ? 'text' : 'password'}
@@ -98,10 +98,7 @@ export default function PasswordFields({
       </div>
  
       <div className="mb-10">
-        <div className="flex">
-          <p className="text-[15px] font-semibold text-[#1E2125]">{confirmLabel}</p>
-          <p className="text-[#FF5F5F]">*</p>
-        </div>
+        <FieldLabel label={confirmLabel} variant={labelVariant} />
         <div className="relative">
           <input
             type={showPasswordConfirm ? 'text' : 'password'}

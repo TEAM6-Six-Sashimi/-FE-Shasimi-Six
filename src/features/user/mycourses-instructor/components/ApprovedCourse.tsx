@@ -122,7 +122,6 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
                     <span className="w-px h-2 bg-[#D1D5DB]" />
                     <span>수강생 {course.studentCount?.toLocaleString() || 0}명</span>
                     <span className="w-px h-2 bg-[#D1D5DB]" />
-                    {/* <span>등록일</span> */}{/* 등록일 type 추가 필요 */}
                   </div>
                 </div>
 
@@ -139,14 +138,6 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
                         className="h-9 px-4 border-[#D1D5DB] text-[#1E2125] text-[12.5px] font-semibold hover:bg-[#F9FAFB] cursor-pointer"
                       >
                         상세보기
-                      </Button>
-                    </Link>
-                    <Link href={`/mycourses-instructor/${course.courseId}/manage`}>
-                      <Button
-                        size="sm"
-                        className="h-9 px-4 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[12.5px] font-semibold cursor-pointer"
-                      >
-                        운영관리
                       </Button>
                     </Link>
                   </div>

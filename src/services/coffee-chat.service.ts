@@ -1,5 +1,5 @@
 import {
-  ChatMessage,
+  ChatMessageEvent,
   InstructorChatRoom,
   StudentChatRoom,
 } from '@/features/user/coffee-chat/types';
@@ -142,7 +142,7 @@ const MESSAGE_PAGE_SIZE = 100;
 export async function fetchInstructorMessages(
   accessToken: string,
   chatId: number,
-): Promise<ChatMessage[]> {
+): Promise<ChatMessageEvent[]> {
   try {
     const res = await fetch(
       `${API_BASE_URL}/instructor/coffee-chats/${chatId}/messages?page=0&size=${MESSAGE_PAGE_SIZE}`,
@@ -168,7 +168,7 @@ export async function fetchInstructorMessages(
 export async function fetchChatMessages(
   accessToken: string,
   chatId: number,
-): Promise<ChatMessage[]> {
+): Promise<ChatMessageEvent[]> {
   try {
     const res = await fetch(
       `${API_BASE_URL}/student/coffee-chats/${chatId}/messages?page=0&size=${MESSAGE_PAGE_SIZE}`,

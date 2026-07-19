@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useToast } from '@/components/ui/ToastContext';
+import { logoutAction } from '@/features/auth/actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import NoticeContent from '@/components/notice/NoticeContent';
 import { deleteNoticeAction } from '../actions';
@@ -29,6 +30,10 @@ export default function NoticeDetailView({ result }: Props) {
     if (deleteResult.success) {
       showToast('공지사항이 삭제되었습니다.');
       router.push('/admin/noticemanage');
+    } else if (deleteResult.authError) {
+      showToast(deleteResult.message, 'alarm');
+      await logoutAction();
+      return;
     } else {
       showToast(deleteResult.message, 'negative');
       setShowDeleteModal(false);
