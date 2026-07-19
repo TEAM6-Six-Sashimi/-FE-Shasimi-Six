@@ -52,45 +52,48 @@ export default function InstructorChatPanel({
   const handleAccept = async () => {
     if (isResponding) return;
     setIsResponding(true);
-    const success = await acceptInstructorChatAction(room.chatId);
-    setIsResponding(false);
-
-    if (!success) {
-      showToast('승인에 실패했습니다. 다시 시도해주세요.', 'negative');
-      return;
+    try {
+      const success = await acceptInstructorChatAction(room.chatId);
+      if (!success) {
+        showToast('승인에 실패했습니다. 다시 시도해주세요.', 'negative');
+        return;
+      }
+      router.refresh();
+    } finally {
+      setIsResponding(false);
     }
-
-    router.refresh();
   };
 
   const handleReject = async () => {
     if (isResponding) return;
     setIsResponding(true);
-    const success = await rejectInstructorChatAction(room.chatId);
-    setIsResponding(false);
-
-    if (!success) {
-      showToast('거절에 실패했습니다. 다시 시도해주세요.', 'negative');
-      return;
+    try {
+      const success = await rejectInstructorChatAction(room.chatId);
+      if (!success) {
+        showToast('거절에 실패했습니다. 다시 시도해주세요.', 'negative');
+        return;
+      }
+      showToast('커피챗 요청이 거절되었습니다.', 'alarm');
+      router.refresh();
+    } finally {
+      setIsResponding(false);
     }
-
-    showToast('커피챗 요청이 거절되었습니다.', 'alarm');
-    router.refresh();
   };
 
   const handleLeave = async () => {
     if (isResponding) return;
     setShowLeaveConfirm(false);
     setIsResponding(true);
-    const success = await leaveInstructorChatAction(room.chatId);
-    setIsResponding(false);
-
-    if (!success) {
-      showToast('나가기에 실패했습니다. 다시 시도해주세요.', 'negative');
-      return;
+    try {
+      const success = await leaveInstructorChatAction(room.chatId);
+      if (!success) {
+        showToast('나가기에 실패했습니다. 다시 시도해주세요.', 'negative');
+        return;
+      }
+      router.refresh();
+    } finally {
+      setIsResponding(false);
     }
-
-    router.refresh();
   };
 
   return (
