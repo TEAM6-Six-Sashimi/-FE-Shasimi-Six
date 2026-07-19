@@ -46,10 +46,10 @@ export default function ChatMessageList({ messages, myUserId, listEndRef }: Chat
                     </span>
                   )}
                   <div
-                    className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed whitespace-pre-wrap wrap-break-word ${
+                    className={`px-4 py-2.5 rounded-t-2xl text-[14px] text-[#1E2125] leading-relaxed whitespace-pre-wrap wrap-break-word ${
                       isMine
-                        ? 'bg-[#FFEBEB] text-[#1E2125]'
-                        : 'bg-white border border-[#E5E7EB] text-[#1E2125]'
+                        ? 'bg-[#FFEBEB] rounded-bl-2xl'
+                        : 'bg-white border border-[#E5E7EB] rounded-br-2xl'
                     }`}
                   >
                     {message.content}
