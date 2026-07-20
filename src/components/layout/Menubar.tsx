@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { Category } from '@/features/categories/types';
+import { useCoffeeChatAlert } from './CoffeeChatAlertContext';
 
 // ---- Chevron ---------------------------------------------------
 const ChevronIcon = ({ open }: { open: boolean }) => (
@@ -20,13 +21,13 @@ const ChevronIcon = ({ open }: { open: boolean }) => (
 interface MenubarProps {
   categories: Category[];
   role?: 'STUDENT' | 'INSTRUCTOR' | 'GUEST';
-  hasCoffeeChatAlert?: boolean;
 }
 
 // ---- 메인 컴포넌트 ---------------------------------------------
-export default function Menubar({ categories, role, hasCoffeeChatAlert = false }: MenubarProps) {
+export default function Menubar({ categories, role }: MenubarProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { hasAlert: hasCoffeeChatAlert } = useCoffeeChatAlert();
 
   const myCoursesHref = role === 'INSTRUCTOR' ? '/mycourses-instructor' : '/mycourses-student';
 
