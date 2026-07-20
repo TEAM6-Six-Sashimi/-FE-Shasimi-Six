@@ -2,11 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import CareerCounselingChatPanel from './CareerCounselingChatPanel';
+
+// 실제로 챗봇을 열기 전까지는 다운로드되지 않도록 지연 로딩 (모든 페이지에 떠 있는 버튼이라 초기 번들에서 빼는 효과가 큼)
+const CareerCounselingChatPanel = dynamic(() => import('./CareerCounselingChatPanel'), {
+  ssr: false,
+});
 
 const HOVER_MESSAGE = '진로에 대한 갈피를 못잡겠어? 핏봇에게 물어봐';
-const TYPE_INTERVAL_MS = 8;
+// 60fps(약 16ms) 프레임 예산보다 촘촘하게 돌 필요가 없어 16ms로 맞춘다
+const TYPE_INTERVAL_MS = 16;
 
 // 챗봇 버튼을 숨길 페이지 - 커피챗, 강사 지원, 장바구니, 결제페이지, 강사-내강의
 const HIDDEN_PATH_PREFIXES = [

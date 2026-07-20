@@ -11,6 +11,9 @@ import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
 import ChatInput from './ChatInput';
 
+// 대화가 길어져도 매 전송마다 백엔드로 보내는 history 크기가 무한정 커지지 않도록 최근 N개까지만 자른다.
+const MAX_HISTORY_MESSAGES = 15;
+
 interface Props {
   onClose: () => void;
 }
@@ -41,9 +44,10 @@ export default function CareerCounselingChatPanel({ onClose }: Props) {
     const trimmed = input.trim();
     if (!trimmed || isResponding) return;
 
-    // 안내용 초기 메시지는 실제 대화가 아니므로 history에서 제외
+    // 안내용 초기 메시지는 실제 대화가 아니므로 history에서 제외하고, 최근 대화만 남긴다
     const history: ChatbotHistoryItem[] = messages
       .filter((m) => !m.isIntro)
+      .slice(-MAX_HISTORY_MESSAGES)
       .map((m) => ({
         role: m.role === 'bot' ? 'assistant' : 'user',
         content: m.text,
