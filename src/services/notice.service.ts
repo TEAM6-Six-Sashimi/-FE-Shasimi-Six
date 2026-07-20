@@ -10,6 +10,10 @@ import { handleAuthErrorResponse } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// 공지사항 목록/상세 캐시 태그 - 등록/삭제 시 이 태그로 무효화해서 캐시와 실제 데이터를 맞춘다.
+export const NOTICE_CACHE_TAG = 'notices';
+const NOTICE_REVALIDATE_SECONDS = 60;
+
 const EMPTY_LIST: AdminNoticeListResponse = {
   items: [],
   page: 0,
@@ -33,7 +37,7 @@ export async function fetchNotices(
   try {
     const res = await fetch(`${API_BASE_URL}/notices?${buildQuery(params)}`, {
       headers: { Accept: 'application/json' },
-      cache: 'no-store',
+      next: { revalidate: NOTICE_REVALIDATE_SECONDS, tags: [NOTICE_CACHE_TAG] },
     });
 
     if (!res.ok) {
@@ -92,7 +96,7 @@ export async function fetchNoticeDetail(noticeId: number): Promise<NoticeDetailR
   try {
     const res = await fetch(`${API_BASE_URL}/notices/${noticeId}`, {
       headers: { Accept: 'application/json' },
-      cache: 'no-store',
+      next: { revalidate: NOTICE_REVALIDATE_SECONDS, tags: [NOTICE_CACHE_TAG] },
     });
 
     if (!res.ok) {

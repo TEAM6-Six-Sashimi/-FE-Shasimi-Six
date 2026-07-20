@@ -1,7 +1,14 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { fetchNotices, createNotice, fetchNoticeDetail, deleteNotice } from '@/services/notice.service';
+import { updateTag } from 'next/cache';
+import {
+  fetchNotices,
+  createNotice,
+  fetchNoticeDetail,
+  deleteNotice,
+  NOTICE_CACHE_TAG,
+} from '@/services/notice.service';
 import {
   AdminNoticeListResponse,
   AdminNoticeSearchParams,
@@ -22,7 +29,9 @@ export async function createNoticeAction(
 ): Promise<CreateNoticeResult> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
-  return createNotice(accessToken, payload);
+  const result = await createNotice(accessToken, payload);
+  if (result.success) updateTag(NOTICE_CACHE_TAG);
+  return result;
 }
 
 export async function fetchNoticeDetailAction(noticeId: number): Promise<NoticeDetailResult> {
@@ -32,5 +41,7 @@ export async function fetchNoticeDetailAction(noticeId: number): Promise<NoticeD
 export async function deleteNoticeAction(noticeId: number): Promise<DeleteNoticeResult> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';
-  return deleteNotice(accessToken, noticeId);
+  const result = await deleteNotice(accessToken, noticeId);
+  if (result.success) updateTag(NOTICE_CACHE_TAG);
+  return result;
 }
