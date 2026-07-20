@@ -32,9 +32,11 @@ export default async function CoffeeChatPage() {
 
   let studentChatRooms, instructorPendingChats, instructorActiveChats;
   try {
-    studentChatRooms = isInstructor ? [] : await fetchStudentChatRoomsAction();
-    instructorPendingChats = isInstructor ? await fetchInstructorPendingChatsAction() : [];
-    instructorActiveChats = isInstructor ? await fetchInstructorActiveChatsAction() : [];
+    [studentChatRooms, instructorPendingChats, instructorActiveChats] = await Promise.all([
+      isInstructor ? Promise.resolve([]) : fetchStudentChatRoomsAction(),
+      isInstructor ? fetchInstructorPendingChatsAction() : Promise.resolve([]),
+      isInstructor ? fetchInstructorActiveChatsAction() : Promise.resolve([]),
+    ]);
   } catch (e) {
     // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
     if (e instanceof AuthSessionError) {

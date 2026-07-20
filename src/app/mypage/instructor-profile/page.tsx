@@ -1,7 +1,8 @@
 import { cookies } from 'next/headers';
-import { fetchUserMe } from '@/services/user.service';
+import { fetchUserMeStrict, UserMeAuthError } from '@/services/user.service';
 import { fetchInstructorProfile } from '@/services/instructor.service';
 import InstructorProfileView from '@/features/mypage/components/instructor-profile/InstructorProfileView';
+import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
 import { AuthSessionError } from '@/features/auth/errors';
 import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
@@ -17,7 +18,16 @@ export default async function InstructorProfilePage() {
     );
   }
 
-  const user = await fetchUserMe(accessToken);
+  let user;
+  try {
+    user = await fetchUserMeStrict(accessToken);
+  } catch (error) {
+    if (error instanceof UserMeAuthError) {
+      const message = (await parseAuthErrorMessage(error.response)) ?? '다시 로그인해주세요.';
+      return <SessionExpiredRedirect message={message} />;
+    }
+    throw error;
+  }
 
   let profile;
   try {

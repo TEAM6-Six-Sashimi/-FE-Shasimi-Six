@@ -46,7 +46,8 @@ export default async function UserLayout({ children }: { children: React.ReactNo
     if (e instanceof AuthSessionError) {
       return <SessionExpiredRedirect message={e.message} />;
     }
-    throw e;
+    // 배지 표시는 부가 기능이므로, 그 외 실패(네트워크 오류 등)는 조용히 무시하고
+    // hasCoffeeChatAlert 기본값(false)으로 계속 진행한다 - 전체 페이지를 막지 않기 위함.
   }
 
   return (
