@@ -5,6 +5,10 @@ import { fetchNotices } from '@/services/notice.service';
 const BASE_URL = 'https://www.sixsashimi.com.market-app.org';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// 실제 콘텐츠가 거의 안 바뀌는 정적 페이지들 - sitemap이 재생성될 때마다 "방금 수정됨"으로
+// 보고되지 않도록 실제 마지막 변경일을 고정값으로 관리한다 (내용이 바뀌면 이 날짜도 갱신).
+const STATIC_CONTENT_LAST_MODIFIED = new Date('2026-07-20');
+
 // 카테고리 목록 조회 (동적 경로 생성용)
 async function fetchCategoryNames(): Promise<string[]> {
   try {
@@ -38,31 +42,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${BASE_URL}/compare`,
-      lastModified: new Date(),
+      lastModified: STATIC_CONTENT_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
       url: `${BASE_URL}/ai-subscribe`,
-      lastModified: new Date(),
+      lastModified: STATIC_CONTENT_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
       url: `${BASE_URL}/recommendations`,
-      lastModified: new Date(),
+      lastModified: STATIC_CONTENT_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
       url: `${BASE_URL}/ai-analysis`,
-      lastModified: new Date(),
+      lastModified: STATIC_CONTENT_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
-      url: `${BASE_URL}/coffee-chat`,
-      lastModified: new Date(),
+      url: `${BASE_URL}/website-about`,
+      lastModified: STATIC_CONTENT_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.6,
     },
