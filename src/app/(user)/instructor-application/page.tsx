@@ -4,6 +4,7 @@ import { fetchUserMeStrict, UserMeAuthError } from '@/services/user.service';
 import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
 import { fetchCategories } from '@/services/categories.service';
 import { fetchMyInstructorApplications } from '@/services/instructor-application.service';
+import { AuthSessionError } from '@/features/auth/errors';
 import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 export default async function InstructorApplicationPage() {
@@ -21,8 +22,18 @@ export default async function InstructorApplicationPage() {
     throw error;
   }
 
+  let applications;
+  try {
+    applications = await fetchMyInstructorApplications(userInfo.id, accessToken);
+  } catch (error) {
+    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
+    if (error instanceof AuthSessionError) {
+      return <SessionExpiredRedirect message={error.message} />;
+    }
+    throw error;
+  }
+
   const categories = await fetchCategories();
-  const applications = await fetchMyInstructorApplications(userInfo.id, accessToken);
   const hasPendingApplication = applications.some((app) => app.approvalStatus === 'PENDING');
 
   return (

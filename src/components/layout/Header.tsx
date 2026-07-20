@@ -1,18 +1,17 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { cookies } from 'next/headers';
-import { fetchUserMe, GUEST_USER } from '@/services/user.service';
+import { UserMe } from '@/features/auth/types';
 import HeaderDropdown from '../../features/header/components/HeaderDropdown';
 import HeaderCartLink from '../../features/header/components/HeaderCartComponent';
 import AdminModeToggle from './AdminMode';
 import TokenTimer from './TokenTimer';
 
-export default async function Header() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value;
+interface HeaderProps {
+  user: UserMe;
+  accessToken?: string;
+}
 
-  const user = accessToken ? await fetchUserMe(accessToken) : GUEST_USER;
-
+export default function Header({ user, accessToken }: HeaderProps) {
   return (
     <div className="flex justify-between bg-white border-b border-[#E5E7EB] h-12 items-center p-5">
       <Link href="/">

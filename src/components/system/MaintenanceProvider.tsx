@@ -1,7 +1,9 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { fetchMaintenanceStatus } from '@/services/maintenance.service';
+import { createContext, useContext, useState, ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { MAINTENANCE_EXCLUDED_PATHS } from '@/lib/maintenance-excluded-paths';
+import { useMaintenancePolling } from './useMaintenancePolling';
 import ServiceUnavailablePage from './ServiceUnavailablePage';
 
 interface MaintenanceContextValue {
@@ -12,7 +14,13 @@ interface MaintenanceContextValue {
 
 const MaintenanceContext = createContext<MaintenanceContextValue | undefined>(undefined);
 
-export function MaintenanceProvider({ children }: { children: ReactNode }) {
+interface MaintenanceProviderProps {
+  isAdmin: boolean;
+  children: ReactNode;
+}
+
+export function MaintenanceProvider({ isAdmin, children }: MaintenanceProviderProps) {
+  const pathname = usePathname();
   const [isBlocked, setIsBlocked] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -21,15 +29,14 @@ export function MaintenanceProvider({ children }: { children: ReactNode }) {
     setMessage(msg);
   };
 
-  useEffect(() => {
-    fetchMaintenanceStatus()
-      .then((data) => {
-        if (data.enabled) setMaintenance(true, data.message);
-      })
-      .catch(() => {
-        // 이 요청 자체가 실패해도 여기선 무시 (미들웨어가 페이지 단위로 이미 걸러줌)
-      });
-  }, []);
+  // 관리자 또는 예외 경로(로그인/점검 안내 페이지)는 능동적 점검 체크 대상에서 제외한다.
+  // proxy.ts가 이 경우 서버 단에서 이미 통과시켜주므로, 클라이언트가 별도로 다시 막아버리면
+  // (특히 /auth/login에서) 점검 중 로그인이 아예 불가능해지는 문제가 생긴다.
+  const isExcluded = isAdmin || MAINTENANCE_EXCLUDED_PATHS.includes(pathname);
+
+  useMaintenancePolling((status) => {
+    if (status.enabled) setMaintenance(true, status.message);
+  }, !isExcluded && !isBlocked);
 
   if (isBlocked) {
     return (

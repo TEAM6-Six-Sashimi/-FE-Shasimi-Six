@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Geist } from 'next/font/google';
+import { cookies } from 'next/headers';
 import { cn } from '@/lib/utils';
 import { ToastProvider } from '@/components/ui/ToastContext';
 import { MaintenanceProvider } from '@/components/system/MaintenanceProvider';
 import Header from '@/components/layout/Header';
+import { fetchUserMe, GUEST_USER } from '@/services/user.service';
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -64,17 +66,21 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+  const user = accessToken ? await fetchUserMe(accessToken) : GUEST_USER;
+
   return (
     <html lang="ko" className={cn('font-sans', geist.variable)}>
       <body className="flex-1">
-        <MaintenanceProvider>
+        <MaintenanceProvider isAdmin={user.role === 'ADMIN'}>
           <ToastProvider>
-            <Header />
+            <Header user={user} accessToken={accessToken} />
             <main>{children}</main>
           </ToastProvider>
         </MaintenanceProvider>

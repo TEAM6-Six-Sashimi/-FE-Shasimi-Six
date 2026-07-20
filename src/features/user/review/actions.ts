@@ -57,7 +57,10 @@ export async function createReviewAction(
 export async function deleteReviewAction(
   courseId: number,
   reviewId: number,
-): Promise<{ success: true } | { success: false; message: string; authError?: true }> {
+): Promise<
+  | { success: true }
+  | { success: false; message: string; authError?: true; maintenance?: true }
+> {
   try {
     const { accessToken, user } = await getAuthOrThrow();
     await deleteReview(accessToken, user.id, courseId, reviewId);
@@ -67,6 +70,7 @@ export async function deleteReviewAction(
       success: false,
       message: error instanceof Error ? error.message : '수강평 삭제에 실패했습니다.',
       authError: isAuthError(error) || undefined,
+      maintenance: error instanceof MaintenanceError || undefined,
     };
   }
 }
@@ -74,7 +78,10 @@ export async function deleteReviewAction(
 export async function reportReviewAction(
   reviewId: number,
   body: ReportReviewRequest,
-): Promise<{ success: true } | { success: false; message: string; authError?: true }> {
+): Promise<
+  | { success: true }
+  | { success: false; message: string; authError?: true; maintenance?: true }
+> {
   try {
     const { accessToken } = await getAuthOrThrow();
     await reportReview(accessToken, reviewId, body);
@@ -84,6 +91,7 @@ export async function reportReviewAction(
       success: false,
       message: error instanceof Error ? error.message : '신고 처리에 실패했습니다.',
       authError: isAuthError(error) || undefined,
+      maintenance: error instanceof MaintenanceError || undefined,
     };
   }
 }

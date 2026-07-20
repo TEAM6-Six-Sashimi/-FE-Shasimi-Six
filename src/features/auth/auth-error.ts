@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { parseAuthErrorMessage } from './auth-error-messages';
+import { AuthSessionError } from './errors';
 
 export { AuthSessionError } from './errors';
 
@@ -27,4 +28,24 @@ export async function handleAuthErrorResponse(res: Response): Promise<string | n
   cookieStore.delete('accessTokenExpiresAt');
 
   return message;
+}
+
+/**
+ * 클라이언트 컴포넌트가 직접 호출하는 'use server' 액션에서 쓴다.
+ * AuthSessionError를 던진 채로 클라이언트 경계를 넘기면 React Flight 직렬화 과정에서
+ * 커스텀 에러 클래스가 평범한 Error로 바뀌어버려서 클라이언트의 instanceof 체크가
+ * 항상 실패한다 - 그래서 여기서 미리 잡아 안전한(직렬화 가능한) 값으로 변환해 돌려준다.
+ */
+export async function toActionResult<T>(
+  fn: () => Promise<T>,
+): Promise<{ success: true; data: T } | { success: false; authError?: true; message: string }> {
+  try {
+    return { success: true, data: await fn() };
+  } catch (error) {
+    return {
+      success: false,
+      authError: error instanceof AuthSessionError || undefined,
+      message: error instanceof Error ? error.message : '요청에 실패했습니다.',
+    };
+  }
 }

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SubscriptionMeResponse, SubscriptionPaymentItem } from '../../types';
 import { cancelSubscriptionAction } from '../../actions';
+import { logoutAction } from '@/features/auth/actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { useToast } from '@/components/ui/ToastContext';
 
@@ -39,6 +40,10 @@ export default function SubscriptionPaymentTable({
       setCancelModalOpen(false);
       showToast('구독이 해지되었습니다.', 'positive');
       router.refresh();
+    } else if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
+      return;
     } else {
       showToast(result.message, 'negative');
     }

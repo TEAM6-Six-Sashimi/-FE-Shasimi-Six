@@ -6,6 +6,7 @@ import { CourseReview } from '../types';
 import { StarRating } from './ReviewSummary';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { useToast } from '@/components/ui/ToastContext';
+import { useMaintenance } from '@/components/system/MaintenanceProvider';
 import { logoutAction } from '@/features/auth/actions';
 import { deleteReviewAction, reportReviewAction } from '../actions';
 import ReportModal, { ReportCategoryOption } from '@/components/modals/ReportModal';
@@ -37,6 +38,7 @@ export default function ReviewList({
 }: ReviewListProps) {
   const router = useRouter();
   const { showToast } = useToast();
+  const { setMaintenance } = useMaintenance();
   const [sort, setSort] = useState<SortType>('최신순');
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<CourseReview | null>(null);
@@ -92,6 +94,8 @@ export default function ReviewList({
       showToast(result.message, 'alarm');
       await logoutAction();
       return;
+    } else if (result.maintenance) {
+      setMaintenance(true, result.message);
     } else {
       showToast(result.message, 'negative');
     }
@@ -111,6 +115,8 @@ export default function ReviewList({
       showToast(result.message, 'alarm');
       await logoutAction();
       return;
+    } else if (result.maintenance) {
+      setMaintenance(true, result.message);
     } else {
       showToast(result.message, 'negative');
     }

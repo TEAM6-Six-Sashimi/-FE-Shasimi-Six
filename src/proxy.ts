@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, NextFetchEvent } from 'next/server';
+import { MAINTENANCE_EXCLUDED_PATHS } from '@/lib/maintenance-excluded-paths';
 
 const PROTECTED_PREFIXES = [
   '/mycourses-student',
@@ -9,9 +10,6 @@ const PROTECTED_PREFIXES = [
   '/payments',
   '/cart',
 ];
-
-// 로그인 페이지 자체와 점검 안내 페이지는 점검모드 리다이렉트 대상에서 제외
-const MAINTENANCE_EXCLUDED_PATHS = ['/maintenance', '/auth/login'];
 
 // prefix가 실제 경로 세그먼트 경계에서 끝나는지까지 확인한다.
 function matchesPath(pathname: string, prefix: string): boolean {
@@ -27,6 +25,10 @@ const MAINTENANCE_CACHE_TTL_MS = 5000; // 백엔드 Cache-Control max-age와 맞
 const MAINTENANCE_CHECK_TIMEOUT_MS = 1500; // 이 요청은 거의 모든 경로에서 매번 걸리므로 짧게 끊어야 함
 const MAINTENANCE_RETRY_DELAY_MS = 400; // 순간적인 지연과 완전한 다운을 구분하기 위한 재시도 전 대기
 
+// 캐시 갱신 도중 동시에 들어온 요청들이 각자 새로 조회하지 않고 진행 중인 갱신을 같이 기다리게 한다.
+// (thundering herd 방지 - 캐시 만료 순간 몰린 요청 수만큼 백엔드에 중복 조회가 나가는 것을 막음)
+let refreshInFlight: Promise<void> | null = null;
+
 async function fetchMaintenanceStatus(): Promise<{ enabled: boolean; message: string }> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/maintenance/status`, {
     signal: AbortSignal.timeout(MAINTENANCE_CHECK_TIMEOUT_MS),
@@ -36,13 +38,11 @@ async function fetchMaintenanceStatus(): Promise<{ enabled: boolean; message: st
   return { enabled: data.enabled, message: data.message };
 }
 
-async function checkMaintenance(): Promise<{ enabled: boolean; message: string }> {
-  const now = Date.now();
-  if (now - maintenanceCache.checkedAt < MAINTENANCE_CACHE_TTL_MS) return maintenanceCache;
-
+// 캐시를 실제로 새로 고치는 로직 (기존 재시도 흐름과 동일)
+async function refreshMaintenanceCache(now: number): Promise<void> {
   try {
     maintenanceCache = { checkedAt: now, ...(await fetchMaintenanceStatus()) };
-    return maintenanceCache;
+    return;
   } catch {
     // 1차 실패 - 네트워크 순간 지연일 수 있으니 짧게 대기 후 한 번 더 시도
   }
@@ -59,7 +59,34 @@ async function checkMaintenance(): Promise<{ enabled: boolean; message: string }
       message: '서버 점검 또는 일시적인 장애로 서비스 이용이 어렵습니다. 잠시 후 다시 시도해주세요.',
     };
   }
+}
 
+// 갱신을 중복 없이 한 번만 트리거하고, 동시에 들어온 다른 요청들은 그 Promise를 재사용한다.
+function triggerRefresh(now: number): Promise<void> {
+  if (!refreshInFlight) {
+    refreshInFlight = refreshMaintenanceCache(now).finally(() => {
+      refreshInFlight = null;
+    });
+  }
+  return refreshInFlight;
+}
+
+async function checkMaintenance(
+  event: NextFetchEvent,
+): Promise<{ enabled: boolean; message: string }> {
+  const now = Date.now();
+  if (now - maintenanceCache.checkedAt < MAINTENANCE_CACHE_TTL_MS) return maintenanceCache;
+
+  // 캐시가 한 번도 채워진 적 없는 최초 요청(서버 기동 직후)만 갱신을 기다린다.
+  if (maintenanceCache.checkedAt === 0) {
+    await triggerRefresh(now);
+    return maintenanceCache;
+  }
+
+  // 그 외에는 오래된(stale) 값을 즉시 반환해 이번 요청의 지연을 없애고,
+  // 갱신은 응답을 막지 않는 백그라운드에서 진행한다. waitUntil로 넘겨서
+  // 응답이 나간 뒤에도 (배포 환경의 Edge/서버리스 런타임에서도) 끝까지 실행되도록 보장한다.
+  event.waitUntil(triggerRefresh(now));
   return maintenanceCache;
 }
 
@@ -78,7 +105,7 @@ async function verifyRole(accessToken: string): Promise<string | null> {
   }
 }
 
-export async function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest, event: NextFetchEvent) {
   const { pathname, search } = request.nextUrl;
   const accessToken = request.cookies.get('accessToken')?.value;
 
@@ -95,7 +122,7 @@ export async function proxy(request: NextRequest) {
   // 1) 점검모드 체크 — 전체 경로 대상, 예외 경로·API 라우트는 건너뜀
   const isApiPath = matchesPath(pathname, '/api');
   if (!isApiPath && !MAINTENANCE_EXCLUDED_PATHS.includes(pathname)) {
-    const { enabled } = await checkMaintenance();
+    const { enabled } = await checkMaintenance(event);
     if (enabled) {
       const role = await getVerifiedRole();
       if (role !== 'ADMIN') {

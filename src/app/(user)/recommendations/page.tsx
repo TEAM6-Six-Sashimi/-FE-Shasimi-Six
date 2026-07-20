@@ -4,6 +4,8 @@ import { fetchMyResume } from '@/services/resume.service';
 import { fetchMySubscriptionAction } from '@/features/user/payments/actions';
 import { fetchLatestJobPostingRecommendationAction } from '@/features/user/recommendations/actions';
 import RecommendationPageClient from '@/features/user/recommendations/components/RecommendationClientPage';
+import { AuthSessionError } from '@/features/auth/errors';
+import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 export const metadata: Metadata = {
   title: 'AI 맞춤 강의 추천',
@@ -19,11 +21,20 @@ export default async function RecommendationsPage() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  const [savedResume, mySubscription, latestRecommendation] = await Promise.all([
-    accessToken ? fetchMyResume(accessToken) : Promise.resolve(null),
-    accessToken ? fetchMySubscriptionAction() : Promise.resolve(null),
-    accessToken ? fetchLatestJobPostingRecommendationAction() : Promise.resolve(null),
-  ]);
+  let savedResume, mySubscription, latestRecommendation;
+  try {
+    [savedResume, mySubscription, latestRecommendation] = await Promise.all([
+      accessToken ? fetchMyResume(accessToken) : Promise.resolve(null),
+      accessToken ? fetchMySubscriptionAction() : Promise.resolve(null),
+      accessToken ? fetchLatestJobPostingRecommendationAction() : Promise.resolve(null),
+    ]);
+  } catch (e) {
+    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
+    if (e instanceof AuthSessionError) {
+      return <SessionExpiredRedirect message={e.message} />;
+    }
+    throw e;
+  }
 
   return (
     <RecommendationPageClient

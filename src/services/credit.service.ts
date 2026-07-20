@@ -7,6 +7,9 @@ import {
 } from '@/features/user/credit/types';
 import { CreditChargeHistoryResponse } from '@/features/mypage/types';
 import { parseMaintenanceMessage, MaintenanceError } from '@/services/maintenance.service';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
+import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
+import { AuthSessionError } from '@/features/auth/errors';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -18,6 +21,11 @@ export async function fetchCreditBalance(accessToken: string): Promise<CreditBal
   });
 
   if (!res.ok) {
+    // fetchCreditBalance는 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
+    // 순수 파싱 버전으로 메시지만 확인하고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
+    const authMessage = await parseAuthErrorMessage(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     const errorBody = await res.json().catch(() => ({}));
     throw new Error(errorBody.message || '크레딧 잔액 조회에 실패했습니다.');
   }
@@ -40,6 +48,12 @@ export async function readyCreditCharge(
   });
 
   if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
+    const maintenanceMessage = await parseMaintenanceMessage(res);
+    if (maintenanceMessage) throw new MaintenanceError(maintenanceMessage);
+
     const errorBody = await res.json().catch(() => ({}));
     throw new Error(errorBody.message || '충전 준비에 실패했습니다.');
   }
@@ -62,6 +76,9 @@ export async function confirmCreditCharge(
   });
 
   if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     const maintenanceMessage = await parseMaintenanceMessage(res);
     if (maintenanceMessage) throw new MaintenanceError(maintenanceMessage);
 
@@ -86,6 +103,11 @@ export async function fetchCreditChargeHistory(
   });
 
   if (!res.ok) {
+    // fetchCreditChargeHistory는 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
+    // 순수 파싱 버전으로 메시지만 확인하고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
+    const authMessage = await parseAuthErrorMessage(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     const errorBody = await res.text().catch(() => '');
     console.error(`[fetchCreditChargeHistory] status=${res.status} body=${errorBody}`);
     return { items: [], totalElements: 0, totalPages: 0, page: 0, size };

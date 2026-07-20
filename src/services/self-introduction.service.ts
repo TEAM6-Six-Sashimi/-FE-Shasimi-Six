@@ -8,6 +8,8 @@ import {
   LatestCoverLetterReviewResponse,
 } from '@/features/user/self-introduction/types';
 import { handleAuthErrorResponse } from '@/features/auth/auth-error';
+import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
+import { AuthSessionError } from '@/features/auth/errors';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -23,10 +25,17 @@ export async function fetchMyCoverLetter(accessToken: string): Promise<CoverLett
       cache: 'no-store',
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      // 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
+      // 순수 파싱 버전으로 던지고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
+      const authMessage = await parseAuthErrorMessage(res);
+      if (authMessage) throw new AuthSessionError(authMessage);
+      return null;
+    }
 
     return await res.json();
-  } catch {
+  } catch (e) {
+    if (e instanceof AuthSessionError) throw e;
     return null;
   }
 }
@@ -119,16 +128,23 @@ export async function fetchLatestCoverLetterReview(
       cache: 'no-store',
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const authMessage = await parseAuthErrorMessage(res);
+      if (authMessage) throw new AuthSessionError(authMessage);
+      return null;
+    }
 
     const data: LatestCoverLetterReviewResponse = await res.json();
     return data.review;
-  } catch {
+  } catch (e) {
+    if (e instanceof AuthSessionError) throw e;
     return null;
   }
 }
 
 // 자기소개서 AI 첨삭 상세 결과 조회 (문항별 맞춤법 수정/피드백/개선 예시)
+// 클라이언트 컴포넌트에서 클릭 트리거로 호출되므로(진짜 Server Action 컨텍스트) 쿠키 정리까지 안전하게 수행 가능.
+// 단, 소비처(SelfIntroReviewDetail.tsx)가 별도 에러 처리를 안 하므로 throw는 하지 않고 조용히 정리만 한다.
 export async function fetchCoverLetterReviewById(
   accessToken: string,
   reviewId: number,
@@ -143,7 +159,10 @@ export async function fetchCoverLetterReviewById(
       cache: 'no-store',
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
+      return null;
+    }
 
     return await res.json();
   } catch {

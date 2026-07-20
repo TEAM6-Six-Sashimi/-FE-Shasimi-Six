@@ -7,6 +7,8 @@ import {
   fetchStudentChatRoomsAction,
 } from '@/features/user/coffee-chat/actions';
 import CoffeeChatPageClient from '@/features/user/coffee-chat/components/CoffeeChatPageClient';
+import { AuthSessionError } from '@/features/auth/errors';
+import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 export const metadata: Metadata = {
   title: '커피챗',
@@ -27,9 +29,21 @@ export default async function CoffeeChatPage() {
   }
 
   const isInstructor = user.role === 'INSTRUCTOR';
-  const studentChatRooms = isInstructor ? [] : await fetchStudentChatRoomsAction();
-  const instructorPendingChats = isInstructor ? await fetchInstructorPendingChatsAction() : [];
-  const instructorActiveChats = isInstructor ? await fetchInstructorActiveChatsAction() : [];
+
+  let studentChatRooms, instructorPendingChats, instructorActiveChats;
+  try {
+    [studentChatRooms, instructorPendingChats, instructorActiveChats] = await Promise.all([
+      isInstructor ? Promise.resolve([]) : fetchStudentChatRoomsAction(),
+      isInstructor ? fetchInstructorPendingChatsAction() : Promise.resolve([]),
+      isInstructor ? fetchInstructorActiveChatsAction() : Promise.resolve([]),
+    ]);
+  } catch (e) {
+    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
+    if (e instanceof AuthSessionError) {
+      return <SessionExpiredRedirect message={e.message} />;
+    }
+    throw e;
+  }
 
   return (
     <CoffeeChatPageClient

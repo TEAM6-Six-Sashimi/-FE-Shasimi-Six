@@ -3,6 +3,9 @@ import {
   InstructorChatRoom,
   StudentChatRoom,
 } from '@/features/user/coffee-chat/types';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
+import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
+import { AuthSessionError } from '@/features/auth/errors';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -18,10 +21,17 @@ export async function fetchStudentChatRooms(accessToken: string): Promise<Studen
       cache: 'no-store',
     });
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      // 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
+      // 순수 파싱 버전으로 던지고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
+      const authMessage = await parseAuthErrorMessage(res);
+      if (authMessage) throw new AuthSessionError(authMessage);
+      return [];
+    }
 
     return await res.json();
-  } catch {
+  } catch (e) {
+    if (e instanceof AuthSessionError) throw e;
     return [];
   }
 }
@@ -40,10 +50,15 @@ export async function fetchInstructorPendingChats(
       cache: 'no-store',
     });
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      const authMessage = await parseAuthErrorMessage(res);
+      if (authMessage) throw new AuthSessionError(authMessage);
+      return [];
+    }
 
     return await res.json();
-  } catch {
+  } catch (e) {
+    if (e instanceof AuthSessionError) throw e;
     return [];
   }
 }
@@ -62,10 +77,15 @@ export async function fetchInstructorActiveChats(
       cache: 'no-store',
     });
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      const authMessage = await parseAuthErrorMessage(res);
+      if (authMessage) throw new AuthSessionError(authMessage);
+      return [];
+    }
 
     return await res.json();
-  } catch {
+  } catch (e) {
+    if (e instanceof AuthSessionError) throw e;
     return [];
   }
 }
@@ -84,6 +104,8 @@ export async function acceptInstructorChat(
       },
       cache: 'no-store',
     });
+
+    if (!res.ok) await handleAuthErrorResponse(res);
 
     return res.ok;
   } catch {
@@ -106,6 +128,8 @@ export async function rejectInstructorChat(
       cache: 'no-store',
     });
 
+    if (!res.ok) await handleAuthErrorResponse(res);
+
     return res.ok;
   } catch {
     return false;
@@ -126,6 +150,8 @@ export async function leaveInstructorChat(
       },
       cache: 'no-store',
     });
+
+    if (!res.ok) await handleAuthErrorResponse(res);
 
     return res.ok;
   } catch {
@@ -156,7 +182,10 @@ export async function fetchInstructorMessages(
       },
     );
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      await handleAuthErrorResponse(res);
+      return [];
+    }
 
     return await res.json();
   } catch {
@@ -182,7 +211,10 @@ export async function fetchChatMessages(
       },
     );
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      await handleAuthErrorResponse(res);
+      return [];
+    }
 
     return await res.json();
   } catch {

@@ -6,6 +6,9 @@ import CartContent from '@/features/user/cart/components/CartContent';
 import CartSticky from '@/features/user/cart/components/CartSticky';
 import { CartCourseItem } from '@/features/user/cart/types';
 import { deleteCartItemsAction } from '@/features/user/cart/actions';
+import { logoutAction } from '@/features/auth/actions';
+import { useToast } from '@/components/ui/ToastContext';
+import { useMaintenance } from '@/components/system/MaintenanceProvider';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 
 interface CartClientProps {
@@ -14,6 +17,8 @@ interface CartClientProps {
 
 export default function CartClient({ initialItems }: CartClientProps) {
   const router = useRouter();
+  const { showToast } = useToast();
+  const { setMaintenance } = useMaintenance();
   const [items, setItems] = useState<CartCourseItem[]>(initialItems);
   const [selectedIds, setSelectedIds] = useState<number[]>(
     initialItems.filter((i) => i.selected).map((i) => i.courseId),
@@ -42,20 +47,30 @@ export default function CartClient({ initialItems }: CartClientProps) {
 
   // 실제 삭제 실행
   const handleConfirmDelete = async () => {
-    try {
-      const cartItemIds = items
-        .filter((i) => selectedIds.includes(i.courseId))
-        .map((i) => i.cartItemId);
+    const cartItemIds = items
+      .filter((i) => selectedIds.includes(i.courseId))
+      .map((i) => i.cartItemId);
 
-      await deleteCartItemsAction(cartItemIds);
+    const result = await deleteCartItemsAction(cartItemIds);
 
-      setItems((prev) => prev.filter((i) => !selectedIds.includes(i.courseId)));
-      setSelectedIds([]);
-      setShowDeleteModal(false);
-      router.refresh();
-    } catch {
-      // 삭제 실패 시 모달 유지
+    if (!result.success) {
+      if (result.authError) {
+        showToast(result.message, 'alarm');
+        await logoutAction();
+        return;
+      }
+      if (result.maintenance) {
+        setMaintenance(true, result.message);
+        return;
+      }
+      showToast(result.message, 'negative');
+      return; // 삭제 실패 시 모달 유지
     }
+
+    setItems((prev) => prev.filter((i) => !selectedIds.includes(i.courseId)));
+    setSelectedIds([]);
+    setShowDeleteModal(false);
+    router.refresh();
   };
 
   // 구매하기 → 결제 페이지로 이동

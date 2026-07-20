@@ -5,6 +5,9 @@ import { loadTossPayments } from '@tosspayments/tosspayments-sdk';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { readyCreditChargeAction } from '@/features/user/credit/actions';
+import { logoutAction } from '@/features/auth/actions';
+import { useToast } from '@/components/ui/ToastContext';
+import { useMaintenance } from '@/components/system/MaintenanceProvider';
 import { Button } from '@/components/ui/button';
 
 interface StickyProps {
@@ -20,6 +23,8 @@ const MIN_AMOUNT = 10000;
 const UNIT_AMOUNT = 1000;
 
 export default function Sticky({ currentCredit, chargeAmount, afterCredit }: StickyProps) {
+  const { showToast } = useToast();
+  const { setMaintenance } = useMaintenance();
   const [modalState, setModalState] = useState<ModalState>('none');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -43,6 +48,16 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
     const readyResult = await readyCreditChargeAction(chargeAmount);
 
     if (!readyResult.success) {
+      if (readyResult.authError) {
+        showToast(readyResult.message, 'alarm');
+        await logoutAction();
+        return;
+      }
+      if (readyResult.maintenance) {
+        setMaintenance(true, readyResult.message);
+        setIsLoading(false);
+        return;
+      }
       setErrorMessage(readyResult.message);
       setModalState('error');
       setIsLoading(false);
