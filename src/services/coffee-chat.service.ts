@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import {
   ChatMessageEvent,
   InstructorChatRoom,
@@ -10,7 +11,10 @@ import { AuthSessionError } from '@/features/auth/errors';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // 학생 - 내 채팅방 목록 조회
-export async function fetchStudentChatRooms(accessToken: string): Promise<StudentChatRoom[]> {
+// 상단 메뉴 알림 배지(레이아웃)와 커피챗 페이지 본문이 같은 요청 안에서 각자 이 함수를
+// 부르는 경우가 있어, React cache()로 감싸서 같은 렌더 패스 안에서는 중복 호출돼도
+// 실제 네트워크 요청은 한 번만 나가도록 한다.
+export const fetchStudentChatRooms = cache(async (accessToken: string): Promise<StudentChatRoom[]> => {
   try {
     const res = await fetch(`${API_BASE_URL}/student/coffee-chats`, {
       method: 'GET',
@@ -34,61 +38,62 @@ export async function fetchStudentChatRooms(accessToken: string): Promise<Studen
     if (e instanceof AuthSessionError) throw e;
     return [];
   }
-}
+});
 
-// 강사 - 요청 목록(대기 중인 커피챗) 조회
-export async function fetchInstructorPendingChats(
-  accessToken: string,
-): Promise<InstructorChatRoom[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/instructor/coffee-chats/pending`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-      cache: 'no-store',
-    });
+// 강사 - 요청 목록(대기 중인 커피챗) 조회 (레이아웃 배지 계산과 페이지 본문이 같은 요청
+// 안에서 중복 호출할 수 있어 cache()로 감쌈 - fetchStudentChatRooms 주석 참고)
+export const fetchInstructorPendingChats = cache(
+  async (accessToken: string): Promise<InstructorChatRoom[]> => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/instructor/coffee-chats/pending`, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: 'no-store',
+      });
 
-    if (!res.ok) {
-      const authMessage = await parseAuthErrorMessage(res);
-      if (authMessage) throw new AuthSessionError(authMessage);
+      if (!res.ok) {
+        const authMessage = await parseAuthErrorMessage(res);
+        if (authMessage) throw new AuthSessionError(authMessage);
+        return [];
+      }
+
+      return await res.json();
+    } catch (e) {
+      if (e instanceof AuthSessionError) throw e;
       return [];
     }
+  },
+);
 
-    return await res.json();
-  } catch (e) {
-    if (e instanceof AuthSessionError) throw e;
-    return [];
-  }
-}
+// 강사 - 채팅방 목록(수락된 커피챗) 조회 (마찬가지로 cache()로 중복 호출 방지)
+export const fetchInstructorActiveChats = cache(
+  async (accessToken: string): Promise<InstructorChatRoom[]> => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/instructor/coffee-chats/active`, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: 'no-store',
+      });
 
-// 강사 - 채팅방 목록(수락된 커피챗) 조회
-export async function fetchInstructorActiveChats(
-  accessToken: string,
-): Promise<InstructorChatRoom[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/instructor/coffee-chats/active`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-      cache: 'no-store',
-    });
+      if (!res.ok) {
+        const authMessage = await parseAuthErrorMessage(res);
+        if (authMessage) throw new AuthSessionError(authMessage);
+        return [];
+      }
 
-    if (!res.ok) {
-      const authMessage = await parseAuthErrorMessage(res);
-      if (authMessage) throw new AuthSessionError(authMessage);
+      return await res.json();
+    } catch (e) {
+      if (e instanceof AuthSessionError) throw e;
       return [];
     }
-
-    return await res.json();
-  } catch (e) {
-    if (e instanceof AuthSessionError) throw e;
-    return [];
-  }
-}
+  },
+);
 
 // 강사 - 커피챗 요청 승인
 export async function acceptInstructorChat(

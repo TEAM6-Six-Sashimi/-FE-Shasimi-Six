@@ -15,6 +15,9 @@ interface UseChatMessagesParams {
   isConnected: boolean;
   subscribe: (chatId: number, onMessage: (message: ChatMessage) => void) => () => void;
   sendMessage: (chatId: number, content: string) => boolean;
+  // 사이드바 목록의 최근 메시지 미리보기를 실시간으로 갱신하기 위한 콜백.
+  // 이 방에서 오간 모든 메시지(내가 보낸 것 포함)에 대해 호출된다.
+  onMessage?: (message: ChatMessageEvent) => void;
 }
 
 // 학생/강사 채팅 패널이 공유하는 메시지 상태 및 송수신 로직
@@ -26,6 +29,7 @@ export function useChatMessages({
   isConnected,
   subscribe,
   sendMessage,
+  onMessage,
 }: UseChatMessagesParams) {
   const { showToast } = useToast();
   const [messages, setMessages] = useState<ChatMessageEvent[]>([]);
@@ -40,6 +44,12 @@ export function useChatMessages({
   useEffect(() => {
     pendingContentRef.current = pendingContent;
   }, [pendingContent]);
+
+  // onMessage도 같은 이유(stale closure)로 ref에 담아 최신 함수를 참조한다.
+  const onMessageRef = useRef(onMessage);
+  useEffect(() => {
+    onMessageRef.current = onMessage;
+  }, [onMessage]);
 
   // READ 이벤트가 히스토리 응답이나 대상 MESSAGE보다 먼저 도착할 수 있어서,
   // 그 시점에 존재하는 메시지에만 적용하고 버리면 이후 병합/도착하는 메시지가 다시
@@ -108,6 +118,8 @@ export function useChatMessages({
       if (message.senderId === myUserId && message.content === pendingContentRef.current) {
         setPendingContent(null);
       }
+
+      onMessageRef.current?.(message);
     });
 
     return unsubscribe;

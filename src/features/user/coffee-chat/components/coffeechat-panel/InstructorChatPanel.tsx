@@ -12,7 +12,7 @@ import {
   rejectInstructorChatAction,
 } from '../../actions';
 import { useChatMessages } from '../../hooks/useChatMessages';
-import { ChatMessage, InstructorChatRoom } from '../../types';
+import { ChatMessage, ChatMessageEvent, InstructorChatRoom } from '../../types';
 import ChatMessageList from './ChatMessageList';
 import ChatMessageInput from './ChatMessageInput';
 
@@ -23,6 +23,8 @@ interface InstructorChatPanelProps {
   subscribe: (chatId: number, onMessage: (message: ChatMessage) => void) => () => void;
   sendMessage: (chatId: number, content: string) => boolean;
   onBack: () => void;
+  // 사이드바 목록의 최근 메시지 미리보기를 실시간으로 갱신하기 위한 콜백
+  onMessage?: (message: ChatMessageEvent) => void;
 }
 
 export default function InstructorChatPanel({
@@ -32,6 +34,7 @@ export default function InstructorChatPanel({
   subscribe,
   sendMessage,
   onBack,
+  onMessage,
 }: InstructorChatPanelProps) {
   const { showToast } = useToast();
   const router = useRouter();
@@ -46,6 +49,7 @@ export default function InstructorChatPanel({
     isConnected,
     subscribe,
     sendMessage,
+    onMessage,
   });
 
   // 승인 성공 후 요청/채팅방 목록을 다시 GET해서 반영해야 함.

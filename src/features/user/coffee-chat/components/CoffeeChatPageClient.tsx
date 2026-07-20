@@ -51,6 +51,19 @@ function markRoomRead<T extends { chatId: number; unreadMessageCount: number }>(
   return list.map((item) => (item.chatId === chatId ? { ...item, unreadMessageCount: 0 } : item));
 }
 
+// 지금 열려있는 방은 이미 보고 있으므로 안읽음 개수는 그대로 두고 미리보기만 갱신
+function updatePreview<T extends UnreadTrackable>(
+  list: T[],
+  chatId: number,
+  message: ChatMessageEvent,
+): T[] {
+  return list.map((item) =>
+    item.chatId === chatId
+      ? { ...item, lastMessagePreview: message.content, lastMessageAt: message.createdAt }
+      : item,
+  );
+}
+
 export default function CoffeeChatPageClient({
   role,
   userId,
@@ -176,6 +189,9 @@ export default function CoffeeChatPageClient({
           subscribe={subscribe}
           sendMessage={sendMessage}
           onBack={() => setSelectedChatId(null)}
+          onMessage={(message) =>
+            setRooms((prev) => updatePreview(prev, selectedStudentRoom.chatId, message))
+          }
         />
       )}
       {selectedInstructorChat && (
@@ -187,6 +203,10 @@ export default function CoffeeChatPageClient({
           subscribe={subscribe}
           sendMessage={sendMessage}
           onBack={() => setSelectedChatId(null)}
+          onMessage={(message) => {
+            setPendingChats((prev) => updatePreview(prev, selectedInstructorChat.chatId, message));
+            setActiveChats((prev) => updatePreview(prev, selectedInstructorChat.chatId, message));
+          }}
         />
       )}
       {!hasSelection && (
