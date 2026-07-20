@@ -140,6 +140,15 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
                         상세보기
                       </Button>
                     </Link>
+                    <Link href={`/mycourses-instructor/${course.courseId}?tab=reviews`}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 px-4 border-none bg-[#FF5E5E] text-white text-[12.5px] font-semibold hover:bg-[#D14848] hover:text-white cursor-pointer"
+                      >
+                        수강평 보기
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </div>
