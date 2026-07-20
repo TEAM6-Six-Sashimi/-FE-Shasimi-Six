@@ -7,14 +7,12 @@ export default function Footer() {
         <div className="flex flex-col gap-2">
           <div className="text-[15px] font-semibold text-[#CFEE5D]">회사 소개</div>
           <div className="flex flex-col gap-1.5">
-            <a
-              href="https://www.wanted.co.kr/?utm_source=google&utm_medium=sa&utm_campaign=kr_recruit_web_sa_signup&utm_term=%EC%9B%90%ED%8B%B0%EB%93%9C&utm_content=brand_new&airbridge_referrer=airbridge%3Dtrue%26channel%3Dgoogle.adwords%26campaign%3D1732347827%26campaign_id%3D1732347827%26ad_group%3D148879638611%26ad_group_id%3D148879638611%26ad_creative%3D696367802555%26ad_creative_id%3D696367802555%26term%3D%EC%9B%90%ED%8B%B0%EB%93%9C%26sub_id%3Dg%26sub_id_1%3D%26sub_id_2%3D%26sub_id_3%3Db%26click_id%3DCj0KCQjww8rQBhDjARIsAE43KPMSL53Xo0nSguUZR0qYW_HeMWsQBA0etm48vx3WXC9Kh1uES2gUtLEaAhurEALw_wcB%26gclid%3DCj0KCQjww8rQBhDjARIsAE43KPMSL53Xo0nSguUZR0qYW_HeMWsQBA0etm48vx3WXC9Kh1uES2gUtLEaAhurEALw_wcB%26ad_type%3Dclick&gad_source=1&gad_campaignid=1732347827&gbraid=0AAAAADK3HCdloBylE9nEOLa3CgYWvj6Al&gclid=Cj0KCQjww8rQBhDjARIsAE43KPMSL53Xo0nSguUZR0qYW_HeMWsQBA0etm48vx3WXC9Kh1uES2gUtLEaAhurEALw_wcB"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/website-about"
               className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]"
             >
               회사 소개
-            </a>
+            </Link>
             <a
               href="https://www.wanted.co.kr/?utm_source=google&utm_medium=sa&utm_campaign=kr_recruit_web_sa_signup&utm_term=%EC%9B%90%ED%8B%B0%EB%93%9C&utm_content=brand_new&airbridge_referrer=airbridge%3Dtrue%26channel%3Dgoogle.adwords%26campaign%3D1732347827%26campaign_id%3D1732347827%26ad_group%3D148879638611%26ad_group_id%3D148879638611%26ad_creative%3D696367802555%26ad_creative_id%3D696367802555%26term%3D%EC%9B%90%ED%8B%B0%EB%93%9C%26sub_id%3Dg%26sub_id_1%3D%26sub_id_2%3D%26sub_id_3%3Db%26click_id%3DCj0KCQjww8rQBhDjARIsAE43KPMSL53Xo0nSguUZR0qYW_HeMWsQBA0etm48vx3WXC9Kh1uES2gUtLEaAhurEALw_wcB%26gclid%3DCj0KCQjww8rQBhDjARIsAE43KPMSL53Xo0nSguUZR0qYW_HeMWsQBA0etm48vx3WXC9Kh1uES2gUtLEaAhurEALw_wcB%26ad_type%3Dclick&gad_source=1&gad_campaignid=1732347827&gbraid=0AAAAADK3HCdloBylE9nEOLa3CgYWvj6Al&gclid=Cj0KCQjww8rQBhDjARIsAE43KPMSL53Xo0nSguUZR0qYW_HeMWsQBA0etm48vx3WXC9Kh1uES2gUtLEaAhurEALw_wcB"
               target="_blank"
@@ -41,12 +39,6 @@ export default function Footer() {
               className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]"
             >
               공지사항
-            </Link>
-            <Link
-              href="/notice"
-              className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]"
-            >
-              1:1 문의
             </Link>
           </div>
         </div>
