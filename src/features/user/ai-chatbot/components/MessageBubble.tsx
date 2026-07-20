@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import Image from 'next/image';
 import { ChatMessage } from '../types';
 import BotAvatar from './BotAvatar';
@@ -21,13 +22,8 @@ interface Props {
   onToggleSpeak: (msg: ChatMessage) => void;
 }
 
-export default function MessageBubble({
-  msg,
-  isStreaming,
-  hasTTSSupport,
-  isSpeaking,
-  onToggleSpeak,
-}: Props) {
+// 대화가 길어질수록 타이핑 스트리밍 중 관련 없는 다른 메시지 버블까지 매 틱 리렌더링되는 걸 막기 위해 메모이제이션
+function MessageBubble({ msg, isStreaming, hasTTSSupport, isSpeaking, onToggleSpeak }: Props) {
   if (msg.role === 'user') {
     return (
       <div className="flex justify-end">
@@ -65,3 +61,5 @@ export default function MessageBubble({
     </div>
   );
 }
+
+export default memo(MessageBubble);
