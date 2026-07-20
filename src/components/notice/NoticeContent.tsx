@@ -39,6 +39,7 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
             key={`${keyPrefix}-img${idx++}`}
             src={resolvedUrl}
             alt={alt || '공지 이미지'}
+            loading="lazy"
             className="block max-w-full h-auto rounded-lg border border-[#E5E7EB] my-3"
           />,
         );
