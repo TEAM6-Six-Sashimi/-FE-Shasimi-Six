@@ -45,9 +45,7 @@ export default function ChatRoomList({ rooms, selectedChatId, onSelect }: ChatRo
                   className="object-cover"
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-[#6A7282] text-[9px] text-center px-1 leading-tight">
-                  프로필 사진 없음
-                </div>
+                <Image src="/chat/basic-profile-gray.svg" alt="" width={22} height={22} />
               )}
             </div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { fetchNoticesAction } from '@/features/admin/noticemanage/actions';
@@ -8,13 +8,26 @@ import { AdminNotice } from '@/features/admin/noticemanage/types';
 
 const ITEMS_PER_PAGE = 10;
 
-export default function NoticeListView() {
+interface NoticeListViewProps {
+  initialItems: AdminNotice[];
+  initialTotalPages: number;
+}
+
+export default function NoticeListView({ initialItems, initialTotalPages }: NoticeListViewProps) {
   const [page, setPage] = useState(0);
-  const [items, setItems] = useState<AdminNotice[]>([]);
-  const [totalPages, setTotalPages] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [items, setItems] = useState<AdminNotice[]>(initialItems);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
+  const [isLoading, setIsLoading] = useState(false);
+  // 최초 페이지(0)는 서버에서 이미 받아온 initialItems를 그대로 쓰고,
+  // 페이지 이동으로 page가 바뀔 때만 클라이언트에서 다시 조회한다.
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
     let active = true;
     setIsLoading(true);
     fetchNoticesAction({ page, size: ITEMS_PER_PAGE })
