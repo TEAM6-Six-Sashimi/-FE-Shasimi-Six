@@ -1,6 +1,19 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { Metadata } from 'next';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: '서비스 소개',
+  description:
+    'AI 기반 역량 진단부터 맞춤 강의 추천, 취업 준비까지 - 핏(Fit)-격이 다른 이유를 소개합니다.',
+  openGraph: {
+    title: '서비스 소개 | 핏(Fit)-격',
+    description:
+      'AI 기반 역량 진단부터 맞춤 강의 추천, 취업 준비까지 - 핏(Fit)-격이 다른 이유를 소개합니다.',
+    url: '/website-about',
+  },
+};
 
 const BEFORE_TAGS = ['어디서 시작하지?', '강의가 너무 많아', '내 수준을 모르겠어'];
 const AFTER_TAGS = ['역량 자동 분석', '맞춤 강의 추천'];
@@ -55,7 +68,8 @@ export default function WebsiteAboutPage() {
             src="/aboutpage/aboutpage-logo.png"
             alt="핏(Fit)-격 FITGYEOK 로고"
             width={280}
-            height={210}
+            height={204}
+            priority
           />
         </div>
 
