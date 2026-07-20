@@ -75,6 +75,9 @@ export async function fetchCourseRejectReasons(
   });
 
   if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     const errorBody = await res.text().catch(() => '');
     console.error(`[fetchCourseRejectReasons] status=${res.status} body=${errorBody}`);
     throw new Error('반려 사유 카테고리를 불러오지 못했습니다.');

@@ -9,6 +9,8 @@ import {
   fetchInstructorPendingChatsAction,
   fetchStudentChatRoomsAction,
 } from '@/features/user/coffee-chat/actions';
+import { AuthSessionError } from '@/features/auth/errors';
+import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 export default async function UserLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
@@ -25,17 +27,26 @@ export default async function UserLayout({ children }: { children: React.ReactNo
   // 학생/강사 모두 안읽은 메시지가 있는 방(요청 목록 포함)이 있는지로만 판단한다.
   // (강사의 경우, 처리 안 한 요청이 있어도 메시지를 이미 다 읽었으면 알림 안 띄움)
   let hasCoffeeChatAlert = false;
-  if (role === 'STUDENT') {
-    const rooms = await fetchStudentChatRoomsAction();
-    hasCoffeeChatAlert = rooms.some((room) => room.unreadMessageCount > 0);
-  } else if (role === 'INSTRUCTOR') {
-    const [pendingChats, activeChats] = await Promise.all([
-      fetchInstructorPendingChatsAction(),
-      fetchInstructorActiveChatsAction(),
-    ]);
-    hasCoffeeChatAlert = [...pendingChats, ...activeChats].some(
-      (chat) => chat.unreadMessageCount > 0,
-    );
+  try {
+    if (role === 'STUDENT') {
+      const rooms = await fetchStudentChatRoomsAction();
+      hasCoffeeChatAlert = rooms.some((room) => room.unreadMessageCount > 0);
+    } else if (role === 'INSTRUCTOR') {
+      const [pendingChats, activeChats] = await Promise.all([
+        fetchInstructorPendingChatsAction(),
+        fetchInstructorActiveChatsAction(),
+      ]);
+      hasCoffeeChatAlert = [...pendingChats, ...activeChats].some(
+        (chat) => chat.unreadMessageCount > 0,
+      );
+    }
+  } catch (e) {
+    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 이 레이아웃은 모든 페이지를 감싸므로
+    // 여기서 안 잡으면 세션이 죽은 사용자가 어느 페이지를 가든 에러 화면만 보게 된다.
+    if (e instanceof AuthSessionError) {
+      return <SessionExpiredRedirect message={e.message} />;
+    }
+    throw e;
   }
 
   return (

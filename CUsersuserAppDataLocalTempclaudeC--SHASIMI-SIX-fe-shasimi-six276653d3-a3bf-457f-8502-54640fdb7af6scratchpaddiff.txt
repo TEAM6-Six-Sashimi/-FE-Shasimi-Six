@@ -1,0 +1,1525 @@
+diff --git a/src/app/(user)/ai-analysis/page.tsx b/src/app/(user)/ai-analysis/page.tsx
+index 1ab723c..124e875 100644
+--- a/src/app/(user)/ai-analysis/page.tsx
++++ b/src/app/(user)/ai-analysis/page.tsx
+@@ -9,6 +9,8 @@ import {
+ import { fetchLatestAiReviewAction } from '@/features/user/resume/actions';
+ import { fetchMySubscriptionAction } from '@/features/user/payments/actions';
+ import AiAnalysisPageClient from '@/features/user/ai-analysis/components/AiAnalysisPageClient';
++import { AuthSessionError } from '@/features/auth/errors';
++import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
+ 
+ export const metadata: Metadata = {
+   title: 'AI 이력서, 자기소개서 작성 & 평가',
+@@ -35,16 +37,24 @@ export default async function AiAnalysisPage() {
+     }
+   }
+ 
+-  const [savedResume, savedCoverLetter, latestCoverLetterReview, mySubscription] =
+-    await Promise.all([
++  let savedResume, savedCoverLetter, latestCoverLetterReview, mySubscription, latestAiReview;
++  try {
++    [savedResume, savedCoverLetter, latestCoverLetterReview, mySubscription] = await Promise.all([
+       isLoggedIn ? fetchMyResume(accessToken!) : Promise.resolve(null),
+       isLoggedIn ? fetchMyCoverLetterAction() : Promise.resolve(null),
+       isLoggedIn ? fetchLatestCoverLetterReviewAction() : Promise.resolve(null),
+       fetchMySubscriptionAction(),
+     ]);
+ 
+-  const latestAiReview =
+-    isLoggedIn && savedResume ? await fetchLatestAiReviewAction(savedResume.resumeId) : null;
++    latestAiReview =
++      isLoggedIn && savedResume ? await fetchLatestAiReviewAction(savedResume.resumeId) : null;
++  } catch (e) {
++    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
++    if (e instanceof AuthSessionError) {
++      return <SessionExpiredRedirect message={e.message} />;
++    }
++    throw e;
++  }
+ 
+   return (
+     <AiAnalysisPageClient
+diff --git a/src/app/(user)/cart/page.tsx b/src/app/(user)/cart/page.tsx
+index bb627a2..9598b75 100644
+--- a/src/app/(user)/cart/page.tsx
++++ b/src/app/(user)/cart/page.tsx
+@@ -2,6 +2,8 @@ import { cookies } from 'next/headers';
+ import { fetchCart } from '@/services/cart.service';
+ import { CartCourseItem } from '@/features/user/cart/types';
+ import CartClient from '@/features/user/cart/components/CartClient';
++import { AuthSessionError } from '@/features/auth/errors';
++import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
+ 
+ export default async function CartPage() {
+   const cookieStore = await cookies();
+@@ -13,6 +15,10 @@ export default async function CartPage() {
+       const data = await fetchCart(accessToken);
+       initialItems = data.items;
+     } catch (e) {
++      // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 빈 장바구니 대신 로그아웃 처리
++      if (e instanceof AuthSessionError) {
++        return <SessionExpiredRedirect message={e.message} />;
++      }
+       initialItems = [];
+     }
+   }
+diff --git a/src/app/(user)/coffee-chat/page.tsx b/src/app/(user)/coffee-chat/page.tsx
+index eec019a..242357b 100644
+--- a/src/app/(user)/coffee-chat/page.tsx
++++ b/src/app/(user)/coffee-chat/page.tsx
+@@ -7,6 +7,8 @@ import {
+   fetchStudentChatRoomsAction,
+ } from '@/features/user/coffee-chat/actions';
+ import CoffeeChatPageClient from '@/features/user/coffee-chat/components/CoffeeChatPageClient';
++import { AuthSessionError } from '@/features/auth/errors';
++import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
+ 
+ export const metadata: Metadata = {
+   title: '커피챗',
+@@ -27,9 +29,19 @@ export default async function CoffeeChatPage() {
+   }
+ 
+   const isInstructor = user.role === 'INSTRUCTOR';
+-  const studentChatRooms = isInstructor ? [] : await fetchStudentChatRoomsAction();
+-  const instructorPendingChats = isInstructor ? await fetchInstructorPendingChatsAction() : [];
+-  const instructorActiveChats = isInstructor ? await fetchInstructorActiveChatsAction() : [];
++
++  let studentChatRooms, instructorPendingChats, instructorActiveChats;
++  try {
++    studentChatRooms = isInstructor ? [] : await fetchStudentChatRoomsAction();
++    instructorPendingChats = isInstructor ? await fetchInstructorPendingChatsAction() : [];
++    instructorActiveChats = isInstructor ? await fetchInstructorActiveChatsAction() : [];
++  } catch (e) {
++    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
++    if (e instanceof AuthSessionError) {
++      return <SessionExpiredRedirect message={e.message} />;
++    }
++    throw e;
++  }
+ 
+   return (
+     <CoffeeChatPageClient
+diff --git a/src/app/(user)/credit/page.tsx b/src/app/(user)/credit/page.tsx
+index b568bd7..e106907 100644
+--- a/src/app/(user)/credit/page.tsx
++++ b/src/app/(user)/credit/page.tsx
+@@ -1,6 +1,8 @@
+ import { cookies } from 'next/headers';
+ import { fetchCreditBalance } from '@/services/credit.service';
+ import CreditClient from '@/features/user/credit/components/CreditClient';
++import { AuthSessionError } from '@/features/auth/errors';
++import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
+ 
+ export default async function CreditPage() {
+   const cookieStore = await cookies();
+@@ -12,8 +14,12 @@ export default async function CreditPage() {
+     try {
+       const data = await fetchCreditBalance(accessToken);
+       initialCredit = data.balance;
+-    } catch {
+-      // 조회 실패 시 초기값 0
++    } catch (e) {
++      // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 잔액 0 대신 로그아웃 처리
++      if (e instanceof AuthSessionError) {
++        return <SessionExpiredRedirect message={e.message} />;
++      }
++      // 그 외 실패 시 초기값 0
+     }
+   }
+ 
+diff --git a/src/app/(user)/instructor-application/page.tsx b/src/app/(user)/instructor-application/page.tsx
+index 0714bf1..b3f5fd9 100644
+--- a/src/app/(user)/instructor-application/page.tsx
++++ b/src/app/(user)/instructor-application/page.tsx
+@@ -4,6 +4,7 @@ import { fetchUserMeStrict, UserMeAuthError } from '@/services/user.service';
+ import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
+ import { fetchCategories } from '@/services/categories.service';
+ import { fetchMyInstructorApplications } from '@/services/instructor-application.service';
++import { AuthSessionError } from '@/features/auth/errors';
+ import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
+ 
+ export default async function InstructorApplicationPage() {
+@@ -21,8 +22,18 @@ export default async function InstructorApplicationPage() {
+     throw error;
+   }
+ 
++  let applications;
++  try {
++    applications = await fetchMyInstructorApplications(userInfo.id, accessToken);
++  } catch (error) {
++    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
++    if (error instanceof AuthSessionError) {
++      return <SessionExpiredRedirect message={error.message} />;
++    }
++    throw error;
++  }
++
+   const categories = await fetchCategories();
+-  const applications = await fetchMyInstructorApplications(userInfo.id, accessToken);
+   const hasPendingApplication = applications.some((app) => app.approvalStatus === 'PENDING');
+ 
+   return (
+diff --git a/src/app/(user)/mycourses-instructor/[courseId]/edit/page.tsx b/src/app/(user)/mycourses-instructor/[courseId]/edit/page.tsx
+index c0dceec..4d8dd61 100644
+--- a/src/app/(user)/mycourses-instructor/[courseId]/edit/page.tsx
++++ b/src/app/(user)/mycourses-instructor/[courseId]/edit/page.tsx
+@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
+ import { fetchUserMeStrict, UserMeAuthError } from '@/services/user.service';
+ import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
+ import { fetchCourseDetail } from '@/services/instructor.service';
++import { AuthSessionError } from '@/features/auth/errors';
+ import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
+ 
+ interface PageProps {
+@@ -26,10 +27,19 @@ export default async function EditCoursePage({ params }: PageProps) {
+     throw error;
+   }
+ 
+-  const [categories, course] = await Promise.all([
+-    fetchCategories(),
+-    fetchCourseDetail(accessToken, String(user.id), Number(courseId)),
+-  ]);
++  let categories, course;
++  try {
++    [categories, course] = await Promise.all([
++      fetchCategories(),
++      fetchCourseDetail(accessToken, String(user.id), Number(courseId)),
++    ]);
++  } catch (error) {
++    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
++    if (error instanceof AuthSessionError) {
++      return <SessionExpiredRedirect message={error.message} />;
++    }
++    throw error;
++  }
+ 
+   const DIFFICULTY_REVERSE: Record<string, string> = {
+     BEGINNER: '초급',
+diff --git a/src/app/(user)/mycourses-instructor/page.tsx b/src/app/(user)/mycourses-instructor/page.tsx
+index 438443c..107f623 100644
+--- a/src/app/(user)/mycourses-instructor/page.tsx
++++ b/src/app/(user)/mycourses-instructor/page.tsx
+@@ -12,6 +12,7 @@ import {
+ } from '@/services/instructor.service';
+ import { fetchUserMeStrict, UserMeAuthError } from '@/services/user.service';
+ import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
++import { AuthSessionError } from '@/features/auth/errors';
+ import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
+ 
+ type InstructorTab = 'dashboard' | 'approved' | 'pending' | 'private';
+@@ -52,22 +53,33 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
+   }
+   const userId = user ? String(user.id) : '';
+ 
+-  const [approvedCourses, inProgressCourses, closedCourses, categories] =
+-    accessToken && userId
+-      ? await Promise.all([
+-          activeTab === 'approved'
+-            ? fetchApprovedCourses(accessToken, userId)
+-            : Promise.resolve([]),
++  let approvedCourses, inProgressCourses, closedCourses, categories;
++  try {
++    [approvedCourses, inProgressCourses, closedCourses, categories] =
++      accessToken && userId
++        ? await Promise.all([
++            activeTab === 'approved'
++              ? fetchApprovedCourses(accessToken, userId)
++              : Promise.resolve([]),
+ 
+-          activeTab === 'pending'
+-            ? fetchInProgressCourses(accessToken, userId)
+-            : Promise.resolve([]),
++            activeTab === 'pending'
++              ? fetchInProgressCourses(accessToken, userId)
++              : Promise.resolve([]),
+ 
+-          activeTab === 'private' ? fetchClosedCourses(accessToken, userId) : Promise.resolve([]),
++            activeTab === 'private'
++              ? fetchClosedCourses(accessToken, userId)
++              : Promise.resolve([]),
+ 
+-          fetchCategories(),
+-        ])
+-      : [[], [], [], []];
++            fetchCategories(),
++          ])
++        : [[], [], [], []];
++  } catch (error) {
++    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
++    if (error instanceof AuthSessionError) {
++      return <SessionExpiredRedirect message={error.message} />;
++    }
++    throw error;
++  }
+ 
+   return (
+     <div className="max-w-275 min-h-[calc(100vh-95px)] container mx-auto px-6 py-8">
+diff --git a/src/app/(user)/payments/page.tsx b/src/app/(user)/payments/page.tsx
+index 052a47c..d864e0e 100644
+--- a/src/app/(user)/payments/page.tsx
++++ b/src/app/(user)/payments/page.tsx
+@@ -7,6 +7,8 @@ import { PaymentSummary, OrderLineItem } from '@/features/user/payments/types';
+ import { fetchCategories } from '@/services/categories.service';
+ import { fetchCreditBalance } from '@/services/credit.service';
+ import { Category } from '@/features/categories/types';
++import { AuthSessionError } from '@/features/auth/errors';
++import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
+ 
+ interface PaymentPageProps {
+   searchParams: Promise<{
+@@ -93,6 +95,9 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
+ 
+     if (creditsResult.status === 'fulfilled') {
+       ownedCredits = creditsResult.value.balance ?? 0;
++    } else if (creditsResult.reason instanceof AuthSessionError) {
++      // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 결제 페이지 대신 로그아웃 처리
++      return <SessionExpiredRedirect message={creditsResult.reason.message} />;
+     } else {
+       console.error('크레딧 조회 실패:', creditsResult.reason);
+     }
+diff --git a/src/app/(user)/recommendations/page.tsx b/src/app/(user)/recommendations/page.tsx
+index 1235858..60ca989 100644
+--- a/src/app/(user)/recommendations/page.tsx
++++ b/src/app/(user)/recommendations/page.tsx
+@@ -4,6 +4,8 @@ import { fetchMyResume } from '@/services/resume.service';
+ import { fetchMySubscriptionAction } from '@/features/user/payments/actions';
+ import { fetchLatestJobPostingRecommendationAction } from '@/features/user/recommendations/actions';
+ import RecommendationPageClient from '@/features/user/recommendations/components/RecommendationClientPage';
++import { AuthSessionError } from '@/features/auth/errors';
++import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
+ 
+ export const metadata: Metadata = {
+   title: 'AI 맞춤 강의 추천',
+@@ -19,11 +21,20 @@ export default async function RecommendationsPage() {
+   const cookieStore = await cookies();
+   const accessToken = cookieStore.get('accessToken')?.value;
+ 
+-  const [savedResume, mySubscription, latestRecommendation] = await Promise.all([
+-    accessToken ? fetchMyResume(accessToken) : Promise.resolve(null),
+-    accessToken ? fetchMySubscriptionAction() : Promise.resolve(null),
+-    accessToken ? fetchLatestJobPostingRecommendationAction() : Promise.resolve(null),
+-  ]);
++  let savedResume, mySubscription, latestRecommendation;
++  try {
++    [savedResume, mySubscription, latestRecommendation] = await Promise.all([
++      accessToken ? fetchMyResume(accessToken) : Promise.resolve(null),
++      accessToken ? fetchMySubscriptionAction() : Promise.resolve(null),
++      accessToken ? fetchLatestJobPostingRecommendationAction() : Promise.resolve(null),
++    ]);
++  } catch (e) {
++    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
++    if (e instanceof AuthSessionError) {
++      return <SessionExpiredRedirect message={e.message} />;
++    }
++    throw e;
++  }
+ 
+   return (
+     <RecommendationPageClient
+diff --git a/src/app/layout.tsx b/src/app/layout.tsx
+index a0320d2..c305972 100644
+--- a/src/app/layout.tsx
++++ b/src/app/layout.tsx
+@@ -1,10 +1,12 @@
+ import type { Metadata } from 'next';
+ import './globals.css';
+ import { Geist } from 'next/font/google';
++import { cookies } from 'next/headers';
+ import { cn } from '@/lib/utils';
+ import { ToastProvider } from '@/components/ui/ToastContext';
+ import { MaintenanceProvider } from '@/components/system/MaintenanceProvider';
+ import Header from '@/components/layout/Header';
++import { fetchUserMe, GUEST_USER } from '@/services/user.service';
+ 
+ const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
+ 
+@@ -64,17 +66,21 @@ export const metadata: Metadata = {
+   },
+ };
+ 
+-export default function RootLayout({
++export default async function RootLayout({
+   children,
+ }: Readonly<{
+   children: React.ReactNode;
+ }>) {
++  const cookieStore = await cookies();
++  const accessToken = cookieStore.get('accessToken')?.value;
++  const user = accessToken ? await fetchUserMe(accessToken) : GUEST_USER;
++
+   return (
+     <html lang="ko" className={cn('font-sans', geist.variable)}>
+       <body className="flex-1">
+-        <MaintenanceProvider>
++        <MaintenanceProvider isAdmin={user.role === 'ADMIN'}>
+           <ToastProvider>
+-            <Header />
++            <Header user={user} accessToken={accessToken} />
+             <main>{children}</main>
+           </ToastProvider>
+         </MaintenanceProvider>
+diff --git a/src/app/mypage/credit-charge/page.tsx b/src/app/mypage/credit-charge/page.tsx
+index 7a4562a..9aca790 100644
+--- a/src/app/mypage/credit-charge/page.tsx
++++ b/src/app/mypage/credit-charge/page.tsx
+@@ -1,6 +1,8 @@
+ import { cookies } from 'next/headers';
+ import { fetchCreditChargeHistory } from '@/services/credit.service';
+ import CreditChargeTable from '@/features/mypage/components/credit-charge/CreditChargeTable';
++import { AuthSessionError } from '@/features/auth/errors';
++import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
+ 
+ export default async function MyPageCreditChargePage() {
+   const cookieStore = await cookies();
+@@ -14,7 +16,16 @@ export default async function MyPageCreditChargePage() {
+     );
+   }
+ 
+-  const history = await fetchCreditChargeHistory(accessToken);
++  let history;
++  try {
++    history = await fetchCreditChargeHistory(accessToken);
++  } catch (e) {
++    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
++    if (e instanceof AuthSessionError) {
++      return <SessionExpiredRedirect message={e.message} />;
++    }
++    throw e;
++  }
+ 
+   return (
+     <div className="max-w-5xl mx-auto">
+diff --git a/src/app/mypage/instructor-application-list/[id]/page.tsx b/src/app/mypage/instructor-application-list/[id]/page.tsx
+index 59b8398..fe840ba 100644
+--- a/src/app/mypage/instructor-application-list/[id]/page.tsx
++++ b/src/app/mypage/instructor-application-list/[id]/page.tsx
+@@ -3,6 +3,8 @@ import { fetchUserMe } from '@/services/user.service';
+ import { fetchMyInstructorApplicationDetail } from '@/services/instructor-application.service';
+ import { fetchCategories } from '@/services/categories.service';
+ import InstructorApplicationDetailView from '@/features/mypage/components/instructor-apply-history/InstructorApplicationDetailView';
++import { AuthSessionError } from '@/features/auth/errors';
++import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
+ 
+ interface Props {
+   params: Promise<{ id: string }>;
+@@ -22,10 +24,20 @@ export default async function InstructorApplicationDetailPage({ params }: Props)
+   }
+ 
+   const user = await fetchUserMe(accessToken);
+-  const [detail, categories] = await Promise.all([
+-    fetchMyInstructorApplicationDetail(user.id, Number(id), accessToken),
+-    fetchCategories(),
+-  ]);
++
++  let detail, categories;
++  try {
++    [detail, categories] = await Promise.all([
++      fetchMyInstructorApplicationDetail(user.id, Number(id), accessToken),
++      fetchCategories(),
++    ]);
++  } catch (e) {
++    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
++    if (e instanceof AuthSessionError) {
++      return <SessionExpiredRedirect message={e.message} />;
++    }
++    throw e;
++  }
+ 
+   if (!detail) {
+     return (
+diff --git a/src/app/mypage/instructor-application-list/page.tsx b/src/app/mypage/instructor-application-list/page.tsx
+index 1a2b194..52e6e6b 100644
+--- a/src/app/mypage/instructor-application-list/page.tsx
++++ b/src/app/mypage/instructor-application-list/page.tsx
+@@ -3,6 +3,8 @@ import { fetchUserMe } from '@/services/user.service';
+ import { fetchMyInstructorApplications } from '@/services/instructor-application.service';
+ import { fetchCategories } from '@/services/categories.service';
+ import InstructorApplicationHistoryTable from '@/features/mypage/components/instructor-apply-history/InstructorApplicationHistoryTable';
++import { AuthSessionError } from '@/features/auth/errors';
++import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
+ 
+ 
+ export default async function InstructorApplicationListPage() {
+@@ -18,10 +20,20 @@ export default async function InstructorApplicationListPage() {
+   }
+ 
+   const user = await fetchUserMe(accessToken);
+-  const [applications, categories] = await Promise.all([
+-    fetchMyInstructorApplications(user.id, accessToken),
+-    fetchCategories(),
+-  ]);
++
++  let applications, categories;
++  try {
++    [applications, categories] = await Promise.all([
++      fetchMyInstructorApplications(user.id, accessToken),
++      fetchCategories(),
++    ]);
++  } catch (e) {
++    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
++    if (e instanceof AuthSessionError) {
++      return <SessionExpiredRedirect message={e.message} />;
++    }
++    throw e;
++  }
+ 
+    return (
+       <div className="max-w-5xl mx-auto">
+diff --git a/src/app/mypage/instructor-profile/page.tsx b/src/app/mypage/instructor-profile/page.tsx
+index 20b75ff..ce6904b 100644
+--- a/src/app/mypage/instructor-profile/page.tsx
++++ b/src/app/mypage/instructor-profile/page.tsx
+@@ -2,6 +2,8 @@ import { cookies } from 'next/headers';
+ import { fetchUserMe } from '@/services/user.service';
+ import { fetchInstructorProfile } from '@/services/instructor.service';
+ import InstructorProfileView from '@/features/mypage/components/instructor-profile/InstructorProfileView';
++import { AuthSessionError } from '@/features/auth/errors';
++import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
+ 
+ export default async function InstructorProfilePage() {
+   const cookieStore = await cookies();
+@@ -16,7 +18,17 @@ export default async function InstructorProfilePage() {
+   }
+ 
+   const user = await fetchUserMe(accessToken);
+-  const profile = await fetchInstructorProfile(user.id, accessToken);
++
++  let profile;
++  try {
++    profile = await fetchInstructorProfile(user.id, accessToken);
++  } catch (e) {
++    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
++    if (e instanceof AuthSessionError) {
++      return <SessionExpiredRedirect message={e.message} />;
++    }
++    throw e;
++  }
+ 
+   return (
+     <div className="max-w-5xl mx-auto">
+diff --git a/src/app/mypage/payment-history/page.tsx b/src/app/mypage/payment-history/page.tsx
+index dd83de0..6b00a69 100644
+--- a/src/app/mypage/payment-history/page.tsx
++++ b/src/app/mypage/payment-history/page.tsx
+@@ -5,6 +5,8 @@ import {
+   fetchSubscriptionMe,
+ } from '@/services/payment.service';
+ import PaymentHistoryClient from './components/PaymentHistoryClient';
++import { AuthSessionError } from '@/features/auth/errors';
++import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
+ 
+ export default async function PaymentHistoryPage() {
+   const cookieStore = await cookies();
+@@ -18,11 +20,20 @@ export default async function PaymentHistoryPage() {
+     );
+   }
+ 
+-  const [coursePayments, subscriptionPayments, subscriptionMe] = await Promise.all([
+-    fetchCoursePaymentHistory(accessToken),
+-    fetchSubscriptionPaymentHistory(accessToken),
+-    fetchSubscriptionMe(accessToken),
+-  ]);
++  let coursePayments, subscriptionPayments, subscriptionMe;
++  try {
++    [coursePayments, subscriptionPayments, subscriptionMe] = await Promise.all([
++      fetchCoursePaymentHistory(accessToken),
++      fetchSubscriptionPaymentHistory(accessToken),
++      fetchSubscriptionMe(accessToken),
++    ]);
++  } catch (e) {
++    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
++    if (e instanceof AuthSessionError) {
++      return <SessionExpiredRedirect message={e.message} />;
++    }
++    throw e;
++  }
+ 
+   return (
+     <PaymentHistoryClient
+diff --git a/src/components/layout/Header.tsx b/src/components/layout/Header.tsx
+index d1ea37c..118e642 100644
+--- a/src/components/layout/Header.tsx
++++ b/src/components/layout/Header.tsx
+@@ -1,18 +1,17 @@
+ import Link from 'next/link';
+ import Image from 'next/image';
+-import { cookies } from 'next/headers';
+-import { fetchUserMe, GUEST_USER } from '@/services/user.service';
++import { UserMe } from '@/features/auth/types';
+ import HeaderDropdown from '../../features/header/components/HeaderDropdown';
+ import HeaderCartLink from '../../features/header/components/HeaderCartComponent';
+ import AdminModeToggle from './AdminMode';
+ import TokenTimer from './TokenTimer';
+ 
+-export default async function Header() {
+-  const cookieStore = await cookies();
+-  const accessToken = cookieStore.get('accessToken')?.value;
+-
+-  const user = accessToken ? await fetchUserMe(accessToken) : GUEST_USER;
++interface HeaderProps {
++  user: UserMe;
++  accessToken?: string;
++}
+ 
++export default function Header({ user, accessToken }: HeaderProps) {
+   return (
+     <div className="flex justify-between bg-white border-b border-[#E5E7EB] h-12 items-center p-5">
+       <Link href="/">
+diff --git a/src/components/system/MaintenanceProvider.tsx b/src/components/system/MaintenanceProvider.tsx
+index fd5a4bb..d1842ff 100644
+--- a/src/components/system/MaintenanceProvider.tsx
++++ b/src/components/system/MaintenanceProvider.tsx
+@@ -1,9 +1,13 @@
+ 'use client';
+ 
+ import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
++import { usePathname } from 'next/navigation';
+ import { fetchMaintenanceStatus } from '@/services/maintenance.service';
++import { MAINTENANCE_EXCLUDED_PATHS } from '@/lib/maintenance-excluded-paths';
+ import ServiceUnavailablePage from './ServiceUnavailablePage';
+ 
++const POLL_INTERVAL_MS = 5000; // 미들웨어의 점검 상태 캐시 TTL과 맞춤
++
+ interface MaintenanceContextValue {
+   isBlocked: boolean;
+   message: string;
+@@ -12,7 +16,13 @@ interface MaintenanceContextValue {
+ 
+ const MaintenanceContext = createContext<MaintenanceContextValue | undefined>(undefined);
+ 
+-export function MaintenanceProvider({ children }: { children: ReactNode }) {
++interface MaintenanceProviderProps {
++  isAdmin: boolean;
++  children: ReactNode;
++}
++
++export function MaintenanceProvider({ isAdmin, children }: MaintenanceProviderProps) {
++  const pathname = usePathname();
+   const [isBlocked, setIsBlocked] = useState(false);
+   const [message, setMessage] = useState('');
+ 
+@@ -21,15 +31,33 @@ export function MaintenanceProvider({ children }: { children: ReactNode }) {
+     setMessage(msg);
+   };
+ 
++  // 관리자 또는 예외 경로(로그인/점검 안내 페이지)는 능동적 점검 체크 대상에서 제외한다.
++  // proxy.ts가 이 경우 서버 단에서 이미 통과시켜주므로, 클라이언트가 별도로 다시 막아버리면
++  // (특히 /auth/login에서) 점검 중 로그인이 아예 불가능해지는 문제가 생긴다.
++  const isExcluded = isAdmin || MAINTENANCE_EXCLUDED_PATHS.includes(pathname);
++
+   useEffect(() => {
+-    fetchMaintenanceStatus()
+-      .then((data) => {
+-        if (data.enabled) setMaintenance(true, data.message);
+-      })
+-      .catch(() => {
+-        // 이 요청 자체가 실패해도 여기선 무시 (미들웨어가 페이지 단위로 이미 걸러줌)
+-      });
+-  }, []);
++    if (isExcluded || isBlocked) return;
++
++    let cancelled = false;
++
++    const check = async () => {
++      try {
++        const data = await fetchMaintenanceStatus();
++        if (!cancelled && data.enabled) setMaintenance(true, data.message);
++      } catch {
++        // 이 요청 자체가 실패해도 무시 - 다음 폴링에서 다시 시도
++      }
++    };
++
++    check();
++    const timer = setInterval(check, POLL_INTERVAL_MS);
++
++    return () => {
++      cancelled = true;
++      clearInterval(timer);
++    };
++  }, [isExcluded, isBlocked]);
+ 
+   if (isBlocked) {
+     return (
+diff --git a/src/features/user/cart/actions.ts b/src/features/user/cart/actions.ts
+index 4a913dc..56dcafa 100644
+--- a/src/features/user/cart/actions.ts
++++ b/src/features/user/cart/actions.ts
+@@ -33,11 +33,31 @@ export async function addCartItemAction(
+ }
+ 
+ // 장바구니 아이템 삭제
+-export async function deleteCartItemsAction(cartItemIds: number[]): Promise<void> {
++export type DeleteCartItemsResult =
++  | { success: true }
++  | { success: false; authError?: true; maintenance?: true; message: string };
++
++export async function deleteCartItemsAction(
++  cartItemIds: number[],
++): Promise<DeleteCartItemsResult> {
+   const cookieStore = await cookies();
+   const accessToken = cookieStore.get('accessToken')?.value;
+ 
+-  if (!accessToken) throw new Error('로그인이 필요합니다.');
++  if (!accessToken) return { success: false, message: '로그인이 필요합니다.' };
+ 
+-  return deleteCartItems(accessToken, cartItemIds);
++  try {
++    await deleteCartItems(accessToken, cartItemIds);
++    return { success: true };
++  } catch (error) {
++    if (error instanceof AuthSessionError) {
++      return { success: false, authError: true, message: error.message };
++    }
++    if (error instanceof MaintenanceError) {
++      return { success: false, maintenance: true, message: error.message };
++    }
++    return {
++      success: false,
++      message: error instanceof Error ? error.message : '장바구니 삭제에 실패했습니다.',
++    };
++  }
+ }
+diff --git a/src/features/user/cart/components/CartClient.tsx b/src/features/user/cart/components/CartClient.tsx
+index 7b871bb..84e1f08 100644
+--- a/src/features/user/cart/components/CartClient.tsx
++++ b/src/features/user/cart/components/CartClient.tsx
+@@ -6,6 +6,9 @@ import CartContent from '@/features/user/cart/components/CartContent';
+ import CartSticky from '@/features/user/cart/components/CartSticky';
+ import { CartCourseItem } from '@/features/user/cart/types';
+ import { deleteCartItemsAction } from '@/features/user/cart/actions';
++import { logoutAction } from '@/features/auth/actions';
++import { useToast } from '@/components/ui/ToastContext';
++import { useMaintenance } from '@/components/system/MaintenanceProvider';
+ import TwoButtonModal from '@/components/modals/TwoButtonModal';
+ 
+ interface CartClientProps {
+@@ -14,6 +17,8 @@ interface CartClientProps {
+ 
+ export default function CartClient({ initialItems }: CartClientProps) {
+   const router = useRouter();
++  const { showToast } = useToast();
++  const { setMaintenance } = useMaintenance();
+   const [items, setItems] = useState<CartCourseItem[]>(initialItems);
+   const [selectedIds, setSelectedIds] = useState<number[]>(
+     initialItems.filter((i) => i.selected).map((i) => i.courseId),
+@@ -42,20 +47,30 @@ export default function CartClient({ initialItems }: CartClientProps) {
+ 
+   // 실제 삭제 실행
+   const handleConfirmDelete = async () => {
+-    try {
+-      const cartItemIds = items
+-        .filter((i) => selectedIds.includes(i.courseId))
+-        .map((i) => i.cartItemId);
++    const cartItemIds = items
++      .filter((i) => selectedIds.includes(i.courseId))
++      .map((i) => i.cartItemId);
+ 
+-      await deleteCartItemsAction(cartItemIds);
++    const result = await deleteCartItemsAction(cartItemIds);
+ 
+-      setItems((prev) => prev.filter((i) => !selectedIds.includes(i.courseId)));
+-      setSelectedIds([]);
+-      setShowDeleteModal(false);
+-      router.refresh();
+-    } catch {
+-      // 삭제 실패 시 모달 유지
++    if (!result.success) {
++      if (result.authError) {
++        showToast(result.message, 'alarm');
++        await logoutAction();
++        return;
++      }
++      if (result.maintenance) {
++        setMaintenance(true, result.message);
++        return;
++      }
++      showToast(result.message, 'negative');
++      return; // 삭제 실패 시 모달 유지
+     }
++
++    setItems((prev) => prev.filter((i) => !selectedIds.includes(i.courseId)));
++    setSelectedIds([]);
++    setShowDeleteModal(false);
++    router.refresh();
+   };
+ 
+   // 구매하기 → 결제 페이지로 이동
+diff --git a/src/features/user/courses/components/sidebar-buttons/AdminPendingButtons.tsx b/src/features/user/courses/components/sidebar-buttons/AdminPendingButtons.tsx
+index 1ef4165..8104f53 100644
+--- a/src/features/user/courses/components/sidebar-buttons/AdminPendingButtons.tsx
++++ b/src/features/user/courses/components/sidebar-buttons/AdminPendingButtons.tsx
+@@ -12,6 +12,7 @@ import {
+   rejectCourseAction,
+ } from '@/features/admin/coursemanage/action';
+ import { logoutAction } from '@/features/auth/actions';
++import { AuthSessionError } from '@/features/auth/errors';
+ import { RejectReasonCategory } from '@/features/admin/coursemanage/type';
+ 
+ interface AdminPendingButtonsProps {
+@@ -42,7 +43,12 @@ export default function AdminPendingButtons({ courseId, courseTitle }: AdminPend
+       const categories = await fetchCourseRejectReasonsAction();
+       setRejectCategories(categories);
+       setCategoryLoadState('loaded');
+-    } catch {
++    } catch (e) {
++      if (e instanceof AuthSessionError) {
++        showToast(e.message, 'alarm');
++        await logoutAction();
++        return;
++      }
+       setCategoryLoadState('failed');
+       showToast('반려 사유 카테고리를 불러오지 못했습니다.', 'negative');
+     }
+diff --git a/src/features/user/credit/actions.ts b/src/features/user/credit/actions.ts
+index f77d3d1..2029a95 100644
+--- a/src/features/user/credit/actions.ts
++++ b/src/features/user/credit/actions.ts
+@@ -11,7 +11,7 @@ export async function readyCreditChargeAction(
+   amount: number,
+ ): Promise<
+   | { success: true; data: CreditReadyResponse }
+-  | { success: false; authError?: true; message: string }
++  | { success: false; authError?: true; maintenance?: true; message: string }
+ > {
+   try {
+     const cookieStore = await cookies();
+@@ -27,6 +27,9 @@ export async function readyCreditChargeAction(
+     if (error instanceof AuthSessionError) {
+       return { success: false, authError: true, message: error.message };
+     }
++    if (error instanceof MaintenanceError) {
++      return { success: false, maintenance: true, message: error.message };
++    }
+     return {
+       success: false,
+       message: error instanceof Error ? error.message : '충전 준비에 실패했습니다.',
+diff --git a/src/features/user/credit/components/Sticky.tsx b/src/features/user/credit/components/Sticky.tsx
+index cdcd85c..80c871a 100644
+--- a/src/features/user/credit/components/Sticky.tsx
++++ b/src/features/user/credit/components/Sticky.tsx
+@@ -7,6 +7,7 @@ import TwoButtonModal from '@/components/modals/TwoButtonModal';
+ import { readyCreditChargeAction } from '@/features/user/credit/actions';
+ import { logoutAction } from '@/features/auth/actions';
+ import { useToast } from '@/components/ui/ToastContext';
++import { useMaintenance } from '@/components/system/MaintenanceProvider';
+ import { Button } from '@/components/ui/button';
+ 
+ interface StickyProps {
+@@ -23,6 +24,7 @@ const UNIT_AMOUNT = 1000;
+ 
+ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: StickyProps) {
+   const { showToast } = useToast();
++  const { setMaintenance } = useMaintenance();
+   const [modalState, setModalState] = useState<ModalState>('none');
+   const [isLoading, setIsLoading] = useState(false);
+   const [errorMessage, setErrorMessage] = useState('');
+@@ -51,6 +53,11 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
+         await logoutAction();
+         return;
+       }
++      if (readyResult.maintenance) {
++        setMaintenance(true, readyResult.message);
++        setIsLoading(false);
++        return;
++      }
+       setErrorMessage(readyResult.message);
+       setModalState('error');
+       setIsLoading(false);
+diff --git a/src/features/user/review/actions.ts b/src/features/user/review/actions.ts
+index 4c86655..9a5874b 100644
+--- a/src/features/user/review/actions.ts
++++ b/src/features/user/review/actions.ts
+@@ -57,7 +57,10 @@ export async function createReviewAction(
+ export async function deleteReviewAction(
+   courseId: number,
+   reviewId: number,
+-): Promise<{ success: true } | { success: false; message: string; authError?: true }> {
++): Promise<
++  | { success: true }
++  | { success: false; message: string; authError?: true; maintenance?: true }
++> {
+   try {
+     const { accessToken, user } = await getAuthOrThrow();
+     await deleteReview(accessToken, user.id, courseId, reviewId);
+@@ -67,6 +70,7 @@ export async function deleteReviewAction(
+       success: false,
+       message: error instanceof Error ? error.message : '수강평 삭제에 실패했습니다.',
+       authError: isAuthError(error) || undefined,
++      maintenance: error instanceof MaintenanceError || undefined,
+     };
+   }
+ }
+@@ -74,7 +78,10 @@ export async function deleteReviewAction(
+ export async function reportReviewAction(
+   reviewId: number,
+   body: ReportReviewRequest,
+-): Promise<{ success: true } | { success: false; message: string; authError?: true }> {
++): Promise<
++  | { success: true }
++  | { success: false; message: string; authError?: true; maintenance?: true }
++> {
+   try {
+     const { accessToken } = await getAuthOrThrow();
+     await reportReview(accessToken, reviewId, body);
+@@ -84,6 +91,7 @@ export async function reportReviewAction(
+       success: false,
+       message: error instanceof Error ? error.message : '신고 처리에 실패했습니다.',
+       authError: isAuthError(error) || undefined,
++      maintenance: error instanceof MaintenanceError || undefined,
+     };
+   }
+ }
+diff --git a/src/features/user/review/components/ReviewList.tsx b/src/features/user/review/components/ReviewList.tsx
+index eee733c..2cf8c7f 100644
+--- a/src/features/user/review/components/ReviewList.tsx
++++ b/src/features/user/review/components/ReviewList.tsx
+@@ -6,6 +6,7 @@ import { CourseReview } from '../types';
+ import { StarRating } from './ReviewSummary';
+ import TwoButtonModal from '@/components/modals/TwoButtonModal';
+ import { useToast } from '@/components/ui/ToastContext';
++import { useMaintenance } from '@/components/system/MaintenanceProvider';
+ import { logoutAction } from '@/features/auth/actions';
+ import { deleteReviewAction, reportReviewAction } from '../actions';
+ import ReportModal, { ReportCategoryOption } from '@/components/modals/ReportModal';
+@@ -37,6 +38,7 @@ export default function ReviewList({
+ }: ReviewListProps) {
+   const router = useRouter();
+   const { showToast } = useToast();
++  const { setMaintenance } = useMaintenance();
+   const [sort, setSort] = useState<SortType>('최신순');
+   const [currentPage, setCurrentPage] = useState(1);
+   const [deleteTarget, setDeleteTarget] = useState<CourseReview | null>(null);
+@@ -92,6 +94,8 @@ export default function ReviewList({
+       showToast(result.message, 'alarm');
+       await logoutAction();
+       return;
++    } else if (result.maintenance) {
++      setMaintenance(true, result.message);
+     } else {
+       showToast(result.message, 'negative');
+     }
+@@ -111,6 +115,8 @@ export default function ReviewList({
+       showToast(result.message, 'alarm');
+       await logoutAction();
+       return;
++    } else if (result.maintenance) {
++      setMaintenance(true, result.message);
+     } else {
+       showToast(result.message, 'negative');
+     }
+diff --git a/src/proxy.ts b/src/proxy.ts
+index 85756e7..5ce4f52 100644
+--- a/src/proxy.ts
++++ b/src/proxy.ts
+@@ -1,4 +1,5 @@
+-import { NextRequest, NextResponse } from 'next/server';
++import { NextRequest, NextResponse, NextFetchEvent } from 'next/server';
++import { MAINTENANCE_EXCLUDED_PATHS } from '@/lib/maintenance-excluded-paths';
+ 
+ const PROTECTED_PREFIXES = [
+   '/mycourses-student',
+@@ -10,9 +11,6 @@ const PROTECTED_PREFIXES = [
+   '/cart',
+ ];
+ 
+-// 로그인 페이지 자체와 점검 안내 페이지는 점검모드 리다이렉트 대상에서 제외
+-const MAINTENANCE_EXCLUDED_PATHS = ['/maintenance', '/auth/login'];
+-
+ // prefix가 실제 경로 세그먼트 경계에서 끝나는지까지 확인한다.
+ function matchesPath(pathname: string, prefix: string): boolean {
+   return pathname === prefix || pathname.startsWith(`${prefix}/`);
+@@ -27,6 +25,10 @@ const MAINTENANCE_CACHE_TTL_MS = 5000; // 백엔드 Cache-Control max-age와 맞
+ const MAINTENANCE_CHECK_TIMEOUT_MS = 1500; // 이 요청은 거의 모든 경로에서 매번 걸리므로 짧게 끊어야 함
+ const MAINTENANCE_RETRY_DELAY_MS = 400; // 순간적인 지연과 완전한 다운을 구분하기 위한 재시도 전 대기
+ 
++// 캐시 갱신 도중 동시에 들어온 요청들이 각자 새로 조회하지 않고 진행 중인 갱신을 같이 기다리게 한다.
++// (thundering herd 방지 - 캐시 만료 순간 몰린 요청 수만큼 백엔드에 중복 조회가 나가는 것을 막음)
++let refreshInFlight: Promise<void> | null = null;
++
+ async function fetchMaintenanceStatus(): Promise<{ enabled: boolean; message: string }> {
+   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/maintenance/status`, {
+     signal: AbortSignal.timeout(MAINTENANCE_CHECK_TIMEOUT_MS),
+@@ -36,13 +38,11 @@ async function fetchMaintenanceStatus(): Promise<{ enabled: boolean; message: st
+   return { enabled: data.enabled, message: data.message };
+ }
+ 
+-async function checkMaintenance(): Promise<{ enabled: boolean; message: string }> {
+-  const now = Date.now();
+-  if (now - maintenanceCache.checkedAt < MAINTENANCE_CACHE_TTL_MS) return maintenanceCache;
+-
++// 캐시를 실제로 새로 고치는 로직 (기존 재시도 흐름과 동일)
++async function refreshMaintenanceCache(now: number): Promise<void> {
+   try {
+     maintenanceCache = { checkedAt: now, ...(await fetchMaintenanceStatus()) };
+-    return maintenanceCache;
++    return;
+   } catch {
+     // 1차 실패 - 네트워크 순간 지연일 수 있으니 짧게 대기 후 한 번 더 시도
+   }
+@@ -59,7 +59,34 @@ async function checkMaintenance(): Promise<{ enabled: boolean; message: string }
+       message: '서버 점검 또는 일시적인 장애로 서비스 이용이 어렵습니다. 잠시 후 다시 시도해주세요.',
+     };
+   }
++}
++
++// 갱신을 중복 없이 한 번만 트리거하고, 동시에 들어온 다른 요청들은 그 Promise를 재사용한다.
++function triggerRefresh(now: number): Promise<void> {
++  if (!refreshInFlight) {
++    refreshInFlight = refreshMaintenanceCache(now).finally(() => {
++      refreshInFlight = null;
++    });
++  }
++  return refreshInFlight;
++}
++
++async function checkMaintenance(
++  event: NextFetchEvent,
++): Promise<{ enabled: boolean; message: string }> {
++  const now = Date.now();
++  if (now - maintenanceCache.checkedAt < MAINTENANCE_CACHE_TTL_MS) return maintenanceCache;
++
++  // 캐시가 한 번도 채워진 적 없는 최초 요청(서버 기동 직후)만 갱신을 기다린다.
++  if (maintenanceCache.checkedAt === 0) {
++    await triggerRefresh(now);
++    return maintenanceCache;
++  }
+ 
++  // 그 외에는 오래된(stale) 값을 즉시 반환해 이번 요청의 지연을 없애고,
++  // 갱신은 응답을 막지 않는 백그라운드에서 진행한다. waitUntil로 넘겨서
++  // 응답이 나간 뒤에도 (배포 환경의 Edge/서버리스 런타임에서도) 끝까지 실행되도록 보장한다.
++  event.waitUntil(triggerRefresh(now));
+   return maintenanceCache;
+ }
+ 
+@@ -78,7 +105,7 @@ async function verifyRole(accessToken: string): Promise<string | null> {
+   }
+ }
+ 
+-export async function proxy(request: NextRequest) {
++export async function proxy(request: NextRequest, event: NextFetchEvent) {
+   const { pathname, search } = request.nextUrl;
+   const accessToken = request.cookies.get('accessToken')?.value;
+ 
+@@ -95,7 +122,7 @@ export async function proxy(request: NextRequest) {
+   // 1) 점검모드 체크 — 전체 경로 대상, 예외 경로·API 라우트는 건너뜀
+   const isApiPath = matchesPath(pathname, '/api');
+   if (!isApiPath && !MAINTENANCE_EXCLUDED_PATHS.includes(pathname)) {
+-    const { enabled } = await checkMaintenance();
++    const { enabled } = await checkMaintenance(event);
+     if (enabled) {
+       const role = await getVerifiedRole();
+       if (role !== 'ADMIN') {
+diff --git a/src/services/admin-coursemanage.service.ts b/src/services/admin-coursemanage.service.ts
+index 0afbda6..1886427 100644
+--- a/src/services/admin-coursemanage.service.ts
++++ b/src/services/admin-coursemanage.service.ts
+@@ -75,6 +75,9 @@ export async function fetchCourseRejectReasons(
+   });
+ 
+   if (!res.ok) {
++    const authMessage = await handleAuthErrorResponse(res);
++    if (authMessage) throw new AuthSessionError(authMessage);
++
+     const errorBody = await res.text().catch(() => '');
+     console.error(`[fetchCourseRejectReasons] status=${res.status} body=${errorBody}`);
+     throw new Error('반려 사유 카테고리를 불러오지 못했습니다.');
+diff --git a/src/services/cart.service.ts b/src/services/cart.service.ts
+index c6ab24f..8ae6699 100644
+--- a/src/services/cart.service.ts
++++ b/src/services/cart.service.ts
+@@ -2,6 +2,7 @@
+ import { CartResponse } from '@/features/user/cart/types';
+ import { parseMaintenanceMessage, MaintenanceError } from '@/services/maintenance.service';
+ import { handleAuthErrorResponse } from '@/features/auth/auth-error';
++import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
+ import { AuthSessionError } from '@/features/auth/errors';
+ 
+ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+@@ -28,7 +29,9 @@ export async function fetchCart(accessToken: string): Promise<CartResponse> {
+   });
+ 
+   if (!response.ok) {
+-    const authMessage = await handleAuthErrorResponse(response);
++    // fetchCart는 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
++    // 순수 파싱 버전으로 메시지만 확인하고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
++    const authMessage = await parseAuthErrorMessage(response);
+     if (authMessage) throw new AuthSessionError(authMessage);
+ 
+     console.log('fetchCart status:', response.status);
+@@ -92,6 +95,9 @@ export async function deleteCartItems(accessToken: string, cartItemIds: number[]
+     const authMessage = await handleAuthErrorResponse(response);
+     if (authMessage) throw new AuthSessionError(authMessage);
+ 
++    const maintenanceMessage = await parseMaintenanceMessage(response);
++    if (maintenanceMessage) throw new MaintenanceError(maintenanceMessage);
++
+     throw new Error('장바구니 삭제에 실패했습니다.');
+   }
+ }
+diff --git a/src/services/coffee-chat.service.ts b/src/services/coffee-chat.service.ts
+index 355ca6b..ef3f22e 100644
+--- a/src/services/coffee-chat.service.ts
++++ b/src/services/coffee-chat.service.ts
+@@ -4,6 +4,8 @@ import {
+   StudentChatRoom,
+ } from '@/features/user/coffee-chat/types';
+ import { handleAuthErrorResponse } from '@/features/auth/auth-error';
++import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
++import { AuthSessionError } from '@/features/auth/errors';
+ 
+ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+ 
+@@ -20,12 +22,16 @@ export async function fetchStudentChatRooms(accessToken: string): Promise<Studen
+     });
+ 
+     if (!res.ok) {
+-      await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
++      // 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
++      // 순수 파싱 버전으로 던지고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
++      const authMessage = await parseAuthErrorMessage(res);
++      if (authMessage) throw new AuthSessionError(authMessage);
+       return [];
+     }
+ 
+     return await res.json();
+-  } catch {
++  } catch (e) {
++    if (e instanceof AuthSessionError) throw e;
+     return [];
+   }
+ }
+@@ -45,12 +51,14 @@ export async function fetchInstructorPendingChats(
+     });
+ 
+     if (!res.ok) {
+-      await handleAuthErrorResponse(res);
++      const authMessage = await parseAuthErrorMessage(res);
++      if (authMessage) throw new AuthSessionError(authMessage);
+       return [];
+     }
+ 
+     return await res.json();
+-  } catch {
++  } catch (e) {
++    if (e instanceof AuthSessionError) throw e;
+     return [];
+   }
+ }
+@@ -70,12 +78,14 @@ export async function fetchInstructorActiveChats(
+     });
+ 
+     if (!res.ok) {
+-      await handleAuthErrorResponse(res);
++      const authMessage = await parseAuthErrorMessage(res);
++      if (authMessage) throw new AuthSessionError(authMessage);
+       return [];
+     }
+ 
+     return await res.json();
+-  } catch {
++  } catch (e) {
++    if (e instanceof AuthSessionError) throw e;
+     return [];
+   }
+ }
+diff --git a/src/services/credit.service.ts b/src/services/credit.service.ts
+index 6756b67..01bfb63 100644
+--- a/src/services/credit.service.ts
++++ b/src/services/credit.service.ts
+@@ -8,6 +8,7 @@ import {
+ import { CreditChargeHistoryResponse } from '@/features/mypage/types';
+ import { parseMaintenanceMessage, MaintenanceError } from '@/services/maintenance.service';
+ import { handleAuthErrorResponse } from '@/features/auth/auth-error';
++import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
+ import { AuthSessionError } from '@/features/auth/errors';
+ 
+ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+@@ -20,7 +21,9 @@ export async function fetchCreditBalance(accessToken: string): Promise<CreditBal
+   });
+ 
+   if (!res.ok) {
+-    const authMessage = await handleAuthErrorResponse(res);
++    // fetchCreditBalance는 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
++    // 순수 파싱 버전으로 메시지만 확인하고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
++    const authMessage = await parseAuthErrorMessage(res);
+     if (authMessage) throw new AuthSessionError(authMessage);
+ 
+     const errorBody = await res.json().catch(() => ({}));
+@@ -48,6 +51,9 @@ export async function readyCreditCharge(
+     const authMessage = await handleAuthErrorResponse(res);
+     if (authMessage) throw new AuthSessionError(authMessage);
+ 
++    const maintenanceMessage = await parseMaintenanceMessage(res);
++    if (maintenanceMessage) throw new MaintenanceError(maintenanceMessage);
++
+     const errorBody = await res.json().catch(() => ({}));
+     throw new Error(errorBody.message || '충전 준비에 실패했습니다.');
+   }
+@@ -97,7 +103,10 @@ export async function fetchCreditChargeHistory(
+   });
+ 
+   if (!res.ok) {
+-    await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
++    // fetchCreditChargeHistory는 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
++    // 순수 파싱 버전으로 메시지만 확인하고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
++    const authMessage = await parseAuthErrorMessage(res);
++    if (authMessage) throw new AuthSessionError(authMessage);
+ 
+     const errorBody = await res.text().catch(() => '');
+     console.error(`[fetchCreditChargeHistory] status=${res.status} body=${errorBody}`);
+diff --git a/src/services/instructor-application.service.ts b/src/services/instructor-application.service.ts
+index cb50ae3..d698fcd 100644
+--- a/src/services/instructor-application.service.ts
++++ b/src/services/instructor-application.service.ts
+@@ -1,5 +1,6 @@
+ import { MyInstructorApplication, MyInstructorApplicationDetail } from '@/features/mypage/types';
+-import { handleAuthErrorResponse } from '@/features/auth/auth-error';
++import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
++import { AuthSessionError } from '@/features/auth/errors';
+ 
+ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+ 
+@@ -15,11 +16,15 @@ export async function fetchMyInstructorApplications(
+     });
+ 
+     if (!res.ok) {
+-      await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
++      // 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
++      // 순수 파싱 버전으로 던지고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
++      const authMessage = await parseAuthErrorMessage(res);
++      if (authMessage) throw new AuthSessionError(authMessage);
+       return [];
+     }
+     return res.json();
+-  } catch {
++  } catch (e) {
++    if (e instanceof AuthSessionError) throw e;
+     return [];
+   }
+ }
+@@ -40,11 +45,13 @@ export async function fetchMyInstructorApplicationDetail(
+     );
+ 
+     if (!res.ok) {
+-      await handleAuthErrorResponse(res);
++      const authMessage = await parseAuthErrorMessage(res);
++      if (authMessage) throw new AuthSessionError(authMessage);
+       return null;
+     }
+     return res.json();
+-  } catch {
++  } catch (e) {
++    if (e instanceof AuthSessionError) throw e;
+     return null;
+   }
+ }
+diff --git a/src/services/instructor.service.ts b/src/services/instructor.service.ts
+index 0550e7f..a6d0532 100644
+--- a/src/services/instructor.service.ts
++++ b/src/services/instructor.service.ts
+@@ -9,6 +9,8 @@ import {
+ } from '@/features/user/mycourses-instructor/types';
+ import { InstructorProfile } from '@/features/mypage/types';
+ import { handleAuthErrorResponse } from '@/features/auth/auth-error';
++import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
++import { AuthSessionError } from '@/features/auth/errors';
+ 
+ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+ 
+@@ -24,11 +26,15 @@ export async function fetchInstructorProfile(
+     });
+ 
+     if (!res.ok) {
+-      await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
++      // 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
++      // 순수 파싱 버전으로 던지고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
++      const authMessage = await parseAuthErrorMessage(res);
++      if (authMessage) throw new AuthSessionError(authMessage);
+       return null;
+     }
+     return res.json();
+-  } catch {
++  } catch (e) {
++    if (e instanceof AuthSessionError) throw e;
+     return null;
+   }
+ }
+@@ -57,7 +63,8 @@ export async function fetchApprovedCourses(
+     });
+ 
+     if (!response.ok) {
+-      await handleAuthErrorResponse(response);
++      const authMessage = await parseAuthErrorMessage(response);
++      if (authMessage) throw new AuthSessionError(authMessage);
+       const errorBody = await response.text();
+       return [];
+     }
+@@ -65,6 +72,7 @@ export async function fetchApprovedCourses(
+     const result = await response.json();
+     return Array.isArray(result) ? result : (result.data ?? []);
+   } catch (e) {
++    if (e instanceof AuthSessionError) throw e;
+     console.error('fetchApprovedCourses fetch error:', e);
+     return [];
+   }
+@@ -84,11 +92,13 @@ export async function fetchInProgressCourses(
+       cache: 'no-store',
+     });
+     if (!res.ok) {
+-      await handleAuthErrorResponse(res);
++      const authMessage = await parseAuthErrorMessage(res);
++      if (authMessage) throw new AuthSessionError(authMessage);
+       return [];
+     }
+     return res.json();
+-  } catch {
++  } catch (e) {
++    if (e instanceof AuthSessionError) throw e;
+     return [];
+   }
+ }
+@@ -110,7 +120,8 @@ export async function fetchCourseDetail(
+     });
+ 
+     if (!res.ok) {
+-      await handleAuthErrorResponse(res);
++      const authMessage = await parseAuthErrorMessage(res);
++      if (authMessage) throw new AuthSessionError(authMessage);
+       const errorBody = await res.text().catch(() => '');
+       console.error(`[fetchCourseDetail] status=${res.status} body=${errorBody}`);
+       return null;
+@@ -118,6 +129,7 @@ export async function fetchCourseDetail(
+ 
+     return res.json();
+   } catch (e) {
++    if (e instanceof AuthSessionError) throw e;
+     console.error('[fetchCourseDetail] fetch error:', e);
+     return null;
+   }
+@@ -139,13 +151,15 @@ export async function fetchClosedCourses(
+     });
+ 
+     if (!response.ok) {
+-      await handleAuthErrorResponse(response);
++      const authMessage = await parseAuthErrorMessage(response);
++      if (authMessage) throw new AuthSessionError(authMessage);
+       return [];
+     }
+ 
+     const result = await response.json();
+     return Array.isArray(result) ? result : (result.data ?? []);
+-  } catch {
++  } catch (e) {
++    if (e instanceof AuthSessionError) throw e;
+     return [];
+   }
+ }
+diff --git a/src/services/payment.service.ts b/src/services/payment.service.ts
+index 23117b7..3c88cc0 100644
+--- a/src/services/payment.service.ts
++++ b/src/services/payment.service.ts
+@@ -5,6 +5,7 @@ import {
+   SubscriptionMeResponse,
+ } from '@/features//mypage/types';
+ import { handleAuthErrorResponse } from '@/features/auth/auth-error';
++import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
+ import { AuthSessionError } from '@/features/auth/errors';
+ 
+ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+@@ -19,7 +20,10 @@ export async function fetchCoursePaymentHistory(
+   });
+ 
+   if (!res.ok) {
+-    await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
++    // fetchCoursePaymentHistory는 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
++    // 순수 파싱 버전으로 던지고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
++    const authMessage = await parseAuthErrorMessage(res);
++    if (authMessage) throw new AuthSessionError(authMessage);
+ 
+     const errorBody = await res.text().catch(() => '');
+     console.error(`[fetchCoursePaymentHistory] status=${res.status} body=${errorBody}`);
+@@ -42,7 +46,8 @@ export async function fetchSubscriptionPaymentHistory(
+   });
+ 
+   if (!res.ok) {
+-    await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
++    const authMessage = await parseAuthErrorMessage(res);
++    if (authMessage) throw new AuthSessionError(authMessage);
+ 
+     const errorBody = await res.text().catch(() => '');
+     console.error(`[fetchSubscriptionPaymentHistory] status=${res.status} body=${errorBody}`);
+@@ -62,7 +67,8 @@ export async function fetchSubscriptionMe(
+   });
+ 
+   if (!res.ok) {
+-    await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
++    const authMessage = await parseAuthErrorMessage(res);
++    if (authMessage) throw new AuthSessionError(authMessage);
+ 
+     const errorBody = await res.text().catch(() => '');
+     console.error(`[fetchSubscriptionMe] status=${res.status} body=${errorBody}`);
+diff --git a/src/services/recommendation.service.ts b/src/services/recommendation.service.ts
+index c358589..b32a890 100644
+--- a/src/services/recommendation.service.ts
++++ b/src/services/recommendation.service.ts
+@@ -69,7 +69,10 @@ export async function fetchJobPostingRecommendation(
+       cache: 'no-store',
+     });
+ 
+-    if (!res.ok) return null;
++    if (!res.ok) {
++      await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
++      return null;
++    }
+     return res.json();
+   } catch {
+     return null;
+diff --git a/src/services/resume.service.ts b/src/services/resume.service.ts
+index 178fbcb..c54bfc6 100644
+--- a/src/services/resume.service.ts
++++ b/src/services/resume.service.ts
+@@ -7,6 +7,8 @@ import {
+   LatestAiReviewResponse,
+ } from '@/features/user/resume/types';
+ import { handleAuthErrorResponse } from '@/features/auth/auth-error';
++import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
++import { AuthSessionError } from '@/features/auth/errors';
+ import { parseMaintenanceMessage } from '@/services/maintenance.service';
+ 
+ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+@@ -96,11 +98,18 @@ export async function fetchMyResume(accessToken: string): Promise<SavedResume |
+       cache: 'no-store',
+     });
+ 
+-    if (!res.ok) return null;
++    if (!res.ok) {
++      // 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
++      // 순수 파싱 버전으로 던지고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
++      const authMessage = await parseAuthErrorMessage(res);
++      if (authMessage) throw new AuthSessionError(authMessage);
++      return null;
++    }
+ 
+     const data: SavedResume = await res.json();
+     return data;
+-  } catch {
++  } catch (e) {
++    if (e instanceof AuthSessionError) throw e;
+     return null;
+   }
+ }
+@@ -163,11 +172,16 @@ export async function fetchLatestAiReview(
+       cache: 'no-store',
+     });
+ 
+-    if (!res.ok) return null;
++    if (!res.ok) {
++      const authMessage = await parseAuthErrorMessage(res);
++      if (authMessage) throw new AuthSessionError(authMessage);
++      return null;
++    }
+ 
+     const data: LatestAiReviewResponse = await res.json();
+     return data.review;
+-  } catch {
++  } catch (e) {
++    if (e instanceof AuthSessionError) throw e;
+     return null;
+   }
+ }
+diff --git a/src/services/review.service.ts b/src/services/review.service.ts
+index d31e9e2..d198406 100644
+--- a/src/services/review.service.ts
++++ b/src/services/review.service.ts
+@@ -98,6 +98,9 @@ export async function deleteReview(
+     const authMessage = await handleAuthErrorResponse(res);
+     if (authMessage) throw new ReviewApiError(authMessage, res.status, true);
+ 
++    const maintenanceMessage = await parseMaintenanceMessage(res);
++    if (maintenanceMessage) throw new MaintenanceError(maintenanceMessage);
++
+     const message = await parseErrorMessage(res, '리뷰 삭제에 실패했습니다.');
+     throw new ReviewApiError(message, res.status);
+   }
+@@ -123,6 +126,9 @@ export async function reportReview(
+     const authMessage = await handleAuthErrorResponse(res);
+     if (authMessage) throw new ReviewApiError(authMessage, res.status, true);
+ 
++    const maintenanceMessage = await parseMaintenanceMessage(res);
++    if (maintenanceMessage) throw new MaintenanceError(maintenanceMessage);
++
+     let message = '신고 처리에 실패했습니다.';
+     if (res.status === 403) message = '본인이 작성한 수강평은 신고할 수 없습니다.';
+     else if (res.status === 404) message = '수강평을 찾을 수 없습니다.';
+diff --git a/src/services/self-introduction.service.ts b/src/services/self-introduction.service.ts
+index cd0934f..d8c1eb8 100644
+--- a/src/services/self-introduction.service.ts
++++ b/src/services/self-introduction.service.ts
+@@ -8,6 +8,8 @@ import {
+   LatestCoverLetterReviewResponse,
+ } from '@/features/user/self-introduction/types';
+ import { handleAuthErrorResponse } from '@/features/auth/auth-error';
++import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
++import { AuthSessionError } from '@/features/auth/errors';
+ 
+ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+ 
+@@ -23,10 +25,17 @@ export async function fetchMyCoverLetter(accessToken: string): Promise<CoverLett
+       cache: 'no-store',
+     });
+ 
+-    if (!res.ok) return null;
++    if (!res.ok) {
++      // 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
++      // 순수 파싱 버전으로 던지고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
++      const authMessage = await parseAuthErrorMessage(res);
++      if (authMessage) throw new AuthSessionError(authMessage);
++      return null;
++    }
+ 
+     return await res.json();
+-  } catch {
++  } catch (e) {
++    if (e instanceof AuthSessionError) throw e;
+     return null;
+   }
+ }
+@@ -119,16 +128,23 @@ export async function fetchLatestCoverLetterReview(
+       cache: 'no-store',
+     });
+ 
+-    if (!res.ok) return null;
++    if (!res.ok) {
++      const authMessage = await parseAuthErrorMessage(res);
++      if (authMessage) throw new AuthSessionError(authMessage);
++      return null;
++    }
+ 
+     const data: LatestCoverLetterReviewResponse = await res.json();
+     return data.review;
+-  } catch {
++  } catch (e) {
++    if (e instanceof AuthSessionError) throw e;
+     return null;
+   }
+ }
+ 
+ // 자기소개서 AI 첨삭 상세 결과 조회 (문항별 맞춤법 수정/피드백/개선 예시)
++// 클라이언트 컴포넌트에서 클릭 트리거로 호출되므로(진짜 Server Action 컨텍스트) 쿠키 정리까지 안전하게 수행 가능.
++// 단, 소비처(SelfIntroReviewDetail.tsx)가 별도 에러 처리를 안 하므로 throw는 하지 않고 조용히 정리만 한다.
+ export async function fetchCoverLetterReviewById(
+   accessToken: string,
+   reviewId: number,
+@@ -143,7 +159,10 @@ export async function fetchCoverLetterReviewById(
+       cache: 'no-store',
+     });
+ 
+-    if (!res.ok) return null;
++    if (!res.ok) {
++      await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
++      return null;
++    }
+ 
+     return await res.json();
+   } catch {

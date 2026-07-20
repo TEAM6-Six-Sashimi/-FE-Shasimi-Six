@@ -5,6 +5,7 @@ import {
   SubscriptionMeResponse,
 } from '@/features//mypage/types';
 import { handleAuthErrorResponse } from '@/features/auth/auth-error';
+import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
 import { AuthSessionError } from '@/features/auth/errors';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -19,7 +20,10 @@ export async function fetchCoursePaymentHistory(
   });
 
   if (!res.ok) {
-    await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
+    // fetchCoursePaymentHistory는 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
+    // 순수 파싱 버전으로 던지고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
+    const authMessage = await parseAuthErrorMessage(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
 
     const errorBody = await res.text().catch(() => '');
     console.error(`[fetchCoursePaymentHistory] status=${res.status} body=${errorBody}`);
@@ -42,7 +46,8 @@ export async function fetchSubscriptionPaymentHistory(
   });
 
   if (!res.ok) {
-    await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
+    const authMessage = await parseAuthErrorMessage(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
 
     const errorBody = await res.text().catch(() => '');
     console.error(`[fetchSubscriptionPaymentHistory] status=${res.status} body=${errorBody}`);
@@ -62,7 +67,8 @@ export async function fetchSubscriptionMe(
   });
 
   if (!res.ok) {
-    await handleAuthErrorResponse(res); // 동시 접속 등으로 세션이 끊긴 경우 쿠키 정리
+    const authMessage = await parseAuthErrorMessage(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
 
     const errorBody = await res.text().catch(() => '');
     console.error(`[fetchSubscriptionMe] status=${res.status} body=${errorBody}`);

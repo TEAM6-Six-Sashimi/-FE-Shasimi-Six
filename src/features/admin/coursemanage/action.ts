@@ -1,13 +1,13 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { CreateCategoryRequest, RejectReasonCategory } from './type';
+import { CreateCategoryRequest } from './type';
 import {
   approveCourse,
   fetchCourseRejectReasons,
   rejectCourse,
 } from '@/services/admin-coursemanage.service';
-import { AuthSessionError } from '@/features/auth/auth-error';
+import { AuthSessionError, toActionResult } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -32,11 +32,12 @@ export async function approveCourseAction(courseId: number): Promise<CourseAppro
   }
 }
 
-export async function fetchCourseRejectReasonsAction(): Promise<RejectReasonCategory[]> {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value ?? '';
-
-  return fetchCourseRejectReasons(accessToken);
+export async function fetchCourseRejectReasonsAction() {
+  return toActionResult(async () => {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value ?? '';
+    return fetchCourseRejectReasons(accessToken);
+  });
 }
 
 export async function rejectCourseAction(

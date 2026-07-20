@@ -7,6 +7,8 @@ import { PaymentSummary, OrderLineItem } from '@/features/user/payments/types';
 import { fetchCategories } from '@/services/categories.service';
 import { fetchCreditBalance } from '@/services/credit.service';
 import { Category } from '@/features/categories/types';
+import { AuthSessionError } from '@/features/auth/errors';
+import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 interface PaymentPageProps {
   searchParams: Promise<{
@@ -93,6 +95,9 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
 
     if (creditsResult.status === 'fulfilled') {
       ownedCredits = creditsResult.value.balance ?? 0;
+    } else if (creditsResult.reason instanceof AuthSessionError) {
+      // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 결제 페이지 대신 로그아웃 처리
+      return <SessionExpiredRedirect message={creditsResult.reason.message} />;
     } else {
       console.error('크레딧 조회 실패:', creditsResult.reason);
     }

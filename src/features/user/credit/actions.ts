@@ -11,7 +11,7 @@ export async function readyCreditChargeAction(
   amount: number,
 ): Promise<
   | { success: true; data: CreditReadyResponse }
-  | { success: false; authError?: true; message: string }
+  | { success: false; authError?: true; maintenance?: true; message: string }
 > {
   try {
     const cookieStore = await cookies();
@@ -26,6 +26,9 @@ export async function readyCreditChargeAction(
   } catch (error) {
     if (error instanceof AuthSessionError) {
       return { success: false, authError: true, message: error.message };
+    }
+    if (error instanceof MaintenanceError) {
+      return { success: false, maintenance: true, message: error.message };
     }
     return {
       success: false,

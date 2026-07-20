@@ -3,6 +3,8 @@ import { fetchUserMe } from '@/services/user.service';
 import { fetchMyInstructorApplications } from '@/services/instructor-application.service';
 import { fetchCategories } from '@/services/categories.service';
 import InstructorApplicationHistoryTable from '@/features/mypage/components/instructor-apply-history/InstructorApplicationHistoryTable';
+import { AuthSessionError } from '@/features/auth/errors';
+import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 
 export default async function InstructorApplicationListPage() {
@@ -18,10 +20,20 @@ export default async function InstructorApplicationListPage() {
   }
 
   const user = await fetchUserMe(accessToken);
-  const [applications, categories] = await Promise.all([
-    fetchMyInstructorApplications(user.id, accessToken),
-    fetchCategories(),
-  ]);
+
+  let applications, categories;
+  try {
+    [applications, categories] = await Promise.all([
+      fetchMyInstructorApplications(user.id, accessToken),
+      fetchCategories(),
+    ]);
+  } catch (e) {
+    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
+    if (e instanceof AuthSessionError) {
+      return <SessionExpiredRedirect message={e.message} />;
+    }
+    throw e;
+  }
 
    return (
       <div className="max-w-5xl mx-auto">

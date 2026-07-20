@@ -2,6 +2,7 @@
 import { CartResponse } from '@/features/user/cart/types';
 import { parseMaintenanceMessage, MaintenanceError } from '@/services/maintenance.service';
 import { handleAuthErrorResponse } from '@/features/auth/auth-error';
+import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
 import { AuthSessionError } from '@/features/auth/errors';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -28,7 +29,9 @@ export async function fetchCart(accessToken: string): Promise<CartResponse> {
   });
 
   if (!response.ok) {
-    const authMessage = await handleAuthErrorResponse(response);
+    // fetchCart는 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
+    // 순수 파싱 버전으로 메시지만 확인하고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
+    const authMessage = await parseAuthErrorMessage(response);
     if (authMessage) throw new AuthSessionError(authMessage);
 
     console.log('fetchCart status:', response.status);
@@ -91,6 +94,9 @@ export async function deleteCartItems(accessToken: string, cartItemIds: number[]
   if (!response.ok) {
     const authMessage = await handleAuthErrorResponse(response);
     if (authMessage) throw new AuthSessionError(authMessage);
+
+    const maintenanceMessage = await parseMaintenanceMessage(response);
+    if (maintenanceMessage) throw new MaintenanceError(maintenanceMessage);
 
     throw new Error('장바구니 삭제에 실패했습니다.');
   }

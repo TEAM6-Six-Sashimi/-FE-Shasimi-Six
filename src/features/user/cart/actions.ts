@@ -33,11 +33,31 @@ export async function addCartItemAction(
 }
 
 // 장바구니 아이템 삭제
-export async function deleteCartItemsAction(cartItemIds: number[]): Promise<void> {
+export type DeleteCartItemsResult =
+  | { success: true }
+  | { success: false; authError?: true; maintenance?: true; message: string };
+
+export async function deleteCartItemsAction(
+  cartItemIds: number[],
+): Promise<DeleteCartItemsResult> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  if (!accessToken) throw new Error('로그인이 필요합니다.');
+  if (!accessToken) return { success: false, message: '로그인이 필요합니다.' };
 
-  return deleteCartItems(accessToken, cartItemIds);
+  try {
+    await deleteCartItems(accessToken, cartItemIds);
+    return { success: true };
+  } catch (error) {
+    if (error instanceof AuthSessionError) {
+      return { success: false, authError: true, message: error.message };
+    }
+    if (error instanceof MaintenanceError) {
+      return { success: false, maintenance: true, message: error.message };
+    }
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : '장바구니 삭제에 실패했습니다.',
+    };
+  }
 }

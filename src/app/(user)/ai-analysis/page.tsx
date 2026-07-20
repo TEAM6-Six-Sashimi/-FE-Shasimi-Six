@@ -9,6 +9,8 @@ import {
 import { fetchLatestAiReviewAction } from '@/features/user/resume/actions';
 import { fetchMySubscriptionAction } from '@/features/user/payments/actions';
 import AiAnalysisPageClient from '@/features/user/ai-analysis/components/AiAnalysisPageClient';
+import { AuthSessionError } from '@/features/auth/errors';
+import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 export const metadata: Metadata = {
   title: 'AI 이력서, 자기소개서 작성 & 평가',
@@ -35,16 +37,24 @@ export default async function AiAnalysisPage() {
     }
   }
 
-  const [savedResume, savedCoverLetter, latestCoverLetterReview, mySubscription] =
-    await Promise.all([
+  let savedResume, savedCoverLetter, latestCoverLetterReview, mySubscription, latestAiReview;
+  try {
+    [savedResume, savedCoverLetter, latestCoverLetterReview, mySubscription] = await Promise.all([
       isLoggedIn ? fetchMyResume(accessToken!) : Promise.resolve(null),
       isLoggedIn ? fetchMyCoverLetterAction() : Promise.resolve(null),
       isLoggedIn ? fetchLatestCoverLetterReviewAction() : Promise.resolve(null),
       fetchMySubscriptionAction(),
     ]);
 
-  const latestAiReview =
-    isLoggedIn && savedResume ? await fetchLatestAiReviewAction(savedResume.resumeId) : null;
+    latestAiReview =
+      isLoggedIn && savedResume ? await fetchLatestAiReviewAction(savedResume.resumeId) : null;
+  } catch (e) {
+    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
+    if (e instanceof AuthSessionError) {
+      return <SessionExpiredRedirect message={e.message} />;
+    }
+    throw e;
+  }
 
   return (
     <AiAnalysisPageClient

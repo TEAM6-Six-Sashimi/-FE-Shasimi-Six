@@ -1,4 +1,5 @@
 import { AuthErrorCode, AuthErrorResponseBody } from './types';
+import { AuthSessionError } from './errors';
 
 // AUTH_008(다른 기기 로그인)은 백엔드가 내려주는 문구를 그대로 쓰고,
 // 나머지는 사용자에게 원인을 정확히 설명하기보다 다음 행동(재로그인)을 안내하는 문구로 고정한다.
@@ -29,4 +30,13 @@ export async function parseAuthErrorMessage(res: Response): Promise<string | nul
     return body?.message ?? '다른 기기에서 로그인되어 자동 로그아웃 되었습니다.';
   }
   return AUTH_ERROR_MESSAGES[code as Exclude<AuthErrorCode, 'AUTH_008'>] ?? null;
+}
+
+/**
+ * 세션이 완전히 죽은 상태(AUTH_00X)면 AuthSessionError를 던지고, 그 외 실패는 그냥 통과시킨다.
+ * 서비스 함수마다 반복되던 "parseAuthErrorMessage + throw" 2줄을 한 곳에 모은 것.
+ */
+export async function throwIfAuthSessionError(res: Response): Promise<void> {
+  const authMessage = await parseAuthErrorMessage(res);
+  if (authMessage) throw new AuthSessionError(authMessage);
 }

@@ -2,6 +2,8 @@ import { cookies } from 'next/headers';
 import { fetchUserMe } from '@/services/user.service';
 import { fetchInstructorProfile } from '@/services/instructor.service';
 import InstructorProfileView from '@/features/mypage/components/instructor-profile/InstructorProfileView';
+import { AuthSessionError } from '@/features/auth/errors';
+import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 export default async function InstructorProfilePage() {
   const cookieStore = await cookies();
@@ -16,7 +18,17 @@ export default async function InstructorProfilePage() {
   }
 
   const user = await fetchUserMe(accessToken);
-  const profile = await fetchInstructorProfile(user.id, accessToken);
+
+  let profile;
+  try {
+    profile = await fetchInstructorProfile(user.id, accessToken);
+  } catch (e) {
+    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
+    if (e instanceof AuthSessionError) {
+      return <SessionExpiredRedirect message={e.message} />;
+    }
+    throw e;
+  }
 
   return (
     <div className="max-w-5xl mx-auto">
