@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { getThumbnailUrl } from '@/lib/thumbnail';
 import { fetchChatMessagesAction } from '../../actions';
 import { useChatMessages } from '../../hooks/useChatMessages';
-import { ChatMessage, StudentChatRoom } from '../../types';
+import { ChatMessage, ChatMessageEvent, StudentChatRoom } from '../../types';
 import ChatMessageList from './ChatMessageList';
 import ChatMessageInput from './ChatMessageInput';
 
@@ -15,6 +15,8 @@ interface ChatPanelProps {
   subscribe: (chatId: number, onMessage: (message: ChatMessage) => void) => () => void;
   sendMessage: (chatId: number, content: string) => boolean;
   onBack: () => void;
+  // 사이드바 목록의 최근 메시지 미리보기를 실시간으로 갱신하기 위한 콜백
+  onMessage?: (message: ChatMessageEvent) => void;
 }
 
 export default function ChatPanel({
@@ -24,17 +26,19 @@ export default function ChatPanel({
   subscribe,
   sendMessage,
   onBack,
+  onMessage,
 }: ChatPanelProps) {
   const profileImageUrl = getThumbnailUrl(room.profileImagePath);
 
   const { messages, input, setInput, pendingContent, listEndRef, handleSend } = useChatMessages({
-      chatId: room.chatId,
-      myUserId,
-      fetchMessages: fetchChatMessagesAction,
-      isConnected,
-      subscribe,
-      sendMessage,
-    });
+    chatId: room.chatId,
+    myUserId,
+    fetchMessages: fetchChatMessagesAction,
+    isConnected,
+    subscribe,
+    sendMessage,
+    onMessage,
+  });
 
   return (
     <div className="flex-1 flex flex-col bg-white h-full">
@@ -69,9 +73,7 @@ export default function ChatPanel({
               className="object-cover"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-[#6A7282] text-[7px] text-center px-0.5 leading-tight">
-              프로필 사진 없음
-            </div>
+            <Image src="/chat/basic-profile-gray.svg" alt="" width={18} height={18} />
           )}
         </div>
         <h2 className="text-[15px] font-bold text-[#1E2125]">

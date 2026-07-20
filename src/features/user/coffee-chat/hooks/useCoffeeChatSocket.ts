@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Client, IMessage } from '@stomp/stompjs';
 import { reissueAction, logoutAction } from '@/features/auth/actions';
 import { ChatMessage } from '../types';
@@ -92,7 +92,9 @@ export function useCoffeeChatSocket() {
   }, []);
 
   // 특정 채팅방 구독. 반환값(구독 해제 함수)은 방을 바꾸거나 컴포넌트가 사라질 때 호출할 것.
-  function subscribe(chatId: number, onMessage: (message: ChatMessage) => void) {
+  // clientRef(ref)만 참조하므로 useCallback으로 감싸 렌더마다 재생성되지 않게 한다 -
+  // 이 함수를 쓰는 effect들이 의존성 배열에서 안전하게 뺄 수 있는 이유이기도 하다.
+  const subscribe = useCallback((chatId: number, onMessage: (message: ChatMessage) => void) => {
     const client = clientRef.current;
     if (!client || !client.connected) return () => {};
 
@@ -104,9 +106,9 @@ export function useCoffeeChatSocket() {
     );
 
     return () => subscription.unsubscribe();
-  }
+  }, []);
 
-  function sendMessage(chatId: number, content: string) {
+  const sendMessage = useCallback((chatId: number, content: string) => {
     const client = clientRef.current;
     if (!client || !client.connected) return false;
 
@@ -115,7 +117,7 @@ export function useCoffeeChatSocket() {
       body: JSON.stringify({ content }),
     });
     return true;
-  }
+  }, []);
 
   return { isConnected, subscribe, sendMessage };
 }
