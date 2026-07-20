@@ -62,6 +62,8 @@ export function useCoffeeChatSocket() {
             hasRetriedReissueRef.current = true;
 
             const result = await reissueAction();
+            if (cancelled) return; // 재발급 대기 중 언마운트되면 로그아웃/재연결을 하지 않는다
+
             if (!result.success) {
               await logoutAction();
               return;
