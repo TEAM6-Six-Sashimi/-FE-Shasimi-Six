@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 export type CourseTabKey = 'curriculum' | 'instructor' | 'reviews';
 
@@ -21,8 +22,31 @@ const SECTION_ID: Record<CourseTabKey, string> = {
   reviews: 'course-reviews',
 };
 
+function scrollToSection(key: CourseTabKey) {
+  const target = document.getElementById(SECTION_ID[key]);
+  if (target) {
+    const offset = 80;
+    const top = target.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+}
+
 export default function CourseTabNav() {
-  const [activeTab, setActiveTab] = useState<CourseTabKey>(ALL_TABS[0].key);
+  const searchParams = useSearchParams();
+  const requestedTab = searchParams.get('tab');
+  const initialTab = ALL_TABS.some((tab) => tab.key === requestedTab)
+    ? (requestedTab as CourseTabKey)
+    : ALL_TABS[0].key;
+  const [activeTab, setActiveTab] = useState<CourseTabKey>(initialTab);
+
+  // 다른 페이지에서 ?tab=reviews 같은 쿼리스트링으로 들어온 경우,
+  // 탭을 직접 클릭한 것과 동일하게 해당 섹션으로 스크롤 이동
+  useEffect(() => {
+    if (ALL_TABS.some((tab) => tab.key === requestedTab)) {
+      scrollToSection(requestedTab as CourseTabKey);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 스크롤 위치에 따라 화면에 보이는 섹션을 감지해서 활성 탭 갱신
   useEffect(() => {
@@ -50,12 +74,7 @@ export default function CourseTabNav() {
 
   // 클릭 시 해당 섹션으로 스크롤 이동
   const handleClick = (key: CourseTabKey) => {
-    const target = document.getElementById(SECTION_ID[key]);
-    if (target) {
-      const offset = 80;
-      const top = target.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top, behavior: 'smooth' });
-    }
+    scrollToSection(key);
     setActiveTab(key);
   };
 
