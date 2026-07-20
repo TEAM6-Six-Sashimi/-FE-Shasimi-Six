@@ -12,6 +12,7 @@ import {
 } from '@/services/instructor.service';
 import { fetchUserMeStrict, UserMeAuthError } from '@/services/user.service';
 import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
+import { AuthSessionError } from '@/features/auth/errors';
 import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 type InstructorTab = 'dashboard' | 'approved' | 'pending' | 'private';
@@ -52,22 +53,33 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
   }
   const userId = user ? String(user.id) : '';
 
-  const [approvedCourses, inProgressCourses, closedCourses, categories] =
-    accessToken && userId
-      ? await Promise.all([
-          activeTab === 'approved'
-            ? fetchApprovedCourses(accessToken, userId)
-            : Promise.resolve([]),
+  let approvedCourses, inProgressCourses, closedCourses, categories;
+  try {
+    [approvedCourses, inProgressCourses, closedCourses, categories] =
+      accessToken && userId
+        ? await Promise.all([
+            activeTab === 'approved'
+              ? fetchApprovedCourses(accessToken, userId)
+              : Promise.resolve([]),
 
-          activeTab === 'pending'
-            ? fetchInProgressCourses(accessToken, userId)
-            : Promise.resolve([]),
+            activeTab === 'pending'
+              ? fetchInProgressCourses(accessToken, userId)
+              : Promise.resolve([]),
 
-          activeTab === 'private' ? fetchClosedCourses(accessToken, userId) : Promise.resolve([]),
+            activeTab === 'private'
+              ? fetchClosedCourses(accessToken, userId)
+              : Promise.resolve([]),
 
-          fetchCategories(),
-        ])
-      : [[], [], [], []];
+            fetchCategories(),
+          ])
+        : [[], [], [], []];
+  } catch (error) {
+    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
+    if (error instanceof AuthSessionError) {
+      return <SessionExpiredRedirect message={error.message} />;
+    }
+    throw error;
+  }
 
   return (
     <div className="max-w-275 min-h-[calc(100vh-95px)] container mx-auto px-6 py-8">

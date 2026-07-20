@@ -5,6 +5,8 @@ import {
   fetchSubscriptionMe,
 } from '@/services/payment.service';
 import PaymentHistoryClient from './components/PaymentHistoryClient';
+import { AuthSessionError } from '@/features/auth/errors';
+import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 export default async function PaymentHistoryPage() {
   const cookieStore = await cookies();
@@ -18,11 +20,20 @@ export default async function PaymentHistoryPage() {
     );
   }
 
-  const [coursePayments, subscriptionPayments, subscriptionMe] = await Promise.all([
-    fetchCoursePaymentHistory(accessToken),
-    fetchSubscriptionPaymentHistory(accessToken),
-    fetchSubscriptionMe(accessToken),
-  ]);
+  let coursePayments, subscriptionPayments, subscriptionMe;
+  try {
+    [coursePayments, subscriptionPayments, subscriptionMe] = await Promise.all([
+      fetchCoursePaymentHistory(accessToken),
+      fetchSubscriptionPaymentHistory(accessToken),
+      fetchSubscriptionMe(accessToken),
+    ]);
+  } catch (e) {
+    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
+    if (e instanceof AuthSessionError) {
+      return <SessionExpiredRedirect message={e.message} />;
+    }
+    throw e;
+  }
 
   return (
     <PaymentHistoryClient

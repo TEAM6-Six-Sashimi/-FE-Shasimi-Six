@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers';
 import { fetchCreditBalance } from '@/services/credit.service';
 import CreditClient from '@/features/user/credit/components/CreditClient';
+import { AuthSessionError } from '@/features/auth/errors';
+import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 export default async function CreditPage() {
   const cookieStore = await cookies();
@@ -12,8 +14,12 @@ export default async function CreditPage() {
     try {
       const data = await fetchCreditBalance(accessToken);
       initialCredit = data.balance;
-    } catch {
-      // 조회 실패 시 초기값 0
+    } catch (e) {
+      // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 잔액 0 대신 로그아웃 처리
+      if (e instanceof AuthSessionError) {
+        return <SessionExpiredRedirect message={e.message} />;
+      }
+      // 그 외 실패 시 초기값 0
     }
   }
 

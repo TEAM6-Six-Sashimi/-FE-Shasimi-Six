@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { fetchUserMeStrict, UserMeAuthError } from '@/services/user.service';
 import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
 import { fetchCourseDetail } from '@/services/instructor.service';
+import { AuthSessionError } from '@/features/auth/errors';
 import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 interface PageProps {
@@ -26,10 +27,19 @@ export default async function EditCoursePage({ params }: PageProps) {
     throw error;
   }
 
-  const [categories, course] = await Promise.all([
-    fetchCategories(),
-    fetchCourseDetail(accessToken, String(user.id), Number(courseId)),
-  ]);
+  let categories, course;
+  try {
+    [categories, course] = await Promise.all([
+      fetchCategories(),
+      fetchCourseDetail(accessToken, String(user.id), Number(courseId)),
+    ]);
+  } catch (error) {
+    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
+    if (error instanceof AuthSessionError) {
+      return <SessionExpiredRedirect message={error.message} />;
+    }
+    throw error;
+  }
 
   const DIFFICULTY_REVERSE: Record<string, string> = {
     BEGINNER: '초급',

@@ -38,14 +38,22 @@ export default function AdminPendingButtons({ courseId, courseTitle }: AdminPend
 
   const loadRejectCategories = async () => {
     setCategoryLoadState('loading');
-    try {
-      const categories = await fetchCourseRejectReasonsAction();
-      setRejectCategories(categories);
+    const result = await fetchCourseRejectReasonsAction();
+
+    if (result.success) {
+      setRejectCategories(result.data);
       setCategoryLoadState('loaded');
-    } catch {
-      setCategoryLoadState('failed');
-      showToast('반려 사유 카테고리를 불러오지 못했습니다.', 'negative');
+      return;
     }
+
+    if (result.authError) {
+      showToast(result.message, 'alarm');
+      await logoutAction();
+      return;
+    }
+
+    setCategoryLoadState('failed');
+    showToast('반려 사유 카테고리를 불러오지 못했습니다.', 'negative');
   };
 
   // 반려 모달을 열기 전에 카테고리 목록을 미리 받아둠

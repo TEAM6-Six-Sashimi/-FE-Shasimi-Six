@@ -1,12 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { fetchMaintenanceStatus } from '@/services/maintenance.service';
 import { getSafeRedirect } from '@/lib/safe-redirect';
-
-const POLL_INTERVAL_MS = 5000; // 미들웨어의 점검 상태 캐시 TTL과 맞춤
+import { useMaintenancePolling } from './useMaintenancePolling';
 
 interface ServiceUnavailablePageProps {
   message: string;
@@ -23,33 +20,16 @@ export default function ServiceUnavailablePage({
 }: ServiceUnavailablePageProps) {
   const router = useRouter();
 
-  useEffect(() => {
-    let cancelled = false;
+  useMaintenancePolling((status) => {
+    if (status.enabled) return;
 
-    const checkAndRecover = async () => {
-      try {
-        const status = await fetchMaintenanceStatus();
-        if (cancelled || status.enabled) return;
-
-        if (onRecovered) {
-          onRecovered();
-        } else {
-          const safeTarget = getSafeRedirect(redirectTo);
-          router.replace(safeTarget === '/maintenance' ? '/' : safeTarget);
-        }
-      } catch {
-        // 상태 조회 자체가 실패하면(백엔드가 아직 안 올라옴 등) 다음 폴링에서 다시 시도
-      }
-    };
-
-    checkAndRecover();
-    const timer = setInterval(checkAndRecover, POLL_INTERVAL_MS);
-
-    return () => {
-      cancelled = true;
-      clearInterval(timer);
-    };
-  }, [router, redirectTo, onRecovered]);
+    if (onRecovered) {
+      onRecovered();
+    } else {
+      const safeTarget = getSafeRedirect(redirectTo);
+      router.replace(safeTarget === '/maintenance' ? '/' : safeTarget);
+    }
+  }, true);
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 bg-white">

@@ -8,6 +8,7 @@ import { CourseDetailFromAPI } from '@/features/user/courses/types';
 import { addCartItemAction } from '../../../cart/actions';
 import { useMaintenance } from '@/components/system/MaintenanceProvider';
 import { useToast } from '@/components/ui/ToastContext';
+import { logoutAction } from '@/features/auth/actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 
 interface NotOwnedButtonsProps {
@@ -41,6 +42,11 @@ export default function NotOwnedButtons({ course }: NotOwnedButtonsProps) {
 
       if (result.code === 'UNAUTHORIZED') {
         router.push('/auth/login');
+        return;
+      }
+      if (result.code === 'AUTH_SESSION_EXPIRED') {
+        showToast(result.message ?? '다시 로그인해주세요.', 'alarm');
+        await logoutAction();
         return;
       }
       if (result.code === 'CART_002') {

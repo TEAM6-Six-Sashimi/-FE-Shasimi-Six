@@ -4,6 +4,9 @@ import {
   CancelSubscriptionResponse,
   SubscriptionMeResponse,
 } from '@/features//mypage/types';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
+import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
+import { AuthSessionError } from '@/features/auth/errors';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -17,6 +20,11 @@ export async function fetchCoursePaymentHistory(
   });
 
   if (!res.ok) {
+    // fetchCoursePaymentHistory는 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
+    // 순수 파싱 버전으로 던지고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
+    const authMessage = await parseAuthErrorMessage(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     const errorBody = await res.text().catch(() => '');
     console.error(`[fetchCoursePaymentHistory] status=${res.status} body=${errorBody}`);
     return { items: [] };
@@ -38,6 +46,9 @@ export async function fetchSubscriptionPaymentHistory(
   });
 
   if (!res.ok) {
+    const authMessage = await parseAuthErrorMessage(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     const errorBody = await res.text().catch(() => '');
     console.error(`[fetchSubscriptionPaymentHistory] status=${res.status} body=${errorBody}`);
     return { items: [], page: 0, size, totalElements: 0, totalPages: 0 };
@@ -56,6 +67,9 @@ export async function fetchSubscriptionMe(
   });
 
   if (!res.ok) {
+    const authMessage = await parseAuthErrorMessage(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
     const errorBody = await res.text().catch(() => '');
     console.error(`[fetchSubscriptionMe] status=${res.status} body=${errorBody}`);
     return null;
@@ -69,6 +83,11 @@ export async function cancelSubscription(accessToken: string): Promise<CancelSub
     method: 'POST',
     headers: { Authorization: `Bearer ${accessToken}` },
   });
+
+  if (!res.ok) {
+    const authMessage = await handleAuthErrorResponse(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+  }
 
   const rawText = await res.text();
 

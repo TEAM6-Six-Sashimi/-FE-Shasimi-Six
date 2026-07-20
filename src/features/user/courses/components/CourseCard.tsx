@@ -9,6 +9,7 @@ import { addCartItemAction } from '../../cart/actions';
 import { checkAlreadyEnrolledAction } from '../actions';
 import { useMaintenance } from '@/components/system/MaintenanceProvider';
 import { useToast } from '@/components/ui/ToastContext';
+import { logoutAction } from '@/features/auth/actions';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import Image from 'next/image';
 import { getThumbnailUrl, isLocalhostUrl } from '@/lib/thumbnail';
@@ -64,6 +65,11 @@ export default function CourseCard({ course, category, priority = false }: Cours
         }
         if (result.code === 'UNAUTHORIZED') {
           router.push('/auth/login');
+          return;
+        }
+        if (result.code === 'AUTH_SESSION_EXPIRED') {
+          showToast(result.message ?? '다시 로그인해주세요.', 'alarm');
+          await logoutAction();
           return;
         }
         if (result.code === 'CART_002') {

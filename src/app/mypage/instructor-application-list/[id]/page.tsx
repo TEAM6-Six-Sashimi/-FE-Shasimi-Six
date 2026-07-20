@@ -3,6 +3,8 @@ import { fetchUserMe } from '@/services/user.service';
 import { fetchMyInstructorApplicationDetail } from '@/services/instructor-application.service';
 import { fetchCategories } from '@/services/categories.service';
 import InstructorApplicationDetailView from '@/features/mypage/components/instructor-apply-history/InstructorApplicationDetailView';
+import { AuthSessionError } from '@/features/auth/errors';
+import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -22,10 +24,20 @@ export default async function InstructorApplicationDetailPage({ params }: Props)
   }
 
   const user = await fetchUserMe(accessToken);
-  const [detail, categories] = await Promise.all([
-    fetchMyInstructorApplicationDetail(user.id, Number(id), accessToken),
-    fetchCategories(),
-  ]);
+
+  let detail, categories;
+  try {
+    [detail, categories] = await Promise.all([
+      fetchMyInstructorApplicationDetail(user.id, Number(id), accessToken),
+      fetchCategories(),
+    ]);
+  } catch (e) {
+    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
+    if (e instanceof AuthSessionError) {
+      return <SessionExpiredRedirect message={e.message} />;
+    }
+    throw e;
+  }
 
   if (!detail) {
     return (

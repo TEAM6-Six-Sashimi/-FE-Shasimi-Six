@@ -1,4 +1,6 @@
 import { MyInstructorApplication, MyInstructorApplicationDetail } from '@/features/mypage/types';
+import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
+import { AuthSessionError } from '@/features/auth/errors';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -13,9 +15,16 @@ export async function fetchMyInstructorApplications(
       cache: 'no-store',
     });
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      // 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
+      // 순수 파싱 버전으로 던지고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
+      const authMessage = await parseAuthErrorMessage(res);
+      if (authMessage) throw new AuthSessionError(authMessage);
+      return [];
+    }
     return res.json();
-  } catch {
+  } catch (e) {
+    if (e instanceof AuthSessionError) throw e;
     return [];
   }
 }
@@ -35,9 +44,14 @@ export async function fetchMyInstructorApplicationDetail(
       },
     );
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const authMessage = await parseAuthErrorMessage(res);
+      if (authMessage) throw new AuthSessionError(authMessage);
+      return null;
+    }
     return res.json();
-  } catch {
+  } catch (e) {
+    if (e instanceof AuthSessionError) throw e;
     return null;
   }
 }

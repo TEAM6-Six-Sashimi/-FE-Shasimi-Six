@@ -8,6 +8,9 @@ import {
   InstructorCompletionRateStatistics,
 } from '@/features/user/mycourses-instructor/types';
 import { InstructorProfile } from '@/features/mypage/types';
+import { handleAuthErrorResponse } from '@/features/auth/auth-error';
+import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
+import { AuthSessionError } from '@/features/auth/errors';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -22,9 +25,16 @@ export async function fetchInstructorProfile(
       cache: 'no-store',
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      // 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
+      // 순수 파싱 버전으로 던지고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
+      const authMessage = await parseAuthErrorMessage(res);
+      if (authMessage) throw new AuthSessionError(authMessage);
+      return null;
+    }
     return res.json();
-  } catch {
+  } catch (e) {
+    if (e instanceof AuthSessionError) throw e;
     return null;
   }
 }
@@ -53,6 +63,8 @@ export async function fetchApprovedCourses(
     });
 
     if (!response.ok) {
+      const authMessage = await parseAuthErrorMessage(response);
+      if (authMessage) throw new AuthSessionError(authMessage);
       const errorBody = await response.text();
       return [];
     }
@@ -60,6 +72,7 @@ export async function fetchApprovedCourses(
     const result = await response.json();
     return Array.isArray(result) ? result : (result.data ?? []);
   } catch (e) {
+    if (e instanceof AuthSessionError) throw e;
     console.error('fetchApprovedCourses fetch error:', e);
     return [];
   }
@@ -78,9 +91,14 @@ export async function fetchInProgressCourses(
       },
       cache: 'no-store',
     });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      const authMessage = await parseAuthErrorMessage(res);
+      if (authMessage) throw new AuthSessionError(authMessage);
+      return [];
+    }
     return res.json();
-  } catch {
+  } catch (e) {
+    if (e instanceof AuthSessionError) throw e;
     return [];
   }
 }
@@ -102,6 +120,8 @@ export async function fetchCourseDetail(
     });
 
     if (!res.ok) {
+      const authMessage = await parseAuthErrorMessage(res);
+      if (authMessage) throw new AuthSessionError(authMessage);
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchCourseDetail] status=${res.status} body=${errorBody}`);
       return null;
@@ -109,6 +129,7 @@ export async function fetchCourseDetail(
 
     return res.json();
   } catch (e) {
+    if (e instanceof AuthSessionError) throw e;
     console.error('[fetchCourseDetail] fetch error:', e);
     return null;
   }
@@ -130,12 +151,15 @@ export async function fetchClosedCourses(
     });
 
     if (!response.ok) {
+      const authMessage = await parseAuthErrorMessage(response);
+      if (authMessage) throw new AuthSessionError(authMessage);
       return [];
     }
 
     const result = await response.json();
     return Array.isArray(result) ? result : (result.data ?? []);
-  } catch {
+  } catch (e) {
+    if (e instanceof AuthSessionError) throw e;
     return [];
   }
 }
@@ -157,6 +181,7 @@ export async function fetchInstructorDashboardSummary(
     );
 
     if (!res.ok) {
+      await handleAuthErrorResponse(res);
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchInstructorDashboardSummary] status=${res.status} body=${errorBody}`);
       return null;
@@ -186,6 +211,7 @@ export async function fetchInstructorSalesStatistics(
     );
 
     if (!res.ok) {
+      await handleAuthErrorResponse(res);
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchInstructorSalesStatistics] status=${res.status} body=${errorBody}`);
       return null;
@@ -210,6 +236,7 @@ export async function fetchInstructorStudentStatistics(
     });
 
     if (!res.ok) {
+      await handleAuthErrorResponse(res);
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchInstructorStudentStatistics] status=${res.status} body=${errorBody}`);
       return null;
@@ -234,6 +261,7 @@ export async function fetchInstructorCompletionRateStatistics(
     });
 
     if (!res.ok) {
+      await handleAuthErrorResponse(res);
       const errorBody = await res.text().catch(() => '');
       console.error(
         `[fetchInstructorCompletionRateStatistics] status=${res.status} body=${errorBody}`,
