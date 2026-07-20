@@ -9,6 +9,7 @@ import { useCoffeeChatSocket } from '../hooks/useCoffeeChatSocket';
 import { fetchChatMessagesAction, fetchInstructorMessagesAction } from '../actions';
 import { UserMe } from '@/features/auth/types';
 import { ChatMessageEvent, InstructorChatRoom, StudentChatRoom } from '../types';
+import { useCoffeeChatAlert } from '@/components/layout/CoffeeChatAlertContext';
 
 interface CoffeeChatPageClientProps {
   role: UserMe['role'];
@@ -74,6 +75,7 @@ export default function CoffeeChatPageClient({
   const isInstructor = role === 'INSTRUCTOR';
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
   const { isConnected, subscribe, sendMessage } = useCoffeeChatSocket();
+  const { setHasAlert } = useCoffeeChatAlert();
 
   // 안읽음 배지를 실시간으로 갱신하기 위해 서버 props를 그대로 렌더링하지 않고
   // 로컬 state로 승격한다. router.refresh() 등으로 서버 props가 새로 내려오면
@@ -109,6 +111,15 @@ export default function CoffeeChatPageClient({
       activeChats.find((chat) => chat.chatId === selectedChatId) ??
       null)
     : null;
+
+  // 안읽음 상태가 바뀔 때마다(메시지 도착, 방을 읽어서 0이 됨 등) 상단 메뉴바의
+  // 커피챗 알림 점도 같은 순간에 실시간으로 갱신되도록 공유 컨텍스트에 반영한다.
+  useEffect(() => {
+    const hasAlert = isInstructor
+      ? [...pendingChats, ...activeChats].some((chat) => chat.unreadMessageCount > 0)
+      : rooms.some((room) => room.unreadMessageCount > 0);
+    setHasAlert(hasAlert);
+  }, [isInstructor, rooms, pendingChats, activeChats, setHasAlert]);
 
   // 지금 열어본 방을 제외한 나머지 모든 방에 구독을 걸어서, 안 열어본(배경) 방에
   // 새 메시지가 오면 목록의 안읽음 배지를 실시간으로 갱신한다.
