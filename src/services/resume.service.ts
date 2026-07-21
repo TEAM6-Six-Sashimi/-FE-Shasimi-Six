@@ -17,6 +17,7 @@ export type SaveResumeResult =
   | { resumeId: number }
   | { authError: true; message: string }
   | { maintenance: true; message: string }
+  | { validationError: true }
   | null;
 
 // 이력서 신규 작성
@@ -41,6 +42,10 @@ export async function saveResume(
       const maintenanceMessage = await parseMaintenanceMessage(res);
       if (maintenanceMessage) return { maintenance: true, message: maintenanceMessage };
 
+      // 400은 입력값 자체가 잘못됐다는 뜻(존재하지 않는 날짜 등) - 서버 오류와 구분해서
+      // 호출부가 "입력 내용을 확인해주세요" 식의 메시지를 보여줄 수 있게 한다.
+      if (res.status === 400) return { validationError: true };
+
       return null;
     }
 
@@ -52,7 +57,13 @@ export async function saveResume(
 
 export type UpdateResumeResult =
   | { success: true }
-  | { success: false; authError?: true; maintenance?: true; message?: string };
+  | {
+      success: false;
+      authError?: true;
+      maintenance?: true;
+      validationError?: true;
+      message?: string;
+    };
 
 // 이력서 수정
 export async function updateResume(
@@ -76,6 +87,10 @@ export async function updateResume(
 
       const maintenanceMessage = await parseMaintenanceMessage(res);
       if (maintenanceMessage) return { success: false, maintenance: true, message: maintenanceMessage };
+
+      // 400은 입력값 자체가 잘못됐다는 뜻(존재하지 않는 날짜 등) - 서버 오류와 구분해서
+      // 호출부가 "입력 내용을 확인해주세요" 식의 메시지를 보여줄 수 있게 한다.
+      if (res.status === 400) return { success: false, validationError: true };
 
       return { success: false };
     }

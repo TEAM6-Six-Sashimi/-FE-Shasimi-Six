@@ -76,7 +76,7 @@ export default function PopularCourseSliderClient({ courses }: PopularCourseSlid
   const next = () => setCurrent((p) => Math.min(lastIndex, p + 1));
 
   return (
-    <section className="px-6">
+    <section className="px-6 mb-20">
       <div className="mb-6">
         <h2 className="text-[26px] font-bold text-[#1E2125]">
           <span className="text-[#FF5E5E]">인기</span> 강의

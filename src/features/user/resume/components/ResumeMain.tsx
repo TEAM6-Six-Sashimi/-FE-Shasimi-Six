@@ -1,57 +1,13 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
-import { useToast } from '@/components/ui/ToastContext';
-import { useMaintenance } from '@/components/system/MaintenanceProvider';
-import {
-  EducationItem,
-  CareerItem,
-  CertificationItem,
-  CertificationType,
-  DegreeType,
-  GraduationStatus,
-  EmploymentType,
-  ResumePayload,
-  SavedResume,
-} from '../types';
-import { saveResumeAction, updateResumeAction } from '../actions';
-import { logoutAction } from '@/features/auth/actions';
-import { formatYearMonth, formatYearMonthDay } from '@/lib/utils';
+import { SavedResume } from '../types';
+import { useResumeForm } from '../hooks/useResumeForm';
 import ResumeLoginInfo from '../sections/ResumeLoginInfo';
 import EducationSection from '../sections/EducationSection';
 import CareerSection from '../sections/CareerSection';
 import CertificationSection from '../sections/CertificationSection';
-
-// 임시 id 생성용
-function generateTempId() {
-  return Math.random().toString(36).slice(2, 10);
-}
-
-// SavedResume → 프론트 폼 상태로 변환 (id 부여, null 값들은 빈 문자열로 변환)
-function toFormState(saved: SavedResume) {
-  return {
-    educations: saved.educations.map((e) => ({
-      ...e,
-      id: generateTempId(),
-      minorOrResearch: e.minorOrResearch ?? '',
-    })) as EducationItem[],
-    isNewGraduate: saved.entryLevel,
-    careers: saved.careers.map((c) => ({
-      ...c,
-      id: generateTempId(),
-      customEmploymentType: c.customEmploymentType ?? '',
-      endYearMonth: c.endYearMonth ?? '',
-    })) as CareerItem[],
-    certifications: saved.certifications.map((cert) => ({
-      ...cert,
-      id: generateTempId(),
-      scoreOrGrade: cert.scoreOrGrade ?? '',
-    })) as CertificationItem[],
-  };
-}
 
 interface ResumeMainProps {
   userName: string;
@@ -72,402 +28,114 @@ export default function ResumeMain({
   onSavedStateChange,
   onDirtyStateChange,
 }: ResumeMainProps) {
-  const router = useRouter();
-  const { showToast } = useToast();
-  const { setMaintenance } = useMaintenance();
-  const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
-
-  // 저장된 이력서가 있으면 그 값으로, 없으면 빈 배열로 초기화
-  const initial = savedResume ? toFormState(savedResume) : null;
-
-  const [educations, setEducations] = useState<EducationItem[]>(initial?.educations ?? []);
-  const [isNewGraduate, setIsNewGraduate] = useState(initial?.isNewGraduate ?? false);
-  const [careers, setCareers] = useState<CareerItem[]>(initial?.careers ?? []);
-  const [certifications, setCertifications] = useState<CertificationItem[]>(
-    initial?.certifications ?? [],
-  );
-
-  // 저장 상태 추적 - 기존 이력서가 있으면 resumeId를 바로 채워서 "수정 모드"로 시작
-  const [resumeId, setResumeId] = useState<number | null>(savedResume?.resumeId ?? null);
-
-  const initialSnapshot = useMemo(
-    () => JSON.stringify({ educations, isNewGraduate, careers, certifications }),
-    [], // 최초 마운트 시점 값으로 고정
-  );
-  const [lastSavedSnapshot, setLastSavedSnapshot] = useState<string>(initialSnapshot);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const currentSnapshot = useMemo(
-    () => JSON.stringify({ educations, isNewGraduate, careers, certifications }),
-    [educations, isNewGraduate, careers, certifications],
-  );
-
-  const isDirty = currentSnapshot !== lastSavedSnapshot;
-  const isSaved = resumeId !== null;
-  // 저장하기 버튼 활성화 조건: 새로 작성됐거나(아직 저장 안 됨) 수정이 감지된 경우
-  const canSave = !isSaved || isDirty;
-
-  // 섹션별 필수 입력 검증 에러 메시지
-  const [educationError, setEducationError] = useState('');
-  const [careerError, setCareerError] = useState('');
-  const [certificationError, setCertificationError] = useState('');
-
-  // 학력 필수 필드 검증 - 하나라도 비어있으면 false
-  function validateEducations(): boolean {
-    if (educations.length === 0) {
-      setEducationError('학력 사항을 한 개 이상 입력해주세요.');
-      return false;
-    }
-    const hasEmpty = educations.some(
-      (e) =>
-        !e.schoolName ||
-        !e.startYearMonth ||
-        !e.endYearMonth ||
-        !e.graduationStatus ||
-        !e.major ||
-        !e.degree,
-    );
-    if (hasEmpty) {
-      setEducationError('학력 사항의 필수 항목을 모두 입력해주세요.');
-      return false;
-    }
-    setEducationError('');
-    return true;
-  }
-
-  // 경력 필수 필드 검증 - 신입이면 통과, 아니면 careers 검증
-  function validateCareers(): boolean {
-    if (isNewGraduate) {
-      setCareerError('');
-      return true;
-    }
-    if (careers.length === 0) {
-      setCareerError('경력 사항을 한 개 이상 입력하거나 신입에 체크해주세요.');
-      return false;
-    }
-    const hasEmpty = careers.some(
-      (c) =>
-        !c.companyName ||
-        !c.startYearMonth ||
-        (!c.currentlyEmployed && !c.endYearMonth) ||
-        !c.employmentType ||
-        (c.employmentType === 'OTHER' && !c.customEmploymentType) ||
-        !c.jobTitle,
-    );
-    if (hasEmpty) {
-      setCareerError('경력 사항의 필수 항목을 모두 입력해주세요.');
-      return false;
-    }
-    setCareerError('');
-    return true;
-  }
-
-  // 자격증 필수 필드 검증
-  function validateCertifications(): boolean {
-    if (certifications.length === 0) {
-      setCertificationError('보유 기술 및 자격증을 한 개 이상 입력해주세요.');
-      return false;
-    }
-    const hasEmpty = certifications.some(
-      (cert) => !cert.type || !cert.name || !cert.issuer || !cert.acquiredDate,
-    );
-    if (hasEmpty) {
-      setCertificationError('보유 기술 및 자격증의 필수 항목을 모두 입력해주세요.');
-      return false;
-    }
-    setCertificationError('');
-    return true;
-  }
-
-  useEffect(() => {
-    onSavedStateChange?.(isSaved && !isDirty, resumeId);
-  }, [isSaved, isDirty, resumeId, onSavedStateChange]);
-
-  useEffect(() => {
-    onDirtyStateChange?.(isDirty);
-  }, [isDirty, onDirtyStateChange]);
-
-  //   학력 사항
-  const addEducation = () => {
-    setEducations((prev) => [
-      ...prev,
-      {
-        id: generateTempId(),
-        schoolName: '',
-        startYearMonth: '',
-        endYearMonth: '',
-        graduationStatus: '',
-        major: '',
-        degree: '',
-        minorOrResearch: '',
-      },
-    ]);
-  };
-
-  const removeEducation = (id: string) => {
-    setEducations((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const updateEducation = (id: string, field: keyof EducationItem, value: string) => {
-    setEducations((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item)),
-    );
-    if (educationError) setEducationError('');
-  };
-
-  // 날짜(YYYY-MM) 자동 하이픈 적용 핸들러
-  const handleEducationDateChange = (
-    id: string,
-    field: 'startYearMonth' | 'endYearMonth',
-    value: string,
-  ) => {
-    updateEducation(id, field, formatYearMonth(value));
-  };
-
-  //   경력 사항
-  const addCareer = () => {
-    setCareers((prev) => [
-      ...prev,
-      {
-        id: generateTempId(),
-        companyName: '',
-        startYearMonth: '',
-        endYearMonth: '',
-        currentlyEmployed: false,
-        employmentType: '',
-        customEmploymentType: '',
-        jobTitle: '',
-      },
-    ]);
-  };
-
-  const updateCareer = (id: string, field: keyof CareerItem, value: string | boolean) => {
-    setCareers((prev) => prev.map((item) => (item.id === id ? { ...item, [field]: value } : item)));
-    if (careerError) setCareerError('');
-  };
-
-  const handleCareerDateChange = (
-    id: string,
-    field: 'startYearMonth' | 'endYearMonth',
-    value: string,
-  ) => {
-    updateCareer(id, field, formatYearMonth(value));
-  };
-
-  // 신입 체크 시 기존 경력 입력값 초기화 (+ 버튼도 숨김)
-  const handleNewGraduateToggle = () => {
-    setIsNewGraduate((prev) => {
-      const next = !prev;
-      if (next) setCareers([]);
-      return next;
-    });
-    if (careerError) setCareerError('');
-  };
-
-  //   자격증
-  const addCertification = () => {
-    setCertifications((prev) => [
-      ...prev,
-      {
-        id: generateTempId(),
-        type: '',
-        name: '',
-        issuer: '',
-        acquiredDate: '',
-        scoreOrGrade: '',
-      },
-    ]);
-  };
-
-  const updateCertification = (id: string, field: keyof CertificationItem, value: string) => {
-    setCertifications((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item)),
-    );
-    if (certificationError) setCertificationError('');
-  };
-
-  const handleCertificationDateChange = (id: string, value: string) => {
-    updateCertification(id, 'acquiredDate', formatYearMonthDay(value));
-  };
-
-  const removeCertification = (id: string) => {
-    setCertifications((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const removeCareer = (id: string) => {
-    setCareers((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  //   저장 (신규 작성 → POST, 기존 이력서 있음 → PATCH)
-  const handleSave = async () => {
-    if (!canSave || isSaving) return;
-
-    // 로그인 여부 우선 확인
-    if (!isLoggedIn) {
-      setShowLoginRequiredModal(true);
-      return;
-    }
-
-    // 저장 전 필수 입력 검증 - 실패 시 각 섹션 아래 안내문구만 표시, 토스트는 띄우지 않음
-    const isEducationValid = validateEducations();
-    const isCareerValid = validateCareers();
-    const isCertificationValid = validateCertifications();
-
-    if (!isEducationValid || !isCareerValid || !isCertificationValid) {
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const payload: ResumePayload = {
-        educations: educations.map((e) => ({
-          schoolName: e.schoolName,
-          startYearMonth: e.startYearMonth,
-          endYearMonth: e.endYearMonth,
-          degree: e.degree as DegreeType,
-          major: e.major,
-          graduationStatus: e.graduationStatus as GraduationStatus,
-          minorOrResearch: e.minorOrResearch || undefined,
-        })),
-        entryLevel: isNewGraduate,
-        careers: careers.map((c) => ({
-          companyName: c.companyName,
-          startYearMonth: c.startYearMonth,
-          endYearMonth: c.currentlyEmployed ? null : c.endYearMonth,
-          currentlyEmployed: c.currentlyEmployed,
-          employmentType: c.employmentType as EmploymentType,
-          customEmploymentType:
-            c.employmentType === 'OTHER' ? c.customEmploymentType || null : null,
-          jobTitle: c.jobTitle,
-        })),
-        certifications: certifications.map((cert) => ({
-          name: cert.name,
-          type: cert.type as CertificationType,
-          issuer: cert.issuer,
-          acquiredDate: cert.acquiredDate,
-          scoreOrGrade: cert.scoreOrGrade || undefined,
-        })),
-        defaultResume: true,
-      };
-
-      // 이미 저장된 이력서가 있으면 수정(PATCH), 없으면 신규 작성(POST)
-      if (resumeId !== null) {
-        const result = await updateResumeAction(resumeId, payload);
-        if (result.success) {
-          setLastSavedSnapshot(currentSnapshot);
-          showToast('이력서가 저장되었습니다.');
-        } else if (result.maintenance) {
-          setMaintenance(true, result.message);
-          return;
-        } else if (result.authError) {
-          showToast(result.message ?? '다른 기기에서 로그인되어 자동 로그아웃 되었습니다.', 'alarm');
-          await logoutAction();
-          return;
-        } else {
-          showToast('이력서 저장에 실패했습니다.', 'negative');
-        }
-      } else {
-        const result = await saveResumeAction(payload);
-
-        if (result.success) {
-          setResumeId(result.resumeId ?? null);
-          setLastSavedSnapshot(currentSnapshot);
-          showToast('이력서가 저장되었습니다.');
-        } else if (result.maintenance) {
-          setMaintenance(true, result.message);
-          return;
-        } else if (result.authError) {
-          showToast(result.message ?? '다른 기기에서 로그인되어 자동 로그아웃 되었습니다.', 'alarm');
-          await logoutAction();
-          return;
-        } else {
-          showToast('이력서 저장에 실패했습니다.', 'negative');
-        }
-      }
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const {
+    router,
+    educations,
+    educationError,
+    addEducation,
+    removeEducation,
+    updateEducation,
+    handleEducationDateChange,
+    careers,
+    isNewGraduate,
+    careerError,
+    addCareer,
+    removeCareer,
+    updateCareer,
+    handleCareerDateChange,
+    handleNewGraduateToggle,
+    certifications,
+    certificationError,
+    addCertification,
+    removeCertification,
+    updateCertification,
+    handleCertificationDateChange,
+    handleSave,
+    isSaving,
+    canSave,
+    showLoginRequiredModal,
+    setShowLoginRequiredModal,
+  } = useResumeForm({ savedResume, isLoggedIn, onSavedStateChange, onDirtyStateChange });
 
   return (
     <>
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleSave();
-      }}
-      className="flex-1 bg-white rounded-xl shadow-md p-6 flex flex-col gap-6"
-    >
-      <h2 className="text-[20px] font-extrabold mt-2 text-[#1E2125]">이력서 작성</h2>
-
-      {/* 로그인 정보 */}
-      <ResumeLoginInfo userName={userName} userPhone={userPhone} userEmail={userEmail} />
-
-      <hr className="border-[#E5E7EB]" />
-
-      {/* ─────────────── 학력 사항 ─────────────── */}
-      <EducationSection
-        educations={educations}
-        error={educationError}
-        onAdd={addEducation}
-        onRemove={removeEducation}
-        onUpdate={updateEducation}
-        onDateChange={handleEducationDateChange}
-      />
-
-      <hr className="border-[#E5E7EB]" />
-
-      {/* ─────────────── 경력 사항 ─────────────── */}
-      <CareerSection
-        careers={careers}
-        isNewGraduate={isNewGraduate}
-        error={careerError}
-        onAdd={addCareer}
-        onRemove={removeCareer}
-        onUpdate={updateCareer}
-        onDateChange={handleCareerDateChange}
-        onNewGraduateToggle={handleNewGraduateToggle}
-      />
-
-      <hr className="border-[#E5E7EB]" />
-
-      {/* ─────────────── 보유 기술 및 자격증 ─────────────── */}
-      <CertificationSection
-        certifications={certifications}
-        error={certificationError}
-        onAdd={addCertification}
-        onRemove={removeCertification}
-        onUpdate={updateCertification}
-        onDateChange={handleCertificationDateChange}
-      />
-
-      <Button
-        onClick={handleSave}
-        disabled={!canSave || isSaving}
-        className={`w-full h-11 font-semibold text-[14px] cursor-pointer transition-colors ${
-          canSave && !isSaving
-            ? 'bg-[#FF5E5E] hover:bg-[#D14848] text-white'
-            : 'bg-[#FFEBEB] text-[#FF5E5E] cursor-not-allowed'
-        }`}
-      >
-        {isSaving ? '저장 중...' : '저장하기'}
-      </Button>
-    </form>
-
-    {/* 로그인 필요 모달 */}
-    {showLoginRequiredModal && (
-      <TwoButtonModal
-        title="로그인이 필요합니다"
-        message={`로그인 후 이용할 수 있는 기능입니다.\n로그인 페이지로 이동하시겠습니까?`}
-        confirmLabel="확인"
-        cancelLabel="취소"
-        onConfirm={() => {
-          setShowLoginRequiredModal(false);
-          router.push('/auth/login');
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSave();
         }}
-        onCancel={() => setShowLoginRequiredModal(false)}
-      />
-    )}
+        className="flex-1 bg-white rounded-xl shadow-md p-6 flex flex-col gap-6"
+      >
+        <h2 className="text-[20px] font-extrabold mt-2 text-[#1E2125]">이력서 작성</h2>
+
+        {/* 로그인 정보 */}
+        <ResumeLoginInfo userName={userName} userPhone={userPhone} userEmail={userEmail} />
+
+        <hr className="border-[#E5E7EB]" />
+
+        {/* ─────────────── 학력 사항 ─────────────── */}
+        <EducationSection
+          educations={educations}
+          error={educationError}
+          onAdd={addEducation}
+          onRemove={removeEducation}
+          onUpdate={updateEducation}
+          onDateChange={handleEducationDateChange}
+        />
+
+        <hr className="border-[#E5E7EB]" />
+
+        {/* ─────────────── 경력 사항 ─────────────── */}
+        <CareerSection
+          careers={careers}
+          isNewGraduate={isNewGraduate}
+          error={careerError}
+          onAdd={addCareer}
+          onRemove={removeCareer}
+          onUpdate={updateCareer}
+          onDateChange={handleCareerDateChange}
+          onNewGraduateToggle={handleNewGraduateToggle}
+        />
+
+        <hr className="border-[#E5E7EB]" />
+
+        {/* ─────────────── 보유 기술 및 자격증 ─────────────── */}
+        <CertificationSection
+          certifications={certifications}
+          error={certificationError}
+          onAdd={addCertification}
+          onRemove={removeCertification}
+          onUpdate={updateCertification}
+          onDateChange={handleCertificationDateChange}
+        />
+
+        <Button
+          onClick={handleSave}
+          disabled={!canSave || isSaving}
+          className={`w-full h-11 font-semibold text-[14px] cursor-pointer transition-colors ${
+            canSave && !isSaving
+              ? 'bg-[#FF5E5E] hover:bg-[#D14848] text-white'
+              : 'bg-[#FFEBEB] text-[#FF5E5E] cursor-not-allowed'
+          }`}
+        >
+          {isSaving ? '저장 중...' : '저장하기'}
+        </Button>
+      </form>
+
+      {/* 로그인 필요 모달 */}
+      {showLoginRequiredModal && (
+        <TwoButtonModal
+          title="로그인이 필요합니다"
+          message={`로그인 후 이용할 수 있는 기능입니다.\n로그인 페이지로 이동하시겠습니까?`}
+          confirmLabel="확인"
+          cancelLabel="취소"
+          onConfirm={() => {
+            setShowLoginRequiredModal(false);
+            router.push('/auth/login');
+          }}
+          onCancel={() => setShowLoginRequiredModal(false)}
+        />
+      )}
     </>
   );
 }

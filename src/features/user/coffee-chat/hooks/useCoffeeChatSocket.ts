@@ -19,13 +19,18 @@ async function fetchWsToken(): Promise<string | null> {
   }
 }
 
-export function useCoffeeChatSocket() {
+export function useCoffeeChatSocket(enabled: boolean = true) {
   const clientRef = useRef<Client | null>(null);
   const hasRetriedReissueRef = useRef(false);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    // 로그인하지 않은 상태(게스트)에서는 /api/ws-token이 항상 401을 반환하는데,
+    // 이걸 일반적인 일시 장애로 취급해 3초마다 무한 재시도하면 콘솔에 401 로그가
+    // 계속 쌓인다. 로그인한 사용자만 연결을 시도한다.
+    if (!enabled) return;
+
     let cancelled = false;
 
     function scheduleReconnect() {
@@ -89,7 +94,7 @@ export function useCoffeeChatSocket() {
       clientRef.current?.deactivate();
       clientRef.current = null;
     };
-  }, []);
+  }, [enabled]);
 
   // 특정 채팅방 구독. 반환값(구독 해제 함수)은 방을 바꾸거나 컴포넌트가 사라질 때 호출할 것.
   // clientRef(ref)만 참조하므로 useCallback으로 감싸 렌더마다 재생성되지 않게 한다 -

@@ -34,7 +34,7 @@ const showToast = (message: string, type: ToastType = 'positive') => {
       {children}
       {toast && (
         <div className="fixed top-26 left-1/2 -translate-x-1/2 z-50"> {/* 높이 고정할지 고민 중.. 현재는 상단 메뉴바 아래로 뜸 */}
-          <div className={`min-w-100 rounded-md px-8 py-2 font-semibold border-[1.5px] text-center text-[14px] shadow-lg  ${TOAST_STYLES[toast.type]}`}>
+          <div className={`min-w-100 rounded-md px-8 py-2 font-semibold border-[1.5px] text-center text-[14px] shadow-lg whitespace-pre-line ${TOAST_STYLES[toast.type]}`}>
             {toast.message}
           </div>
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { loadTossPayments } from '@tosspayments/tosspayments-sdk';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
@@ -8,6 +9,7 @@ import { readyCreditChargeAction } from '@/features/user/credit/actions';
 import { logoutAction } from '@/features/auth/actions';
 import { useToast } from '@/components/ui/ToastContext';
 import { useMaintenance } from '@/components/system/MaintenanceProvider';
+import { isSafeReturnPath } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 interface StickyProps {
@@ -23,6 +25,7 @@ const MIN_AMOUNT = 10000;
 const UNIT_AMOUNT = 1000;
 
 export default function Sticky({ currentCredit, chargeAmount, afterCredit }: StickyProps) {
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
   const { setMaintenance } = useMaintenance();
   const [modalState, setModalState] = useState<ModalState>('none');
@@ -67,6 +70,12 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
     try {
       const { orderId, orderName, amount } = readyResult.data;
 
+      // 충전 전에 있던 페이지(예: 결제 페이지)로 돌아갈 수 있도록 successUrl에 그대로 실어 보낸다
+      const returnTo = searchParams.get('returnTo');
+      const returnToQuery = isSafeReturnPath(returnTo)
+        ? `?returnTo=${encodeURIComponent(returnTo)}`
+        : '';
+
       // 2) Toss 결제창 호출 (성공 시 successUrl로 리다이렉트되며 이 페이지로는 돌아오지 않음)
       const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
       const payment = tossPayments.payment({ customerKey: orderId });
@@ -79,7 +88,7 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
         },
         orderId,
         orderName,
-        successUrl: `${window.location.origin}/credit/success`,
+        successUrl: `${window.location.origin}/credit/success${returnToQuery}`,
         failUrl: `${window.location.origin}/credit/fail`,
       });
       // 정상 흐름에서는 브라우저가 리다이렉트되므로 이 아래 코드는 실행되지 않음
@@ -155,7 +164,7 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
       {modalState === 'confirm' && (
         <TwoButtonModal
           title="크레딧 충전"
-          message="크레딧을 충전하시겠습니까? 확인 시 Toss 결제창으로 이동합니다."
+          message={'크레딧을 충전하시겠습니까?\n확인 시 Toss 결제창으로 이동합니다.'}
           onConfirm={handleConfirm}
           onCancel={() => setModalState('none')}
         />

@@ -17,6 +17,7 @@ export async function saveResumeAction(
   resumeId?: number;
   authError?: true;
   maintenance?: true;
+  validationError?: true;
   message?: string;
 }> {
   const cookieStore = await cookies();
@@ -32,6 +33,9 @@ export async function saveResumeAction(
   if ('maintenance' in result) {
     return { success: false, maintenance: true, message: result.message };
   }
+  if ('validationError' in result) {
+    return { success: false, validationError: true };
+  }
 
   return { success: true, resumeId: result.resumeId };
 }
@@ -40,7 +44,13 @@ export async function saveResumeAction(
 export async function updateResumeAction(
   resumeId: number,
   payload: ResumePayload,
-): Promise<{ success: boolean; authError?: true; maintenance?: true; message?: string }> {
+): Promise<{
+  success: boolean;
+  authError?: true;
+  maintenance?: true;
+  validationError?: true;
+  message?: string;
+}> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
