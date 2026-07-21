@@ -66,6 +66,7 @@ export default function CourseDetailContent({
           ratingDistribution={course.ratingDistribution}
           reviews={course.reviews}
           reviewMode={reviewMode}
+          progressRate={course.progressRate}
           currentUserLoginId={currentUserLoginId}
         />
       </section>

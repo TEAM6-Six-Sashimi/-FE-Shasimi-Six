@@ -28,8 +28,16 @@ interface Step02DocumentsProps {
 
 const formatFileSize = (bytes: number) => `${(bytes / 1024).toFixed(2)} KB`;
 
-const ALLOWED_CERT_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-const ALLOWED_RESUME_TYPES = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+// file.type(브라우저가 OS의 MIME 레지스트리를 참고해 채우는 값)은 환경에 따라 빈 문자열이나
+// application/octet-stream으로 잡히는 경우가 있어, 정상 파일도 잘못 거부될 수 있다.
+// 그래서 파일 내용과 무관하게 항상 일관된 파일 확장자로 검증한다.
+const ALLOWED_CERT_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png'];
+const ALLOWED_RESUME_EXTENSIONS = ['.docx'];
+
+function hasAllowedExtension(fileName: string, allowedExtensions: string[]): boolean {
+  const lower = fileName.toLowerCase();
+  return allowedExtensions.some((ext) => lower.endsWith(ext));
+}
 
 function CheckboxItem({
   id,
@@ -72,7 +80,7 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
   const isError = submitted && !isValid;
 
   const addCertificationFiles = (files: File[]) => {
-    const invalid = files.find((f) => !ALLOWED_CERT_TYPES.includes(f.type));
+    const invalid = files.find((f) => !hasAllowedExtension(f.name, ALLOWED_CERT_EXTENSIONS));
     if (invalid) {
       setCertError('PDF, JPG, PNG 파일만 첨부할 수 있습니다.');
       if (certFileRef.current) certFileRef.current.value = '';
@@ -111,7 +119,7 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
   };
 
   const handleResumeChange = (file: File | null) => {
-    if (file && !ALLOWED_RESUME_TYPES.includes(file.type)) {
+    if (file && !hasAllowedExtension(file.name, ALLOWED_RESUME_EXTENSIONS)) {
       setResumeError('docx 파일만 첨부할 수 있습니다.');
       if (resumeRef.current) resumeRef.current.value = '';
       return;

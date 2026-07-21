@@ -67,8 +67,26 @@ export async function createReview(
 
     // REVIEW_001 -> 이미 해당 강의에 리뷰를 작성한 경우
     const errorCode = await parseErrorCode(res.clone());
-    if (errorCode === 'REVIEW_001') {
+    if (errorCode === 'REVIEW_001' || res.status === 409) {
       throw new ReviewApiError('수강평이 이미 등록되어 있습니다.', res.status);
+    }
+
+    // 400: 수강 전(진행률 0%) 또는 잘못된 입력값 - 프론트에서 사전에 막지만, 놓친 경우를 대비한 안전망
+    if (res.status === 400) {
+      const message = await parseErrorMessage(
+        res,
+        '강의를 수강한 후에 수강평을 작성할 수 있습니다.',
+      );
+      throw new ReviewApiError(message, res.status);
+    }
+
+    // 403: 수강 중인 강의가 아님
+    if (res.status === 403) {
+      const message = await parseErrorMessage(
+        res,
+        '수강 중인 강의만 수강평을 작성할 수 있습니다.',
+      );
+      throw new ReviewApiError(message, res.status);
     }
 
     const message = await parseErrorMessage(res, '리뷰 등록에 실패했습니다.');

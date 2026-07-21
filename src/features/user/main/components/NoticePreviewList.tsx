@@ -35,15 +35,17 @@ export default async function NoticePreviewList() {
                   {String(idx + 1).padStart(2, '0')}
                 </span>
                 {notice ? (
-                  <span className="text-[14.5px] text-[#1E2125] truncate transition-colors group-hover:text-[#FF5E5E] group-hover:underline">
-                    {notice.title}
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <span className="truncate text-[14.5px] text-[#1E2125] transition-colors group-hover:text-[#FF5E5E] group-hover:underline">
+                      {notice.title}
+                    </span>
                     {notice.pinned && (
                       <Image
                         src="/pin-Icon.svg"
                         alt="고정"
                         width={13}
                         height={13}
-                        className="inline-block align-middle ml-1.5 -mt-0.5"
+                        className="shrink-0"
                       />
                     )}
                   </span>

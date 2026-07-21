@@ -85,7 +85,7 @@ export default function NoticeManagementList() {
         <thead>
           <tr className="border-b border-[#E5E7EB]">
             <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">#</th>
-            <th className="py-3 w-[52%] text-left pl-2 font-semibold text-[#1E2125]">제목</th>
+            <th className="py-3 w-[52%] text-center font-semibold text-[#1E2125]">제목</th>
             <th className="py-3 w-[20%] text-center font-semibold text-[#1E2125]">고정 여부</th>
             <th className="py-3 w-[20%] text-center font-semibold text-[#1E2125]">등록 날짜</th>
           </tr>
@@ -114,22 +114,24 @@ export default function NoticeManagementList() {
                 <td className="py-3 text-center text-[#6A7282]">
                   {page * ITEMS_PER_PAGE + idx + 1}
                 </td>
-                <td className="py-3 px-2 text-left truncate">
-                  <Link
-                    href={`/admin/noticemanage/${notice.noticeId}`}
-                    className="font-semibold text-[#1E2125] hover:text-[#FF5E5E] hover:underline transition-colors"
-                  >
-                    {notice.title}
-                  </Link>
-                  {notice.pinned && (
-                    <Image
-                      src="/pin-Icon.svg"
-                      alt="고정"
-                      width={15}
-                      height={15}
-                      className="inline-block align-middle ml-1.5 -mt-0.5"
-                    />
-                  )}
+                <td className="py-3 px-2 text-left">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Link
+                      href={`/admin/noticemanage/${notice.noticeId}`}
+                      className="truncate font-semibold text-[#1E2125] hover:text-[#FF5E5E] hover:underline transition-colors"
+                    >
+                      {notice.title}
+                    </Link>
+                    {notice.pinned && (
+                      <Image
+                        src="/pin-Icon.svg"
+                        alt="고정"
+                        width={15}
+                        height={15}
+                        className="shrink-0"
+                      />
+                    )}
+                  </div>
                 </td>
                 <td className="py-3 text-center">
                   {notice.pinned ? (

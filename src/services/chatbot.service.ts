@@ -2,6 +2,9 @@ import { ChatbotHistoryItem, ChatbotMessageResponse } from '@/features/user/ai-c
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// 백엔드가 재배포 등으로 응답을 못 주는 경우 무한 대기하지 않도록 타임아웃(60초)
+const CHATBOT_TIMEOUT_MS = 60000;
+
 export type SendChatbotMessageResult =
   | { success: true; reply: string }
   | { success: false; message: string };
@@ -16,6 +19,7 @@ export async function sendChatbotMessage(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message, history }),
+      signal: AbortSignal.timeout(CHATBOT_TIMEOUT_MS),
     });
 
     if (!res.ok) {
