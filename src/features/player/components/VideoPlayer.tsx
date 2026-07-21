@@ -1,6 +1,13 @@
 'use client';
 
 import { RefObject, useEffect, useState } from 'react';
+import { usePlayerSettings } from '../hooks/usePlayerSettings';
+import { useAutoHideControls } from '../hooks/useAutoHideControls';
+import { useVideoKeyboardShortcuts } from '../hooks/useVideoKeyboardShortcuts';
+import SeekBar from './SeekBar';
+import TimeDisplay from './TimeDisplay';
+import VolumeControl from './VolumeControl';
+import SpeedMenu from './SpeedMenu';
 
 interface VideoPlayerProps {
   videoRef: RefObject<HTMLVideoElement | null>;
@@ -10,17 +17,6 @@ interface VideoPlayerProps {
   onPlayingChange: (isPlaying: boolean) => void;
 }
 
-function formatTime(seconds: number): string {
-  if (!Number.isFinite(seconds)) return '0:00';
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
-
-// 볼륨/음소거 설정은 다음 영상·다음 방문에도 유지되도록 저장해둔다
-const VOLUME_STORAGE_KEY = 'player:volume';
-const MUTED_STORAGE_KEY = 'player:muted';
-
 export default function VideoPlayer({
   videoRef,
   src,
@@ -28,50 +24,17 @@ export default function VideoPlayer({
   onEnded,
   onPlayingChange,
 }: VideoPlayerProps) {
-  const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
+
+  const { volume, isMuted, playbackRate, toggleMute, handleVolumeChange, adjustVolume, changePlaybackRate } =
+    usePlayerSettings(videoRef, src);
+  const { showControls, handleMouseMove } = useAutoHideControls(isPlaying);
 
   const updatePlaying = (playing: boolean) => {
     setIsPlaying(playing);
     onPlayingChange(playing);
-  };
-
-  // 마운트 시 저장된 볼륨/음소거 설정 복원
-  useEffect(() => {
-    const storedVolume = Number(localStorage.getItem(VOLUME_STORAGE_KEY));
-    if (Number.isFinite(storedVolume) && storedVolume >= 0 && storedVolume <= 1) {
-      setVolume(storedVolume);
-    }
-    setIsMuted(localStorage.getItem(MUTED_STORAGE_KEY) === 'true');
-  }, []);
-
-  // 볼륨/음소거 상태가 바뀌거나 새 영상이 로드될 때마다 실제 video 엘리먼트에 반영
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.volume = volume;
-    video.muted = isMuted;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [volume, isMuted, src]);
-
-  const toggleMute = () => {
-    const next = !isMuted;
-    setIsMuted(next);
-    localStorage.setItem(MUTED_STORAGE_KEY, String(next));
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const next = Number(e.target.value);
-    setVolume(next);
-    localStorage.setItem(VOLUME_STORAGE_KEY, String(next));
-    // 슬라이더를 올리면 음소거 상태였더라도 자동으로 해제 (일반적인 플레이어 UX)
-    if (next > 0 && isMuted) {
-      setIsMuted(false);
-      localStorage.setItem(MUTED_STORAGE_KEY, 'false');
-    }
   };
 
   const togglePlay = () => {
@@ -90,13 +53,13 @@ export default function VideoPlayer({
     videoRef.current?.requestFullscreen?.();
   };
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const video = videoRef.current;
-    if (!video) return;
-    const time = Number(e.target.value);
-    video.currentTime = time;
-    setCurrentTime(time);
-  };
+  useVideoKeyboardShortcuts({
+    videoRef,
+    onTogglePlay: togglePlay,
+    onToggleMute: toggleMute,
+    onAdjustVolume: adjustVolume,
+    onFullscreen: handleFullscreen,
+  });
 
   // 영상 메타데이터가 로드되면 이어보기 지점으로 시작 위치 설정
   const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
@@ -104,7 +67,6 @@ export default function VideoPlayer({
     setDuration(video.duration);
     if (startSeconds > 0 && startSeconds < video.duration) {
       video.currentTime = startSeconds;
-      setCurrentTime(startSeconds);
     }
   };
 
@@ -128,25 +90,37 @@ export default function VideoPlayer({
     if (!video || startSeconds <= 0) return;
     if (video.readyState >= 1 && startSeconds < video.duration) {
       video.currentTime = startSeconds;
-      setCurrentTime(startSeconds);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startSeconds]);
 
   return (
-    <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden">
+    <div
+      onMouseMove={handleMouseMove}
+      className={`relative w-full aspect-video bg-black rounded-xl overflow-hidden ${
+        !showControls && isPlaying ? 'cursor-none' : ''
+      }`}
+    >
       <video
         ref={videoRef}
         src={src}
         className="w-full h-full"
-        onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
         onLoadedMetadata={handleLoadedMetadata}
         onDurationChange={handleDurationChange}
         onPlay={() => updatePlaying(true)}
         onPause={() => updatePlaying(false)}
+        onWaiting={() => setIsBuffering(true)}
+        onPlaying={() => setIsBuffering(false)}
         onEnded={onEnded}
         onClick={togglePlay}
       />
+
+      {/* 버퍼링 인디케이터 */}
+      {isBuffering && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span className="w-12 h-12 rounded-full border-4 border-white/30 border-t-white animate-spin" />
+        </div>
+      )}
 
       {/* 중앙 재생 버튼 (정지 상태일 때만) */}
       {!isPlaying && (
@@ -163,15 +137,12 @@ export default function VideoPlayer({
       )}
 
       {/* 하단 컨트롤 바 */}
-      <div className="absolute bottom-0 left-0 right-0 px-4 pb-3">
-        <input
-          type="range"
-          min={0}
-          max={duration || 0}
-          value={currentTime}
-          onChange={handleSeek}
-          className="w-full h-1 mb-2 accent-[#FF5E5E] cursor-pointer"
-        />
+      <div
+        className={`absolute bottom-0 left-0 right-0 px-4 pb-3 transition-opacity duration-200 ${
+          showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <SeekBar videoRef={videoRef} duration={duration} />
         <div className="flex items-center justify-between text-white text-[13px]">
           <div className="flex items-center gap-3">
             <button onClick={togglePlay} className="cursor-pointer">
@@ -185,43 +156,24 @@ export default function VideoPlayer({
                 </svg>
               )}
             </button>
-            <span>
-              {formatTime(currentTime)} / {formatTime(duration)}
-            </span>
-            <div className="group/volume flex items-center gap-1.5">
-              <button
-                onClick={toggleMute}
-                aria-label={isMuted || volume === 0 ? '음소거 해제' : '음소거'}
-                className="cursor-pointer shrink-0"
-              >
-                {isMuted || volume === 0 ? (
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-white">
-                    <path d="M3 10v4h4l5 5V5L7 10H3z" fill="white" stroke="none" />
-                    <path d="M15.5 9.5l5 5m0-5l-5 5" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
-                    <path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2A4.5 4.5 0 0 0 14 7.97v8.05A4.48 4.48 0 0 0 16.5 12z" />
-                  </svg>
-                )}
-              </button>
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.01}
-                value={isMuted ? 0 : volume}
-                onChange={handleVolumeChange}
-                aria-label="볼륨 조절"
-                className="w-0 group-hover/volume:w-16 focus:w-16 h-1 accent-[#FF5E5E] cursor-pointer opacity-0 group-hover/volume:opacity-100 focus:opacity-100 transition-all"
-              />
-            </div>
+            <TimeDisplay videoRef={videoRef} duration={duration} />
+            <VolumeControl
+              volume={volume}
+              isMuted={isMuted}
+              onToggleMute={toggleMute}
+              onVolumeChange={handleVolumeChange}
+            />
           </div>
-          <button onClick={handleFullscreen} className="cursor-pointer">
-            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
-              <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
-            </svg>
-          </button>
+
+          <div className="flex items-center gap-3">
+            <SpeedMenu playbackRate={playbackRate} onChangeRate={changePlaybackRate} />
+
+            <button onClick={handleFullscreen} className="cursor-pointer">
+              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
+                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
