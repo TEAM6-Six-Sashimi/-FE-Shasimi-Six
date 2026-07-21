@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface PortfolioProps {
   portfolioUrl: string;
 }
@@ -12,7 +14,7 @@ export default function PortfolioSection({ portfolioUrl }: PortfolioProps) {
         rel="noopener noreferrer"
         className="flex items-center gap-1.5 text-[13px] text-[#5B8DEE] underline hover:text-[#3B66B9] w-fit"
       >
-        <span>🔗</span> {portfolioUrl}
+        <Image src="/chain-link.svg" width={15} height={15} alt="링크" /> {portfolioUrl}
       </a>
     </section>
   );

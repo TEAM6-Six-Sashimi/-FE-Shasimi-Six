@@ -24,59 +24,63 @@ export default function CourseRecommendationSection({
         자격증 기반 강의 정보
       </h2>
 
-      <div className="flex flex-col gap-3">
-        {courses.map((course) => {
-          const detail = courseDetailMap.get(course.courseId);
+      {courses.length === 0 ? (
+        <p className="py-8 text-center text-[13px] text-[#9CA3AF]">추천할 강의 정보가 없습니다.</p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {courses.map((course) => {
+            const detail = courseDetailMap.get(course.courseId);
 
-          return (
-            <div
-              key={course.courseId}
-              className="flex items-center gap-4 border border-[#E5E7EB] rounded-xl p-4"
-            >
-              <div className="relative w-30 h-20 rounded-lg overflow-hidden bg-[#E5E7EB] shrink-0">
-                {detail?.thumbnail && (
-                  <Image
-                    src={getThumbnailUrl(detail.thumbnail) ?? ''}
-                    alt={course.title}
-                    fill
-                    unoptimized={isLocalhostUrl(detail.thumbnail)}
-                    sizes="120px"
-                    className="object-cover"
-                  />
-                )}
-              </div>
+            return (
+              <div
+                key={course.courseId}
+                className="flex items-center gap-4 border border-[#E5E7EB] rounded-xl p-4"
+              >
+                <div className="relative w-30 h-20 rounded-lg overflow-hidden bg-[#E5E7EB] shrink-0">
+                  {detail?.thumbnail && (
+                    <Image
+                      src={getThumbnailUrl(detail.thumbnail) ?? ''}
+                      alt={course.title}
+                      fill
+                      unoptimized={isLocalhostUrl(detail.thumbnail)}
+                      sizes="120px"
+                      className="object-cover"
+                    />
+                  )}
+                </div>
 
-              <div className="flex-1 min-w-0">
-                <p className="text-[14.5px] font-bold text-[#1E2125] truncate">{course.title}</p>
-                {detail?.instructorName && (
-                  <p className="text-[12.5px] text-[#6A7282] mt-0.5">{detail.instructorName}</p>
-                )}
-                {detail?.categoryName && (
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-[#FFEBEB] text-[#FF5E5E] text-[11.5px] font-medium">
-                    {detail.categoryName}
-                  </span>
-                )}
-              </div>
-              <div className="pt-9">
-                <Link
-                  href={
-                    detail?.categoryName
-                      ? `/courses/${encodeURIComponent(detail.categoryName)}/${course.courseId}`
-                      : `/courses/${course.courseId}`
-                  }
-                >
-                  <Button
-                    variant="outline"
-                    className="py-4 px-4 border-[#FF5E5E] text-[#FF5E5E] text-[12px] font-semibold hover:bg-[#FFEBEB] hover:text-[#FF5E5E] cursor-pointer shrink-0"
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14.5px] font-bold text-[#1E2125] truncate">{course.title}</p>
+                  {detail?.instructorName && (
+                    <p className="text-[12.5px] text-[#6A7282] mt-0.5">{detail.instructorName}</p>
+                  )}
+                  {detail?.categoryName && (
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-[#FFEBEB] text-[#FF5E5E] text-[11.5px] font-medium">
+                      {detail.categoryName}
+                    </span>
+                  )}
+                </div>
+                <div className="pt-9">
+                  <Link
+                    href={
+                      detail?.categoryName
+                        ? `/courses/${encodeURIComponent(detail.categoryName)}/${course.courseId}`
+                        : `/courses/${course.courseId}`
+                    }
                   >
-                    강의 바로가기
-                  </Button>
-                </Link>
+                    <Button
+                      variant="outline"
+                      className="py-4 px-4 border-[#FF5E5E] text-[#FF5E5E] text-[12px] font-semibold hover:bg-[#FFEBEB] hover:text-[#FF5E5E] cursor-pointer shrink-0"
+                    >
+                      강의 바로가기
+                    </Button>
+                  </Link>
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }

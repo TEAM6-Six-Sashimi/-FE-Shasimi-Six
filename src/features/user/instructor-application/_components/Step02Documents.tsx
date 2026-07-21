@@ -6,6 +6,7 @@ import Checkbox from '@/components/ui/Checkbox';
 import { Input } from '@/components/ui/input';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 import { useToast } from '@/components/ui/ToastContext';
+import Image from 'next/image';
 
 export interface CertificationItem {
   name: string;
@@ -368,7 +369,7 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
         </label>
         <div className="relative">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6A7282] text-[13px]">
-            🔗
+            <Image src="/chain-link.svg" width={15} height={15} alt="링크" />
           </span>
           <Input
             id="portfolioUrl"
