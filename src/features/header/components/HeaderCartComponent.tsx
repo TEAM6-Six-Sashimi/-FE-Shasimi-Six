@@ -21,10 +21,10 @@ export default async function HeaderCartLink({ accessToken }: HeaderCartComponen
     <Link
       href="/cart"
       aria-label={itemCount > 0 ? `장바구니 (${itemCount}개)` : '장바구니'}
-      className="flex items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]"
+      className="flex items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB] shrink-0"
     >
-      <span className="relative inline-flex">
-        <Image src="/header/cart.svg" width={17} height={17} alt="" />
+      <span className="relative inline-flex shrink-0">
+        <Image src="/header/cart.svg" width={17} height={17} alt="" className="shrink-0" />
         {itemCount > 0 && (
           <span
             aria-hidden="true"

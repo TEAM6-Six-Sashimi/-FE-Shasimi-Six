@@ -14,7 +14,7 @@ export default function VolumeControl({
   onVolumeChange,
 }: VolumeControlProps) {
   return (
-    <div className="group/volume flex items-center gap-1.5">
+    <div className="flex items-center gap-1.5">
       <button
         onClick={onToggleMute}
         aria-label={isMuted || volume === 0 ? '음소거 해제' : '음소거'}
@@ -39,7 +39,7 @@ export default function VolumeControl({
         value={isMuted ? 0 : volume}
         onChange={(e) => onVolumeChange(Number(e.target.value))}
         aria-label="볼륨 조절"
-        className="w-0 group-hover/volume:w-16 focus:w-16 h-1 accent-[#FF5E5E] cursor-pointer opacity-0 group-hover/volume:opacity-100 focus:opacity-100 transition-all"
+        className="w-14 sm:w-16 h-1 accent-[#FF5E5E] cursor-pointer"
       />
     </div>
   );

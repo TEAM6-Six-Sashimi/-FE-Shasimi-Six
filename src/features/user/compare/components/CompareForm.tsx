@@ -146,11 +146,11 @@ export default function ComapareForm() {
     <div className="flex flex-col gap-6">
       {/* ===================== 선택 영역 ===================== */}
       <div className="bg-white rounded-xl shadow-md p-7">
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex flex-wrap items-end gap-3 mb-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-[13px] font-semibold text-[#1E2125]">대분류</label>
             <Select value={mainCategoryId} onValueChange={handleMainCategoryChange}>
-              <SelectTrigger className={`${selectCls} w-48 cursor-pointer`}>
+              <SelectTrigger className={`${selectCls} w-40 sm:w-48 cursor-pointer`}>
                 <SelectValue placeholder="대분류 선택" />
               </SelectTrigger>
               <SelectContent position="popper" side="bottom">
@@ -167,7 +167,7 @@ export default function ComapareForm() {
             </Select>
           </div>
 
-          <span className="text-[#9CA3AF] mt-6">{'>'}</span>
+          <span className="hidden sm:inline text-[#9CA3AF] mb-2.5">{'>'}</span>
 
           <div className="flex flex-col gap-1.5">
             <label className="text-[13px] font-semibold text-[#1E2125]">자격증</label>
@@ -176,7 +176,7 @@ export default function ComapareForm() {
               onValueChange={handleSubCategoryChange}
               disabled={!mainCategoryId}
             >
-              <SelectTrigger className={`${selectCls} w-48 cursor-pointer`}>
+              <SelectTrigger className={`${selectCls} w-40 sm:w-48 cursor-pointer`}>
                 <SelectValue placeholder="자격증 선택" />
               </SelectTrigger>
               <SelectContent position="popper" side="bottom">
@@ -192,7 +192,7 @@ export default function ComapareForm() {
 
         <div className="flex flex-col gap-1">
           <label className="text-[13px] font-semibold text-[#1E2125]">비교 강의 선택</label>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
               { slot: slotA, key: 'A' as const },
               { slot: slotB, key: 'B' as const },
@@ -256,48 +256,50 @@ export default function ComapareForm() {
       </div>
 
       {/* ===================== 비교 표 ===================== */}
-      <div className="bg-white rounded-2xl shadow-md p-8">
-        <CompareRow label="기본 정보" isSection />
-        <CompareRow
-          label="난이도"
-          valueA={slotA.detail ? DIFFICULTY_LABEL[slotA.detail.difficulty] : null}
-          valueB={slotB.detail ? DIFFICULTY_LABEL[slotB.detail.difficulty] : null}
-          badge
-        />
-        <CompareRow
-          label="강의 수"
-          valueA={slotA.detail ? `${slotA.detail.sessions.length}강` : null}
-          valueB={slotB.detail ? `${slotB.detail.sessions.length}강` : null}
-        />
-        <CompareRow
-          label="가격"
-          valueA={slotA.detail ? `${slotA.detail.price.toLocaleString()} 크레딧` : null}
-          valueB={slotB.detail ? `${slotB.detail.price.toLocaleString()} 크레딧` : null}
-          highlight
-        />
+      <div className="bg-white rounded-2xl shadow-md p-8 overflow-x-auto">
+        <div className="min-w-110">
+          <CompareRow label="기본 정보" isSection />
+          <CompareRow
+            label="난이도"
+            valueA={slotA.detail ? DIFFICULTY_LABEL[slotA.detail.difficulty] : null}
+            valueB={slotB.detail ? DIFFICULTY_LABEL[slotB.detail.difficulty] : null}
+            badge
+          />
+          <CompareRow
+            label="강의 수"
+            valueA={slotA.detail ? `${slotA.detail.sessions.length}강` : null}
+            valueB={slotB.detail ? `${slotB.detail.sessions.length}강` : null}
+          />
+          <CompareRow
+            label="가격"
+            valueA={slotA.detail ? `${slotA.detail.price.toLocaleString()} 크레딧` : null}
+            valueB={slotB.detail ? `${slotB.detail.price.toLocaleString()} 크레딧` : null}
+            highlight
+          />
 
-        <CompareRow label="수강 현황" isSection />
-        <CompareRow
-          label="평점"
-          valueA={slotA.detail ? `⭐ ${slotA.detail.ratingAvg.toFixed(1)} / 5.0` : null}
-          valueB={slotB.detail ? `⭐ ${slotB.detail.ratingAvg.toFixed(1)} / 5.0` : null}
-        />
-        <CompareRow
-          label="수강생"
-          valueA={slotA.detail ? `${slotA.detail.studentCount.toLocaleString()}명` : null}
-          valueB={slotB.detail ? `${slotB.detail.studentCount.toLocaleString()}명` : null}
-        />
+          <CompareRow label="수강 현황" isSection />
+          <CompareRow
+            label="평점"
+            valueA={slotA.detail ? `⭐ ${slotA.detail.ratingAvg.toFixed(1)} / 5.0` : null}
+            valueB={slotB.detail ? `⭐ ${slotB.detail.ratingAvg.toFixed(1)} / 5.0` : null}
+          />
+          <CompareRow
+            label="수강생"
+            valueA={slotA.detail ? `${slotA.detail.studentCount.toLocaleString()}명` : null}
+            valueB={slotB.detail ? `${slotB.detail.studentCount.toLocaleString()}명` : null}
+          />
 
-        <CompareRow label="강사 정보" isSection />
-        <CompareRow
-          label="강사명"
-          valueA={slotA.detail?.instructor.name ?? null}
-          valueB={slotB.detail?.instructor.name ?? null}
-        />
-        <CompareCareerRow label="주요 경력" detailA={slotA.detail} detailB={slotB.detail} />
+          <CompareRow label="강사 정보" isSection />
+          <CompareRow
+            label="강사명"
+            valueA={slotA.detail?.instructor.name ?? null}
+            valueB={slotB.detail?.instructor.name ?? null}
+          />
+          <CompareCareerRow label="주요 경력" detailA={slotA.detail} detailB={slotB.detail} />
 
-        <CompareRow label="커리큘럼" isSection />
-        <CompareSessionRow label="전체 세션" detailA={slotA.detail} detailB={slotB.detail} />
+          <CompareRow label="커리큘럼" isSection />
+          <CompareSessionRow label="전체 세션" detailA={slotA.detail} detailB={slotB.detail} />
+        </div>
       </div>
     </div>
   );

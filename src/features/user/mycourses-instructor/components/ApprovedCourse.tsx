@@ -52,8 +52,8 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
   return (
     <div className="flex flex-col gap-6">
       {/* 검색 + 정렬 + 강의 신청 버튼 */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 flex-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
           {/* 검색창 */}
           <div className="relative flex-1 max-w-sm">
             <input
@@ -92,8 +92,8 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
           </Select>
         </div>
 
-        <Link href="/mycourses-instructor/new">
-          <Button className="h-11 px-5 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[13px] font-semibold cursor-pointer shrink-0">
+        <Link href="/mycourses-instructor/new" className="shrink-0">
+          <Button className="h-11 px-5 w-full sm:w-auto bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[13px] font-semibold cursor-pointer shrink-0">
             + 신규 강의 신청
           </Button>
         </Link>
@@ -110,9 +110,9 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
             return (
               <div
                 key={course.courseId}
-                className="bg-white rounded-xl border border-[#D1D5DB] px-5 py-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
+                className="bg-white rounded-xl border border-[#D1D5DB] px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4 hover:shadow-sm transition-shadow"
               >
-                <div className="flex flex-col gap-1 flex-1">
+                <div className="flex flex-col gap-1 flex-1 min-w-0">
                   <p className="text-[14.5px] font-semibold text-[#1E2125]">{course.title}</p>
                   <p className="text-[12px] text-[#6A7282]">{getCategoryName(course.categoryId)}</p>
                   <div className="flex items-center gap-2 text-[12px] text-[#6A7282]">
@@ -124,7 +124,7 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
                   </div>
                 </div>
 
-                <div className="flex flex-col items-end gap-2 shrink-0">
+                <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 shrink-0">
                   <span className="text-[15px] font-bold text-[#1E2125]">
                     {course.price?.toLocaleString() || 0}{' '}
                     <span className="text-[13px] font-normal text-[#6A7282]">크레딧</span>

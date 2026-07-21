@@ -41,12 +41,18 @@ export default function Header({ user, accessToken }: HeaderProps) {
       ) : (
         <div className="flex flex-1 justify-end">
           {user.role === 'STUDENT' && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <Link
                 href="/credit"
-                className="flex text-[15px] font-medium gap-1 items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]"
+                className="flex text-[15px] font-medium gap-1 items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB] shrink-0"
               >
-                <Image src="/header/credit.svg" width={17} height={17} alt="크레딧 충전" />
+                <Image
+                  src="/header/credit.svg"
+                  width={17}
+                  height={17}
+                  alt="크레딧 충전"
+                  className="shrink-0"
+                />
                 <span className="hidden sm:inline">크레딧 충전</span>
               </Link>
               <HeaderCartLink accessToken={accessToken} />
@@ -55,12 +61,18 @@ export default function Header({ user, accessToken }: HeaderProps) {
           )}
 
           {user.role === 'INSTRUCTOR' && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <Link
                 href="/credit"
-                className="flex text-[15px] font-medium gap-1 items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]"
+                className="flex text-[15px] font-medium gap-1 items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB] shrink-0"
               >
-                <Image src="/header/credit.svg" width={17} height={17} alt="크레딧 충전" />
+                <Image
+                  src="/header/credit.svg"
+                  width={17}
+                  height={17}
+                  alt="크레딧 충전"
+                  className="shrink-0"
+                />
                 <span className="hidden sm:inline">크레딧 충전</span>
               </Link>
               <HeaderCartLink accessToken={accessToken} />
@@ -69,13 +81,19 @@ export default function Header({ user, accessToken }: HeaderProps) {
           )}
 
           {user.role === 'ADMIN' && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <AdminModeToggle />
               <Link
                 href="/credit"
-                className="flex text-[15px] font-medium gap-1 items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB]"
+                className="flex text-[15px] font-medium gap-1 items-center h-8 px-2 rounded-md transition-colors duration-200 hover:bg-[#E5E7EB] shrink-0"
               >
-                <Image src="/header/credit.svg" width={17} height={17} alt="크레딧 충전" />
+                <Image
+                  src="/header/credit.svg"
+                  width={17}
+                  height={17}
+                  alt="크레딧 충전"
+                  className="shrink-0"
+                />
                 <span className="hidden sm:inline">크레딧 충전</span>
               </Link>
               <HeaderCartLink accessToken={accessToken} />

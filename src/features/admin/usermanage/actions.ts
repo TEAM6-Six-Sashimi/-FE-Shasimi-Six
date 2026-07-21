@@ -57,31 +57,36 @@ export async function rejectInstructorAction(
 export async function getApplicationDetailAction(
   applicationId: number,
 ): Promise<InstructorApplicationDetail | null> {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value ?? '';
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value ?? '';
 
-  const detail = await fetchInstructorApplicationDetail(accessToken, applicationId);
+    const detail = await fetchInstructorApplicationDetail(accessToken, applicationId);
 
-  if (!detail) return null;
+    if (!detail) return null;
 
-  const [pending, rejected] = await Promise.all([
-    fetchInstructorApplications(accessToken),
-    fetchRejectedInstructorApplications(accessToken),
-  ]);
+    const [pending, rejected] = await Promise.all([
+      fetchInstructorApplications(accessToken),
+      fetchRejectedInstructorApplications(accessToken),
+    ]);
 
-  const fromPending = pending.find((p) => p.applicationId === applicationId);
-  const fromRejected = rejected.find((r) => r.applicationId === applicationId);
-  const matched = fromPending ?? fromRejected;
+    const fromPending = pending.find((p) => p.applicationId === applicationId);
+    const fromRejected = rejected.find((r) => r.applicationId === applicationId);
+    const matched = fromPending ?? fromRejected;
 
-  const merged: InstructorApplicationDetail = {
-    ...detail,
-    mainCareers: detail.mainCareers ?? [],
-    certifications: detail.certifications ?? [],
-    name: matched?.name,
-    loginId: matched?.loginId,
-    email: matched?.email,
-    categoryName: fromPending?.categoryName ?? detail.categoryName,
-  };
+    const merged: InstructorApplicationDetail = {
+      ...detail,
+      mainCareers: detail.mainCareers ?? [],
+      certifications: detail.certifications ?? [],
+      name: matched?.name,
+      loginId: matched?.loginId,
+      email: matched?.email,
+      categoryName: fromPending?.categoryName ?? detail.categoryName,
+    };
 
-  return merged;
+    return merged;
+  } catch (error) {
+    console.error('[getApplicationDetailAction] failed:', error);
+    return null;
+  }
 }

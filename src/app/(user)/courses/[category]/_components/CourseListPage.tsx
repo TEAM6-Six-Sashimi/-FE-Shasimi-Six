@@ -95,7 +95,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-6 py-8">
         {/* 헤더: 카테고리 타이틀 + 검색 */}
-        <div className="flex items-center justify-between gap-3 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <h1 className="text-[#1E2125] text-3xl font-bold">{category}</h1>
 
           <div className="flex items-center gap-3">
@@ -157,7 +157,7 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
 
         {/* 서브카테고리 탭 + 정렬 */}
         <div className="flex items-center justify-between mb-6 border-b border-[#E5E7EB]">
-          <nav aria-label="세부 카테고리">
+          <nav aria-label="세부 카테고리" className="min-w-0 flex-1">
             <ul className="flex items-center gap-0 overflow-x-auto list-none">
               {subCategories.map((item) => {
                 const isActive = subCategoryId ? subCategoryId === item.id : item.id === 0;
