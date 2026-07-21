@@ -83,7 +83,7 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
     <div className="max-w-275 min-h-[calc(100vh-95px)] container mx-auto px-6 py-8">
       <h1 className="text-[24px] font-bold text-[#1E2125] mb-5">내 강의</h1>
 
-      <div className="flex items-center gap-0 border-b border-[#E5E7EB] mb-6">
+      <div className="flex items-center gap-0 border-b border-[#E5E7EB] mb-6 overflow-x-auto">
         {TABS.map(({ id, label }) => {
           const href =
             id === 'dashboard' ? '/mycourses-instructor' : `/mycourses-instructor?tab=${id}`;
@@ -91,7 +91,7 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
             <Link
               key={id}
               href={href}
-              className={`px-5 py-3 text-[13.5px] font-medium whitespace-nowrap border-b-2 transition-colors duration-150 ${
+              className={`px-5 py-3 text-[13.5px] font-medium whitespace-nowrap shrink-0 border-b-2 transition-colors duration-150 ${
                 activeTab === id
                   ? 'border-[#FF5E5E] text-[#FF5E5E] font-semibold'
                   : 'border-transparent text-[#6A7282] hover:text-[#1E2125]'

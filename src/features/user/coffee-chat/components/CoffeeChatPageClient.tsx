@@ -167,7 +167,7 @@ export default function CoffeeChatPageClient({
   const hasSelection = !!selectedStudentRoom || !!selectedInstructorChat;
 
   return (
-    <div className="flex flex-col lg:flex-row bg-white h-[calc(100vh-180px)] lg:h-[calc(100vh-140px)] min-h-125 lg:min-h-167.5">
+    <div className="flex flex-col lg:flex-row bg-white h-full">
       <div
         className={`w-full lg:w-105 xl:w-125 shrink-0 flex-1 lg:flex-none ${
           hasSelection ? 'hidden lg:block' : ''

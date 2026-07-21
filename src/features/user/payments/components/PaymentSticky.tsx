@@ -40,11 +40,13 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
   const [errorMessage, setErrorMessage] = useState('');
   const [showErrorModal, setShowErrorModal] = useState(false);
 
-  const idempotencyKeyRef = useRef('');
-
-  const generateIdempotencyKey = () => {
+  // 결제 시도 중 재시도해도 서버가 같은 요청으로 식별할 수 있도록, 컴포넌트 생애주기 동안 하나로 고정
+  const idempotencyKeyRef = useRef<string | null>(null);
+  if (idempotencyKeyRef.current === null) {
     idempotencyKeyRef.current = crypto.randomUUID();
-  };
+  }
+  // 확인 모달을 빠르게 연타해도 결제 요청이 중복 전송되지 않도록 하는 동기 가드
+  const isSubmittingRef = useRef(false);
 
   const isSubscription = summary.purchaseType === 'AI_SUBSCRIPTION';
 
@@ -60,13 +62,17 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
       return;
     }
 
-    generateIdempotencyKey();
     setShowConfirmModal(true);
   };
 
   const handleConfirmPayment = async () => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     setShowConfirmModal(false);
     setIsLoading(true);
+
+    // 컴포넌트 첫 렌더링 시점에 이미 채워져 있음이 보장됨
+    const idempotencyKey = idempotencyKeyRef.current as string;
 
     let result;
     if (summary.purchaseType === 'AI_SUBSCRIPTION') {
@@ -76,7 +82,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
           planCode: summary.planCode,
           agreed: true,
         },
-        idempotencyKeyRef.current,
+        idempotencyKey,
       );
     } else if (summary.purchaseType === 'COURSE') {
       result = await checkoutAction(
@@ -85,7 +91,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
           courseId: summary.courseIds?.[0],
           agreed: true,
         },
-        idempotencyKeyRef.current,
+        idempotencyKey,
       );
     } else {
       result = await checkoutAction(
@@ -94,7 +100,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
           courseIds: summary.courseIds,
           agreed: true,
         },
-        idempotencyKeyRef.current,
+        idempotencyKey,
       );
     }
 
@@ -103,12 +109,14 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
     } else {
       if (result.maintenance) {
         setMaintenance(true, result.message);
+        isSubmittingRef.current = false;
         return;
       }
 
       if (result.code === 'UNAUTHORIZED') {
         router.push('/auth/login');
         setIsLoading(false);
+        isSubmittingRef.current = false;
         return;
       }
 
@@ -117,6 +125,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
     }
 
     setIsLoading(false);
+    isSubmittingRef.current = false;
   };
 
   // 결제 완료 후 이동 경로 (강의 결제 완료 시에만)

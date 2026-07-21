@@ -102,9 +102,9 @@ export default function PrivateCourse({ courses = [], categories = [] }: Props) 
             return (
               <div
                 key={course.courseId}
-                className="bg-white rounded-xl border border-[#D1D5DB] px-5 py-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
+                className="bg-white rounded-xl border border-[#D1D5DB] px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4 hover:shadow-sm transition-shadow"
               >
-                <div className="flex flex-col gap-1 flex-1">
+                <div className="flex flex-col gap-1 flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-[14.5px] font-semibold text-[#1E2125]">{course.title}</p>
                   </div>
@@ -117,7 +117,7 @@ export default function PrivateCourse({ courses = [], categories = [] }: Props) 
                   </div>
                 </div>
 
-                <div className="flex flex-col items-end gap-2 shrink-0">
+                <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 shrink-0">
                   <span className="text-[15px] font-bold text-[#1E2125]">
                     {course.price?.toLocaleString() || 0}{' '}
                     <span className="text-[13px] font-normal text-[#6A7282]">크레딧</span>

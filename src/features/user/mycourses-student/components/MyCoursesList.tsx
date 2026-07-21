@@ -72,16 +72,16 @@ export default function MyCoursesList({ courses }: Props) {
                 className="bg-white rounded-xl border border-[#E5E7EB] p-5"
               >
                 <Link href={courseDetailHref(course)}>
-                  <div className="flex gap-5">
+                  <div className="flex flex-col sm:flex-row gap-5">
                     {/* 썸네일 */}
-                    <div className="relative w-44 h-28 shrink-0 rounded-lg overflow-hidden bg-[#E5E7EB]">
+                    <div className="relative w-full h-40 sm:w-44 sm:h-28 shrink-0 rounded-lg overflow-hidden bg-[#E5E7EB]">
                       {thumbnailUrl && (
                         <Image
                           src={thumbnailUrl}
                           alt={course.title}
                           fill
                           unoptimized={isLocalhostUrl(thumbnailUrl)}
-                          sizes="176px"
+                          sizes="(max-width: 640px) 100vw, 176px"
                           priority={idx === 0}
                           className="object-cover"
                         />
@@ -89,39 +89,23 @@ export default function MyCoursesList({ courses }: Props) {
                     </div>
 
                     {/* 우측 전체 */}
-                    <div className="flex-1 flex flex-col">
-                      {/* 상단: 강의 정보 + 버튼 */}
-                      <div className="flex items-start justify-between">
-                        <div className="flex flex-col gap-1">
+                    <div className="flex-1 flex flex-col min-w-0">
+                      {/* 상단: 강의 정보 + 버튼(데스크톱) */}
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                        <div className="flex flex-col gap-1 min-w-0">
                           <p className="text-[16px] font-extrabold text-[#1E2125] leading-snug mt-2">
                             {course.title}
                           </p>
                         </div>
 
-                        {/* 버튼 */}
-                        <div className="flex items-center gap-2 shrink-0 ml-4">
-                          <Button
-                            size="sm"
-                            onClick={(e) => handleContinueWatching(e, course)}
-                            disabled={isLoading}
-                            className="h-9 px-4 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[12.5px] font-semibold cursor-pointer disabled:opacity-70"
-                          >
-                            {isLoading
-                              ? '이동 중...'
-                              : course.completed
-                                ? '다시보기 >'
-                                : course.progressRate > 0
-                                  ? '이어보기 >'
-                                  : '수강하기 >'}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={(e) => handleWriteReview(e, course)}
-                            className="h-9 px-4 border-[1.5px] border-[#1E2125] text-[#1E2125] text-[12.5px] font-semibold bg-white hover:bg-[#F9FAFB] cursor-pointer"
-                          >
-                            리뷰 작성
-                          </Button>
+                        {/* 버튼(데스크톱: 제목 옆) */}
+                        <div className="hidden sm:flex items-center gap-2 shrink-0 sm:ml-4">
+                          <CourseActionButtons
+                            course={course}
+                            isLoading={isLoading}
+                            onContinueWatching={handleContinueWatching}
+                            onWriteReview={handleWriteReview}
+                          />
                         </div>
                       </div>
                       <div>
@@ -158,6 +142,16 @@ export default function MyCoursesList({ courses }: Props) {
                           />
                         </div>
                       </div>
+
+                      {/* 버튼(모바일: 진행률 아래) */}
+                      <div className="flex sm:hidden items-center gap-2 mt-3 justify-end">
+                        <CourseActionButtons
+                          course={course}
+                          isLoading={isLoading}
+                          onContinueWatching={handleContinueWatching}
+                          onWriteReview={handleWriteReview}
+                        />
+                      </div>
                     </div>
                   </div>
                 </Link>
@@ -167,5 +161,44 @@ export default function MyCoursesList({ courses }: Props) {
         )}
       </div>
     </div>
+  );
+}
+
+function CourseActionButtons({
+  course,
+  isLoading,
+  onContinueWatching,
+  onWriteReview,
+}: {
+  course: StudentCourse;
+  isLoading: boolean;
+  onContinueWatching: (e: React.MouseEvent, course: StudentCourse) => void;
+  onWriteReview: (e: React.MouseEvent, course: StudentCourse) => void;
+}) {
+  return (
+    <>
+      <Button
+        size="sm"
+        onClick={(e) => onContinueWatching(e, course)}
+        disabled={isLoading}
+        className="h-9 px-4 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[12.5px] font-semibold cursor-pointer disabled:opacity-70"
+      >
+        {isLoading
+          ? '이동 중...'
+          : course.completed
+            ? '다시보기 >'
+            : course.progressRate > 0
+              ? '이어보기 >'
+              : '수강하기 >'}
+      </Button>
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={(e) => onWriteReview(e, course)}
+        className="h-9 px-4 border-[1.5px] border-[#1E2125] text-[#1E2125] text-[12.5px] font-semibold bg-white hover:bg-[#F9FAFB] cursor-pointer"
+      >
+        리뷰 작성
+      </Button>
+    </>
   );
 }

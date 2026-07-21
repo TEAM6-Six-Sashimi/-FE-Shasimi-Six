@@ -72,15 +72,15 @@ export default function TokenTimer() {
   const s = String(remaining % 60).padStart(2, '0');
 
   return (
-    <div className="flex h-7 items-end gap-1.5">
-      <span className="text-[14px] text-[#6A7282] tabular-nums">
+    <div className="flex flex-col items-center gap-0 sm:flex-row sm:h-7 sm:items-end sm:gap-1.5">
+      <span className="text-[14px] text-[#6A7282] tabular-nums leading-tight">
         {h}:{m}:{s}
       </span>
       <button
         type="button"
         onClick={handleExtend}
         disabled={isExtending}
-        className="text-[13px] text-[#6A7282] underline cursor-pointer disabled:opacity-50"
+        className="text-[13px] text-[#6A7282] underline cursor-pointer disabled:opacity-50 leading-tight"
       >
         연장하기
       </button>

@@ -73,7 +73,10 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/courses/${id}`, {
             headers: { Authorization: `Bearer ${accessToken}` },
             cache: 'no-store',
-          }).then((r) => r.json()),
+          }).then((r) => {
+            if (!r.ok) throw new Error(`강의(${id}) 조회 실패: ${r.status}`);
+            return r.json();
+          }),
         ),
       ),
       fetchCreditBalance(accessToken),
@@ -91,6 +94,14 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
       totalPrice = items.reduce((sum, item) => sum + item.price, 0);
     } else {
       console.error('강의 정보 조회 실패:', courseResults.reason);
+      return (
+        <div className="max-w-3xl mx-auto py-24 text-center text-[#6A7282]">
+          <p className="text-[16px] font-semibold text-[#1E2125] mb-2">
+            결제 정보를 불러오지 못했습니다.
+          </p>
+          <p className="text-[13.5px]">잠시 후 다시 시도해주세요.</p>
+        </div>
+      );
     }
 
     if (creditsResult.status === 'fulfilled') {

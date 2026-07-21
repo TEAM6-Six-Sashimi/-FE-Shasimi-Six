@@ -46,12 +46,14 @@ export default async function CoffeeChatPage() {
   }
 
   return (
-    <CoffeeChatPageClient
-      role={user.role}
-      userId={user.id}
-      studentChatRooms={studentChatRooms}
-      instructorPendingChats={instructorPendingChats}
-      instructorActiveChats={instructorActiveChats}
-    />
+    <div className="h-[calc(100vh-95px)] lg:h-[calc(100vh-95px)] min-h-100 lg:min-h-100">
+      <CoffeeChatPageClient
+        role={user.role}
+        userId={user.id}
+        studentChatRooms={studentChatRooms}
+        instructorPendingChats={instructorPendingChats}
+        instructorActiveChats={instructorActiveChats}
+      />
+    </div>
   );
 }
