@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { PaymentSummary } from '../types';
 import { checkoutAction } from '../actions';
 import { useMaintenance } from '@/components/system/MaintenanceProvider';
@@ -27,6 +27,8 @@ const ERROR_MAP: Record<string, string> = {
 
 export function PaymentSticky({ summary }: PaymentStickyProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { setMaintenance } = useMaintenance();
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [agreedToRefund, setAgreedToRefund] = useState(false);
@@ -205,7 +207,10 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
           cancelLabel="취소"
           onConfirm={() => {
             setShowInsufficientModal(false);
-            router.push('/credit');
+            // 충전 완료 후 다시 이 결제 페이지로 돌아올 수 있도록 현재 경로를 실어 보낸다
+            const query = searchParams.toString();
+            const returnTo = query ? `${pathname}?${query}` : pathname;
+            router.push(`/credit?returnTo=${encodeURIComponent(returnTo)}`);
           }}
           onCancel={() => setShowInsufficientModal(false)}
         />

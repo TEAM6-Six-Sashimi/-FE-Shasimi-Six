@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { confirmCreditChargeAction } from '@/features/user/credit/actions';
 import { useMaintenance } from '@/components/system/MaintenanceProvider';
+import { isSafeReturnPath } from '@/lib/utils';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 
 type ConfirmState = 'loading' | 'success' | 'error';
@@ -67,7 +68,10 @@ export default function CreditSuccessPage() {
         <OneButtonModal
           title="충전 완료"
           message={`${chargedAmount.toLocaleString()} 크레딧이 충전되었습니다.`}
-          onConfirm={() => router.push('/')}
+          onConfirm={() => {
+            const returnTo = searchParams.get('returnTo');
+            router.push(isSafeReturnPath(returnTo) ? returnTo : '/');
+          }}
         />
       )}
       {state === 'error' && (

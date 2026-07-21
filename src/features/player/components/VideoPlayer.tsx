@@ -17,6 +17,10 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+// 볼륨/음소거 설정은 다음 영상·다음 방문에도 유지되도록 저장해둔다
+const VOLUME_STORAGE_KEY = 'player:volume';
+const MUTED_STORAGE_KEY = 'player:muted';
+
 export default function VideoPlayer({
   videoRef,
   src,
@@ -27,10 +31,47 @@ export default function VideoPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
 
   const updatePlaying = (playing: boolean) => {
     setIsPlaying(playing);
     onPlayingChange(playing);
+  };
+
+  // 마운트 시 저장된 볼륨/음소거 설정 복원
+  useEffect(() => {
+    const storedVolume = Number(localStorage.getItem(VOLUME_STORAGE_KEY));
+    if (Number.isFinite(storedVolume) && storedVolume >= 0 && storedVolume <= 1) {
+      setVolume(storedVolume);
+    }
+    setIsMuted(localStorage.getItem(MUTED_STORAGE_KEY) === 'true');
+  }, []);
+
+  // 볼륨/음소거 상태가 바뀌거나 새 영상이 로드될 때마다 실제 video 엘리먼트에 반영
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = volume;
+    video.muted = isMuted;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [volume, isMuted, src]);
+
+  const toggleMute = () => {
+    const next = !isMuted;
+    setIsMuted(next);
+    localStorage.setItem(MUTED_STORAGE_KEY, String(next));
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const next = Number(e.target.value);
+    setVolume(next);
+    localStorage.setItem(VOLUME_STORAGE_KEY, String(next));
+    // 슬라이더를 올리면 음소거 상태였더라도 자동으로 해제 (일반적인 플레이어 UX)
+    if (next > 0 && isMuted) {
+      setIsMuted(false);
+      localStorage.setItem(MUTED_STORAGE_KEY, 'false');
+    }
   };
 
   const togglePlay = () => {
@@ -147,9 +188,34 @@ export default function VideoPlayer({
             <span>
               {formatTime(currentTime)} / {formatTime(duration)}
             </span>
-            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
-              <path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2A4.5 4.5 0 0 0 14 7.97v8.05A4.48 4.48 0 0 0 16.5 12z" />
-            </svg>
+            <div className="group/volume flex items-center gap-1.5">
+              <button
+                onClick={toggleMute}
+                aria-label={isMuted || volume === 0 ? '음소거 해제' : '음소거'}
+                className="cursor-pointer shrink-0"
+              >
+                {isMuted || volume === 0 ? (
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-white">
+                    <path d="M3 10v4h4l5 5V5L7 10H3z" fill="white" stroke="none" />
+                    <path d="M15.5 9.5l5 5m0-5l-5 5" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
+                    <path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2A4.5 4.5 0 0 0 14 7.97v8.05A4.48 4.48 0 0 0 16.5 12z" />
+                  </svg>
+                )}
+              </button>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={isMuted ? 0 : volume}
+                onChange={handleVolumeChange}
+                aria-label="볼륨 조절"
+                className="w-0 group-hover/volume:w-16 focus:w-16 h-1 accent-[#FF5E5E] cursor-pointer opacity-0 group-hover/volume:opacity-100 focus:opacity-100 transition-all"
+              />
+            </div>
           </div>
           <button onClick={handleFullscreen} className="cursor-pointer">
             <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">

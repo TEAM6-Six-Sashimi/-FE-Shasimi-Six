@@ -3,8 +3,10 @@ export interface MaintenanceStatus {
   message: string;
 }
 
+// 백엔드에 직접 묻는 대신 캐시가 걸린 내부 라우트(/api/maintenance-status)를 거친다 -
+// 클라이언트가 몇 명이든 실제 백엔드 조회는 서버 인스턴스당 5초에 한 번으로 묶인다.
 export async function fetchMaintenanceStatus(): Promise<MaintenanceStatus> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/maintenance/status`);
+  const res = await fetch('/api/maintenance-status');
   return res.json();
 }
 
