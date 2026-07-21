@@ -33,7 +33,7 @@ export default async function InstructorProfilePage() {
   try {
     profile = await fetchInstructorProfile(user.id, accessToken);
   } catch (e) {
-    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
+    // 세션이 완전히 끊긴 경우 - 로그아웃 처리
     if (e instanceof AuthSessionError) {
       return <SessionExpiredRedirect message={e.message} />;
     }

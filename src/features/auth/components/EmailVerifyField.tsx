@@ -62,12 +62,18 @@ export default function EmailVerifyField({
               : 'bg-[#FF5F5F] text-white hover:bg-[#D14848]'
           }`}
         >
-          {isSending ? '발송 중...' : isVerified ? '인증 완료' : isSent ? '재발송' : '인증번호 발송'}
+          {isSending
+            ? '발송 중...'
+            : isVerified
+              ? '인증 완료'
+              : isSent
+                ? '재발송'
+                : '인증번호 발송'}
         </Button>
       </div>
 
       {emailHasError && (
-        <p className="text-xs mt-1 font-medium text-[#DC2626]">이메일 형식을 지켜주세요</p>
+        <p className="text-xs mt-1 font-medium text-[#DC2626]">올바른 이메일 형식을 지켜주세요</p>
       )}
       {!emailHasError && sendMessage && (
         <p className="text-xs mt-1 font-medium text-[#6A7282]">{sendMessage}</p>

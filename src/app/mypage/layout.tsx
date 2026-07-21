@@ -30,7 +30,7 @@ export default async function UserMypageLayout({ children }: { children: React.R
       </div>
     );
   } catch (error) {
-    // 마이페이지 하위 전체를 보호: 세션이 죽은 상태면 빈/깨진 화면 대신 로그아웃 처리
+    // 마이페이지 하위 전체를 보호 - 세션이 죽은 상태면 로그아웃 처리
     if (error instanceof UserMeAuthError) {
       const message = (await parseAuthErrorMessage(error.response)) ?? '다시 로그인해주세요.';
       return <SessionExpiredRedirect message={message} />;

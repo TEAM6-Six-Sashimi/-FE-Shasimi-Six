@@ -10,7 +10,7 @@ import { MySubscription, SubscriptionPlan } from '@/features/user/payments/types
 interface Props {
   plans: SubscriptionPlan[];
   mySubscription: MySubscription | null;
-  aiConsent: boolean; // GET /users/me 응답의 aiConsent
+  aiConsent: boolean; // ai 동의 여부
 }
 
 export default function AiSubscribePage({ plans, mySubscription, aiConsent }: Props) {
@@ -27,7 +27,6 @@ export default function AiSubscribePage({ plans, mySubscription, aiConsent }: Pr
       setAgreementModalOpen(true);
       return;
     }
-    // 결제 페이지로 이동 - 거기서 preview 조회 + 결제까지 일괄 처리
     router.push(`/payments?type=subscription&planCode=${planCode}`);
   };
 

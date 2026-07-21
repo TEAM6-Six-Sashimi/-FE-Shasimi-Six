@@ -181,8 +181,7 @@ export default function Dashboard() {
                   <div>
                     <p className="text-[14px] font-bold text-[#1E2125]">매출 통계</p>
                     <p className="text-[12px] text-[#6A7282]">
-                      {year}년 {month}월 총 매출: {(sales?.totalSales ?? 0).toLocaleString()}{' '}
-                      크레딧
+                      {year}년 {month}월 총 매출: {(sales?.totalSales ?? 0).toLocaleString()} 크레딧
                     </p>
                   </div>
                   {sales?.courses.length ? (
@@ -240,30 +239,28 @@ export default function Dashboard() {
                     <p className="text-[12px] text-[#6A7282]">완강 기준: 100%</p>
                   </div>
                   {sortedCompletionCourses.length ? (
-                    sortedCompletionCourses
-                      .slice(pageStart, pageEnd)
-                      .map((c) => (
-                        <div
-                          key={c.courseId}
-                          className="flex flex-col gap-1.5 py-2 border-b border-[#F3F4F6] last:border-none"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-[13.5px] text-[#1E2125]">{c.title}</span>
-                            <span className="text-[12px] text-[#6A7282]">
-                              ({c.completedStudentCount}명 / {c.totalStudentCount}명){' '}
-                              <span className="font-semibold text-[#1E2125]">
-                                {c.completionRate}%
-                              </span>
+                    sortedCompletionCourses.slice(pageStart, pageEnd).map((c) => (
+                      <div
+                        key={c.courseId}
+                        className="flex flex-col gap-1.5 py-2 border-b border-[#F3F4F6] last:border-none"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-[13.5px] text-[#1E2125]">{c.title}</span>
+                          <span className="text-[12px] text-[#6A7282]">
+                            ({c.completedStudentCount}명 / {c.totalStudentCount}명){' '}
+                            <span className="font-semibold text-[#1E2125]">
+                              {c.completionRate}%
                             </span>
-                          </div>
-                          <div className="w-full h-2 bg-[#D1D5DB] rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-[#CFEE5D] rounded-full"
-                              style={{ width: `${c.completionRate}%` }}
-                            />
-                          </div>
+                          </span>
                         </div>
-                      ))
+                        <div className="w-full h-2 bg-[#D1D5DB] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[#CFEE5D] rounded-full"
+                            style={{ width: `${c.completionRate}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))
                   ) : (
                     <p className="text-center text-[13px] text-[#6A7282] py-6">
                       완강률 내역이 없습니다.

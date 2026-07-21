@@ -62,7 +62,7 @@ async function clearAuthCookies() {
   const cookieStore = await cookies();
   cookieStore.delete('accessToken');
   cookieStore.delete('refreshToken');
-  cookieStore.delete('role'); // role도 삭제
+  cookieStore.delete('role');
   cookieStore.delete('accessTokenExpiresAt');
 }
 
@@ -71,7 +71,7 @@ export async function logoutAction(): Promise<void> {
   redirect('/');
 }
 
-// 토큰 만료 등으로 세션이 끊겨 재로그인이 필요한 경우 - 홈이 아니라 로그인 페이지로 바로 이동시킨다.
+// 재로그인이 필요한 경우 - 홈이 아니라 로그인 페이지로 바로 이동
 export async function logoutToLoginAction(): Promise<void> {
   await clearAuthCookies();
   redirect('/auth/login');
@@ -109,7 +109,7 @@ export async function reissueAction(): Promise<
       path: '/',
     });
 
-    // 만료 시각도 새로 갱신
+    // 만료 시각 새로 갱신
     cookieStore.set('accessTokenExpiresAt', String(result.accessTokenExpiresIn), {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',

@@ -88,8 +88,6 @@ export default function PersonalInfoEditPage({ user }: Props) {
     }
 
     // 새 비밀번호를 입력했으면 비밀번호도 변경
-    // 서버가 새 accessToken/refreshToken을 내려주고 쿠키를 즉시 교체하므로
-    // 세션이 끊기지 않고 그대로 마이페이지로 돌아갈 수 있음
     if (newPassword) {
       const passwordResult = await changePasswordAction({
         currentPassword,
@@ -213,7 +211,6 @@ export default function PersonalInfoEditPage({ user }: Props) {
       <div className="pt-5 mt-5 border-t border-[#E5E7EB]">
         <p className="text-[14px] font-semibold text-[#1E2125] mb-3">동의 여부</p>
 
-        {/* 필수 항목 - 항상 동의 상태, 변경 불가 (하드코딩) */}
         <div className="flex items-center justify-between py-3 border-b border-[#F3F4F6]">
           <div>
             <p className="text-[14px] font-semibold text-[#1E2125]">개인정보 수집 및 이용</p>

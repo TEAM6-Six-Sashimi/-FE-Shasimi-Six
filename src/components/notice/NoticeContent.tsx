@@ -3,7 +3,6 @@
 import { ReactNode, useMemo } from 'react';
 import { getThumbnailUrl } from '@/lib/thumbnail';
 
-// 공지사항 content에 들어간 간단한 서식 문법을 렌더링
 // - ![alt](url) : 이미지
 // - [size=N]text[/size] : 글씨 크기 (내부에 **볼드**도 중첩 가능)
 // - **text** : 볼드
@@ -34,7 +33,6 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
       const resolvedUrl = getThumbnailUrl(url);
       if (resolvedUrl) {
         nodes.push(
-          // eslint-disable-next-line @next/next/no-img-element -- 첨부 이미지는 크기를 알 수 없어 비율 유지가 필요, next/image는 부적합
           <img
             key={`${keyPrefix}-img${idx++}`}
             src={resolvedUrl}

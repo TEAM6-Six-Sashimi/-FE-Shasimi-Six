@@ -20,7 +20,6 @@ export default function AdminCourseDetail({ course, categories }: AdminCourseDet
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // 목록 페이지에서 ?from=탭이름 으로 들어왔으면 그 탭으로, 아니면 기본(전체) 탭으로 복귀
   const fromTab = searchParams.get('from');
   const backTab: Tab = VALID_TABS.includes(fromTab as Tab) ? (fromTab as Tab) : 'all';
   const backToListUrl =

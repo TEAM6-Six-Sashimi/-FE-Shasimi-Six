@@ -24,7 +24,7 @@ const STATUS_BADGE_CLS: Record<AdminUser['status'], string> = {
   SUSPENDED: 'bg-[#FEE2E2] text-[#B91C1C]',
 };
 
-// YYYY-MM-DDTHH:mm:ss → YYYY-MM-DD 로 표시 (날짜만 필요한 컬럼용)
+// YYYY-MM-DDTHH:mm:ss → YYYY-MM-DD 로 표시
 const formatDate = (value: string | null) => (value ? value.slice(0, 10) : '-');
 
 const ITEMS_PER_PAGE = 10;

@@ -6,7 +6,6 @@ import { handleAuthErrorResponse } from '@/features/auth/auth-error';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // 강사 지원자 자격증 진위확인 명단 제출 + 엑셀 다운로드 (관리자 전용)
-// 백엔드가 이 호출 자체를 "제출 처리"로 간주하므로, 다운로드가 곧 제출임에 유의
 export async function GET(req: NextRequest) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value ?? '';

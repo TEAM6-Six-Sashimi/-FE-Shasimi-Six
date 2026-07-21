@@ -99,35 +99,14 @@ export default function PrivateCourse({ courses = [], categories = [] }: Props) 
           </div>
         ) : (
           paged.map((course) => {
-            // const thumbnailUrl = getThumbnailUrl(course.thumbnail);
             return (
               <div
                 key={course.courseId}
                 className="bg-white rounded-xl border border-[#D1D5DB] px-5 py-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
               >
-                {/* 썸네일 */}
-                {/* <div className="relative w-24 h-16 rounded-lg overflow-hidden bg-[#E5E7EB] shrink-0">
-                  {thumbnailUrl ? (
-                    <Image
-                      src={thumbnailUrl}
-                      alt={course.title}
-                      fill
-                      unoptimized
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#9CA3AF] text-[11px]">
-                      No Image
-                    </div>
-                  )}
-                </div> */}
-
                 <div className="flex flex-col gap-1 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="text-[14.5px] font-semibold text-[#1E2125]">{course.title}</p>
-                    {/* <span className="text-[11.5px] text-[#9CA3AF]">
-                      비공개 처리일: {course.privatedAt}
-                    </span> */}
                   </div>
                   <p className="text-[12px] text-[#6A7282]">{getCategoryName(course.categoryId)}</p>
                   <div className="flex items-center gap-2 text-[12px] text-[#6A7282]">

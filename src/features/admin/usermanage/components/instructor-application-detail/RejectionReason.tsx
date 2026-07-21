@@ -3,10 +3,7 @@ interface RejectionReasonProps {
   reason: string;
 }
 
-export default function RejectionReason({
-  categoryLabel,
-  reason,
-}: RejectionReasonProps) {
+export default function RejectionReason({ categoryLabel, reason }: RejectionReasonProps) {
   return (
     <section className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-7">
       <h2 className="text-[15px] font-bold text-[#1E2125] mb-4">반려 사유</h2>

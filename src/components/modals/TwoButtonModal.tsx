@@ -10,7 +10,7 @@ interface TwoButtonModalProps {
   cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
-  /** 제공하면 우측 상단에 X 버튼이 노출되고, 클릭 시 이 콜백이 호출됩니다. */
+  // 제공하면 우측 상단에 X 버튼
   onClose?: () => void;
 }
 

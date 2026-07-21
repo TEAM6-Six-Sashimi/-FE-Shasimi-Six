@@ -7,8 +7,6 @@ export interface JobPostingRecommendationRequest {
   rawContent?: string | null;
 }
 
-// ===== GET /recommendations/job-posting/{recommendationId} 응답 =====
-
 export type AnalysisStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
 
 export interface JobPostingSummary {
@@ -61,7 +59,7 @@ export interface JobPostingRecommendationResult {
   analysisStatus: AnalysisStatus;
   resumeBased: boolean;
   summary: JobPostingSummary | null;
-  fitAnalysis: FitAnalysis | null; // resumeBased가 false or PENDING이면 null
+  fitAnalysis: FitAnalysis | null;    // resumeBased가 false or PENDING이면 null
   certificates: RecommendedCertificate[] | null;
   courses: RecommendedCourse[] | null;
   createdAt: string;
@@ -83,7 +81,7 @@ export type AnalyzeResult =
   | { success: true; data: JobPostingRecommendationResponse }
   | { success: false; error: RecommendationApiErrorBody };
 
-// GET /recommendations/job-posting/latest 응답 - 입력창 포커스 시 드롭다운에 보여줄 최근 분석 기록 1건
+// 입력창 포커스 시 드롭다운에 보여줄 최근 분석 기록 1건
 export interface LatestJobPostingRecommendation {
   recommendationId: number;
   resumeId: number | null;

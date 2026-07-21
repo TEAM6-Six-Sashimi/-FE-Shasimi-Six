@@ -90,7 +90,7 @@ const EMPTY_FORM: SelfIntroductionFormData = {
   conflictResolution: '',
 };
 
-// GET /cover-letters 응답 → 폼 상태로 변환 (작성 전이면 items가 전부 빈 content로 옴)
+// GET /cover-letters 응답 → 폼 상태로 변환
 export function toFormData(items: CoverLetterItem[] | undefined): SelfIntroductionFormData {
   if (!items) return EMPTY_FORM;
   const contentByKey = new Map(items.map((item) => [item.questionKey, item.content]));
@@ -114,7 +114,7 @@ export function toSavePayload(form: SelfIntroductionFormData): CoverLetterSavePa
   };
 }
 
-// POST /cover-letters/review 응답
+// POST /cover-letters/review
 export interface CoverLetterReviewSummary {
   completedCount: number;
   totalCount: number;
@@ -141,7 +141,7 @@ export type CoverLetterReviewResponse =
   | { success: true; data: CoverLetterReviewResult }
   | { success: false; error: CoverLetterReviewError };
 
-// GET /cover-letters/reviews/latest/summary 응답
+// GET /cover-letters/reviews/latest/summary
 export interface CoverLetterReviewDetail {
   reviewId: number;
   createdAt: string;
@@ -175,7 +175,7 @@ export interface CoverLetterReviewQuestion {
   improvedExample: string | null;
 }
 
-// GET /cover-letters/reviews/{reviewId} 응답
+// GET /cover-letters/reviews/{reviewId}
 export interface CoverLetterReviewDetailResult {
   reviewId: number;
   questions: CoverLetterReviewQuestion[];

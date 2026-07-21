@@ -48,7 +48,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
 
   const isSubscription = summary.purchaseType === 'AI_SUBSCRIPTION';
 
-  // 동의 체크박스만 충족하면 버튼 활성화 (크레딧 조건 제거)
+  // 동의 체크박스만 충족하면 버튼 활성화
   const canPurchase = agreedToTerms && agreedToRefund;
 
   const handlePaymentClick = () => {
@@ -119,7 +119,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
     setIsLoading(false);
   };
 
-  // 결제 완료 후 이동 경로 (강의 결제 완료 시에만 사용 — 구독은 선택지가 2개라 별도 처리)
+  // 결제 완료 후 이동 경로 (강의 결제 완료 시에만)
   const completeRedirectPath = '/mycourses-student';
   const cancelRedirectPath = '/cart';
 
@@ -195,7 +195,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
         </div>
       </div>
 
-      {/* 결제 처리 중 전체 화면 로딩 - 처리 도중 다른 곳으로 이탈하지 못하게 막는다 */}
+      {/* 결제 처리 중 전체 화면 로딩 */}
       {isLoading && <FullScreenLoading message="결제를 처리하고 있어요..." />}
 
       {/* 크레딧 부족 모달 */}
@@ -207,7 +207,7 @@ export function PaymentSticky({ summary }: PaymentStickyProps) {
           cancelLabel="취소"
           onConfirm={() => {
             setShowInsufficientModal(false);
-            // 충전 완료 후 다시 이 결제 페이지로 돌아올 수 있도록 현재 경로를 실어 보낸다
+            // 충전 완료 후 다시 이 결제 페이지로 돌아올 수 있도록 현재 경로를 실어 보냄
             const query = searchParams.toString();
             const returnTo = query ? `${pathname}?${query}` : pathname;
             router.push(`/credit?returnTo=${encodeURIComponent(returnTo)}`);

@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { checkLoginIdDuplicate } from "@/services/auth.service"
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { checkLoginIdDuplicate } from '@/services/auth.service';
 
 const LENGTH_REGEX = /^[a-zA-Z0-9]{6,20}$/;
 const HAS_UPPER = /[A-Z]/;
@@ -17,7 +17,7 @@ interface LoginIdFieldProps {
   isAvailable: boolean;
   onAvailableChange: (value: boolean) => void;
 }
- 
+
 export default function LoginIdField({
   value,
   onChange,
@@ -27,7 +27,7 @@ export default function LoginIdField({
   onAvailableChange,
 }: LoginIdFieldProps) {
   const [message, setMessage] = useState('');
- 
+
   // 길이/허용문자 조건
   const isLengthValid = LENGTH_REGEX.test(value);
   // 영문 대소문자+숫자 모두 포함 조건
@@ -35,35 +35,35 @@ export default function LoginIdField({
   // 최종 형식 통과 여부
   const isFormatValid = isLengthValid && hasAllTypes;
   const hasError = value !== '' && !isFormatValid;
- 
+
   const inputCls = (error: boolean) =>
     `w-full h-9 px-4 rounded-lg border bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none transition-colors ${
       error ? 'border-[#FF5F5F]' : 'border-[#D1D5DB] focus:border-[#1E2125]'
     }`;
- 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
     onCheckedChange(false);
     setMessage('');
   };
- 
+
   const handleCheck = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
- 
+
     // 글자 수 확인
     if (!isLengthValid) {
       setMessage('아이디 글자 수를 확인해주세요');
       onAvailableChange(false);
       return;
     }
- 
+
     // 영문+숫자 포함 조건 확인
     if (!hasAllTypes) {
       setMessage('아이디 형식을 확인해주세요');
       onAvailableChange(false);
       return;
     }
- 
+
     try {
       const isDuplicate = await checkLoginIdDuplicate(value);
       if (isDuplicate) {
@@ -81,7 +81,7 @@ export default function LoginIdField({
       setMessage('서버 통신에 실패했습니다. 잠시 후 다시 시도해 주세요.');
     }
   };
- 
+
   return (
     <div className="mb-4">
       <div className="flex mb-1">
@@ -109,7 +109,9 @@ export default function LoginIdField({
           {isChecked && isAvailable ? '확인 완료' : '중복 확인'}
         </Button>
       </div>
-      <p className="text-[12px] text-[#6A7282] mt-0.5">영문 대소문자, 숫자 포함 6자 이상 20자 이하</p>
+      <p className="text-[12px] text-[#6A7282] mt-0.5">
+        영문 대문자와 소문자, 숫자 모두 포함 6자 이상 20자 이하
+      </p>
       {hasError ? (
         <p className="text-xs mt-1 font-medium text-[#DC2626]">
           {!isLengthValid ? '아이디 글자 수를 확인해주세요' : '아이디 형식을 확인해주세요'}

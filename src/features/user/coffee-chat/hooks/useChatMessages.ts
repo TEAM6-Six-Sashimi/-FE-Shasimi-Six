@@ -5,7 +5,7 @@ import { useToast } from '@/components/ui/ToastContext';
 import { ChatMessage, ChatMessageEvent } from '../types';
 
 // 채팅방의 첫 메시지는 강사 요청 목록 반영 등 서버 쪽 추가 처리가 붙어서
-// 이후 메시지보다 왕복이 더 걸리는 경우가 있어, 여유를 두고 6초로 잡는다.
+// 이후 메시지보다 왕복이 더 걸리는 경우가 있어 6초
 const SEND_TIMEOUT_MS = 6000;
 
 interface UseChatMessagesParams {
@@ -15,8 +15,7 @@ interface UseChatMessagesParams {
   isConnected: boolean;
   subscribe: (chatId: number, onMessage: (message: ChatMessage) => void) => () => void;
   sendMessage: (chatId: number, content: string) => boolean;
-  // 사이드바 목록의 최근 메시지 미리보기를 실시간으로 갱신하기 위한 콜백.
-  // 이 방에서 오간 모든 메시지(내가 보낸 것 포함)에 대해 호출된다.
+  // 사이드바 목록의 최근 메시지 미리보기를 실시간으로 갱신하기 위한 콜백
   onMessage?: (message: ChatMessageEvent) => void;
 }
 
@@ -37,33 +36,25 @@ export function useChatMessages({
   const [pendingContent, setPendingContent] = useState<string | null>(null);
   const listEndRef = useRef<HTMLDivElement>(null);
 
-  // subscribe 이펙트의 onMessage 클로저가 매 렌더마다 재생성되지 않아서
-  // pendingContent state를 직접 참조하면 오래된 값을 보게 된다 (stale closure).
-  // 항상 최신 값을 읽기 위해 ref로 따로 추적한다.
+  // 최신 값을 읽기 위해 ref로 따로 추적
   const pendingContentRef = useRef<string | null>(null);
   useEffect(() => {
     pendingContentRef.current = pendingContent;
   }, [pendingContent]);
 
-  // onMessage도 같은 이유(stale closure)로 ref에 담아 최신 함수를 참조한다.
+  // onMessage도 같은 이유로 ref에 담아 최신 함수 참조
   const onMessageRef = useRef(onMessage);
   useEffect(() => {
     onMessageRef.current = onMessage;
   }, [onMessage]);
 
-  // READ 이벤트가 히스토리 응답이나 대상 MESSAGE보다 먼저 도착할 수 있어서,
-  // 그 시점에 존재하는 메시지에만 적용하고 버리면 이후 병합/도착하는 메시지가 다시
-  // "읽지 않음"으로 보인다. 마지막으로 읽힌 지점을 워터마크로 따로 들고 있다가
-  // 메시지 목록이 갱신될 때마다 함께 적용한다.
   const lastReadMessageIdRef = useRef(0);
 
   function applyReadWatermark(list: ChatMessageEvent[]) {
     const watermark = lastReadMessageIdRef.current;
     if (watermark <= 0) return list;
     return list.map((m) =>
-      m.senderId === myUserId && m.messageId <= watermark && !m.isRead
-        ? { ...m, isRead: true }
-        : m,
+      m.senderId === myUserId && m.messageId <= watermark && !m.isRead ? { ...m, isRead: true } : m,
     );
   }
 
@@ -77,8 +68,7 @@ export function useChatMessages({
     fetchMessages(chatId).then((history) => {
       if (cancelled) return;
 
-      // 히스토리 응답이 오기 전에 소켓으로 먼저 도착한 실시간 메시지가 있을 수 있어서,
-      // 그대로 덮어쓰지 않고 messageId 기준으로 병합한다 (안 그러면 그 메시지가 사라짐).
+      // 히스토리 응답이 오기 전에 먼저 도착한 실시간 메시지가 있을 수 있어서, 그대로 덮어쓰지 않고 messageId 기준으로 병합
       setMessages((prev) => {
         const merged = [...history];
         for (const message of prev) {
@@ -91,7 +81,6 @@ export function useChatMessages({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatId, fetchMessages]);
 
   // 연결되면 실시간 구독
@@ -100,8 +89,7 @@ export function useChatMessages({
 
     const unsubscribe = subscribe(chatId, (message) => {
       if (message.eventType === 'READ') {
-        // 읽음 이벤트는 새 메시지로 그리지 않고, 내가 보낸 메시지 중 lastReadMessageId
-        // 이하인 것들의 읽음 표시만 갱신한다.
+        // 읽음 이벤트는 새 메시지로 그리지 않고, 내가 보낸 메시지 중 lastReadMessageId 이하인 것들의 읽음 표시만 갱신
         lastReadMessageIdRef.current = Math.max(
           lastReadMessageIdRef.current,
           message.lastReadMessageId,
@@ -123,7 +111,6 @@ export function useChatMessages({
     });
 
     return unsubscribe;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected, chatId]);
 
   // 전송 타임아웃 처리

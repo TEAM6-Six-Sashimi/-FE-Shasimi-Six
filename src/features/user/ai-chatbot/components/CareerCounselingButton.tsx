@@ -5,13 +5,12 @@ import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 
-// 실제로 챗봇을 열기 전까지는 다운로드되지 않도록 지연 로딩 (모든 페이지에 떠 있는 버튼이라 초기 번들에서 빼는 효과가 큼)
+// 실제로 챗봇을 열기 전까지는 다운로드되지 않도록 지연 로딩
 const CareerCounselingChatPanel = dynamic(() => import('./CareerCounselingChatPanel'), {
   ssr: false,
 });
 
 const HOVER_MESSAGE = '진로에 대한 갈피를 못잡겠어? 핏봇에게 물어봐';
-// 60fps(약 16ms) 프레임 예산보다 촘촘하게 돌 필요가 없어 16ms로 맞춘다
 const TYPE_INTERVAL_MS = 16;
 
 // 챗봇 버튼을 숨길 페이지 - 커피챗, 강사 지원, 장바구니, 결제페이지, 강사-내강의
@@ -23,7 +22,7 @@ const HIDDEN_PATH_PREFIXES = [
   '/mycourses-instructor',
 ];
 
-// 진로 상담 챗봇 - 실제 AI 응답 연동 전까지는 임시 응답으로 UI만 동작
+// 진로 상담 챗봇
 export default function CareerCounselingButton() {
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false);
@@ -32,7 +31,6 @@ export default function CareerCounselingButton() {
   // 새로고침하면 다시 보이도록 저장소 없이 메모리 상태로만 관리 (페이지 이동 중에는 유지, 새로고침하면 초기화)
   const [isDismissed, setIsDismissed] = useState(false);
 
-  // 호버 중일 때만 메시지를 한 글자씩 타이핑, 벗어나면 초기화해서 다음 호버 때 처음부터
   useEffect(() => {
     if (!isHovered || isChatOpen) {
       setTypedText('');
@@ -49,7 +47,6 @@ export default function CareerCounselingButton() {
     return () => clearInterval(timer);
   }, [isHovered, isChatOpen]);
 
-  // 채팅창을 연 상태로 페이지를 이동하면 다음 방문 때 당황스러우니 경로가 바뀌면 닫아둔다
   useEffect(() => {
     setIsChatOpen(false);
   }, [pathname]);

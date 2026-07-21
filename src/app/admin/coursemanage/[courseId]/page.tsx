@@ -3,7 +3,6 @@ import { fetchCourseDetail } from '@/services/course.service';
 import { fetchCategories } from '@/services/categories.service';
 import AdminCourseDetail from './components/AdminCourseDetailPage';
 
-
 interface PageProps {
   params: Promise<{ courseId: string }>;
 }

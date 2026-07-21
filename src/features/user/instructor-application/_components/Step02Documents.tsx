@@ -28,9 +28,7 @@ interface Step02DocumentsProps {
 
 const formatFileSize = (bytes: number) => `${(bytes / 1024).toFixed(2)} KB`;
 
-// file.type(브라우저가 OS의 MIME 레지스트리를 참고해 채우는 값)은 환경에 따라 빈 문자열이나
-// application/octet-stream으로 잡히는 경우가 있어, 정상 파일도 잘못 거부될 수 있다.
-// 그래서 파일 내용과 무관하게 항상 일관된 파일 확장자로 검증한다.
+// 파일 내용과 무관하게 항상 일관된 파일 확장자로 검증
 const ALLOWED_CERT_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png'];
 const ALLOWED_RESUME_EXTENSIONS = ['.docx'];
 
@@ -52,7 +50,13 @@ function CheckboxItem({
 }) {
   return (
     <label htmlFor={id} className="flex items-center gap-2.5 cursor-pointer w-fit">
-      <Checkbox id={id} checked={checked} onChange={onChange} color="#CFEE5D" checkColor="#1E2125" />
+      <Checkbox
+        id={id}
+        checked={checked}
+        onChange={onChange}
+        color="#CFEE5D"
+        checkColor="#1E2125"
+      />
       <span className="text-[13px] text-[#1E2125]">{children}</span>
     </label>
   );
@@ -88,7 +92,9 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
     }
 
     const isDuplicate = (file: File) =>
-      form.certifications.some((cert) => cert.file.name === file.name && cert.file.size === file.size);
+      form.certifications.some(
+        (cert) => cert.file.name === file.name && cert.file.size === file.size,
+      );
     const newFiles = files.filter((f) => !isDuplicate(f));
 
     setCertError(newFiles.length < files.length ? '이미 첨부된 파일은 제외했습니다.' : '');
@@ -186,7 +192,8 @@ export default function Step02Documents({ data, onSubmit, onPrev }: Step02Docume
       >
         <span className={`font-semibold ${isError ? 'text-[#DC2626]' : 'text-[#854D0E]'}`}>ⓘ</span>
         <p className={`text-[13px] ${isError ? 'text-[#DC2626]' : 'text-[#854D0E]'}`}>
-          자격증, 이력서 등 필요한 서류를 첨부해주세요. 모든 필수 항목을 완료 후 지원서를 제출할 수 있습니다.
+          자격증, 이력서 등 필요한 서류를 첨부해주세요. 모든 필수 항목을 완료 후 지원서를 제출할 수
+          있습니다.
         </p>
       </div>
 

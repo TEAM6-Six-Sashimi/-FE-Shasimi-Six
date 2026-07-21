@@ -8,8 +8,8 @@ interface SeekBarProps {
   duration: number;
 }
 
-// 재생 시간(currentTime)이 초당 여러 번 바뀌므로, 이 값을 쓰는 탐색바만 별도 컴포넌트로
-// 분리해서 재생/음량/배속 등 나머지 컨트롤까지 매 tick마다 다시 렌더링되는 걸 막는다.
+// 재생 시간(currentTime) - 초당 업데이트
+// 탐색바(재생/음량/배속 등) 나머지 컨트롤까지 매 tick마다 다시 렌더링되는 걸 막음
 export default function SeekBar({ videoRef, duration }: SeekBarProps) {
   const currentTime = useVideoCurrentTime(videoRef);
 

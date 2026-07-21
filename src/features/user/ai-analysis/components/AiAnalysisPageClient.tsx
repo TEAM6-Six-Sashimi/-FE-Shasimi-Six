@@ -52,7 +52,7 @@ export default function AiAnalysisPageClient({
 
   const [tab, setTab] = useState<AiAnalysisTab>(initialTab);
 
-  // URL의 tab 쿼리가 바뀌면(뒤로가기, 주소 직접 입력 등) 탭 상태도 동기화
+  // URL의 tab 쿼리가 바뀌면 탭 상태도 동기화
   useEffect(() => {
     if (VALID_TABS.includes(tabFromUrl as AiAnalysisTab)) {
       setTab(tabFromUrl as AiAnalysisTab);

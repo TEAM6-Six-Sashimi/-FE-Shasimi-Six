@@ -12,7 +12,8 @@ import { CareerItem, EMPLOYMENT_TYPE_LABEL, EmploymentType } from '../types';
 const inputCls =
   'w-full h-9 px-3 rounded-lg border border-[#D1D5DB] bg-white text-[13px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors';
 
-const selectTriggerCls = 'h-9! w-full rounded-lg border-[#D1D5DB] bg-white text-[13px] text-[#1E2125]';
+const selectTriggerCls =
+  'h-9! w-full rounded-lg border-[#D1D5DB] bg-white text-[13px] text-[#1E2125]';
 
 const labelCls = 'text-[13px] font-semibold text-[#1E2125] mb-2 flex items-center gap-0.5';
 

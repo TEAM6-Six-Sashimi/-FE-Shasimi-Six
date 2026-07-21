@@ -26,13 +26,13 @@ const INSTRUCTOR_REJECT_CATEGORIES: RejectCategoryOption[] = [
   { value: 'INAPPROPRIATE_CAREER_INCLUDED', label: '부적절한 이력 포함' },
 ];
 
-// value → label (반려 사유 표시용)
+// 반려 사유 표시용
 const CATEGORY_LABEL_MAP: Record<string, string> = INSTRUCTOR_REJECT_CATEGORIES.reduce(
   (acc, c) => ({ ...acc, [c.value]: c.label }),
   {},
 );
 
-// label → value (RejectModal이 label을 콜백으로 넘기므로 백엔드 전송 전 역매핑용)
+// RejectModal이 label을 콜백으로 넘기므로 백엔드 전송 전 역매핑용
 const CATEGORY_VALUE_MAP: Record<string, string> = INSTRUCTOR_REJECT_CATEGORIES.reduce(
   (acc, c) => ({ ...acc, [c.label]: c.value }),
   {},
@@ -69,7 +69,6 @@ export default function InstructorApplicationDetailPage({ params }: Props) {
     };
   }, [applicationId]);
 
-  // 강사 승인 대기 목록에서 들어왔으면 그 탭으로, 아니면 기본(전체 회원) 탭으로 복귀
   const fromTab = searchParams.get('from') === 'approval' ? 'approval' : 'all';
   const backToListUrl =
     fromTab === 'approval' ? '/admin/usermanage?tab=approval' : '/admin/usermanage';

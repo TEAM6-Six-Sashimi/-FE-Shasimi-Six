@@ -9,7 +9,7 @@ import { useCoffeeChatSocket } from '../hooks/useCoffeeChatSocket';
 import { fetchChatMessagesAction, fetchInstructorMessagesAction } from '../actions';
 import { UserMe } from '@/features/auth/types';
 import { ChatMessageEvent, InstructorChatRoom, StudentChatRoom } from '../types';
-import { useCoffeeChatAlert } from '@/components/layout/CoffeeChatAlertContext';
+import { useCoffeeChatAlert } from '@/features/header/components/CoffeeChatAlertContext';
 
 interface CoffeeChatPageClientProps {
   role: UserMe['role'];
@@ -26,7 +26,7 @@ interface UnreadTrackable {
   lastMessageAt: string | null;
 }
 
-// 새 메시지 도착 시 해당 방의 안읽음 개수/미리보기 갱신 (목록에 없는 chatId면 그대로 반환)
+// 새 메시지 도착 시 해당 방의 안읽음 개수/미리보기 갱신
 function applyIncomingMessage<T extends UnreadTrackable>(
   list: T[],
   chatId: number,
@@ -44,7 +44,7 @@ function applyIncomingMessage<T extends UnreadTrackable>(
   );
 }
 
-// 방을 열람하면 그 방의 안읽음 개수를 0으로
+// 방을 열람하면 그 방의 안읽음 개수를 0
 function markRoomRead<T extends { chatId: number; unreadMessageCount: number }>(
   list: T[],
   chatId: number,
@@ -77,9 +77,7 @@ export default function CoffeeChatPageClient({
   const { isConnected, subscribe, sendMessage } = useCoffeeChatSocket(role !== 'GUEST');
   const { setHasAlert } = useCoffeeChatAlert();
 
-  // 안읽음 배지를 실시간으로 갱신하기 위해 서버 props를 그대로 렌더링하지 않고
-  // 로컬 state로 승격한다. router.refresh() 등으로 서버 props가 새로 내려오면
-  // (렌더링 도중 이전 prop과 비교해서) 로컬 state도 다시 동기화한다.
+  // 안읽음 배지를 실시간으로 갱신하기 위해 로컬 state로 승격
   const [rooms, setRooms] = useState(studentChatRooms);
   const [prevStudentChatRooms, setPrevStudentChatRooms] = useState(studentChatRooms);
   if (studentChatRooms !== prevStudentChatRooms) {
@@ -96,8 +94,7 @@ export default function CoffeeChatPageClient({
   }
 
   const [activeChats, setActiveChats] = useState(instructorActiveChats);
-  const [prevInstructorActiveChats, setPrevInstructorActiveChats] =
-    useState(instructorActiveChats);
+  const [prevInstructorActiveChats, setPrevInstructorActiveChats] = useState(instructorActiveChats);
   if (instructorActiveChats !== prevInstructorActiveChats) {
     setPrevInstructorActiveChats(instructorActiveChats);
     setActiveChats(instructorActiveChats);
@@ -112,8 +109,7 @@ export default function CoffeeChatPageClient({
       null)
     : null;
 
-  // 안읽음 상태가 바뀔 때마다(메시지 도착, 방을 읽어서 0이 됨 등) 상단 메뉴바의
-  // 커피챗 알림 점도 같은 순간에 실시간으로 갱신되도록 공유 컨텍스트에 반영한다.
+  // 안읽음 상태가 바뀔 때마다 상단 메뉴바의 커피챗 알림 점도 실시간으로 갱신되도록 공유 컨텍스트에 반영
   useEffect(() => {
     const hasAlert = isInstructor
       ? [...pendingChats, ...activeChats].some((chat) => chat.unreadMessageCount > 0)
@@ -121,9 +117,8 @@ export default function CoffeeChatPageClient({
     setHasAlert(hasAlert);
   }, [isInstructor, rooms, pendingChats, activeChats, setHasAlert]);
 
-  // 지금 열어본 방을 제외한 나머지 모든 방에 구독을 걸어서, 안 열어본(배경) 방에
-  // 새 메시지가 오면 목록의 안읽음 배지를 실시간으로 갱신한다.
-  // 열어본 방은 각 채팅 패널이 자체적으로 구독하므로 여기서는 제외한다(중복 구독 방지).
+  // 지금 열어본 방을 제외한 나머지 모든 방에 구독을 걸어서, 안 열어본 방에 새 메시지가 오면 목록의 안읽음 배지를 실시간으로 갱신
+  // 열어본 방은 각 채팅 패널이 자체적으로 구독하므로 여기서는 제외한다(중복 구독 방지)
   const roomIdsKey = rooms.map((room) => room.chatId).join(',');
   const pendingIdsKey = pendingChats.map((chat) => chat.chatId).join(',');
   const activeIdsKey = activeChats.map((chat) => chat.chatId).join(',');
@@ -139,8 +134,8 @@ export default function CoffeeChatPageClient({
 
     const unsubscribers = backgroundChatIds.map((chatId) =>
       subscribe(chatId, (message) => {
-        if (message.eventType === 'READ') return; // 읽음 이벤트는 안읽음 배지에 영향 없음
-        if (message.senderId === userId) return; // 내가 보낸 메시지는 안읽음으로 세지 않는다
+        if (message.eventType === 'READ') return;
+        if (message.senderId === userId) return;
 
         if (isInstructor) {
           setPendingChats((prev) => applyIncomingMessage(prev, chatId, message));
@@ -152,12 +147,10 @@ export default function CoffeeChatPageClient({
     );
 
     return () => unsubscribers.forEach((unsubscribe) => unsubscribe());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected, isInstructor, selectedChatId, roomIdsKey, pendingIdsKey, activeIdsKey]);
 
-  // 목록에서 채팅방을 고르는 시점에도 읽음 처리가 트리거되도록 메시지 조회를 한 번 미리 호출한다.
-  // (각 채팅 패널이 마운트되면서 한 번 더 조회하지만, 백엔드가 두 시점 모두에 대응해달라고 해서 둘 다 호출)
-  // 안읽음 배지는 서버 응답을 기다리지 않고 선택 즉시 0으로 반영한다.
+  // 목록에서 채팅방을 고르는 시점에도 읽음 처리가 트리거되도록 메시지 조회를 한 번 미리 호출
+  // 안읽음 배지는 서버 응답을 기다리지 않고 선택 즉시 0으로 반영
   const handleSelectChat = (chatId: number) => {
     setSelectedChatId(chatId);
 
@@ -174,9 +167,9 @@ export default function CoffeeChatPageClient({
   const hasSelection = !!selectedStudentRoom || !!selectedInstructorChat;
 
   return (
-    <div className="flex flex-col lg:flex-row bg-white h-[calc(100vh-180px)] lg:h-[calc(100vh-140px)] min-h-[500px] lg:min-h-[670px]">
+    <div className="flex flex-col lg:flex-row bg-white h-[calc(100vh-180px)] lg:h-[calc(100vh-140px)] min-h-125 lg:min-h-167.5">
       <div
-        className={`w-full lg:w-[420px] xl:w-[500px] shrink-0 flex-1 lg:flex-none ${
+        className={`w-full lg:w-105 xl:w-125 shrink-0 flex-1 lg:flex-none ${
           hasSelection ? 'hidden lg:block' : ''
         }`}
       >

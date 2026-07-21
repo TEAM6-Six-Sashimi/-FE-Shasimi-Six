@@ -32,7 +32,7 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
     (s) => s.sessionId === sessionId,
   );
 
-  // 이어보기 시작 지점: 쿼리(t)가 있으면 우선, 없으면 세션 응답의 lastPositionSeconds 사용
+  // 이어보기 시작 지점 - 쿼리(t)가 있으면 우선, 없으면 세션 응답의 lastPositionSeconds 사용
   const startSeconds = (() => {
     const queryT = Number(searchParams.get('t'));
     if (!Number.isNaN(queryT) && queryT > 0) return queryT;
@@ -40,7 +40,7 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
   })();
 
   const loggedOutRef = useRef(false);
-  // 실제 수강생(구매자)만 진행률 저장 대상 - 미리보기(PUBLIC)는 저장 API 호출 대상이 아님
+  // 미리보기(PUBLIC)는 저장 API 호출 대상이 아님
   const isEnrolled = course.viewerType !== 'PUBLIC';
 
   const saveProgress = useCallback(
@@ -50,7 +50,7 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
         await saveSessionProgressAction(courseId, sessionId, Math.floor(positionSeconds));
         return 'success';
       } catch (error) {
-        // 세션이 완전히 끊긴 경우(다른 기기 로그인 등) - 안내 후 한 번만 로그아웃 처리
+        // 세션이 완전히 끊긴 경우 - 안내 후 한 번만 로그아웃 처리
         if (error instanceof AuthSessionError) {
           if (!loggedOutRef.current) {
             loggedOutRef.current = true;
@@ -79,7 +79,6 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
         saveProgress(videoRef.current.currentTime);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleEndLearning = async () => {
@@ -91,7 +90,6 @@ export default function PlayerPage({ course, courseId, sessionId }: PlayerPagePr
     } else if (result === 'error') {
       showToast('저장에 실패했습니다. 잠시 후 다시 시도해주세요.', 'negative');
     }
-    // authError는 saveProgress 내부에서 이미 안내 토스트 + 로그아웃 처리함
 
     router.back();
     setTimeout(() => router.refresh(), 0);

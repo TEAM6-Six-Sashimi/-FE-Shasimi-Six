@@ -9,7 +9,10 @@ interface CourseDetailInstructorProps {
   categories: Category[];
 }
 
-export default function CourseDetailInstructor({ course, categories }: CourseDetailInstructorProps) {
+export default function CourseDetailInstructor({
+  course,
+  categories,
+}: CourseDetailInstructorProps) {
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
       <div className="max-w-275 mx-auto py-6 px-6">
@@ -19,7 +22,7 @@ export default function CourseDetailInstructor({ course, categories }: CourseDet
             categories={categories}
             showProgress={false}
             allSessionsPlayable={true}
-            reviewMode='hidden-form'
+            reviewMode="hidden-form"
           />
           <div className="w-72 shrink-0 sticky top-4">
             <CourseDetailSidebar course={course} actionSlot={null} />

@@ -40,8 +40,6 @@ export async function GET(req: NextRequest) {
   const blob = await res.blob();
   const contentType = res.headers.get('content-type') ?? 'application/octet-stream';
   const contentDisposition = res.headers.get('content-disposition');
-
-  // 백엔드가 파일명을 안 내려주면 key의 마지막 경로 조각을 파일명으로 사용
   const fallbackFilename = key.split('/').pop() || 'download';
 
   return new NextResponse(blob, {

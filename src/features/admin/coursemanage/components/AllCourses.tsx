@@ -29,7 +29,7 @@ export default function AllCourses({ courses, categories }: Props) {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // 세부카테고리명 → 대카테고리명 매핑 (courses.categoryName은 세부카테고리명만 담고 있음)
+  // 세부카테고리명 → 대카테고리명 매핑
   const subToMainMap = useMemo(() => {
     const map = new Map<string, string>();
     categories.forEach((cat) => {
@@ -65,8 +65,6 @@ export default function AllCourses({ courses, categories }: Props) {
   const paged = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   const getStatusBadge = (course: AdminCourse) => {
-    // status가 APPROVED이면서 비공개 처리된 경우를 구분할 필드가 따로 없다면,
-    // 우선 APPROVED → 공개, 그 외(DRAFT 등 전체 목록에 노출되는 경우) → 비공개로 표시
     const isPublic = course.status === 'APPROVED';
     return isPublic ? (
       <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#827717] bg-[#F9FBE7] border border-[#827717]">

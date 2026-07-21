@@ -79,7 +79,7 @@ export interface SubscriptionPaymentHistoryResponse {
   totalPages: number;
 }
 
-// 현재 구독 상태 (GET /subscriptions/me)
+// 현재 구독 상태
 export interface SubscriptionMeResponse {
   subscribed: boolean; // 현재 구독 중인지 여부
   subscriptionId: number;
@@ -90,7 +90,7 @@ export interface SubscriptionMeResponse {
   expiresAt: string;
   nextBillingAt: string | null;
   autoRenew: boolean;
-  cancellable: boolean; // true면 아직 해지 안 한 상태(해지하기 버튼 노출), false면 이미 해지 신청됨
+  cancellable: boolean; // true면 해지하기 버튼 노출, false면 이미 해지 신청됨
 }
 
 // 구독 해지
@@ -148,7 +148,6 @@ export const INSTRUCTOR_APPLICATION_STATUS_STYLE: Record<InstructorApplicationSt
 };
 
 // 강사 지원 상세 (반려 사유 포함)
-// 관리자 반려 처리 시 실제로 전송/저장되는 값과 동일하게 맞춤 (admin 쪽 RejectionCategory 타입은 오타가 있어 미신뢰)
 export type InstructorApplicationRejectionCategory =
   | 'INSUFFICIENT_CAREER_PROOF'
   | 'INSUFFICIENT_BASIC_INFO'

@@ -9,15 +9,15 @@ interface PageProps {
 
 export default async function Page({ params }: PageProps) {
   const { courseId } = await params;
- 
+
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
- 
+
   const [course, categories] = await Promise.all([
     fetchCourseDetail(courseId, accessToken),
-    fetchCategories()
-  ])
- 
+    fetchCategories(),
+  ]);
+
   if (!course) {
     return (
       <div className="min-h-screen flex items-center justify-center text-[#6A7282]">
@@ -25,7 +25,6 @@ export default async function Page({ params }: PageProps) {
       </div>
     );
   }
- 
+
   return <CourseDetailInstructor course={course} categories={categories} />;
 }
- 

@@ -3,7 +3,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import Image from 'next/image';
 
-// 입력창 최소/최대 높이 - 한 줄일 땐 전송 버튼과 높이를 맞추고, 두 줄 분량부터는 그 이상 늘어나지 않고 내부 스크롤
+// 입력창 최소/최대 높이
 export const TEXTAREA_MIN_HEIGHT = 40;
 export const TEXTAREA_MAX_HEIGHT = 61;
 
@@ -32,7 +32,6 @@ const ChatInput = forwardRef<HTMLTextAreaElement, Props>(function ChatInput(
   }, [value]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // 한글 등 IME 조합 중 Enter로 조합을 확정하는 경우까지 전송으로 처리되지 않도록 방지
     if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
       e.preventDefault();
       onSend();

@@ -64,7 +64,6 @@ export async function getApplicationDetailAction(
 
   if (!detail) return null;
 
-  // 상세 응답에 name/loginId/email이 없으므로 목록에서 찾아 보강
   const [pending, rejected] = await Promise.all([
     fetchInstructorApplications(accessToken),
     fetchRejectedInstructorApplications(accessToken),

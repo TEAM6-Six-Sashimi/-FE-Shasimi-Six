@@ -86,7 +86,7 @@ export default function ReviewReportDetailModal({ reportId, onClose, onProcessed
   };
 
   const isProcessed = detail?.reportStatus === 'PROCESSED';
-  // 같은 리뷰의 다른 신고가 이미 삭제 처리를 했다면, 이 신고는 아직 PENDING이어도 더 이상 처리할 수 없어야 함
+  // 같은 리뷰 다른 신고가 이미 처리를 했다면, 이 신고는 아직 PENDING이어도 더 이상 처리할 수 없어야 함
   const isReviewDeleted = detail?.reviewStatus === 'DELETED';
   const isLocked = isProcessed || isReviewDeleted;
 
@@ -159,7 +159,7 @@ export default function ReviewReportDetailModal({ reportId, onClose, onProcessed
             </div>
 
             {isLocked ? (
-              // 이미 처리된 신고이거나, 같은 리뷰가 다른 신고 건으로 이미 삭제된 경우: 중복 처리를 막기 위해 버튼 대신 현재 리뷰 상태만 표시
+              // 이미 처리된 신고: 중복 처리를 막기 위해 버튼 대신 현재 리뷰 상태만 표시
               <div className="mt-2 bg-[#F9FAFB] rounded-lg px-3 py-3 flex items-center justify-between">
                 <p className="text-[12.5px] text-[#9CA3AF]">현재 리뷰 상태</p>
                 <span

@@ -16,12 +16,12 @@ export interface RejectCategoryOption {
 }
 
 interface RejectModalProps {
-  title: string; // 예: "강사 신청 반려", "강의 반려"
-  targetLabel: string; // 예: "반려 대상"
-  targetName: string; // 예: "김민준 (minjun01)", "React 심화 과정"
+  title: string; // 강사 신청/강의 반려
+  targetLabel: string; // 반려 대상
+  targetName: string;
   categories: RejectCategoryOption[];
-  categoryLabel?: string; // 예: "반려 사유 카테고리"
-  detailLabel?: string; // 예: "반려 사유 상세 내용"
+  categoryLabel?: string; // 반려 사유 카테고리
+  detailLabel?: string; // 반려 사유 상세 내용
   detailPlaceholder?: string;
   maxDetailLength?: number;
   confirmLabel?: string;

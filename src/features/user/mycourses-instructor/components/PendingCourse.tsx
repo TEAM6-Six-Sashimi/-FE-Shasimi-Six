@@ -41,8 +41,7 @@ interface RejectionModalData {
 
 const ITEMS_PER_PAGE = 5;
 
-// 이 API는 카테고리 라벨이 별도 필드 없이 "카테고리: 상세 사유" 형태로 rejectReason에 합쳐져 내려온다.
-// rejectCategory가 비어 있으면 첫 ": " 기준으로 분리해 관리자 화면과 동일하게 나눠서 보여준다.
+// rejectCategory가 비어 있으면 첫 ": " 기준으로 분리해 관리자 화면과 동일하게 나눠서 보여줌
 const splitRejectReason = (category: string | null, reason: string | null) => {
   const rawReason = reason ?? '';
   if (category) return { category, detail: rawReason };

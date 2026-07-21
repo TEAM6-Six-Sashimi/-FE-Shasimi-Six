@@ -16,7 +16,7 @@ interface Props {
   setApplicants: React.Dispatch<React.SetStateAction<InstructorApplication[]>>;
 }
 
-// Content-Disposition 헤더에서 파일명 추출 (filename*=UTF-8''... 또는 filename="..." 둘 다 대응)
+// Content-Disposition 헤더에서 파일명 추출
 function extractFilename(contentDisposition: string | null): string {
   const fallback = '자격증_진위확인_명단.xlsx';
   if (!contentDisposition) return fallback;
@@ -53,7 +53,8 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-  const isAllPagedSelected = paged.length > 0 && paged.every((a) => selectedIds.has(a.applicationId));
+  const isAllPagedSelected =
+    paged.length > 0 && paged.every((a) => selectedIds.has(a.applicationId));
 
   const toggleSelect = (applicationId: number) => {
     setSelectedIds((prev) => {

@@ -48,12 +48,11 @@ export default function CourseManagePage({
   const [tab, setTab] = useState<Tab>(initialTab);
   const [pending, setPending] = useState<AdminPendingCourse[]>(pendingCourses);
 
-  // 상세 페이지에서 승인/반려 후 router.refresh()로 서버가 새 pendingCourses를 내려주면 동기화
   useEffect(() => {
     setPending(pendingCourses);
   }, [pendingCourses]);
 
-  // URL의 tab 쿼리가 바뀌면(뒤로가기, 주소 직접 입력 등) 탭 상태도 동기화
+  // URL의 tab 쿼리가 바뀌면 탭 상태도 동기화
   useEffect(() => {
     if (VALID_TABS.includes(tabFromUrl as Tab)) {
       setTab(tabFromUrl as Tab);

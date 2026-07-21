@@ -18,8 +18,6 @@ export default function NoticeListView({ initialItems, initialTotalPages }: Noti
   const [items, setItems] = useState<AdminNotice[]>(initialItems);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [isLoading, setIsLoading] = useState(false);
-  // 최초 페이지(0)는 서버에서 이미 받아온 initialItems를 그대로 쓰고,
-  // 페이지 이동으로 page가 바뀔 때만 클라이언트에서 다시 조회한다.
   const isFirstRender = useRef(true);
 
   useEffect(() => {
@@ -100,9 +98,7 @@ export default function NoticeListView({ initialItems, initialTotalPages }: Noti
                       )}
                     </div>
                   </td>
-                  <td className="py-4 w-[18%] text-center text-[#9CA3AF]">
-                    {notice.createdDate}
-                  </td>
+                  <td className="py-4 w-[18%] text-center text-[#9CA3AF]">{notice.createdDate}</td>
                 </tr>
               ))
             )}

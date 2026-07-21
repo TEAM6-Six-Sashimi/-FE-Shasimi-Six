@@ -29,14 +29,12 @@ export default function CategoryRegisterModal({
   const [selectedCategory, setSelectedCategory] = useState('');
   const [customCategory, setCustomCategory] = useState('');
   const [subCategory, setSubCategory] = useState('');
-
-  // 유효성 에러 상태 관리
   const [errors, setErrors] = useState<{ main?: string; sub?: string }>({});
 
   const isCustom = selectedCategory === 'custom';
   const mainCategories = [...new Set(categories.map((c) => c.mainCategoryName))];
 
-  // 초기 값 설정 (수정 모드 대응)
+  // 초기 값 설정
   useEffect(() => {
     if (mode === 'edit' && initialData) {
       setSelectedCategory(initialData.mainCategoryName);
@@ -56,7 +54,7 @@ export default function CategoryRegisterModal({
       newErrors.sub = '세부 카테고리명을 입력해주세요.';
     }
 
-    // 에러 존재 시 중단 및 테두리 업데이트
+    // 에러 존재 시 중단
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;

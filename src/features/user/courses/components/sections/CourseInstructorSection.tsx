@@ -7,7 +7,7 @@ interface CourseInstructorSectionProps {
   instructor: InstructorInfo;
 }
 
-// 프로토콜(https://) 없이 저장된 링크(github.com/... 등)도 외부 링크로 정상 연결되도록 보정
+// 프로토콜(https://) 없이 저장된 링크도 외부 링크로 정상 연결되도록 보정
 const toExternalHref = (url: string) => (/^https?:\/\//i.test(url) ? url : `https://${url}`);
 
 export default function CourseInstructorSection({

@@ -121,8 +121,6 @@ export interface ApprovedCourse {
   courseId: number;
   categoryId: number;
   title: string;
-  // thumbnail: string; // 나중에 추가 필요
-  // approvedAt: number;
   price: number;
   ratingAvg: number;
   studentCount: number;

@@ -81,8 +81,8 @@ export default function BasicInfoSection({
   const fieldErrorCls = 'text-[12px] text-[#FF5E5E] mt-1';
   const borderCls = (hasError?: string) => (hasError ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]');
 
-  // 새로 선택한 파일(thumbnailPreviewUrl, blob URL)이 없을 때는 기존에 등록된 thumbnail을 보여준다.
-  // thumbnail은 상대 경로(key)로 내려올 수 있어 getThumbnailUrl로 절대 URL로 변환해야 한다.
+  // 새로 선택한 파일이 없을 때는 기존에 등록된 thumbnail을 보여줌
+  // thumbnail은 상대 경로(key)로 내려올 수 있어 getThumbnailUrl로 절대 URL로 변환
   const existingThumbnailUrl = !thumbnailPreviewUrl ? getThumbnailUrl(thumbnail) : null;
 
   return (
@@ -252,7 +252,7 @@ export default function BasicInfoSection({
         </Button>
         {errors.thumbnail && <p className={fieldErrorCls}>{errors.thumbnail}</p>}
 
-        {/* 새로 선택한 파일 미리보기 (blob URL) 또는 기존에 등록된 이미지 미리보기 */}
+        {/* 새로 선택한 파일 미리보기 또는 기존에 등록된 이미지 미리보기 */}
         {(thumbnailPreviewUrl || existingThumbnailUrl) && (
           <figure className="relative mt-2 w-full h-40 rounded-lg border border-[#E5E7EB] overflow-hidden bg-[#F3F4F6]">
             <Image

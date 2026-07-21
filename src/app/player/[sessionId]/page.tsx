@@ -13,14 +13,13 @@ export default async function Page({ params, searchParams }: Props) {
   const { courseId } = await searchParams;
 
   if (!courseId) {
-    // courseId 없이는 강의 정보를 조회할 수 없으므로 강의 목록으로 돌려보냄
     redirect('/mycourses-student');
   }
 
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  // 강의 상세 조회 (viewerType=ENROLLED 기대 - 비로그인/미구매자는 영상 재생 페이지 접근 의미 없음)
+  // 강의 상세 조회
   const course = await fetchCourseDetail(courseId, accessToken);
 
   if (!course) {

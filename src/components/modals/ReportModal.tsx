@@ -21,17 +21,13 @@ interface ReportModalProps {
   loading?: boolean;
 }
 
-export default function ReportModal({
-  onConfirm,
-  onCancel,
-  loading = false,
-}: ReportModalProps) {
+export default function ReportModal({ onConfirm, onCancel, loading = false }: ReportModalProps) {
   const [category, setCategory] = useState<ReportCategoryOption['value'] | ''>('');
   const [reason, setReason] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
   const isCategoryValid = !!category;
-  // '기타'는 사유가 명확하지 않으므로 상세 내용 입력이 필수, 나머지 카테고리는 선택
+  // '기타'는 상세 내용 입력이 필수, 나머지 카테고리는 선택
   const isReasonRequired = category === 'OTHER';
   const isReasonValid = !isReasonRequired || !!reason.trim();
   const isValid = isCategoryValid && isReasonValid;

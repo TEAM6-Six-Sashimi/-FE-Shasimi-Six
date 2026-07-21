@@ -17,7 +17,7 @@ interface InstructorApplicationDetailViewProps {
   categoryName: string;
 }
 
-// 다운로드 URL이 `/files/download?key=경로%2F파일명.pdf` 형태라 key 파라미터에서 실제 파일명을 뽑아냄
+// 다운로드 URL - key 파라미터에서 실제 파일명을 뽑아냄
 const fileNameFromUrl = (url: string) => {
   try {
     const [path, query = ''] = url.split('?');
@@ -28,11 +28,11 @@ const fileNameFromUrl = (url: string) => {
   }
 };
 
-// 지원 시 프로토콜(https://) 없이 저장된 링크(github.com/... 등)도 외부 링크로 정상 연결되도록 보정
+// 지원 시 프로토콜(https://) 없이 저장된 링크도 외부 링크로 정상 연결되도록 보정
 const toExternalHref = (url: string) => (/^https?:\/\//i.test(url) ? url : `https://${url}`);
 
-const fileExtFromUrl = (url: string) => fileNameFromUrl(url).split('.').pop()?.toUpperCase() || 'FILE';
-
+const fileExtFromUrl = (url: string) =>
+  fileNameFromUrl(url).split('.').pop()?.toUpperCase() || 'FILE';
 
 function FileRow({ url, name }: { url: string; name: string }) {
   return (
@@ -178,7 +178,9 @@ export default function InstructorApplicationDetailView({
       </SectionCard>
 
       <SectionCard title="이력서">
-        {resumeFileUrl && <FileRow url={resumeFileUrl} name={fileNameFromUrl(detail.resumeFileUrl)} />}
+        {resumeFileUrl && (
+          <FileRow url={resumeFileUrl} name={fileNameFromUrl(detail.resumeFileUrl)} />
+        )}
         {mainCareers.length > 0 && (
           <div className="mt-1">
             <p className="text-[12.5px] font-semibold text-[#1E2125] mb-2">주요 이력</p>

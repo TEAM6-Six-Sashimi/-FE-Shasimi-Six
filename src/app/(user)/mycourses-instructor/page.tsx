@@ -66,15 +66,13 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
               ? fetchInProgressCourses(accessToken, userId)
               : Promise.resolve([]),
 
-            activeTab === 'private'
-              ? fetchClosedCourses(accessToken, userId)
-              : Promise.resolve([]),
+            activeTab === 'private' ? fetchClosedCourses(accessToken, userId) : Promise.resolve([]),
 
             fetchCategories(),
           ])
         : [[], [], [], []];
   } catch (error) {
-    // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 로그아웃 처리
+    // 세션이 완전히 끊긴 경우 - 로그아웃 처리
     if (error instanceof AuthSessionError) {
       return <SessionExpiredRedirect message={error.message} />;
     }
@@ -87,7 +85,6 @@ export default async function MyCoursesInstructorPage({ searchParams }: PageProp
 
       <div className="flex items-center gap-0 border-b border-[#E5E7EB] mb-6">
         {TABS.map(({ id, label }) => {
-          // 기본 탭(dashboard)은 쿼리 없는 깨끗한 URL, 그 외는 ?tab= 포함
           const href =
             id === 'dashboard' ? '/mycourses-instructor' : `/mycourses-instructor?tab=${id}`;
           return (

@@ -18,7 +18,7 @@ export default function CreditCharges() {
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 검색어는 디바운스 처리 - 타이핑 중 매번 서버 조회하지 않도록
+  // 검색어는 디바운스 처리
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedKeyword(keyword.trim()), 300);
     return () => clearTimeout(timer);

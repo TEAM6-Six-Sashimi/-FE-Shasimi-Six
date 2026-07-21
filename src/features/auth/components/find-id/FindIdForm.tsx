@@ -11,7 +11,7 @@ import EmailVerifyField from '@/features/auth/components/EmailVerifyField';
 export default function FindIdForm() {
   const router = useRouter();
   const [name, setName] = useState('');
-  // 인증번호 확인 API 응답으로 받아둔 아이디 - [아이디 찾기] 클릭 시 모달로 보여주기
+  // 인증번호 확인 API 응답으로 받아둔 아이디 -> [아이디 찾기] 클릭 시 모달로 보여주기
   const [confirmedLoginId, setConfirmedLoginId] = useState<string | null>(null);
   const [showResultModal, setShowResultModal] = useState(false);
 
@@ -29,7 +29,7 @@ export default function FindIdForm() {
     },
   });
 
-  // 확인 단계에서 받아둔 아이디를 모달로 보여주기(API 재호출 없음)
+  // 확인 단계에서 받아둔 아이디를 모달로 보여주기
   const handleFindId = (e: React.FormEvent) => {
     e.preventDefault();
     if (!verification.isVerified || !confirmedLoginId) return;

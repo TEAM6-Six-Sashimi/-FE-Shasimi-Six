@@ -28,7 +28,7 @@ export default function RejectedCourses({ courses, categories }: Props) {
 
   const getMainCategory = (categoryName: string) => subToMainMap.get(categoryName) ?? categoryName;
 
-  // 최신순(반려일, 없는 경우 맨 뒤로)
+  // 최신순(반려일)
   const sorted = useMemo(
     () =>
       [...courses].sort((a, b) => {

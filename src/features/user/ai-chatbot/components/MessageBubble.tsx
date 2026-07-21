@@ -5,13 +5,15 @@ import BotAvatar from './BotAvatar';
 
 // **로 감싼 부분만 굵게 렌더링 (초기 안내 메시지의 강조 표시용)
 function renderMessageText(text: string) {
-  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
-    part.startsWith('**') && part.endsWith('**') ? (
-      <strong key={i}>{part.slice(2, -2)}</strong>
-    ) : (
-      part
-    ),
-  );
+  return text
+    .split(/(\*\*[^*]+\*\*)/g)
+    .map((part, i) =>
+      part.startsWith('**') && part.endsWith('**') ? (
+        <strong key={i}>{part.slice(2, -2)}</strong>
+      ) : (
+        part
+      ),
+    );
 }
 
 interface Props {
