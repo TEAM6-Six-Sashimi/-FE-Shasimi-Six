@@ -1,7 +1,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// next.config.ts의 images.remotePatterns에 등록된 호스트만 next/image 최적화가 가능하다.
-// 그 외 호스트(배포 환경의 EC2 IP 등)는 최적화를 시도하면 "hostname is not configured" 에러가 나므로 unoptimized 처리해야 한다.
+// next.config.ts의 images.remotePatterns에 등록된 호스트만 next/image 최적화가 가능
 const OPTIMIZABLE_HOSTNAMES = ['localhost', 'api.sixsashimi.com.market-app.org'];
 
 export function isLocalhostUrl(url: string): boolean {

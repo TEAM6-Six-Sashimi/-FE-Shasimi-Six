@@ -71,7 +71,7 @@ export async function createReview(
       throw new ReviewApiError('수강평이 이미 등록되어 있습니다.', res.status);
     }
 
-    // 400: 수강 전(진행률 0%) 또는 잘못된 입력값 - 프론트에서 사전에 막지만, 놓친 경우를 대비한 안전망
+    // 진행률 0% 또는 잘못된 입력값 - 프론트에서 사전에 막지만, 놓친 경우를 대비한 안전망
     if (res.status === 400) {
       const message = await parseErrorMessage(
         res,
@@ -80,12 +80,9 @@ export async function createReview(
       throw new ReviewApiError(message, res.status);
     }
 
-    // 403: 수강 중인 강의가 아님
+    // 수강 중인 강의가 아님
     if (res.status === 403) {
-      const message = await parseErrorMessage(
-        res,
-        '수강 중인 강의만 수강평을 작성할 수 있습니다.',
-      );
+      const message = await parseErrorMessage(res, '수강 중인 강의만 수강평을 작성할 수 있습니다.');
       throw new ReviewApiError(message, res.status);
     }
 

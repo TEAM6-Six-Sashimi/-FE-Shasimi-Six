@@ -27,7 +27,7 @@ export async function postJobPostingRecommendation(
     });
 
     if (!res.ok) {
-      // 세션이 죽은 경우(다른 기기 로그인 등) - 안내 메시지 + authError 플래그로 구분
+      // 세션이 죽은 경우 - 안내 메시지 + authError 플래그로 구분
       const authMessage = await handleAuthErrorResponse(res);
       if (authMessage) {
         return {
@@ -108,7 +108,7 @@ export async function fetchLatestJobPostingRecommendation(
   }
 }
 
-// 입력한 URL이 실제로 접속 가능한지 확인 (채용공고 여부 검증 아님, 단순 접근 가능 여부)
+// 입력한 URL이 실제로 접속 가능한지 확인 (단순 접근 가능 여부)
 export async function checkUrlReachable(url: string): Promise<boolean> {
   try {
     const res = await fetch(url, { method: 'HEAD' });
