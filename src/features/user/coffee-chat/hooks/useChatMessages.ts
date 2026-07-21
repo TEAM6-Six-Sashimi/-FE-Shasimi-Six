@@ -53,6 +53,12 @@ export function useChatMessages({
   function applyReadWatermark(list: ChatMessageEvent[]) {
     const watermark = lastReadMessageIdRef.current;
     if (watermark <= 0) return list;
+
+    const hasUnreadToMark = list.some(
+      (m) => m.senderId === myUserId && m.messageId <= watermark && !m.isRead,
+    );
+    if (!hasUnreadToMark) return list;
+
     return list.map((m) =>
       m.senderId === myUserId && m.messageId <= watermark && !m.isRead ? { ...m, isRead: true } : m,
     );

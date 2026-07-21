@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { EMAIL_REGEX, VERIFICATION_CODE_MAX_LENGTH } from '../constants';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const VERIFICATION_CODE_MAX_LENGTH = 8;
 
 interface UseEmailVerificationOptions {
   sendCode: (email: string) => Promise<unknown>;
