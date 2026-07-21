@@ -9,7 +9,7 @@ export type SendChatbotMessageResult =
   | { success: true; reply: string }
   | { success: false; message: string };
 
-// AI 진로상담 챗봇 대화 (공개, 비로그인 허용 / 무상태 - 서버는 대화를 저장하지 않음)
+// AI 진로상담 챗봇 대화
 export async function sendChatbotMessage(
   message: string,
   history: ChatbotHistoryItem[],
