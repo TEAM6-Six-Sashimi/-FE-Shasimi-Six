@@ -41,7 +41,10 @@ export default function CertificateSection({ certificates }: CertificateSectionP
             const hasApplicationPeriod = !!cert.applicationStartDate && !!cert.applicationEndDate;
 
             return (
-              <div key={idx} className="border border-[#E5E7EB] rounded-xl p-5 flex flex-col gap-2.5">
+              <div
+                key={idx}
+                className="border border-[#E5E7EB] rounded-xl p-5 flex flex-col gap-2.5"
+              >
                 <p className="text-[15px] font-bold text-[#1E2125]">{cert.name}</p>
                 <span className="inline-block w-fit px-2.5 py-0.5 rounded-md bg-[#EEF4FF] font-semibold text-[12px] text-[#5B8DEE]">
                   {cert.relatedSkills.join(' | ')}

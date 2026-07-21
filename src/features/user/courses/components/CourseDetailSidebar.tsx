@@ -4,7 +4,7 @@ import SidebarInfoBox, { SidebarThumbnail } from './sidebar-buttons/SidebarInfo'
 
 interface CourseDetailSidebarProps {
   course: CourseDetailFromAPI;
-  /** 썸네일 바로 아래, 강의정보 박스 위에 들어갈 버튼 영역 */
+  /** 버튼 영역 */
   actionSlot: ReactNode;
   /** 가격/크레딧 표시 여부 */
   showPrice?: boolean;

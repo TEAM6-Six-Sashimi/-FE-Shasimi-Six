@@ -14,7 +14,9 @@ import {
 import { MaintenanceError } from '@/services/maintenance.service';
 
 function isAuthError(error: unknown): boolean {
-  return error instanceof AuthSessionError || (error instanceof ReviewApiError && !!error.isAuthError);
+  return (
+    error instanceof AuthSessionError || (error instanceof ReviewApiError && !!error.isAuthError)
+  );
 }
 
 async function getAuthOrThrow() {
@@ -37,8 +39,7 @@ export async function createReviewAction(
   courseId: number,
   body: CreateReviewRequest,
 ): Promise<
-  | { success: true }
-  | { success: false; message: string; authError?: true; maintenance?: true }
+  { success: true } | { success: false; message: string; authError?: true; maintenance?: true }
 > {
   try {
     const { accessToken, user } = await getAuthOrThrow();
@@ -58,8 +59,7 @@ export async function deleteReviewAction(
   courseId: number,
   reviewId: number,
 ): Promise<
-  | { success: true }
-  | { success: false; message: string; authError?: true; maintenance?: true }
+  { success: true } | { success: false; message: string; authError?: true; maintenance?: true }
 > {
   try {
     const { accessToken, user } = await getAuthOrThrow();
@@ -79,8 +79,7 @@ export async function reportReviewAction(
   reviewId: number,
   body: ReportReviewRequest,
 ): Promise<
-  | { success: true }
-  | { success: false; message: string; authError?: true; maintenance?: true }
+  { success: true } | { success: false; message: string; authError?: true; maintenance?: true }
 > {
   try {
     const { accessToken } = await getAuthOrThrow();

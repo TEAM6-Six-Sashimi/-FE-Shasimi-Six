@@ -48,7 +48,6 @@ export function useAdminStatsChart<T>(
     return () => {
       active = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [period, fetchAction]);
 
   return { period, setPeriod, data, isLoading, error };

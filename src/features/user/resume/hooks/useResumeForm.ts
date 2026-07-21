@@ -55,7 +55,7 @@ interface UseResumeFormParams {
   onDirtyStateChange?: (isDirty: boolean) => void;
 }
 
-// 이력서 작성 폼의 상태/검증/저장 로직 (렌더링은 ResumeMain.tsx가 담당)
+// 이력서 작성 폼의 상태/검증/저장 로직
 export function useResumeForm({
   savedResume,
   isLoggedIn,
@@ -82,7 +82,6 @@ export function useResumeForm({
 
   const initialSnapshot = useMemo(
     () => JSON.stringify({ educations, isNewGraduate, careers, certifications }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [], // 최초 마운트 시점 값으로 고정
   );
   const [lastSavedSnapshot, setLastSavedSnapshot] = useState<string>(initialSnapshot);
@@ -95,7 +94,7 @@ export function useResumeForm({
 
   const isDirty = currentSnapshot !== lastSavedSnapshot;
   const isSaved = resumeId !== null;
-  // 저장하기 버튼 활성화 조건: 새로 작성됐거나(아직 저장 안 됨) 수정이 감지된 경우
+  // 새로 작성됐거나 수정이 감지된 경우 저장하기 버튼 활성화
   const canSave = !isSaved || isDirty;
 
   // 섹션별 필수 입력 검증 에러 메시지
@@ -111,7 +110,7 @@ export function useResumeForm({
     onDirtyStateChange?.(isDirty);
   }, [isDirty, onDirtyStateChange]);
 
-  //   학력 사항
+  // 학력 사항
   const addEducation = () => {
     setEducations((prev) => [
       ...prev,
@@ -148,7 +147,7 @@ export function useResumeForm({
     updateEducation(id, field, formatYearMonth(value));
   };
 
-  //   경력 사항
+  // 경력 사항
   const addCareer = () => {
     setCareers((prev) => [
       ...prev,
@@ -188,7 +187,7 @@ export function useResumeForm({
     if (careerError) setCareerError('');
   };
 
-  //   자격증
+  // 자격증
   const addCertification = () => {
     setCertifications((prev) => [
       ...prev,
@@ -222,7 +221,7 @@ export function useResumeForm({
     setCareers((prev) => prev.filter((item) => item.id !== id));
   };
 
-  //   저장 (신규 작성 → POST, 기존 이력서 있음 → PATCH)
+  // 저장 (신규 작성 → POST/기존 이력서 있음 → PATCH)
   const handleSave = async () => {
     if (!canSave || isSaving) return;
 
@@ -232,7 +231,7 @@ export function useResumeForm({
       return;
     }
 
-    // 저장 전 필수 입력 검증 - 실패 시 각 섹션 아래 안내문구만 표시, 토스트는 띄우지 않음
+    // 저장 전 필수 입력 검증 - 실패 시 각 섹션 아래 안내문구만 표시
     const educationErrorMessage = getEducationError(educations);
     const careerErrorMessage = getCareerError(careers, isNewGraduate);
     const certificationErrorMessage = getCertificationError(certifications);

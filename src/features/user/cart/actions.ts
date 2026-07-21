@@ -9,8 +9,7 @@ import { AuthSessionError } from '@/features/auth/errors';
 export async function addCartItemAction(
   courseId: number,
 ): Promise<
-  | { success: true }
-  | { success: false; code: string; maintenance?: true; message?: string }
+  { success: true } | { success: false; code: string; maintenance?: true; message?: string }
 > {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
@@ -37,9 +36,7 @@ export type DeleteCartItemsResult =
   | { success: true }
   | { success: false; authError?: true; maintenance?: true; message: string };
 
-export async function deleteCartItemsAction(
-  cartItemIds: number[],
-): Promise<DeleteCartItemsResult> {
+export async function deleteCartItemsAction(cartItemIds: number[]): Promise<DeleteCartItemsResult> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 

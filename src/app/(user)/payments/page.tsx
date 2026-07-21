@@ -13,7 +13,7 @@ import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 interface PaymentPageProps {
   searchParams: Promise<{
     courseIds?: string | string[];
-    type?: string; // "subscription"이면 AI 구독 결제
+    type?: string; // 강의/AI 구독 플랜 구분
     planCode?: string;
   }>;
 }
@@ -24,7 +24,6 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  // categories는 강의/구독 어느 쪽이든 카테고리 표시에 필요하므로 공통으로 조회
   const categories = await fetchCategories();
 
   // ── AI 구독 결제 ──────────────────────────────────────────
@@ -55,6 +54,7 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
 
     return <PaymentPageLayout summary={summary} categories={categories} />;
   }
+
   // ── 강의 단일 / 장바구니 결제 ─────────────────────────────
   const courseIds: number[] = rawIds
     ? (Array.isArray(rawIds) ? rawIds : rawIds.split(',')).map(Number).filter((id) => !isNaN(id))
@@ -96,7 +96,7 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
     if (creditsResult.status === 'fulfilled') {
       ownedCredits = creditsResult.value.balance ?? 0;
     } else if (creditsResult.reason instanceof AuthSessionError) {
-      // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 결제 페이지 대신 로그아웃 처리
+      // 세션이 완전히 끊긴 경우 - 결제 페이지 대신 로그아웃 처리
       return <SessionExpiredRedirect message={creditsResult.reason.message} />;
     } else {
       console.error('크레딧 조회 실패:', creditsResult.reason);
@@ -116,7 +116,6 @@ export default async function PaymentsPage({ searchParams }: PaymentPageProps) {
   return <PaymentPageLayout summary={summary} categories={categories} />;
 }
 
-// PaymentPageLayout에 categories prop 추가
 function PaymentPageLayout({
   summary,
   categories,

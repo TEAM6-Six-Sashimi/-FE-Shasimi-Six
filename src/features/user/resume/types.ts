@@ -63,7 +63,7 @@ export const CERTIFICATION_TYPE_LABEL: Record<CertificationType, string> = {
 };
 
 export interface EducationItem {
-  id: string; // 프론트 로컬 관리용 임시 i
+  id: string;
   schoolName: string;
   startYearMonth: string;
   endYearMonth: string;
@@ -90,7 +90,7 @@ export interface CertificationItem {
   name: string; // 자격증명
   issuer: string; // 발급기관
   acquiredDate: string; // YYYY-MM-DD
-  scoreOrGrade?: string; // 점수/등급 (선택)
+  scoreOrGrade?: string; // 점수/등급(선택)
 }
 
 export interface ResumeFormData {
@@ -165,7 +165,7 @@ export function getGradeColor(score: number): { bg: string; text: string } {
   return { bg: 'bg-[#FFEBEB]', text: 'text-[#FF5E5E]' }; // 보완 필요
 }
 
-// ===== 수정된 응답 타입 (기존 AiReviewResult 교체) =====
+// ===== 수정된 응답 타입 =====
 export interface SectionScore {
   type: ReviewSectionType;
   label: string;

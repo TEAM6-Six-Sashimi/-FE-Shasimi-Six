@@ -11,7 +11,7 @@ interface CourseReviewsSectionProps {
   ratingDistribution: RatingDistributionItem[];
   reviews: CourseReview[];
   reviewMode: ReviewMode;
-  /** 강의 전체 진행률(%) - ENROLLED만 값 있음. 백엔드가 수강을 시작 안 한 경우(0%) 수강평 작성을 400으로 거부한다 */
+  // 강의 전체 진행률(%)
   progressRate: number | null;
   currentUserLoginId?: string | null;
 }
@@ -28,7 +28,7 @@ export default function CourseReviewsSection({
 }: CourseReviewsSectionProps) {
   const hasReviewed =
     !!currentUserLoginId && reviews.some((review) => review.writerLoginId === currentUserLoginId);
-  // 수강을 아직 시작하지 않은 경우(진행률 0%) 백엔드가 작성 자체를 거부하므로, 폼 대신 미리 안내한다
+  // 수강을 아직 시작하지 않은 경우(진행률 0%), 수강평 작성불가를 사용자에게 미리 안내
   const hasNotStarted = reviewMode === 'writable' && !progressRate;
 
   return (
@@ -62,9 +62,6 @@ export default function CourseReviewsSection({
           강의 구매 후 리뷰를 작성할 수 있습니다.
         </div>
       )}
-
-      {/* hidden-form: 폼/안내문구 없음 (강사 본인 강의, 관리자) */}
-      {/* no-reviews: 안내문구 없이 바로 목록 영역에서 "등록된 수강평이 없습니다" 처리 */}
 
       <ReviewList
         courseId={courseId}

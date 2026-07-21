@@ -90,7 +90,7 @@ export default function SubscriptionPayments() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [planMenuOpen]);
 
-  // 플랜 필터는 백엔드 쿼리 파라미터가 아직 없어 현재 페이지 내에서만 보조 필터링
+  // 플랜 필터 - 현재 페이지 내에서만 보조 필터링
   const filteredItems =
     planFilter === 'ALL' ? items : items.filter((item) => item.planCode === planFilter);
 

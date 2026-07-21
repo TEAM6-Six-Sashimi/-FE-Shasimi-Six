@@ -27,7 +27,7 @@ export default function SubscriptionPaymentTable({
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
 
-  // 가장 최근 결제 건에만 상태(해지 버튼/완료 안내) 표시
+  // 가장 최근 결제 건에만 상태 표시
   const latestPaymentId = items[0]?.subscriptionPaymentId;
 
   const handleCancelConfirm = async () => {
@@ -69,7 +69,7 @@ export default function SubscriptionPaymentTable({
       );
     }
 
-    // 이미 해지 신청됨, 만료일까지 이용 가능
+    // 이미 해지 신청됨. 만료일까지 이용 가능
     return (
       <span className="text-[#6A7282] text-[12px] leading-tight">
         해지 완료

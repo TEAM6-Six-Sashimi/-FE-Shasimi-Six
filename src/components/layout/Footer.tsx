@@ -7,10 +7,7 @@ export default function Footer() {
         <div className="flex flex-col gap-2">
           <div className="text-[15px] font-semibold text-[#CFEE5D]">회사 소개</div>
           <div className="flex flex-col gap-1.5">
-            <Link
-              href="/website-about"
-              className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]"
-            >
+            <Link href="/website-about" className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]">
               회사 소개
             </Link>
             <a
@@ -34,10 +31,7 @@ export default function Footer() {
         <div className="flex flex-col gap-2">
           <div className="text-[15px] font-semibold text-[#CFEE5D]">고객 지원</div>
           <div className="flex flex-col gap-1.5">
-            <Link
-              href="/notice"
-              className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]"
-            >
+            <Link href="/notice" className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]">
               공지사항
             </Link>
           </div>
@@ -45,13 +39,13 @@ export default function Footer() {
         <div className="flex flex-col gap-2">
           <div className="text-[15px] font-semibold text-[#CFEE5D]">서비스</div>
           <div className="flex flex-col gap-1.5">
-            <Link href="/recommendations" className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]">
-              맞춤 강의 추천
-            </Link>
             <Link
-              href="/compare"
+              href="/recommendations"
               className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]"
             >
+              맞춤 강의 추천
+            </Link>
+            <Link href="/compare" className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]">
               강의 비교
             </Link>
             <Link href="/ai-analysis" className="text-[14px] text-[#E5E7EB] hover:text-[#D1D5DB]">

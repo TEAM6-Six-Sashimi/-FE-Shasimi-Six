@@ -46,7 +46,9 @@ export default function RejectDetailModal({
           {fields.map((field) => (
             <div key={field.label}>
               <p className="text-[11.5px] text-[#9CA3AF] mb-0.5">{field.label}</p>
-              <p className="text-[14.5px] font-bold text-[#1E2125] wrap-break-word">{field.value}</p>
+              <p className="text-[14.5px] font-bold text-[#1E2125] wrap-break-word">
+                {field.value}
+              </p>
             </div>
           ))}
         </div>

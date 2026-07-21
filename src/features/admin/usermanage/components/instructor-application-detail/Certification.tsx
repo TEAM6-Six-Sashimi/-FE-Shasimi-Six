@@ -6,7 +6,7 @@ interface CertificationsProps {
   certifications: CertificationFile[] | null;
 }
 
-// 다운로드 URL이 `/files/download?key=경로%2F파일명.pdf` 형태라 key 파라미터에서 실제 파일명을 뽑아냄
+// 다운로드 URL - key 파라미터에서 실제 파일명을 뽑아냄
 const fileNameFromUrl = (url: string) => {
   try {
     const [path, query = ''] = url.split('?');
@@ -17,7 +17,8 @@ const fileNameFromUrl = (url: string) => {
   }
 };
 
-const fileExtFromUrl = (url: string) => fileNameFromUrl(url).split('.').pop()?.toUpperCase() || 'FILE';
+const fileExtFromUrl = (url: string) =>
+  fileNameFromUrl(url).split('.').pop()?.toUpperCase() || 'FILE';
 
 function FileRow({ url, name }: { url: string; name: string }) {
   return (

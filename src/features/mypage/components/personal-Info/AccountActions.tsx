@@ -22,9 +22,9 @@ export default function AccountActions({ user, agreements }: AccountActionsProps
   const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // 수정하기 클릭 → 비밀번호 입력 → 검증 전용 API가 없으므로
-  // PATCH /users/me를 "현재 값 그대로" 호출해 currentPassword만 검증 용도로 사용.
-  // 틀리면 서버가 에러를 던지므로 이 모달에서 바로 에러를 보여주고 다음 페이지로 넘어가지 않음.
+  // 수정하기 클릭 → 비밀번호 입력 → 검증 전용 API가 없음
+  // PATCH /users/me를 "현재 값 그대로" 호출해 currentPassword만 검증 용도로 사용
+  // 틀리면 서버가 에러를 던져 다음 페이지로 넘어가지 않음
   const handleEditPasswordConfirm = async (password: string) => {
     setPasswordError('');
     setLoading(true);
@@ -98,7 +98,7 @@ export default function AccountActions({ user, agreements }: AccountActionsProps
         </button>
       </div>
 
-      {/* 수정하기 비밀번호 확인 모달 (여기서 즉시 검증, 틀리면 바로 에러) */}
+      {/* 수정하기 비밀번호 확인 모달 */}
       {modalMode === 'edit' && (
         <PasswordConfirmModal
           title="비밀번호를 입력해주세요."
@@ -118,7 +118,7 @@ export default function AccountActions({ user, agreements }: AccountActionsProps
         />
       )}
 
-      {/* 탈퇴 2단계: 본인 확인 모달 (여기서 즉시 검증, 틀리면 바로 에러) */}
+      {/* 탈퇴 2단계: 본인 확인 모달 */}
       {modalMode === 'withdrawPassword' && (
         <PasswordConfirmModal
           title="본인 확인"

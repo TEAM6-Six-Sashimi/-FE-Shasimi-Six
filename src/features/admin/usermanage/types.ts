@@ -20,7 +20,7 @@ export interface AdminUserDetail {
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 }
 
-// 강사 승인 대기 목록 (GET /api/members/instructor-applications/pending)
+// 강사 승인 대기 목록
 export interface InstructorApplication {
   applicationId: number;
   name: string;
@@ -40,12 +40,12 @@ export type RejectionCategory =
   | 'IDENTITY_UNVERIFIABLE'
   | 'INAPPROPRIATE_CAREER';
 
-// 강사 승인 대기 상세 (GET /api/members/instructor-applications/{applicationId})
+// 강사 승인 대기 상세
 export interface InstructorApplicationDetail {
   bio: string;
   motivationLetter: string;
   categoryId: number;
-  categoryName?: string; // 목록에서 가져온 이름을 보존하기 위한 보조 필드 (백엔드 상세 응답엔 없음)
+  categoryName?: string; // 목록에서 가져온 이름을 보존하기 위한 보조 필드
   portfolioUrl: string;
   profileImageUrl: string;
   resumeFileUrl: string;
@@ -57,13 +57,13 @@ export interface InstructorApplicationDetail {
   approvedAt: string | null;
   createdAt: string;
 
-  // 목록 화면에서 함께 보여주기 위해 합쳐서 내려주는 보조 필드들 (상세 API 단독 응답엔 없을 수 있음)
+  // 목록 화면에서 함께 보여주기 위해 합쳐서 내려주는 보조 필드들
   name?: string;
   loginId?: string;
   email?: string;
 }
 
-// 강사 승인 반려 이력 (GET /api/members/instructor-applications/rejected)
+// 강사 승인 반려 이력
 export interface RejectedInstructorApplication {
   applicationId: number;
   name: string;

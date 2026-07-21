@@ -39,16 +39,14 @@ export default function CourseTabNav() {
     : ALL_TABS[0].key;
   const [activeTab, setActiveTab] = useState<CourseTabKey>(initialTab);
 
-  // 다른 페이지에서 ?tab=reviews 같은 쿼리스트링으로 들어온 경우,
-  // 탭을 직접 클릭한 것과 동일하게 해당 섹션으로 스크롤 이동
+  // 다른 페이지에서 ?tab=reviews 같은 쿼리스트링으로 들어온 경우, 탭을 직접 클릭한 것과 동일하게 해당 섹션으로 스크롤 이동
   useEffect(() => {
     if (ALL_TABS.some((tab) => tab.key === requestedTab)) {
       scrollToSection(requestedTab as CourseTabKey);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 스크롤 위치에 따라 화면에 보이는 섹션을 감지해서 활성 탭 갱신
+  // 스크롤 위치에 따라 화면의 섹션을 감지해 활성 탭 갱신
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {

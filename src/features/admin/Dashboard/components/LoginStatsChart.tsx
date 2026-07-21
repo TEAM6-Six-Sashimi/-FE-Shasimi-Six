@@ -30,7 +30,7 @@ export default function LoginStatsChart() {
     >
       <ResponsiveContainer width="100%" height="100%">
         <ReChartsLine data={data}>
-          {/* 격자 - 세로선 없이 가로선만 (Figma 목업과 동일) */}
+          {/* 격자 - 가로선만 */}
           <CartesianGrid strokeDasharray="1 3" vertical={false} stroke="#E5E7EB" />
 
           <XAxis

@@ -84,7 +84,7 @@ export default function ComapareForm() {
     })();
   }, [categories, mainCategoryId, searchParams]);
 
-  // 비교 슬롯 선택 상태를 URL 쿼리에 반영 (뒤로가기/새로고침/공유 시 복원용)
+  // 비교 슬롯 선택 상태를 URL 쿼리에 반영
   const updateQuery = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
     Object.entries(updates).forEach(([key, value]) => {
@@ -155,7 +155,11 @@ export default function ComapareForm() {
               </SelectTrigger>
               <SelectContent position="popper" side="bottom">
                 {categories.map((cat) => (
-                  <SelectItem key={cat.mainCategoryId} value={String(cat.mainCategoryId)} className='cursor-pointer'>
+                  <SelectItem
+                    key={cat.mainCategoryId}
+                    value={String(cat.mainCategoryId)}
+                    className="cursor-pointer"
+                  >
                     {cat.name}
                   </SelectItem>
                 ))}
@@ -177,7 +181,7 @@ export default function ComapareForm() {
               </SelectTrigger>
               <SelectContent position="popper" side="bottom">
                 {subCategoryOptions.map((opt) => (
-                  <SelectItem key={opt.id} value={String(opt.id)} className='cursor-pointer'>
+                  <SelectItem key={opt.id} value={String(opt.id)} className="cursor-pointer">
                     {opt.name}
                   </SelectItem>
                 ))}
@@ -204,7 +208,11 @@ export default function ComapareForm() {
                   </SelectTrigger>
                   <SelectContent position="popper" side="bottom">
                     {courseOptions.map((course) => (
-                      <SelectItem key={course.courseId} value={String(course.courseId)} className='cursor-pointer'>
+                      <SelectItem
+                        key={course.courseId}
+                        value={String(course.courseId)}
+                        className="cursor-pointer"
+                      >
                         {course.title}
                       </SelectItem>
                     ))}
@@ -256,11 +264,6 @@ export default function ComapareForm() {
           valueB={slotB.detail ? DIFFICULTY_LABEL[slotB.detail.difficulty] : null}
           badge
         />
-        {/* <CompareRow
-          label="학습 시간"
-          valueA={slotA.detail ? formatDuration(slotA.detail.totalDuration) : null}
-          valueB={slotB.detail ? formatDuration(slotB.detail.totalDuration) : null}
-        /> */}
         <CompareRow
           label="강의 수"
           valueA={slotA.detail ? `${slotA.detail.sessions.length}강` : null}
@@ -350,7 +353,7 @@ function CompareRow({
   );
 }
 
-// 주요 경력 목록 - bullet list 형태로 표시
+// 주요 경력 목록
 function CompareCareerRow({
   label,
   detailA,

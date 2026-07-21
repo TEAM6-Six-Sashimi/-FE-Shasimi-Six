@@ -22,10 +22,10 @@ export default function MyCoursesList({ courses }: Props) {
   const courseDetailHref = (course: StudentCourse) =>
     `/courses/${encodeURIComponent(course.categoryName)}/${course.courseId}`;
 
-  // 이어보기/다시보기: courseId로 이어볼 세션을 조회해서 player로 직행
+  // 이어보기/다시보기
   const handleContinueWatching = async (e: React.MouseEvent, course: StudentCourse) => {
     e.preventDefault();
-    e.stopPropagation(); // 카드 전체를 감싼 Link로 전파되지 않도록
+    e.stopPropagation();
     if (loadingCourseId) return;
 
     setLoadingCourseId(course.courseId);
@@ -73,7 +73,7 @@ export default function MyCoursesList({ courses }: Props) {
               >
                 <Link href={courseDetailHref(course)}>
                   <div className="flex gap-5">
-                    {/* 썸네일 - 카드 안쪽 여백 + 둥근 모서리 */}
+                    {/* 썸네일 */}
                     <div className="relative w-44 h-28 shrink-0 rounded-lg overflow-hidden bg-[#E5E7EB]">
                       {thumbnailUrl && (
                         <Image
@@ -82,7 +82,7 @@ export default function MyCoursesList({ courses }: Props) {
                           fill
                           unoptimized={isLocalhostUrl(thumbnailUrl)}
                           sizes="176px"
-                          priority={idx === 0} // 첫 번째 카드만 priority
+                          priority={idx === 0}
                           className="object-cover"
                         />
                       )}
@@ -129,7 +129,7 @@ export default function MyCoursesList({ courses }: Props) {
                           {course.instructorName}
                         </p>
                       </div>
-                      {/* 학습 진행률 라벨 + 퍼센트 (같은 줄) */}
+                      {/* 학습 진행률 라벨 + 퍼센트 */}
                       <div className="flex-1 flex flex-col justify-end mt-3">
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-2">

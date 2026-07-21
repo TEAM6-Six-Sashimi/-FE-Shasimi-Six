@@ -1,6 +1,6 @@
 export type EmailVerifyPurpose = 'SIGNUP' | 'PASSWORD_RESET' | 'EMAIL_CHANGE';
 
-// POST /verifications/email/request 응답
+// POST /verifications/email/request
 export interface EmailVerificationRequestResponseDto {
   targetEmail: string;
   purpose: EmailVerifyPurpose;
@@ -8,7 +8,7 @@ export interface EmailVerificationRequestResponseDto {
   resendAvailableInSeconds: number;
 }
 
-// POST /auth/find-id/request 응답
+// POST /auth/find-id/request
 export interface FindIdVerificationRequestResponseDto {
   email: string;
   purpose: 'FIND_ID';
@@ -16,12 +16,12 @@ export interface FindIdVerificationRequestResponseDto {
   resendAvailableInSeconds: number;
 }
 
-// POST /auth/find-id/confirm 응답
+// POST /auth/find-id/confirm
 export interface FindIdConfirmResponseDto {
   loginId: string;
 }
 
-// POST /verifications/email/confirm 응답
+// POST /verifications/email/confirm
 export interface EmailVerifyResponseDto {
   targetEmail: string;
   purpose: EmailVerifyPurpose;

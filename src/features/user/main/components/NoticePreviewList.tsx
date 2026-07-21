@@ -7,7 +7,7 @@ const PREVIEW_COUNT = 3;
 export default async function NoticePreviewList() {
   const { items } = await fetchNotices({ page: 0, size: PREVIEW_COUNT });
 
-  // 공지가 3개 미만이어도 항상 3줄을 채워서 보여주고, 빈 자리는 '-'로 표시
+  // 공지가 3개 미만이어도 항상 3줄. 빈 자리는 '-' 표시
   const slots = Array.from({ length: PREVIEW_COUNT }, (_, i) => items[i] ?? null);
 
   return (

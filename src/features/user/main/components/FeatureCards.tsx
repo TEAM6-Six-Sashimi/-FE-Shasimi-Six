@@ -44,7 +44,7 @@ export default function FeatureCards() {
         ({ href, icon, iconBg, title, isFree, description, buttonLabel, buttonStyle, cardBg }) => (
           <li key={href} className="min-w-13">
             <article className={`${cardBg} rounded-xl p-6 flex flex-col gap-4 h-full`}>
-              {/* 아이콘 — 원형 배경, 장식용이라 aria-hidden */}
+              {/* 아이콘 — 장식용 원형 배경 */}
               <div
                 aria-hidden="true"
                 className={`${iconBg} w-12 h-12 rounded-full flex items-center justify-center shrink-0`}

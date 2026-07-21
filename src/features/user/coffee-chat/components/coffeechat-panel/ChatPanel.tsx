@@ -15,7 +15,7 @@ interface ChatPanelProps {
   subscribe: (chatId: number, onMessage: (message: ChatMessage) => void) => () => void;
   sendMessage: (chatId: number, content: string) => boolean;
   onBack: () => void;
-  // 사이드바 목록의 최근 메시지 미리보기를 실시간으로 갱신하기 위한 콜백
+  // 사이드바 목록의 최근 메시지 미리보기 실시간 갱신을 위한 콜백
   onMessage?: (message: ChatMessageEvent) => void;
 }
 

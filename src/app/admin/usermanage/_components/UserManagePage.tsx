@@ -45,7 +45,6 @@ export default function UserManagePage({ applications, users, rejected }: Props)
     }
   }, [tabFromUrl]);
 
-  // 강사 신청 승인/반려 후 리다이렉트로 전달된 ?toast= 파라미터를 읽어 토스트 표시
   const toastParam = searchParams.get('toast');
   useEffect(() => {
     if (toastParam === 'approved') {
@@ -61,7 +60,6 @@ export default function UserManagePage({ applications, users, rejected }: Props)
     params.delete('toast');
     const query = params.toString();
     router.replace(`/admin/usermanage${query ? `?${query}` : ''}`, { scroll: false });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toastParam]);
 
   const handleTabChange = (next: Tab) => {

@@ -1,5 +1,12 @@
 import Image from 'next/image';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   DEGREE_LABEL,
   DegreeType,
   EducationItem,
@@ -9,6 +16,9 @@ import {
 
 const inputCls =
   'w-full h-9 px-3 rounded-lg border border-[#D1D5DB] bg-white text-[13px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors';
+
+const selectTriggerCls =
+  'h-9! w-full rounded-lg border-[#D1D5DB] bg-white text-[13px] text-[#1E2125]';
 
 const labelCls = 'text-[13px] font-semibold text-[#1E2125] mb-2 flex items-center gap-0.5';
 
@@ -105,20 +115,21 @@ export default function EducationSection({
                 <label className={labelCls}>
                   졸업 상태 <span className="text-[#FF5E5E]">*</span>
                 </label>
-                <select
+                <Select
                   value={edu.graduationStatus}
-                  onChange={(e) => onUpdate(edu.id, 'graduationStatus', e.target.value)}
-                  className={inputCls}
+                  onValueChange={(v) => onUpdate(edu.id, 'graduationStatus', v)}
                 >
-                  <option value="" disabled>
-                    선택
-                  </option>
-                  {GRADUATION_STATUS_OPTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {GRADUATION_STATUS_LABEL[s]}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className={selectTriggerCls}>
+                    <SelectValue placeholder="선택" />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    {GRADUATION_STATUS_OPTIONS.map((s) => (
+                      <SelectItem key={s} value={s} className="text-[13px]">
+                        {GRADUATION_STATUS_LABEL[s]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -139,20 +150,18 @@ export default function EducationSection({
                 <label className={labelCls}>
                   학위 <span className="text-[#FF5E5E]">*</span>
                 </label>
-                <select
-                  value={edu.degree}
-                  onChange={(e) => onUpdate(edu.id, 'degree', e.target.value)}
-                  className={inputCls}
-                >
-                  <option value="" disabled>
-                    선택
-                  </option>
-                  {DEGREE_OPTIONS.map((d) => (
-                    <option key={d} value={d}>
-                      {DEGREE_LABEL[d]}
-                    </option>
-                  ))}
-                </select>
+                <Select value={edu.degree} onValueChange={(v) => onUpdate(edu.id, 'degree', v)}>
+                  <SelectTrigger className={selectTriggerCls}>
+                    <SelectValue placeholder="선택" />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    {DEGREE_OPTIONS.map((d) => (
+                      <SelectItem key={d} value={d} className="text-[13px]">
+                        {DEGREE_LABEL[d]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

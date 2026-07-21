@@ -43,11 +43,11 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
     setModalState('confirm');
   };
 
-  // 충전 확인 → 1) 백엔드에 주문 준비(ready) → 2) Toss 결제창 호출
+  // 충전 확인 → 백엔드에 주문 준비 → Toss 결제창 호출
   const handleConfirm = async () => {
     setIsLoading(true);
 
-    // 1) 충전 준비: 백엔드에서 orderId/orderName 발급
+    // 충전 준비: 백엔드에서 orderId/orderName 발급
     const readyResult = await readyCreditChargeAction(chargeAmount);
 
     if (!readyResult.success) {
@@ -70,13 +70,13 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
     try {
       const { orderId, orderName, amount } = readyResult.data;
 
-      // 충전 전에 있던 페이지(예: 결제 페이지)로 돌아갈 수 있도록 successUrl에 그대로 실어 보낸다
+      // 충전 전에 있던 페이지로 돌아갈 수 있도록 successUrl에 그대로 실어 보냄
       const returnTo = searchParams.get('returnTo');
       const returnToQuery = isSafeReturnPath(returnTo)
         ? `?returnTo=${encodeURIComponent(returnTo)}`
         : '';
 
-      // 2) Toss 결제창 호출 (성공 시 successUrl로 리다이렉트되며 이 페이지로는 돌아오지 않음)
+      // Toss 결제창 호출 (성공 시 successUrl로 리다이렉트)
       const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
       const payment = tossPayments.payment({ customerKey: orderId });
 
@@ -91,7 +91,7 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
         successUrl: `${window.location.origin}/credit/success${returnToQuery}`,
         failUrl: `${window.location.origin}/credit/fail`,
       });
-      // 정상 흐름에서는 브라우저가 리다이렉트되므로 이 아래 코드는 실행되지 않음
+      // 정상 흐름에서는 브라우저가 리다이렉트되므로 아래 코드 실행되지 않음
     } catch (err) {
       const message =
         err instanceof Error ? err.message : '충전에 실패했습니다. 다시 시도해주세요.';
@@ -155,7 +155,7 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
       {modalState === 'invalid' && (
         <OneButtonModal
           title="충전 금액 확인"
-          message={"입력하신 충전 금액을 확인해주세요."}
+          message={'입력하신 충전 금액을 확인해주세요.'}
           onConfirm={() => setModalState('none')}
         />
       )}

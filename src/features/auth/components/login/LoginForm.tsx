@@ -49,72 +49,72 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-        <fieldset className="text-[17px]">
-          <label htmlFor="loginId" className="font-medium mb-2">
-            아이디
-          </label>
+      <fieldset className="text-[17px]">
+        <label htmlFor="loginId" className="font-medium mb-2">
+          아이디
+        </label>
+        <input
+          id="loginId"
+          type="text"
+          placeholder="아이디를 입력하세요."
+          value={userIdInput}
+          onChange={(e) => setUserIdInput(e.target.value)}
+          disabled={isSubmitting}
+          className="w-full px-4 py-2.5 mb-4 border border-[#D1D5DB] rounded-lg placeholder-[#6A7282]"
+        />
+      </fieldset>
+      <fieldset className="text-[17px]">
+        <label htmlFor="loginpwd" className="font-medium mb-2">
+          비밀번호
+        </label>
+        <div className="relative">
           <input
-            id="loginId"
-            type="text"
-            placeholder="아이디를 입력하세요."
-            value={userIdInput}
-            onChange={(e) => setUserIdInput(e.target.value)}
+            id="loginpwd"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="비밀번호를 입력하세요."
+            value={userPasswordInput}
+            onChange={(e) => setUserPasswordInput(e.target.value)}
             disabled={isSubmitting}
-            className="w-full px-4 py-2.5 mb-4 border border-[#D1D5DB] rounded-lg placeholder-[#6A7282]"
+            className="w-full px-4 py-2.5 mb-4 pr-11 border border-[#D1D5DB] rounded-lg placeholder-[#6A7282]"
           />
-        </fieldset>
-        <fieldset className="text-[17px]">
-          <label htmlFor="loginpwd" className="font-medium mb-2">
-            비밀번호
-          </label>
-          <div className="relative">
-            <input
-              id="loginpwd"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="비밀번호를 입력하세요."
-              value={userPasswordInput}
-              onChange={(e) => setUserPasswordInput(e.target.value)}
-              disabled={isSubmitting}
-              className="w-full px-4 py-2.5 mb-4 pr-11 border border-[#D1D5DB] rounded-lg placeholder-[#6A7282]"
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 -mt-2 p-1 rounded-md hover:bg-[#E5E7EB] cursor-pointer"
+            aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보이기'}
+          >
+            <Image
+              src={showPassword ? '/auth/closeeye.svg' : '/auth/openeye.svg'}
+              alt=""
+              width={20}
+              height={20}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 -mt-2 p-1 rounded-md hover:bg-[#E5E7EB] cursor-pointer"
-              aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보이기'}
-            >
-              <Image
-                src={showPassword ? '/auth/closeeye.svg' : '/auth/openeye.svg'}
-                alt=""
-                width={20}
-                height={20}
-              />
-            </button>
-          </div>
-        </fieldset>
+          </button>
+        </div>
+      </fieldset>
 
-        {errorMessage && (
-          <p className="text-[14px] text-red-500 mb-4 font-medium pl-1">⚠ {errorMessage}</p>
-        )}
+      {errorMessage && (
+        <p className="text-[14px] text-red-500 mb-4 font-medium pl-1">⚠ {errorMessage}</p>
+      )}
 
-        <nav className="flex justify-center items-center text-[14px] text-[#6A7282] gap-2 mb-4">
-          <Link href="/auth/find-id" className="underline">
-            아이디 찾기
-          </Link>{' '}
-          |{' '}
-          <Link href="/auth/find-pwd" className="underline">
-            비밀번호 찾기
-          </Link>
-        </nav>
+      <nav className="flex justify-center items-center text-[14px] text-[#6A7282] gap-2 mb-4">
+        <Link href="/auth/find-id" className="underline">
+          아이디 찾기
+        </Link>{' '}
+        |{' '}
+        <Link href="/auth/find-pwd" className="underline">
+          비밀번호 찾기
+        </Link>
+      </nav>
 
-        <LoginButton disabled={isSubmitting} />
+      <LoginButton disabled={isSubmitting} />
 
-        <p className="flex justify-center items-center text-[15px] gap-2">
-          <span className="text-[#6A7282]">아직 회원이 아니신가요?</span>
-          <Link href="/auth/signup" className="underline text-[#FF5F5F] hover:text-[#D14848]">
-            회원가입
-          </Link>
-        </p>
+      <p className="flex justify-center items-center text-[15px] gap-2">
+        <span className="text-[#6A7282]">아직 회원이 아니신가요?</span>
+        <Link href="/auth/signup" className="underline text-[#FF5F5F] hover:text-[#D14848]">
+          회원가입
+        </Link>
+      </p>
     </form>
   );
 }

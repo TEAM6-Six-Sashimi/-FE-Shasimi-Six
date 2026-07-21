@@ -122,9 +122,7 @@ function QuestionCard({ question }: { question: CoverLetterReviewQuestion }) {
                 <div className="flex-1 min-h-0 overflow-y-auto pr-1 divide-y divide-[#F3F4F6]">
                   {visibleCorrections.map((correction, idx) => (
                     <div key={idx} className="grid grid-cols-2 gap-3 py-2 text-[12.5px]">
-                      <span className="text-[#9CA3AF] truncate">
-                        {correction.original}
-                      </span>
+                      <span className="text-[#9CA3AF] truncate">{correction.original}</span>
                       <span className="text-[#1E2125] truncate">{correction.corrected}</span>
                     </div>
                   ))}
@@ -150,7 +148,9 @@ function QuestionCard({ question }: { question: CoverLetterReviewQuestion }) {
 
           {/* 종합 첨삭 피드백 */}
           <div className="p-5 flex flex-col max-h-80">
-            <h4 className="shrink-0 text-[13.5px] font-bold text-[#1E2125] mb-3">종합 첨삭 피드백</h4>
+            <h4 className="shrink-0 text-[13.5px] font-bold text-[#1E2125] mb-3">
+              종합 첨삭 피드백
+            </h4>
             <div className="flex-1 min-h-0 overflow-y-auto pr-1">
               <p className="text-[12.5px] text-[#374151] leading-relaxed whitespace-pre-line">
                 {question.feedback}

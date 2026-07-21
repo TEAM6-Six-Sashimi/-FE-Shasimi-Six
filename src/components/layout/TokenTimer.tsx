@@ -30,7 +30,7 @@ export default function TokenTimer() {
       const diff = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
       setRemaining(diff);
 
-      // 만료 시각 도달 - 연장 시도 중이 아니면 안내 후 자동 로그아웃 (한 번만 실행)
+      // 만료 시각 도달 - 자동 로그아웃
       if (diff === 0 && !hasExpiredRef.current && !isExtendingRef.current) {
         hasExpiredRef.current = true;
         showToast('로그인 유효시간이 만료되어 자동으로 로그아웃됩니다.', 'alarm');
@@ -41,7 +41,6 @@ export default function TokenTimer() {
     tick();
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 연장하기 클릭

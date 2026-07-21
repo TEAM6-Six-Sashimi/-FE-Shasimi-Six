@@ -3,10 +3,7 @@ interface InlineDotsLoadingProps {
   dotColor?: string;
 }
 
-export default function InlineDotsLoading({
-  label,
-  dotColor = '#6A7282',
-}: InlineDotsLoadingProps) {
+export default function InlineDotsLoading({ label, dotColor = '#6A7282' }: InlineDotsLoadingProps) {
   return (
     <span className="inline-flex items-center gap-2">
       {label && <span>{label}</span>}

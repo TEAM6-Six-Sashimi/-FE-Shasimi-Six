@@ -18,7 +18,7 @@ export default function CoursePayments() {
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 검색어는 디바운스 처리 - 타이핑 중 매번 서버 조회하지 않도록
+  // 검색어는 디바운스 처리
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedKeyword(keyword.trim()), 300);
     return () => clearTimeout(timer);
@@ -138,9 +138,7 @@ export default function CoursePayments() {
                 <td className="py-3 px-2 text-center font-semibold text-[#1E2125] truncate">
                   {payment.userName}
                 </td>
-                <td className="py-3 px-2 text-center text-[#6A7282] truncate">
-                  {payment.loginId}
-                </td>
+                <td className="py-3 px-2 text-center text-[#6A7282] truncate">{payment.loginId}</td>
                 <td className="py-3 px-4 text-left text-[#1E2125]">
                   <div className="flex flex-col gap-0.5">
                     {payment.courses.map((c, idx) => (

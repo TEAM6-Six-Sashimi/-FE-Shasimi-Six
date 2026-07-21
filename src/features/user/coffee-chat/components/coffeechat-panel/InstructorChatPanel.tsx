@@ -23,7 +23,7 @@ interface InstructorChatPanelProps {
   subscribe: (chatId: number, onMessage: (message: ChatMessage) => void) => () => void;
   sendMessage: (chatId: number, content: string) => boolean;
   onBack: () => void;
-  // 사이드바 목록의 최근 메시지 미리보기를 실시간으로 갱신하기 위한 콜백
+  // 사이드바 목록의 최근 메시지 미리보기 실시간 갱신을 위한 콜백
   onMessage?: (message: ChatMessageEvent) => void;
 }
 
@@ -52,13 +52,7 @@ export default function InstructorChatPanel({
     onMessage,
   });
 
-  // 승인 성공 후 요청/채팅방 목록을 다시 GET해서 반영해야 함.
-  // router.refresh()는 완료를 기다릴 수 있는 Promise가 아니라 재요청만 트리거하고 바로
-  // 반환되므로, 성공 시엔 여기서 isResponding을 풀지 않는다. 그렇게 안 하면 실제 방 상태
-  // (PENDING→ACCEPTED 등)가 화면에 반영되기 전에 버튼이 다시 눌릴 수 있는 창이 생겨서
-  // 같은 액션이 중복으로 나갈 수 있다 — 이 방은 성공 시 상태가 바뀌면서 버튼 자체가
-  // 사라지거나(수락) 목록에서 빠져서 패널이 언마운트되므로(거절/나가기), 실패/예외 시에만
-  // 재시도할 수 있도록 풀어주면 된다.
+  // 승인 성공 후 요청/채팅방 목록을 다시 GET해서 반영
   const handleAccept = async () => {
     if (isResponding) return;
     setIsResponding(true);

@@ -6,7 +6,7 @@ interface CheckboxProps {
   disabled?: boolean;
   // 체크됐을 때 배경/테두리 색
   color?: string;
-  // 체크 아이콘 색 - 밝은 배경(라임 등)에서는 흰색 대신 어두운 색이 필요
+  // 체크 아이콘 색
   checkColor?: string;
   size?: 'sm' | 'md';
   className?: string;

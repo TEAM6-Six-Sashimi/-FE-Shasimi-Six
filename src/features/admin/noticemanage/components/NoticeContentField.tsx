@@ -21,7 +21,7 @@ export default function NoticeContentField({ value, onChange }: NoticeContentFie
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageError, setImageError] = useState('');
 
-  // 선택한 텍스트(없으면 placeholder)를 before/after 문법으로 감싸고, 감싼 부분이 다시 선택되도록 커서 위치 복원
+  // 선택한 텍스트가 다시 선택되도록 커서 위치 복원
   const wrapSelection = (before: string, after: string, placeholder: string) => {
     const textarea = contentRef.current;
     if (!textarea) return;

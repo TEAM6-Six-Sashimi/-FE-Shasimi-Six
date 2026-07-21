@@ -10,7 +10,11 @@ export default function CreditFailPage() {
 
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
-      <OneButtonModal title="결제 실패" message={message} onConfirm={() => router.push('/credit')} />
+      <OneButtonModal
+        title="결제 실패"
+        message={message}
+        onConfirm={() => router.push('/credit')}
+      />
     </div>
   );
 }
