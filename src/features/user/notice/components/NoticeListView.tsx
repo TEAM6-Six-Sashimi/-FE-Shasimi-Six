@@ -58,7 +58,7 @@ export default function NoticeListView({ initialItems, initialTotalPages }: Noti
           <thead>
             <tr className="border-b border-[#E5E7EB]">
               <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">#</th>
-              <th className="py-3 px-2 text-left font-semibold text-[#1E2125]">제목</th>
+              <th className="py-3 px-2 text-center font-semibold text-[#1E2125]">제목</th>
               <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">등록일</th>
             </tr>
           </thead>
@@ -81,22 +81,24 @@ export default function NoticeListView({ initialItems, initialTotalPages }: Noti
                   <td className="py-4 w-[8%] text-center text-[#9CA3AF] font-medium">
                     {String(page * ITEMS_PER_PAGE + idx + 1).padStart(2, '0')}
                   </td>
-                  <td className="py-4 px-2 text-left truncate">
-                    <Link
-                      href={`/notice/${notice.noticeId}`}
-                      className="text-[14.5px] text-[#1E2125] hover:text-[#FF5E5E] hover:underline transition-colors"
-                    >
-                      {notice.title}
-                    </Link>
-                    {notice.pinned && (
-                      <Image
-                        src="/pin-Icon.svg"
-                        alt="고정"
-                        width={13}
-                        height={13}
-                        className="inline-block align-middle ml-1.5 -mt-0.5"
-                      />
-                    )}
+                  <td className="py-4 px-2 text-left">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Link
+                        href={`/notice/${notice.noticeId}`}
+                        className="truncate text-[14.5px] text-[#1E2125] hover:text-[#FF5E5E] hover:underline transition-colors"
+                      >
+                        {notice.title}
+                      </Link>
+                      {notice.pinned && (
+                        <Image
+                          src="/pin-Icon.svg"
+                          alt="고정"
+                          width={13}
+                          height={13}
+                          className="shrink-0"
+                        />
+                      )}
+                    </div>
                   </td>
                   <td className="py-4 w-[18%] text-center text-[#9CA3AF]">
                     {notice.createdDate}

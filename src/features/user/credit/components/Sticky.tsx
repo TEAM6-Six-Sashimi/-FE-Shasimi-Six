@@ -164,7 +164,7 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
       {modalState === 'confirm' && (
         <TwoButtonModal
           title="크레딧 충전"
-          message="크레딧을 충전하시겠습니까? 확인 시 Toss 결제창으로 이동합니다."
+          message={'크레딧을 충전하시겠습니까?\n확인 시 Toss 결제창으로 이동합니다.'}
           onConfirm={handleConfirm}
           onCancel={() => setModalState('none')}
         />

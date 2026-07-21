@@ -6,6 +6,7 @@ import { confirmCreditChargeAction } from '@/features/user/credit/actions';
 import { useMaintenance } from '@/components/system/MaintenanceProvider';
 import { isSafeReturnPath } from '@/lib/utils';
 import OneButtonModal from '@/components/modals/OneButtonModal';
+import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
 
 type ConfirmState = 'loading' | 'success' | 'error';
 
@@ -57,7 +58,10 @@ export default function CreditSuccessPage() {
   if (state === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F9FAFB]">
-        <p className="text-[15px] text-[#6A7282]">결제를 승인하고 있습니다...</p>
+        <div className="flex flex-col items-center justify-center gap-3">
+          <InlineDotsLoading dotColor="#FF5E5E" />
+          <p className="text-[15px] text-[#6A7282]">결제를 승인하고 있습니다...</p>
+        </div>
       </div>
     );
   }

@@ -11,6 +11,8 @@ interface CourseReviewsSectionProps {
   ratingDistribution: RatingDistributionItem[];
   reviews: CourseReview[];
   reviewMode: ReviewMode;
+  /** 강의 전체 진행률(%) - ENROLLED만 값 있음. 백엔드가 수강을 시작 안 한 경우(0%) 수강평 작성을 400으로 거부한다 */
+  progressRate: number | null;
   currentUserLoginId?: string | null;
 }
 
@@ -21,10 +23,13 @@ export default function CourseReviewsSection({
   ratingDistribution,
   reviews,
   reviewMode,
+  progressRate,
   currentUserLoginId,
 }: CourseReviewsSectionProps) {
   const hasReviewed =
     !!currentUserLoginId && reviews.some((review) => review.writerLoginId === currentUserLoginId);
+  // 수강을 아직 시작하지 않은 경우(진행률 0%) 백엔드가 작성 자체를 거부하므로, 폼 대신 미리 안내한다
+  const hasNotStarted = reviewMode === 'writable' && !progressRate;
 
   return (
     <section className="flex flex-col gap-4">
@@ -42,7 +47,15 @@ export default function CourseReviewsSection({
         </div>
       )}
 
-      {reviewMode === 'writable' && !hasReviewed && <ReviewForm courseId={courseId} />}
+      {reviewMode === 'writable' && !hasReviewed && hasNotStarted && (
+        <div className="bg-[#F9FAFB] rounded-lg px-4 py-4 font-medium text-[13px] text-[#6A7282]">
+          강의를 수강한 후에 수강평을 작성할 수 있습니다.
+        </div>
+      )}
+
+      {reviewMode === 'writable' && !hasReviewed && !hasNotStarted && (
+        <ReviewForm courseId={courseId} />
+      )}
 
       {reviewMode === 'readonly' && (
         <div className="bg-[#F9FAFB] rounded-lg px-4 py-4 font-medium text-[13px] text-[#6A7282]">

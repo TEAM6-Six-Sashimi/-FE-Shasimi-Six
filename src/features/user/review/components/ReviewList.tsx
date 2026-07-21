@@ -20,7 +20,7 @@ interface ReviewListProps {
   currentUserLoginId?: string | null;
 }
 
-type SortType = '최신순' | '추천순';
+type SortType = '최신순' | '평점순';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -128,7 +128,7 @@ export default function ReviewList({
       {/* 정렬 탭 */}
       <nav aria-label="수강평 정렬">
         <ul className="flex items-center gap-0 border-b border-[#E5E7EB] list-none">
-          {(['최신순', '추천순'] as SortType[]).map((s) => (
+          {(['최신순', '평점순'] as SortType[]).map((s) => (
             <li key={s}>
               <button
                 type="button"
