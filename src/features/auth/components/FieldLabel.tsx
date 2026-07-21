@@ -5,9 +5,8 @@ interface FieldLabelProps {
   variant?: FieldLabelVariant;
 }
 
-// 회원가입 자체 필드(이름/아이디 등)는 'semibold' 스타일을,
-// 아이디 찾기/비밀번호 찾기 자체 필드는 'medium' 스타일을 쓰고 있어서,
-// 공용 필드(EmailVerifyField/PasswordFields)가 페이지에 맞는 스타일을 고를 수 있게 한다.
+// 회원가입: semibold'
+// 아이디 찾기/비밀번호 찾기: 'medium'
 export default function FieldLabel({ label, variant = 'medium' }: FieldLabelProps) {
   if (variant === 'semibold') {
     return (

@@ -30,7 +30,6 @@ export default function AdminPendingButtons({ courseId, courseTitle }: AdminPend
   const [rejectCategories, setRejectCategories] = useState<RejectReasonCategory[]>([]);
   const [categoryLoadState, setCategoryLoadState] = useState<CategoryLoadState>('idle');
 
-  // label → code (RejectModal이 label을 콜백으로 넘기므로 백엔드 전송 전 역매핑용)
   const categoryValueMap = useMemo(
     () => Object.fromEntries(rejectCategories.map((c) => [c.label, c.code])),
     [rejectCategories],
@@ -80,7 +79,6 @@ export default function AdminPendingButtons({ courseId, courseTitle }: AdminPend
     setIsLoading(false);
   };
 
-  // RejectModal은 선택된 값을 label로 변환해 콜백에 넘기므로, 백엔드 전송 전 code로 역매핑한다.
   const handleReject = async (categoryLabel: string, detail: string) => {
     setIsLoading(true);
     const categoryCode = categoryValueMap[categoryLabel] ?? categoryLabel;

@@ -12,7 +12,7 @@ interface PaymentContentProps {
 }
 
 export default function PaymentContent({ items, categories }: PaymentContentProps) {
-  // 세부카테고리명 → 대카테고리명 매핑 (item.subtitle은 세부카테고리명만 담고 있음)
+  // 세부카테고리명 → 대카테고리명 매핑
   const subToMainMap = useMemo(() => {
     const map = new Map<string, string>();
     categories.forEach((cat) => {

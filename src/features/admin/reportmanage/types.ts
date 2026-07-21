@@ -16,7 +16,7 @@ export const REPORT_CATEGORY_STYLE: Record<ReportCategory, string> = {
   OTHER: 'bg-[#F3F4F6] text-[#6A7282]',
 };
 
-// 목록 조회 (GET /admin/reviews/reports) 응답 항목
+// 목록 조회
 export interface ReviewReport {
   reportId: number;
   reviewContent: string;
@@ -27,7 +27,7 @@ export interface ReviewReport {
   status: ReportStatus;
 }
 
-// 상세 조회 (GET /admin/reviews/reports/{reportId}) 응답
+// 상세 조회
 export interface ReviewReportDetail {
   reviewContent: string;
   writerLoginId: string;
@@ -35,8 +35,8 @@ export interface ReviewReportDetail {
   reportedAt: string;
   category: ReportCategory;
   reason: string;
-  reviewStatus: ReviewStatus; 
-  reportStatus: ReportStatus; 
+  reviewStatus: ReviewStatus;
+  reportStatus: ReportStatus;
 }
 
 export const REPORT_STATUS_LABEL: Record<ReportStatus, string> = {

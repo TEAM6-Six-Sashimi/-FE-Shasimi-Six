@@ -26,7 +26,10 @@ export async function GET() {
   if (!res.ok) {
     const errorBody = await res.text().catch(() => '');
     console.error(`[resume-template] status=${res.status} body=${errorBody}`);
-    return NextResponse.json({ error: '이력서 양식을 불러오지 못했습니다.' }, { status: res.status });
+    return NextResponse.json(
+      { error: '이력서 양식을 불러오지 못했습니다.' },
+      { status: res.status },
+    );
   }
 
   const blob = await res.blob();

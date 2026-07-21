@@ -27,12 +27,10 @@ export default function CategoryManage({ categories, accessToken }: Props) {
     payload?: any;
   } | null>(null);
 
-  // 수정 버튼 클릭 핸들러
   const handleEdit = (row: AdminCategory) => {
     setEditTarget(row);
   };
 
-  // 등록 및 수정 모달에서 검증 후 넘어온 데이터 처리
   const handleModalSubmit = (data: { name: string; subCategory: string }) => {
     if (editTarget) {
       setConfirmModal({ type: 'edit', payload: data });
@@ -41,7 +39,6 @@ export default function CategoryManage({ categories, accessToken }: Props) {
     }
   };
 
-  // 등록 API 호출
   const handleRegisterSubmit = async (data: { name: string; subCategory: string }) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -62,7 +59,6 @@ export default function CategoryManage({ categories, accessToken }: Props) {
     setIsSubmitting(false);
   };
 
-  // 수정 API 호출
   const handleEditSubmit = async (data: { subCategory: string }) => {
     if (!editTarget || isSubmitting) return;
     setIsSubmitting(true);
@@ -82,7 +78,6 @@ export default function CategoryManage({ categories, accessToken }: Props) {
     setIsSubmitting(false);
   };
 
-  // 삭제 API 호출
   const handleDeleteSubmit = async (id: number) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -161,13 +156,13 @@ export default function CategoryManage({ categories, accessToken }: Props) {
                   </td>
                   <td className="py-3 text-center text-[#6A7282]">{row.subCategory}</td>
 
-                  {/* 💡 상태값 true / false에 따른 분기 라벨 노출 부분 */}
+                  {/* 상태값에 따른 분기 라벨 노출 부분 */}
                   <td className="py-3 text-center">
                     <span
                       className={`inline-block px-2 py-0.5 rounded text-[11px] font-semibold ${
                         row.active
-                          ? 'bg-[#F9FBE7] text-[#827717]' // 활성 스타일
-                          : 'bg-[#F9FAFB] text-[#6A7282]' // 비활성 스타일
+                          ? 'bg-[#F9FBE7] text-[#827717]' // 활성
+                          : 'bg-[#F9FAFB] text-[#6A7282]' // 비활성
                       }`}
                     >
                       {row.active ? '공개' : '비공개'}
@@ -199,6 +194,7 @@ export default function CategoryManage({ categories, accessToken }: Props) {
           </tbody>
         </table>
       </div>
+
       {/* 팝업 모달 분기 처리 */}
       {confirmModal?.type === 'create' && (
         <TwoButtonModal

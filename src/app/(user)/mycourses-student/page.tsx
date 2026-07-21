@@ -27,7 +27,7 @@ export default async function StudentMyCourseListPage() {
       </div>
     );
   } catch (error) {
-    // 토큰은 있지만 세션이 죽은 상태(다른 기기 로그인 등) - 빈 목록으로 오해시키지 않고 로그아웃 처리
+    // 토큰은 있지만 세션이 죽은 상태 - 로그아웃 처리
     if (error instanceof UserMeAuthError) {
       const message = (await parseAuthErrorMessage(error.response)) ?? '다시 로그인해주세요.';
       return <SessionExpiredRedirect message={message} />;

@@ -26,7 +26,6 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   };
 }
 
-
 export default async function Page({ params, searchParams }: PageProps) {
   const { category } = await params;
   const { sub } = await searchParams;

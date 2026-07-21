@@ -29,9 +29,6 @@ export function MaintenanceProvider({ isAdmin, children }: MaintenanceProviderPr
     setMessage(msg);
   };
 
-  // 관리자 또는 예외 경로(로그인/점검 안내 페이지)는 능동적 점검 체크 대상에서 제외한다.
-  // proxy.ts가 이 경우 서버 단에서 이미 통과시켜주므로, 클라이언트가 별도로 다시 막아버리면
-  // (특히 /auth/login에서) 점검 중 로그인이 아예 불가능해지는 문제가 생긴다.
   const isExcluded = isAdmin || MAINTENANCE_EXCLUDED_PATHS.includes(pathname);
 
   useMaintenancePolling((status) => {
@@ -39,9 +36,7 @@ export function MaintenanceProvider({ isAdmin, children }: MaintenanceProviderPr
   }, !isExcluded && !isBlocked);
 
   if (isBlocked) {
-    return (
-      <ServiceUnavailablePage message={message} onRecovered={() => setMaintenance(false)} />
-    );
+    return <ServiceUnavailablePage message={message} onRecovered={() => setMaintenance(false)} />;
   }
 
   return (

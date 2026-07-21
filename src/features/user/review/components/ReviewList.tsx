@@ -16,7 +16,6 @@ interface ReviewListProps {
   courseId: number;
   reviews: CourseReview[];
   isEmpty?: boolean;
-  /** 현재 로그인한 사용자의 loginId - 본인 글 판별 및 정렬에 사용 */
   currentUserLoginId?: string | null;
 }
 
@@ -24,7 +23,7 @@ type SortType = '최신순' | '평점순';
 
 const ITEMS_PER_PAGE = 5;
 
-// 아이디 앞 4자리만 노출 (예: "hong123" → "hong****")
+// 아이디 앞 4자리만 노출
 function maskLoginId(loginId: string): string {
   if (loginId.length <= 4) return loginId;
   return `${loginId.slice(0, 4)}${'*'.repeat(loginId.length - 4)}`;
@@ -180,10 +179,7 @@ export default function ReviewList({
                     {/* 별점 + 등록일 */}
                     <div className="flex items-center gap-2">
                       <StarRating rating={review.rating} size={12} />
-                      <time
-                        dateTime={review.createdAt}
-                        className="text-[#6A7282] text-[12px]"
-                      >
+                      <time dateTime={review.createdAt} className="text-[#6A7282] text-[12px]">
                         {review.createdAt.slice(0, 10)}
                       </time>
                     </div>
@@ -212,7 +208,7 @@ export default function ReviewList({
                     삭제
                   </button>
                 ) : (
-                  // 비로그인 게스트는 신고할 수 없으므로(서버 인증 필요) 버튼 자체를 노출하지 않음
+                  // 비로그인 게스트는 신고할 수 없으므로 버튼 자체를 노출하지 않음
                   currentUserLoginId && (
                     <button
                       type="button"

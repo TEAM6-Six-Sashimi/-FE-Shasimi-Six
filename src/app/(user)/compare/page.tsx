@@ -24,9 +24,9 @@ export default function CourseComparePage() {
       />
       <div className="min-h-screen">
         <div className="max-w-275 mx-auto py-8 px-6">
-            <Suspense fallback={null}>
-              <ComapareForm />
-            </Suspense>
+          <Suspense fallback={null}>
+            <ComapareForm />
+          </Suspense>
         </div>
       </div>
     </div>

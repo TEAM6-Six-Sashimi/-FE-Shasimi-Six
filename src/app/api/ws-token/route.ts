@@ -3,9 +3,7 @@ import { NextResponse } from 'next/server';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// accessToken은 httpOnly 쿠키라 브라우저 JS가 직접 못 읽는다.
-// WebSocket(STOMP) 연결에는 전체 권한을 가진 accessToken을 그대로 넘기지 않고,
-// 서버사이드에서 연결 전용 단기 티켓(wsTicket)을 새로 발급받아 그것만 내려준다.
+// (커피챗용) 서버사이드에서 연결 전용 단기 티켓 = wsTicket
 export async function GET() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;

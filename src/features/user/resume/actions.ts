@@ -10,9 +10,7 @@ import {
 } from '@/services/resume.service';
 import { LatestAiReviewDetail, ResumePayload, SavedResume } from './types';
 
-export async function saveResumeAction(
-  payload: ResumePayload,
-): Promise<{
+export async function saveResumeAction(payload: ResumePayload): Promise<{
   success: boolean;
   resumeId?: number;
   authError?: true;

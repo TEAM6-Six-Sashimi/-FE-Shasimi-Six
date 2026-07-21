@@ -11,9 +11,7 @@ interface UseEmailVerificationOptions {
   initialIsVerified?: boolean;
 }
 
-// 회원가입/아이디 찾기/비밀번호 찾기가 공용으로 쓰는 이메일 인증 상태 머신.
-// 실제 API 호출(sendCode/verifyCode)은 화면마다 다를 수 있어(purpose가 다르거나,
-// name이 추가로 필요하거나) 호출부에서 함수로 넘겨받는다.
+// 공용 이메일 인증 상태 머신 - 회원가입/아이디 찾기/비밀번호 찾기
 export function useEmailVerification({
   sendCode,
   verifyCode,
@@ -34,7 +32,7 @@ export function useEmailVerification({
   const canSend = isEmailValid && !isSending && !isVerified;
   const canVerify = code.trim() !== '' && !isVerifying && !isVerified;
 
-  // 이메일을 다시 수정하면 이전 발송/인증 상태는 의미가 없어지므로 초기화한다.
+  // 이메일을 다시 수정하면 이전 발송/인증 상태는 의미가 없어지므로 초기화
   const setEmail = (value: string) => {
     setEmailState(value);
     if (isSent || isVerified) {

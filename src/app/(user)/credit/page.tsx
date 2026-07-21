@@ -8,14 +8,14 @@ export default async function CreditPage() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
-  // 서버에서 초기 크레딧 잔액 조회
+  // 초기 크레딧 잔액 조회
   let initialCredit = 0;
   if (accessToken) {
     try {
       const data = await fetchCreditBalance(accessToken);
       initialCredit = data.balance;
     } catch (e) {
-      // 동시 접속 등으로 세션이 완전히 끊긴 경우 - 잔액 0 대신 로그아웃 처리
+      // 세션이 완전히 끊긴 경우 - 잔액 0 대신 로그아웃 처리
       if (e instanceof AuthSessionError) {
         return <SessionExpiredRedirect message={e.message} />;
       }

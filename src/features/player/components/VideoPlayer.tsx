@@ -28,8 +28,15 @@ export default function VideoPlayer({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
 
-  const { volume, isMuted, playbackRate, toggleMute, handleVolumeChange, adjustVolume, changePlaybackRate } =
-    usePlayerSettings(videoRef, src);
+  const {
+    volume,
+    isMuted,
+    playbackRate,
+    toggleMute,
+    handleVolumeChange,
+    adjustVolume,
+    changePlaybackRate,
+  } = usePlayerSettings(videoRef, src);
   const { showControls, handleMouseMove } = useAutoHideControls(isPlaying);
 
   const updatePlaying = (playing: boolean) => {
@@ -76,14 +83,13 @@ export default function VideoPlayer({
     if (video && video.readyState >= 1 && Number.isFinite(video.duration)) {
       setDuration(video.duration);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src]);
 
   const handleDurationChange = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     setDuration(e.currentTarget.duration);
   };
 
-  // 같은 세션(같은 videoUrl)으로 t 값만 바뀌어 재진입한 경우
+  // 같은 세션으로 t 값만 바뀌어 재진입한 경우
   // src가 안 바뀌어 loadedmetadata가 다시 발생하지 않으므로, 이미 로드된 영상이면 직접 위치를 옮겨줌
   useEffect(() => {
     const video = videoRef.current;
@@ -91,7 +97,6 @@ export default function VideoPlayer({
     if (video.readyState >= 1 && startSeconds < video.duration) {
       video.currentTime = startSeconds;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startSeconds]);
 
   return (

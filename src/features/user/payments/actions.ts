@@ -97,7 +97,7 @@ export async function fetchPlanPreviewAction(planCode: string): Promise<PlanPrev
   });
 
   if (!res.ok) return null;
-  
+
   const data = await res.json();
   return data;
 }

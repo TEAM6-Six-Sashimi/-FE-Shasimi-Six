@@ -44,7 +44,6 @@ export default function SessionItem({
 
   useEffect(() => {
     onUploadingChange(videoUploading || materialUploading);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoUploading, materialUploading]);
 
   useEffect(() => {
@@ -58,7 +57,7 @@ export default function SessionItem({
   }, [session.videoFile]);
 
   // 기존 파일 데이터 (수정 시 이미 등록된 회차) — 새 파일을 고르지 않았으면 이걸로 표시
-  // videoUrl은 업로드 API가 내려주는 상대 경로(key)일 수 있어 getThumbnailUrl로 절대 URL로 변환한다.
+  // videoUrl은 업로드 API가 내려주는 상대 경로(key)일 수 있어 getThumbnailUrl로 절대 URL로 변환
   const existingVideoUrl =
     !session.videoFile && session.videoUrl ? (getThumbnailUrl(session.videoUrl) ?? '') : '';
   const existingMaterialName =

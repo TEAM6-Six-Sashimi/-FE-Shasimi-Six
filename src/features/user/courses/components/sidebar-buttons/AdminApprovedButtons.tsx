@@ -1,4 +1,3 @@
-// src/features/user/courses/components/sidebar-buttons/AdminApprovedButtons.tsx
 'use client';
 
 import Link from 'next/link';

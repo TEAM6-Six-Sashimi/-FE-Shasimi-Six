@@ -33,7 +33,7 @@ const CATEGORY_LABEL: Record<FitCategoryResult['category'], string> = {
 function FitCategoryCard({ result }: { result: FitCategoryResult }) {
   const { bg, text } = FIT_STATUS_COLOR[result.status];
 
-  // 코멘트 아이콘/색상 분기: 충족(긍정) / 확인불가(중립) / 그 외(주의)
+  // 코멘트 아이콘/색상 분기: 충족 / 확인불가 / 그 외
   const commentStyle =
     result.status === 'SATISFIED'
       ? { icon: '✓', color: 'text-[#827717]' }

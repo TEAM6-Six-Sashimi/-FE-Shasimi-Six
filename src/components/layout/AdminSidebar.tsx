@@ -29,7 +29,6 @@ export default function AdminSidebar() {
       {/* 메뉴 목록 */}
       <nav className="flex flex-col gap-2">
         {SIDEBAR_MENUS.map(({ label, href, icon }) => {
-          // '/admin' 자체는 정확히 일치할 때만, 나머지는 하위 경로(상세 페이지 등)도 포함해서 활성 처리
           const isActive =
             pathname === href || (href !== '/admin' && pathname.startsWith(`${href}/`));
           return (

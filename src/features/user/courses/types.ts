@@ -1,4 +1,4 @@
-import { CourseReview } from "../review/types";
+import { CourseReview } from '../review/types';
 
 // 강의 목록용
 export interface CourseFromAPI {
@@ -10,7 +10,7 @@ export interface CourseFromAPI {
   totalDuration: number;
   ratingAvg: number;
   studentCount: number;
-  approvedAt: string; // 등록일
+  approvedAt: string; // 등록일(관리자 승인일)
   label?: string | null; // 인기, NEW
   categoryName: string;
 }
@@ -31,7 +31,7 @@ export interface InstructorInfo {
   portfolioUrl?: string;
 }
 
-// 별점 분포 - 백엔드가 star별 개수(count)만 내려주고, 비율(%) 계산은 프론트 담당
+// 별점 분포 - 백엔드가 star별 개수, 프론트가 비율(%) 계산
 export interface RatingDistributionItem {
   star: number;
   count: number;
@@ -44,7 +44,7 @@ export interface CourseSession {
   sessionId: number;
   sessionUid: string;
   title: string;
-  videoUrl: string | null; // PUBLIC: preview 세션만 값 있음, 나머지 null
+  videoUrl: string | null; // preview 세션만 값 있음, 나머지 null
   durationSeconds: number;
   sessionOrder: number;
   preview: boolean;
@@ -52,13 +52,12 @@ export interface CourseSession {
   attachmentUrl: string | null; // presigned, 120분 만료
   attachmentType: string | null;
   attachmentSize: number | null;
-  // ENROLLED일 때만 값 있음 - 세션별 시청 진행 정보
-  lastPositionSeconds: number | null; // 마지막 시청 지점(초)
+  lastPositionSeconds: number | null; // (초) ENROLLED일 때만 값 있음 - 세션별 시청 진행 정보
   sessionProgressRate: number | null; // 세션 진행률(%)
   sessionCompleted: boolean | null; // 세션 완료 여부
 }
 
-// 강의 상세 — GET /api/courses/{courseId} 응답 (viewerType 공통 스키마)
+// 강의 상세
 export interface CourseDetailFromAPI {
   viewerType: ViewerType;
   courseId: number;
@@ -85,7 +84,7 @@ export interface CourseDetailFromAPI {
   reviews: CourseReview[];
 }
 
-// 수강 정보 (결제 확인용 - 별도 API)
+// 수강 정보 (결제 확인용)
 export interface PaymentInfo {
   paymentId: number;
   courseId: number;

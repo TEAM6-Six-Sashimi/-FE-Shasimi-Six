@@ -68,7 +68,7 @@ export default function AiUsageChart() {
 
           <Tooltip />
 
-          {/* SVG는 나중에 그려진 요소가 위로 오므로, 코랄이 맨 위(마지막)로 오도록 역순으로 렌더링 */}
+          {/* SVG는 나중에 그려진 요소가 위로 옴, 코랄이 맨 위(마지막)로 오도록 역순 렌더링 */}
           {[...SERIES].reverse().map((s) => (
             <Line
               key={s.dataKey}

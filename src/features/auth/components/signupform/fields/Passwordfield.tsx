@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from "react"
-import Image from "next/image"
-import FieldLabel, { FieldLabelVariant } from "@/features/auth/components/FieldLabel"
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import FieldLabel, { FieldLabelVariant } from '@/features/auth/components/FieldLabel';
 
 export const PASSWORD_REGEX =
   /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,16}$/;
@@ -43,7 +43,7 @@ export default function PasswordFields({
     `w-full ${inputHeightClass} px-4 rounded-lg border bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none transition-colors ${
       error ? 'border-[#FF5F5F]' : 'border-[#D1D5DB] focus:border-[#1E2125]'
     }`;
- 
+
   // 비밀번호 형식 + 일치 여부 검사
   useEffect(() => {
     if (!password) {
@@ -53,7 +53,7 @@ export default function PasswordFields({
     } else {
       setPasswordMessage('');
     }
- 
+
     let matched = false;
     if (password && passwordConfirm) {
       matched = password === passwordConfirm;
@@ -61,7 +61,7 @@ export default function PasswordFields({
     setIsMatched(matched);
     onMatchedChange(matched);
   }, [password, passwordConfirm, isFormatValid, onMatchedChange]);
- 
+
   return (
     <>
       <div className="mb-4">
@@ -90,13 +90,13 @@ export default function PasswordFields({
           </button>
         </div>
         <p className="text-[12px] text-[#6A7282] mt-0.5">
-          대소문자, 숫자, 특수문자(!@#$%^_) 포함, 8자 이상 16자 이하
+          영문 대문자와 소문자, 숫자, 특수문자(!@#$%^_) 모두 포함, 8자 이상 16자 이하
         </p>
         {passwordHasError && (
           <p className="text-xs mt-1 font-medium text-[#DC2626]">{passwordMessage}</p>
         )}
       </div>
- 
+
       <div className="mb-10">
         <FieldLabel label={confirmLabel} variant={labelVariant} />
         <div className="relative">

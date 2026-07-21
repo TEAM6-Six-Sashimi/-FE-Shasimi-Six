@@ -37,10 +37,7 @@ export function useVideoKeyboardShortcuts({
           break;
         case 'ArrowRight':
           e.preventDefault();
-          video.currentTime = Math.min(
-            video.duration || video.currentTime,
-            video.currentTime + 5,
-          );
+          video.currentTime = Math.min(video.duration || video.currentTime, video.currentTime + 5);
           break;
         case 'ArrowUp':
           e.preventDefault();
@@ -65,6 +62,5 @@ export function useVideoKeyboardShortcuts({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }

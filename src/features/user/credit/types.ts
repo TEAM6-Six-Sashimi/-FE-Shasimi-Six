@@ -2,7 +2,7 @@ export interface CreditBalanceResponse {
   balance: number;
 }
 
-// 크레딧 충전 준비 (POST /credits/toss/ready)
+// 크레딧 충전 준비
 export interface CreditReadyRequest {
   amount: number;
 }
@@ -13,7 +13,7 @@ export interface CreditReadyResponse {
   amount: number;
 }
 
-// 크레딧 충전 승인 (POST /credits/toss/confirm)
+// 크레딧 충전 승인
 export interface CreditConfirmRequest {
   paymentKey: string;
   orderId: string;

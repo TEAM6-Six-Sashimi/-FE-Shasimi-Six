@@ -99,7 +99,7 @@ export default function Step01Introduction({
 
       {/* 프로필 사진 + 로그인 정보 */}
       <div className="flex items-start gap-6">
-        {/* 프로필 사진 + 업로드 버튼 (박스 밖, 독립) */}
+        {/* 프로필 사진 + 업로드 버튼 */}
         <div className="flex flex-col items-center gap-2 shrink-0">
           <div
             className={`w-20 h-20 rounded-full bg-[#E5E7EB] overflow-hidden flex items-center justify-center text-[#6A7282] ${
@@ -141,7 +141,7 @@ export default function Step01Introduction({
           )}
         </div>
 
-        {/* 로그인 정보 (회색 박스로 감싸짐) */}
+        {/* 로그인 정보 */}
         <div className="flex-1 border border-[#E5E7EB] bg-[#F9FAFB] rounded-xl p-5">
           <div className="flex items-center gap-2 mb-2">
             <Image src="/auth/lock.svg" alt="" width={16} height={16} />

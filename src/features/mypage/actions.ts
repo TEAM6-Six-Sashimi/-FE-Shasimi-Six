@@ -90,14 +90,11 @@ export async function changePasswordAction(
       throw new Error('비밀번호 변경에 실패했습니다.');
     }
 
-    // requiresLogin이 true면 토큰을 재발급하지 않은 정상적인 "재로그인 필요" 흐름.
-    // 호출부가 이 플래그를 보고 재로그인 페이지로 보내게 한다.
     if (data.requiresLogin) {
       return { success: true, requiresLogin: true };
     }
 
-    // requiresLogin이 false인데 토큰 중 하나라도 빠져 있으면 응답이 불완전한 상태이므로
-    // 성공으로 처리하지 않고 명시적으로 실패시킨다. (한쪽 토큰만 갈아끼우는 상황 방지)
+    // requiresLogin이 false인데 토큰 중 하나라도 빠져 있으면 응답이 불완전한 상태이므로 성공으로 처리하지 않고 명시적으로 실패
     if (!data.accessToken || !data.refreshToken) {
       throw new Error('비밀번호는 변경되었지만 세션 갱신에 실패했습니다. 다시 로그인해주세요.');
     }
@@ -151,7 +148,7 @@ export async function deleteMeAction(currentPassword: string): Promise<DeleteMeA
       throw new Error(errorBody.message || '회원 탈퇴에 실패했습니다.');
     }
 
-    // 탈퇴 성공 - 계정이 더 이상 존재하지 않으므로 세션 쿠키를 정리한다.
+    // 탈퇴 성공
     cookieStore.delete('accessToken');
     cookieStore.delete('refreshToken');
     cookieStore.delete('role');

@@ -16,9 +16,7 @@ export default function CreditChargeTable({ items }: CreditChargeTableProps) {
               실제 결제 금액
             </th>
             <th className="py-3 w-[18%] text-center font-semibold text-[#1E2125]">결제 일시</th>
-            <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">
-              충전한 크레딧
-            </th>
+            <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">충전한 크레딧</th>
             <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">결제 수단</th>
           </tr>
         </thead>

@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 
 interface ApproveConfirmModalProps {
-  title: string; // "강사 승인", "강의 승인"
-  targetLabel: string; // "승인 대상"
-  targetName: string; // "홍길동", "React 심화 과정"
-  description: string; // "해당 회원을 강사로 승인하시겠습니까?"
-  notice?: string; // "승인 시 강사 권한이 즉시 부여되고..."
+  title: string; // 강사/강의 승인
+  targetLabel: string;
+  targetName: string;
+  description: string;
+  notice?: string;
   confirmLabel?: string;
   cancelLabel?: string;
   onConfirm: () => void;

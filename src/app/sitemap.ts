@@ -5,15 +5,14 @@ import { fetchNotices } from '@/services/notice.service';
 const BASE_URL = 'https://www.sixsashimi.com.market-app.org';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// 실제 콘텐츠가 거의 안 바뀌는 정적 페이지들 - sitemap이 재생성될 때마다 "방금 수정됨"으로
-// 보고되지 않도록 실제 마지막 변경일을 고정값으로 관리한다 (내용이 바뀌면 이 날짜도 갱신).
+// 실제 콘텐츠가 거의 안 바뀌는 정적 페이지들 - 실제 마지막 변경일을 고정값으로 관리한다 (내용이 바뀌면 이 날짜도 갱신)
 const STATIC_CONTENT_LAST_MODIFIED = new Date('2026-07-20');
 
 // 카테고리 목록 조회 (동적 경로 생성용)
 async function fetchCategoryNames(): Promise<string[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/categories`, {
-      next: { revalidate: 3600 }, // 카테고리는 자주 안 바뀌므로 1시간 캐싱
+      next: { revalidate: 3600 },
     });
     if (!res.ok) return [];
     const data = await res.json();
@@ -78,7 +77,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // 동적 카테고리 페이지 (/courses/[category])
+  // 동적 카테고리 페이지
   const categoryPages: MetadataRoute.Sitemap = categoryNames.map((name) => ({
     url: `${BASE_URL}/courses/${encodeURIComponent(name)}`,
     lastModified: new Date(),
@@ -86,10 +85,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  // 동적 강의 상세 페이지 (/courses/[category]/[courseId])
-  const coursesByCategory = await Promise.all(
-    categoryNames.map((name) => fetchCourses(name)),
-  );
+  // 동적 강의 상세 페이지
+  const coursesByCategory = await Promise.all(categoryNames.map((name) => fetchCourses(name)));
   const coursePages: MetadataRoute.Sitemap = coursesByCategory.flat().map((course) => ({
     url: `${BASE_URL}/courses/${encodeURIComponent(course.categoryName)}/${course.courseId}`,
     lastModified: new Date(),
@@ -97,7 +94,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // 동적 공지사항 상세 페이지 (/notice/[id]) - 로그인 불필요한 공개 게시판
+  // 동적 공지사항 상세 페이지
   const noticeList = await fetchNotices({ page: 0, size: 100 });
   const noticePages: MetadataRoute.Sitemap = noticeList.items.map((notice) => ({
     url: `${BASE_URL}/notice/${notice.noticeId}`,

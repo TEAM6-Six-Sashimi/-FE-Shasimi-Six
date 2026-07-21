@@ -18,7 +18,7 @@ interface PopularCourseSliderClientProps {
   courses: CourseWithCategory[];
 }
 
-// 뷰포트 너비에 따른 한 슬라이드당 카드 개수 (모바일 1 / 태블릿 2 / 데스크톱 3)
+// 슬라이드당 카드 개수 반응형 (모바일 1 / 태블릿 2 / 데스크톱 3)
 function getItemsPerSlide(width: number): number {
   if (width < 640) return 1;
   if (width < 1024) return 2;
@@ -36,8 +36,6 @@ function useItemsPerSlide(): number {
   const [itemsPerSlide, setItemsPerSlide] = useState(3);
 
   useEffect(() => {
-    // window는 클라이언트에서만 접근 가능하므로 마운트 후 이펙트에서 초기값을 잡아야 함
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setItemsPerSlide(getItemsPerSlide(window.innerWidth));
 
     let timer: ReturnType<typeof setTimeout>;
@@ -63,12 +61,10 @@ export default function PopularCourseSliderClient({ courses }: PopularCourseSlid
   const slides = Array.from({ length: Math.ceil(courses.length / itemsPerSlide) }, (_, i) =>
     courses.slice(i * itemsPerSlide, i * itemsPerSlide + itemsPerSlide),
   );
-  // slides가 빈 배열이면 slides.length - 1이 -1이 되어 인덱스 계산이 어긋나므로 0으로 바닥을 깐다
   const lastIndex = Math.max(0, slides.length - 1);
 
   // 뷰포트가 바뀌어 슬라이드 개수가 달라지면 범위를 벗어난 인덱스에 머물지 않도록 보정
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrent((p) => Math.min(p, lastIndex));
   }, [lastIndex]);
 
@@ -93,10 +89,7 @@ export default function PopularCourseSliderClient({ courses }: PopularCourseSlid
             style={{ transform: `translateX(-${current * 100}%)` }}
           >
             {slides.map((group, gIdx) => (
-              <div
-                key={gIdx}
-                className={`min-w-full grid ${GRID_COLS_CLASS[itemsPerSlide]} gap-5`}
-              >
+              <div key={gIdx} className={`min-w-full grid ${GRID_COLS_CLASS[itemsPerSlide]} gap-5`}>
                 {group.map((course) => (
                   <SliderCourseCard key={course.courseId} course={course} />
                 ))}

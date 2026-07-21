@@ -81,7 +81,6 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
 
     if (sort === '인기순') result = result.sort((a, b) => b.studentCount - a.studentCount);
     if (sort === '평점순') result = result.sort((a, b) => b.ratingAvg - a.ratingAvg);
-    // 최신순은 서버에서 이미 정렬된 순서 유지
 
     return result;
   }, [initialCourses, search, filters, sort]);
@@ -212,7 +211,6 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
           <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10 list-none">
             {pagedCourses.map((course, idx) => (
               <li key={course.courseId}>
-                {/* 첫 4개(1행)는 priority로 LCP 개선 */}
                 <CourseCard course={course} category={category} priority={idx < 4} />
               </li>
             ))}

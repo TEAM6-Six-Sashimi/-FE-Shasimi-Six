@@ -14,7 +14,7 @@ export default function JobSummarySection({ summary }: JobSummarySectionProps) {
       </h2>
 
       <div className="grid grid-cols-2 gap-8">
-        {/* 좌측: 직무/경력조건/주요업무 */}
+        {/* 직무/경력조건/주요업무 */}
         <div className="flex flex-col gap-4">
           <div>
             <p className="text-[12.5px] text-[#9CA3AF] mb-1">직무</p>
@@ -32,7 +32,7 @@ export default function JobSummarySection({ summary }: JobSummarySectionProps) {
           </div>
         </div>
 
-        {/* 우측: 필수/우대사항 */}
+        {/* 필수/우대사항 */}
         <div className="flex flex-col gap-4 border-l border-[#E5E7EB] pl-8">
           <div>
             <p className="flex items-center gap-1.5 text-[13.5px] font-bold text-[#1E2125] mb-2">

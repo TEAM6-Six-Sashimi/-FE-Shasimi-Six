@@ -35,7 +35,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '자격증을 1개 이상 첨부해주세요.' }, { status: 400 });
   }
 
-  // 백엔드 명세: bio, motivationLetter, categoryId, portfolioUrl은 query parameter
   const bio = (formData.get('introduction') as string) ?? '';
   const motivationLetter = (formData.get('motivation') as string) ?? '';
   const categoryId = (formData.get('categoryId') as string) ?? '';
@@ -48,7 +47,6 @@ export async function POST(req: NextRequest) {
     portfolioUrl,
   });
 
-  // 백엔드 명세: profileImage, certificateFiles, resumeFile은 request body(multipart)
   const newFormData = new FormData();
   newFormData.append('profileImage', profileImage);
   newFormData.append('resumeFile', resume);
@@ -70,8 +68,6 @@ export async function POST(req: NextRequest) {
       const errorBody = await res.text();
       console.error('instructor-apply error:', errorBody);
 
-      // 백엔드가 구조화된 에러(코드/메시지)를 내려주면 그걸 우선 사용하고,
-      // 없으면 상태 코드 기반의 안내 문구로 대체
       const parsed = (() => {
         try {
           return JSON.parse(errorBody);
@@ -82,7 +78,7 @@ export async function POST(req: NextRequest) {
       const backendMessage: string | undefined = parsed?.message || parsed?.error;
       const backendCode: string | undefined = parsed?.errorCode || parsed?.code;
 
-      // 점검모드(503 + COMMON_900) - 다른 500대 오류와 섞이지 않도록 가장 먼저 분기
+      // 점검모드(503 + COMMON_900)
       if (res.status === 503 && backendCode === 'COMMON_900') {
         return NextResponse.json(
           { error: backendMessage ?? '점검 중입니다.', maintenance: true },
@@ -95,7 +91,6 @@ export async function POST(req: NextRequest) {
         /이미\s*지원/.test(backendMessage ?? '') ||
         /이미\s*지원/.test(errorBody);
 
-      // COMMON_999 등 백엔드 내부 오류 코드는 사용자에게 그대로 보여줘도 도움이 안 되므로
       // 재시도를 유도하는 안내 문구로 대체
       const isGenericServerError = backendCode === 'COMMON_999' || res.status >= 500;
 

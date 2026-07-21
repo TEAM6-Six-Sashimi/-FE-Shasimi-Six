@@ -21,7 +21,7 @@ const MAX_AMOUNT = 10000000;
 const MAX_DIGITS = String(MAX_AMOUNT).length;
 const UNIT_AMOUNT = 1000;
 
-// 직접 입력 금액에 대한 에러 메시지를 반환. 유효하면 null.
+// 직접 입력 금액에 대한 에러 메시지. 유효하면 null
 function getCustomAmountError(rawValue: string): string | null {
   if (!rawValue) return null; // 빈 값은 아직 입력 전이므로 에러 표시 안 함
 

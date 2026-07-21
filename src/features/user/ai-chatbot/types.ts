@@ -5,7 +5,7 @@ export interface ChatbotHistoryItem {
   content: string;
 }
 
-// POST /api/chatbot/messages 응답
+// POST /api/chatbot/messages
 export interface ChatbotMessageResponse {
   reply: string;
 }

@@ -54,9 +54,7 @@ export default function CurriculumSidebar({
               >
                 {idx + 1}. {session.title}
                 {session.sessionCompleted && (
-                  <span className="text-[11.5px] text-[#9CA3AF] font-normal ml-1">
-                    (학습 완료)
-                  </span>
+                  <span className="text-[11.5px] text-[#9CA3AF] font-normal ml-1">(학습 완료)</span>
                 )}
               </span>
               <span

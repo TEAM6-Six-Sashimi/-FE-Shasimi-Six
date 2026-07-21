@@ -7,9 +7,9 @@ import { useMaintenancePolling } from './useMaintenancePolling';
 
 interface ServiceUnavailablePageProps {
   message: string;
-  /** 점검 종료가 감지되면 이동할 경로. 안 주면 홈으로. (독립된 /maintenance 페이지에서 사용) */
+  // 점검 종료가 감지되면 이동할 경로 (없으면 메인홈으로)
   redirectTo?: string;
-  /** 점검 종료가 감지됐을 때 이동 대신 직접 처리하고 싶은 경우(이미 렌더돼 있던 페이지를 그대로 복귀시키는 용도) */
+  // 이미 렌더돼 있던 페이지를 그대로 복귀시키는 용도)
   onRecovered?: () => void;
 }
 
@@ -38,9 +38,7 @@ export default function ServiceUnavailablePage({
       </div>
       <div className="flex flex-col items-center gap-2">
         <h1 className="text-[28px] font-bold text-[#FF5E5E]">서비스 점검 중</h1>
-        <p className="text-[16px] font-semibold text-[#1E2125]">
-          서비스 이용이 잠시 어렵습니다
-        </p>
+        <p className="text-[16px] font-semibold text-[#1E2125]">서비스 이용이 잠시 어렵습니다</p>
         <p className="text-[13.5px] text-[#6A7282]">{message}</p>
       </div>
       <Button
