@@ -74,7 +74,7 @@ export default function CoffeeChatPageClient({
 }: CoffeeChatPageClientProps) {
   const isInstructor = role === 'INSTRUCTOR';
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
-  const { isConnected, subscribe, sendMessage } = useCoffeeChatSocket();
+  const { isConnected, subscribe, sendMessage } = useCoffeeChatSocket(role !== 'GUEST');
   const { setHasAlert } = useCoffeeChatAlert();
 
   // 안읽음 배지를 실시간으로 갱신하기 위해 서버 props를 그대로 렌더링하지 않고
