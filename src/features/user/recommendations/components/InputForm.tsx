@@ -12,6 +12,9 @@ import { logoutAction } from '@/features/auth/actions';
 import { LatestJobPostingRecommendation, RecommendationInputType } from '../types';
 import { analyzeJobPostingAction, validateUrlAction } from '../actions';
 
+// URL 접속 실패/본문 추출 실패 - 인라인 에러 텍스트 대신 백엔드 메시지 그대로 토스트로 띄운다
+const TOAST_ERROR_CODES = ['RECOMMENDATION_001', 'RECOMMENDATION_002'];
+
 const TABS: {
   key: RecommendationInputType;
   label: string;
@@ -139,6 +142,9 @@ export default function InputForm({
         showToast(result.error.message, 'alarm');
         await logoutAction();
         return;
+      } else if (TOAST_ERROR_CODES.includes(result.error.errorCode)) {
+        // 백엔드 메시지가 두 문장을 이어 붙여서 내려와 첫 문장 끝(". ")에서 한 번 줄바꿈한다
+        showToast(result.error.message.replace('. ', '.\n'), 'negative');
       } else {
         setErrorMessage(result.error.message);
       }
@@ -207,8 +213,10 @@ export default function InputForm({
             <p className="text-[12.5px] text-[#6A7282] leading-relaxed">
               URL을 입력하면 자동으로 공고 내용을 불러옵니다.
               <br />
-              (채용공고 중 여러 분야를 한번에 모집하는 경우 현재 모델에서는 지원되지 않습니다.
-              입력할 때 참고 부탁드립니다.)
+              ** 채용공고 중 여러 분야를 한번에 모집하는 경우 채용공고 요약이 정확하지 않을 수 있습니다.
+              입력할 때 참고 부탁드립니다.
+              <br />
+              ** 일부 채용 사이트는 링크를 통한 자동 본문 추출이 제한될 수 있습니다. 이 경우 텍스트 직접 입력을 이용해주세요.
             </p>
           </div>
         )}

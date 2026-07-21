@@ -19,8 +19,8 @@ interface RecommendationPageClientProps {
 }
 
 // polling
-const POLLING_INTERVAL_MS = 1000; // 1초
-const MAX_POLLING_ATTEMPTS = 40; // 최대 대기 1 * 40초(40초)
+const POLLING_INTERVAL_MS = 2000; // 2초
+const MAX_POLLING_ATTEMPTS = 25; // 최대 대기 2 * 25초(50초)
 
 export default function RecommendationPageClient({
   resumeId,
