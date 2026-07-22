@@ -42,8 +42,7 @@ export async function saveResume(
       const maintenanceMessage = await parseMaintenanceMessage(res);
       if (maintenanceMessage) return { maintenance: true, message: maintenanceMessage };
 
-      // 400은 입력값 자체가 잘못됐다는 뜻(존재하지 않는 날짜 등) - 서버 오류와 구분해서
-      // 호출부가 "입력 내용을 확인해주세요" 식의 메시지를 보여줄 수 있게 한다.
+      // 400은 입력값 자체가 잘못됐다는 뜻
       if (res.status === 400) return { validationError: true };
 
       return null;
@@ -86,10 +85,10 @@ export async function updateResume(
       if (authMessage) return { success: false, authError: true, message: authMessage };
 
       const maintenanceMessage = await parseMaintenanceMessage(res);
-      if (maintenanceMessage) return { success: false, maintenance: true, message: maintenanceMessage };
+      if (maintenanceMessage)
+        return { success: false, maintenance: true, message: maintenanceMessage };
 
-      // 400은 입력값 자체가 잘못됐다는 뜻(존재하지 않는 날짜 등) - 서버 오류와 구분해서
-      // 호출부가 "입력 내용을 확인해주세요" 식의 메시지를 보여줄 수 있게 한다.
+      // 400은 입력값 자체가 잘못됐다는 뜻
       if (res.status === 400) return { success: false, validationError: true };
 
       return { success: false };
@@ -114,8 +113,8 @@ export async function fetchMyResume(accessToken: string): Promise<SavedResume | 
     });
 
     if (!res.ok) {
-      // 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없다.
-      // 순수 파싱 버전으로 던지고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당한다.
+      // 페이지 렌더링 중(Server Component) 직접 호출되므로 쿠키를 지울 수 없음
+      // 순수 파싱 버전으로 던지고, 쿠키 정리는 호출부의 SessionExpiredRedirect가 담당
       const authMessage = await parseAuthErrorMessage(res);
       if (authMessage) throw new AuthSessionError(authMessage);
       return null;

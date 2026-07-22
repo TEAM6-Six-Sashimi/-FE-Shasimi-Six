@@ -6,13 +6,17 @@ import {
   RejectedInstructorApplication,
 } from '@/features/admin/usermanage/types';
 import { AuthSessionError, handleAuthErrorResponse } from '@/features/auth/auth-error';
+import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // 회원 관리 - 전체 회원 조회
+// 세션이 죽은 경우(401)는 AuthSessionError로, 그 외 실패(403/500/네트워크)는 일반 Error로 던져서
+// 호출부(관리자 페이지)가 "0건"과 "조회 실패"를 구분해서 보여줄 수 있도록 함
 export async function fetchAdminUsers(accessToken: string): Promise<AdminUser[]> {
+  let res: Response;
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/users`, {
+    res = await fetch(`${API_BASE_URL}/admin/users`, {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
@@ -20,27 +24,32 @@ export async function fetchAdminUsers(accessToken: string): Promise<AdminUser[]>
       },
       cache: 'no-store',
     });
-
-    if (!res.ok) {
-      const errorBody = await res.text().catch(() => '');
-      console.error(`[fetchAdminUsers] status=${res.status} body=${errorBody}`);
-      return [];
-    }
-
-    return res.json();
   } catch (e) {
     console.error('[fetchAdminUsers] fetch error:', e);
-    return [];
+    throw new Error('회원 목록을 불러오지 못했습니다. 네트워크 상태를 확인해주세요.');
   }
+
+  if (!res.ok) {
+    const authMessage = await parseAuthErrorMessage(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
+    const errorBody = await res.text().catch(() => '');
+    console.error(`[fetchAdminUsers] status=${res.status} body=${errorBody}`);
+    throw new Error('회원 목록을 불러오지 못했습니다.');
+  }
+
+  return res.json();
 }
 
 // 회원 관리 - 회원 상세 조회
+// 404(대상 없음)만 null로 반환하고, 그 외 실패는 던져서 "회원 없음"과 "조회 실패"를 구분
 export async function fetchAdminUserDetail(
   accessToken: string,
   userId: number,
 ): Promise<AdminUserDetail | null> {
+  let res: Response;
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+    res = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
@@ -48,45 +57,54 @@ export async function fetchAdminUserDetail(
       },
       cache: 'no-store',
     });
-
-    if (!res.ok) {
-      const errorBody = await res.text().catch(() => '');
-      console.error(`[fetchAdminUserDetail] status=${res.status} body=${errorBody}`);
-      return null;
-    }
-
-    return res.json();
   } catch (e) {
     console.error('[fetchAdminUserDetail] fetch error:', e);
-    return null;
+    throw new Error('회원 정보를 불러오지 못했습니다. 네트워크 상태를 확인해주세요.');
   }
+
+  if (!res.ok) {
+    if (res.status === 404) return null;
+
+    const authMessage = await parseAuthErrorMessage(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
+    const errorBody = await res.text().catch(() => '');
+    console.error(`[fetchAdminUserDetail] status=${res.status} body=${errorBody}`);
+    throw new Error('회원 정보를 불러오지 못했습니다.');
+  }
+
+  return res.json();
 }
 
 // 강사 승인 대기 목록 조회
 export async function fetchInstructorApplications(
   accessToken: string,
 ): Promise<InstructorApplication[]> {
+  let res: Response;
   try {
-    const res = await fetch(`${API_BASE_URL}/api/members/instructor-applications/pending`, {
+    res = await fetch(`${API_BASE_URL}/api/members/instructor-applications/pending`, {
       headers: { Authorization: `Bearer ${accessToken}` },
       cache: 'no-store',
     });
-
-    if (!res.ok) {
-      const errorBody = await res.text().catch(() => '');
-      console.error(
-        `[fetchInstructorApplications] status=${res.status} body=${errorBody} token=${accessToken ? '있음' : '없음(빈 문자열)'}`,
-      );
-      return [];
-    }
-
-    const data = await res.json();
-
-    return Array.isArray(data) ? data : (data.data ?? []);
   } catch (e) {
     console.error('[fetchInstructorApplications] fetch error:', e);
-    return [];
+    throw new Error('강사 승인 대기 목록을 불러오지 못했습니다. 네트워크 상태를 확인해주세요.');
   }
+
+  if (!res.ok) {
+    const authMessage = await parseAuthErrorMessage(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
+    const errorBody = await res.text().catch(() => '');
+    console.error(
+      `[fetchInstructorApplications] status=${res.status} body=${errorBody} token=${accessToken ? '있음' : '없음(빈 문자열)'}`,
+    );
+    throw new Error('강사 승인 대기 목록을 불러오지 못했습니다.');
+  }
+
+  const data = await res.json();
+
+  return Array.isArray(data) ? data : (data.data ?? []);
 }
 
 // 강사 승인 대기 상세 조회
@@ -177,22 +195,26 @@ export async function rejectInstructor(
 export async function fetchRejectedInstructorApplications(
   accessToken: string,
 ): Promise<RejectedInstructorApplication[]> {
+  let res: Response;
   try {
-    const res = await fetch(`${API_BASE_URL}/api/members/instructor-applications/rejected`, {
+    res = await fetch(`${API_BASE_URL}/api/members/instructor-applications/rejected`, {
       headers: { Authorization: `Bearer ${accessToken}` },
       cache: 'no-store',
     });
-
-    if (!res.ok) {
-      const errorBody = await res.text().catch(() => '');
-      console.error(`[fetchRejectedInstructorApplications] status=${res.status} body=${errorBody}`);
-      return [];
-    }
-
-    const data = await res.json();
-    return Array.isArray(data) ? data : (data.data ?? []);
   } catch (e) {
     console.error('[fetchRejectedInstructorApplications] fetch error:', e);
-    return [];
+    throw new Error('강사 반려 이력을 불러오지 못했습니다. 네트워크 상태를 확인해주세요.');
   }
+
+  if (!res.ok) {
+    const authMessage = await parseAuthErrorMessage(res);
+    if (authMessage) throw new AuthSessionError(authMessage);
+
+    const errorBody = await res.text().catch(() => '');
+    console.error(`[fetchRejectedInstructorApplications] status=${res.status} body=${errorBody}`);
+    throw new Error('강사 반려 이력을 불러오지 못했습니다.');
+  }
+
+  const data = await res.json();
+  return Array.isArray(data) ? data : (data.data ?? []);
 }

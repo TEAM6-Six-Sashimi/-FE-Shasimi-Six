@@ -10,7 +10,7 @@ import { handleAuthErrorResponse } from '@/features/auth/auth-error';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// 공지사항 목록/상세 캐시 태그 - 등록/삭제 시 이 태그로 무효화해서 캐시와 실제 데이터를 맞춘다.
+// 공지사항 목록/상세 캐시 태그 - 등록/삭제 시 이 태그로 무효화해서 캐시와 실제 데이터를 맞춤
 export const NOTICE_CACHE_TAG = 'notices';
 const NOTICE_REVALIDATE_SECONDS = 60;
 
@@ -91,7 +91,7 @@ export async function createNotice(
   }
 }
 
-// 공지사항 상세 조회 (공용, 로그인 불필요)
+// 공지사항 상세 조회
 export async function fetchNoticeDetail(noticeId: number): Promise<NoticeDetailResult> {
   try {
     const res = await fetch(`${API_BASE_URL}/notices/${noticeId}`, {

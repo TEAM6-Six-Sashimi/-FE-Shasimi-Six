@@ -41,7 +41,7 @@ interface RejectionModalData {
 
 const ITEMS_PER_PAGE = 5;
 
-// rejectCategory가 비어 있으면 첫 ": " 기준으로 분리해 관리자 화면과 동일하게 나눠서 보여줌
+// rejectCategory가 비어 있으면 첫 ":" 기준으로 분리해 관리자 화면과 동일하게 나눠서 보여줌
 const splitRejectReason = (category: string | null, reason: string | null) => {
   const rawReason = reason ?? '';
   if (category) return { category, detail: rawReason };
@@ -110,7 +110,7 @@ export default function PendingCourse({ courses, categories }: Props) {
   return (
     <div className="flex flex-col gap-4 min-h-[63vh]">
       {/* 검색 + 강의 신청 버튼 */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-sm">
           <input
             type="text"
@@ -126,8 +126,8 @@ export default function PendingCourse({ courses, categories }: Props) {
             <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
           </span>
         </div>
-        <Link href="/mycourses-instructor/new">
-          <Button className="h-11 px-5 bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[13px] font-semibold cursor-pointer shrink-0">
+        <Link href="/mycourses-instructor/new" className="shrink-0">
+          <Button className="h-11 px-5 w-full sm:w-auto bg-[#FF5E5E] hover:bg-[#D14848] text-white text-[13px] font-semibold cursor-pointer shrink-0">
             + 신규 강의 신청
           </Button>
         </Link>
@@ -171,9 +171,9 @@ export default function PendingCourse({ courses, categories }: Props) {
             return (
               <div
                 key={course.courseId}
-                className="bg-white rounded-xl border border-[#D1D5DB] px-5 py-4 flex items-center justify-between"
+                className="bg-white rounded-xl border border-[#D1D5DB] px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-1.5 min-w-0">
                   <div className="flex items-center gap-2">
                     <span
                       className={`px-2 py-0.5 rounded-md text-[11.5px] font-semibold ${STATUS_STYLE[statusLabel] ?? ''}`}
@@ -204,7 +204,7 @@ export default function PendingCourse({ courses, categories }: Props) {
                   <p className="text-[12px] text-[#6A7282]">{getCategoryName(course.categoryId)}</p>
                 </div>
 
-                <div className="flex flex-col items-end gap-2 shrink-0">
+                <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 shrink-0">
                   <span className="text-[15px] font-bold text-[#1E2125]">
                     {course.price.toLocaleString()}{' '}
                     <span className="text-[13px] font-normal text-[#6A7282]">크레딧</span>

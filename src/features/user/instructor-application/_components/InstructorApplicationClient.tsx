@@ -33,16 +33,21 @@ interface InstructorApplicationClientProps {
   userInfo: UserMe;
   categories: Category[];
   hasPendingApplication: boolean;
+  isAlreadyInstructor: boolean;
 }
 
 export default function InstructorApplicationClient({
   userInfo,
   categories,
   hasPendingApplication,
+  isAlreadyInstructor,
 }: InstructorApplicationClientProps) {
   const router = useRouter();
   const { setMaintenance } = useMaintenance();
-  const [showPendingModal, setShowPendingModal] = useState(hasPendingApplication);
+  const [showAlreadyInstructorModal] = useState(isAlreadyInstructor);
+  const [showPendingModal, setShowPendingModal] = useState(
+    !isAlreadyInstructor && hasPendingApplication,
+  );
   const [step, setStep] = useState(1);
   const [step01Data, setStep01Data] = useState<Step01Data>(DEFAULT_STEP01);
   const [step02Data, setStep02Data] = useState<Step02Data>(DEFAULT_STEP02);
@@ -144,6 +149,16 @@ export default function InstructorApplicationClient({
       </div>
 
       {isSubmitting && <FullScreenLoading message="강사 지원서를 제출하는 중입니다..." />}
+
+      {/* 이미 승인된 강사 안내 모달 - 폼 진입 즉시 노출, 재지원 자체를 차단 */}
+      {showAlreadyInstructorModal && (
+        <OneButtonModal
+          title="강사 지원 불필요"
+          message={'이미 강사로 승인된 계정입니다. \n별도의 강사 지원은 필요하지 않습니다.'}
+          confirmLabel="확인"
+          onConfirm={() => router.push('/')}
+        />
+      )}
 
       {/* 심사 중 안내 모달 - 대기 중인 지원서가 있으면 진입 즉시 노출 */}
       {showPendingModal && (

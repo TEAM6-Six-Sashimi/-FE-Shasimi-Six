@@ -1,7 +1,10 @@
 'use client';
 
+import { useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
+
+const emptySubscribe = () => () => {};
 
 interface OneButtonModalProps {
   title: string;
@@ -16,6 +19,14 @@ export default function OneButtonModal({
   confirmLabel = '확인',
   onConfirm,
 }: OneButtonModalProps) {
+
+  const isClient = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+  if (!isClient) return null;
+
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-2xl shadow-xl w-85 p-7 flex flex-col gap-5">

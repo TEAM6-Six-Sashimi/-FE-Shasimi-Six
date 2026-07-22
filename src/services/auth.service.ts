@@ -18,7 +18,7 @@ import { parseAuthErrorMessage } from '@/features/auth/auth-error-messages';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// 백엔드 공통 에러 응답 형태 (timestamp/status/errorCode/message/path/traceId)
+// 백엔드 공통 에러 응답 형태
 interface ApiErrorResponse {
   status?: number;
   errorCode?: string;
@@ -27,7 +27,6 @@ interface ApiErrorResponse {
   traceId?: string;
 }
 
-// 실패 응답을 콘솔에 남겨서(특히 문서화되지 않은 상태코드) 백엔드에 전달할 근거를 확보
 function logApiError(context: string, response: Response, errorBody: ApiErrorResponse) {
   console.error(
     `[${context}] status=${response.status} errorCode=${errorBody.errorCode ?? '-'} traceId=${
@@ -36,7 +35,7 @@ function logApiError(context: string, response: Response, errorBody: ApiErrorRes
   );
 }
 
-// 이메일 인증 요청 (회원가입/비밀번호 재설정 등 공용, purpose로 목적 구분)
+// 이메일 인증 요청 (Purpose로 목적 구분)
 export async function sendEmailVerification(
   email: string,
   purpose: EmailVerifyPurpose = 'SIGNUP',
@@ -89,7 +88,6 @@ export async function verifyEmailCode(
 }
 
 // 아이디 찾기 - 인증번호 발송
-// 문서화된 응답: 400(요청값 형식 오류) / 403(비활성 회원) / 404(일치 회원 없음) / 429(1시간 3회 제한)
 export async function sendFindIdVerification(
   name: string,
   email: string,
@@ -114,9 +112,10 @@ export async function sendFindIdVerification(
       throw new Error('이름과 이메일이 일치하는 회원을 찾을 수 없습니다.');
     }
     if (response.status === 429) {
-      throw new Error('인증번호 요청 횟수를 초과했습니다(1시간 3회 제한). 잠시 후 다시 시도해 주세요.');
+      throw new Error(
+        '인증번호 요청 횟수를 초과했습니다(1시간 3회 제한). 잠시 후 다시 시도해 주세요.',
+      );
     }
-    // 문서화되지 않은 상태코드(예: 500) - 서버가 준 메시지를 그대로 보여주되 콘솔에 근거를 남김
     throw new Error(
       errorBody.message || '인증번호 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.',
     );
@@ -125,8 +124,7 @@ export async function sendFindIdVerification(
   return response.json();
 }
 
-// 아이디 찾기 - 인증번호 확인 (성공 시 loginId까지 함께 반환됨)
-// 문서화된 응답: 400(코드 형식/만료/불일치) / 403(비활성 회원) / 404(일치 회원 없음) / 429(요청 초과)
+// 아이디 찾기 - 인증번호 확인
 export async function confirmFindId(
   name: string,
   email: string,

@@ -44,8 +44,8 @@ export async function fetchUserMe(accessToken: string): Promise<UserMe> {
   }
 }
 
-// 실패를 GUEST_USER로 삼키지 않는 버전. 응답을 그대로 노출해서 호출부가
-// "원래 비로그인"과 "세션이 죽음(AUTH_00X 등)"을 구분할 수 있게 한다.
+// 실패 시 GUEST_USER로 넘기지 않고 응답을 그대로 노출하여
+// 호출부가 "원래 비로그인"과 "세션이 죽음"을 구분
 export class UserMeAuthError extends Error {
   constructor(public response: Response) {
     super('사용자 정보를 가져오지 못했습니다.');

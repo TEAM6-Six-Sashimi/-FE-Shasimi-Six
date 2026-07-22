@@ -45,33 +45,35 @@ export default function Dashboard() {
   // 매출/요약은 연월에 따라 다시 조회, 수강생 수/완강률은 기간과 무관하게 한 번만 조회
   useEffect(() => {
     let active = true;
-    setIsLoading(true);
     Promise.all([
       fetchDashboardSummaryAction(year, month),
       fetchSalesStatisticsAction(year, month),
       fetchStudentStatisticsAction(),
       fetchCompletionRateStatisticsAction(),
-    ]).then(([summaryRes, salesRes, studentsRes, completionRateRes]) => {
-      if (!active) return;
-      setSummary(summaryRes);
-      setSales(salesRes);
-      setStudents(studentsRes);
-      setCompletionRate(completionRateRes);
-      setIsLoading(false);
-    });
+    ])
+      .then(([summaryRes, salesRes, studentsRes, completionRateRes]) => {
+        if (!active) return;
+        setSummary(summaryRes);
+        setSales(salesRes);
+        setStudents(studentsRes);
+        setCompletionRate(completionRateRes);
+      })
+      .catch((error) => {
+        console.error('[Dashboard] 통계 조회 실패:', error);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
     return () => {
       active = false;
     };
   }, [year, month]);
 
-  // 탭을 바꾸면 페이지도 처음으로
-  useEffect(() => {
-    setPage(1);
-  }, [statTab, year, month]);
-
   const handleMonthChange = (value: string) => {
     const [y, m] = value.split('-').map(Number);
     if (!y || !m) return;
+    setIsLoading(true);
+    setPage(1);
     setYear(y);
     setMonth(m);
   };
@@ -118,7 +120,7 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col gap-6">
       {/* 요약 카드 */}
-      <div className="grid grid-cols-3 gap-6 px-8 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 px-4 sm:px-8 mb-6">
         {SUMMARY_CARDS.map(({ iconSrc, iconBg, label, value, sub }) => (
           <div
             key={label}
@@ -154,11 +156,14 @@ export default function Dashboard() {
       {/* 통계 탭 */}
       <div className="bg-white rounded-xl border-2 border-[#D1D5DB] overflow-hidden">
         {/* 탭 헤더 */}
-        <div className="grid grid-cols-3 border-b border-[#D1D5DB] h-13">
+        <div className="grid grid-cols-3 border-b border-[#D1D5DB] h-13 min-w-0">
           {(['매출', '수강생 수', '완강률'] as StatTab[]).map((tab) => (
             <button
               key={tab}
-              onClick={() => setStatTab(tab)}
+              onClick={() => {
+                setStatTab(tab);
+                setPage(1);
+              }}
               className={`py-3 text-[13.5px] font-semibold transition-colors cursor-pointer ${
                 statTab === tab
                   ? 'text-[#FF5E5E] border-b-2 border-[#FF5E5E] -mb-px'

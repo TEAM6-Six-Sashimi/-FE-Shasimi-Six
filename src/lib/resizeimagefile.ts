@@ -4,10 +4,8 @@ interface ResizeOptions {
   quality?: number; // 0~1
 }
 
-/**
- * 이미지 파일을 캔버스로 리사이징/압축한 뒤 File로 반환한다.
- * 원본이 maxWidth/maxHeight보다 작으면 리사이징 없이 압축만 적용.
- */
+// 이미지 파일을 캔버스로 리사이징/압축한 뒤 File로 반환
+// 원본이 maxWidth/maxHeight보다 작으면 리사이징 없이 압축만 적용
 export async function resizeImageFile(
   file: File,
   { maxWidth = 1200, maxHeight = 1200, quality = 0.85 }: ResizeOptions = {},
@@ -39,7 +37,7 @@ export async function resizeImageFile(
     );
     if (!blob) return file;
 
-    // 리사이징 결과가 원본보다 크면(이미 작은 이미지였던 경우) 원본을 그대로 사용
+    // 이미 작은 이미지였던 경우 원본을 그대로 사용
     if (blob.size >= file.size) return file;
 
     const newName = file.name.replace(/\.[^.]+$/, '') + '.jpg';

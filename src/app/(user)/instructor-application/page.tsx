@@ -35,6 +35,7 @@ export default async function InstructorApplicationPage() {
 
   const categories = await fetchCategories();
   const hasPendingApplication = applications.some((app) => app.approvalStatus === 'PENDING');
+  const isAlreadyInstructor = userInfo.role === 'INSTRUCTOR';
 
   return (
     <div className="bg-[#F9FAFB]">
@@ -42,6 +43,7 @@ export default async function InstructorApplicationPage() {
         userInfo={userInfo}
         categories={categories}
         hasPendingApplication={hasPendingApplication}
+        isAlreadyInstructor={isAlreadyInstructor}
       />
     </div>
   );

@@ -16,7 +16,7 @@ export default function CourseDetailSidebar({
   showPrice = true,
 }: CourseDetailSidebarProps) {
   return (
-    <div className="w-80 shrink-0 flex flex-col gap-3 bg-white rounded-xl shadow-md p-6">
+    <div className="w-full shrink-0 flex flex-col gap-3 bg-white rounded-xl shadow-md p-6">
       <SidebarThumbnail course={course} showPrice={showPrice} />
       {actionSlot}
       <hr className="mt-3 mb-2" />

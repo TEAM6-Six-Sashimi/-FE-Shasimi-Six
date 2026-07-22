@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { RadialBar, RadialBarChart, PolarAngleAxis } from 'recharts';
 import InlineDotsLoading from '@/components/ui/InlineDotsLoading';
 import OneButtonModal from '@/components/modals/OneButtonModal';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
@@ -19,28 +18,46 @@ interface ResumeSidebarProps {
   initialReview: LatestAiReviewDetail | null;
 }
 
+// 원형 점수 게이지
 function ScoreCircle({ score }: { score: number }) {
-  const data = [{ value: score, fill: '#5B8DEE' }];
+  const clampedScore = Math.max(0, Math.min(100, score));
+  const size = 176;
+  const strokeWidth = 22;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const targetOffset = circumference * (1 - clampedScore / 100);
+
+  const [dashOffset, setDashOffset] = useState(circumference);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDashOffset(targetOffset), 0);
+    return () => clearTimeout(timer);
+  }, [targetOffset]);
 
   return (
     <div className="relative w-44 h-44 mx-auto">
-      <RadialBarChart
-        width={176}
-        height={176}
-        innerRadius="75%"
-        outerRadius="100%"
-        data={data}
-        startAngle={90}
-        endAngle={-270}
-      >
-        <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-        <RadialBar
-          dataKey="value"
-          background={{ fill: '#E5E7EB' }}
-          cornerRadius={10}
-          angleAxisId={0}
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="#E5E7EB"
+          strokeWidth={strokeWidth}
         />
-      </RadialBarChart>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="#5B8DEE"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={dashOffset}
+          className="transition-[stroke-dashoffset] duration-1000 ease-out"
+        />
+      </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-[40px] font-bold text-[#5B8DEE] leading-none">{score}</span>
         <span className="text-[13px] text-[#9CA3AF] mt-1">/ 100점</span>
@@ -169,7 +186,7 @@ export default function ResumeSidebar({ isSaved, resumeId, initialReview }: Resu
           <Button
             onClick={handleEvaluate}
             disabled={isEvaluating}
-            className="w-full h-11 bg-[#5B8DEE] hover:bg-[#3B66B9] text-white font-semibold text-[14px] cursor-pointer disabled:opacity-60"
+            className="w-full h-11 mt-2 bg-[#5B8DEE] hover:bg-[#3B66B9] text-white font-semibold text-[14px] cursor-pointer disabled:opacity-60"
           >
             {isEvaluating ? '평가 중...' : 'AI 평가 시작'}
           </Button>
