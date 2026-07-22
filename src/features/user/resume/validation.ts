@@ -24,6 +24,10 @@ export function getEducationError(educations: EducationItem[]): string {
   if (hasInvalidDate) {
     return '학력 사항의 입학/졸업 연월을 올바른 형식으로 입력해주세요.';
   }
+  const hasInvalidOrder = educations.some((e) => e.startYearMonth > e.endYearMonth);
+  if (hasInvalidOrder) {
+    return '학력 사항의 입학 연월이 졸업 연월보다 늦을 수 없습니다.';
+  }
   return '';
 }
 
@@ -53,6 +57,12 @@ export function getCareerError(careers: CareerItem[], isNewGraduate: boolean): s
   );
   if (hasInvalidDate) {
     return '경력 사항의 입사/퇴사 연월을 올바른 형식으로 입력해주세요.';
+  }
+  const hasInvalidOrder = careers.some(
+    (c) => !c.currentlyEmployed && c.startYearMonth > c.endYearMonth,
+  );
+  if (hasInvalidOrder) {
+    return '경력 사항의 입사 연월이 퇴사 연월보다 늦을 수 없습니다.';
   }
   return '';
 }

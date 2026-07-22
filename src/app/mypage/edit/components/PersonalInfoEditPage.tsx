@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { UserMeWithAgreements } from '@/features/mypage/types';
 import { changePasswordAction, updateMeAction } from '@/features/mypage/actions';
+import { useMypagePassword } from '@/features/mypage/MypagePasswordContext';
 import Image from 'next/image';
 
 interface Props {
@@ -23,6 +24,7 @@ function formatPhone(phone: string): string {
 export default function PersonalInfoEditPage({ user }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
+  const { verifiedPassword, setVerifiedPassword } = useMypagePassword();
 
   const [currentPassword, setCurrentPassword] = useState<string | null>(null);
   const [phone, setPhone] = useState(user.phone ?? '');
@@ -48,16 +50,15 @@ export default function PersonalInfoEditPage({ user }: Props) {
   const [passwordMismatch, setPasswordMismatch] = useState(false);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem('mypage_current_password');
-    if (!stored) {
+    if (!verifiedPassword) {
       router.replace('/mypage');
       return;
     }
-    setCurrentPassword(stored);
-  }, [router]);
+    setCurrentPassword(verifiedPassword);
+  }, [verifiedPassword, router]);
 
   const handleCancel = () => {
-    sessionStorage.removeItem('mypage_current_password');
+    setVerifiedPassword(null);
     router.push('/mypage');
   };
 
@@ -109,7 +110,7 @@ export default function PersonalInfoEditPage({ user }: Props) {
     }
 
     showToast('개인정보가 수정되었습니다.');
-    sessionStorage.removeItem('mypage_current_password');
+    setVerifiedPassword(null);
     router.replace('/mypage');
   };
 
