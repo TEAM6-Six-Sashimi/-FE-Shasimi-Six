@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { loadTossPayments } from '@tosspayments/tosspayments-sdk';
 import OneButtonModal from '@/components/modals/OneButtonModal';
@@ -31,6 +31,8 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
   const [modalState, setModalState] = useState<ModalState>('none');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  // 확인 모달을 빠르게 연타해도 충전 요청이 중복 전송되지 않도록 하는 동기 가드
+  const isSubmittingRef = useRef(false);
 
   const isAmountInvalid = chargeAmount < MIN_AMOUNT || chargeAmount % UNIT_AMOUNT !== 0;
 
@@ -45,6 +47,8 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
 
   // 충전 확인 → 백엔드에 주문 준비 → Toss 결제창 호출
   const handleConfirm = async () => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     setIsLoading(true);
 
     // 충전 준비: 백엔드에서 orderId/orderName 발급
@@ -59,11 +63,13 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
       if (readyResult.maintenance) {
         setMaintenance(true, readyResult.message);
         setIsLoading(false);
+        isSubmittingRef.current = false;
         return;
       }
       setErrorMessage(readyResult.message);
       setModalState('error');
       setIsLoading(false);
+      isSubmittingRef.current = false;
       return;
     }
 
@@ -99,6 +105,7 @@ export default function Sticky({ currentCredit, chargeAmount, afterCredit }: Sti
       setModalState('error');
     } finally {
       setIsLoading(false);
+      isSubmittingRef.current = false;
     }
   };
 

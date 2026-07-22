@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/ToastContext';
 import { UserAgreements, UserMeWithAgreements } from '../../types';
 import { deleteMeAction, updateMeAction } from '../../actions';
+import { useMypagePassword } from '../../MypagePasswordContext';
 import PasswordConfirmModal from '@/components/modals/PasswordConfirmModal';
 import WithdrawAgreementModal from '@/components/modals/WithdrawAgreementModal';
 
@@ -18,13 +19,13 @@ type ModalMode = 'edit' | 'withdrawAgreement' | 'withdrawPassword' | null;
 export default function AccountActions({ user, agreements }: AccountActionsProps) {
   const router = useRouter();
   const { showToast } = useToast();
+  const { setVerifiedPassword } = useMypagePassword();
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
 
   // 수정하기 클릭 → 비밀번호 입력 → 검증 전용 API가 없음
   // PATCH /users/me를 "현재 값 그대로" 호출해 currentPassword만 검증 용도로 사용
-  // 틀리면 서버가 에러를 던져 다음 페이지로 넘어가지 않음
   const handleEditPasswordConfirm = async (password: string) => {
     setPasswordError('');
     setLoading(true);
@@ -38,7 +39,7 @@ export default function AccountActions({ user, agreements }: AccountActionsProps
     });
 
     if (result.success) {
-      sessionStorage.setItem('mypage_current_password', password);
+      setVerifiedPassword(password);
       setModalMode(null);
       router.push('/mypage/edit');
     } else {

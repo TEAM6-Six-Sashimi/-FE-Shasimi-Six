@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CartContent from '@/features/user/cart/components/CartContent';
 import CartSticky from '@/features/user/cart/components/CartSticky';
@@ -24,6 +24,8 @@ export default function CartClient({ initialItems }: CartClientProps) {
     initialItems.filter((i) => i.selected).map((i) => i.courseId),
   );
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  // 삭제 확인 모달을 빠르게 연타해도 삭제 요청이 중복 전송되지 않도록 하는 동기 가드
+  const isDeletingRef = useRef(false);
 
   // 개별 선택/해제
   const handleToggleSelect = (id: number) => {
@@ -47,6 +49,9 @@ export default function CartClient({ initialItems }: CartClientProps) {
 
   // 실제 삭제 실행
   const handleConfirmDelete = async () => {
+    if (isDeletingRef.current) return;
+    isDeletingRef.current = true;
+
     const cartItemIds = items
       .filter((i) => selectedIds.includes(i.courseId))
       .map((i) => i.cartItemId);
@@ -61,15 +66,18 @@ export default function CartClient({ initialItems }: CartClientProps) {
       }
       if (result.maintenance) {
         setMaintenance(true, result.message);
+        isDeletingRef.current = false;
         return;
       }
       showToast(result.message, 'negative');
+      isDeletingRef.current = false;
       return; // 삭제 실패 시 모달 유지
     }
 
     setItems((prev) => prev.filter((i) => !selectedIds.includes(i.courseId)));
     setSelectedIds([]);
     setShowDeleteModal(false);
+    isDeletingRef.current = false;
     router.refresh();
   };
 

@@ -35,6 +35,7 @@ export function useChatMessages({
   const [input, setInput] = useState('');
   const [pendingContent, setPendingContent] = useState<string | null>(null);
   const listEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // 최신 값을 읽기 위해 ref로 따로 추적
   const pendingContentRef = useRef<string | null>(null);
@@ -111,6 +112,8 @@ export function useChatMessages({
 
       if (message.senderId === myUserId && message.content === pendingContentRef.current) {
         setPendingContent(null);
+        // 전송 버튼 클릭 후 포커스를 입력창으로 옮김
+        inputRef.current?.focus();
       }
 
       onMessageRef.current?.(message);
@@ -126,6 +129,7 @@ export function useChatMessages({
     const timer = setTimeout(() => {
       setInput(pendingContent);
       setPendingContent(null);
+      inputRef.current?.focus();
       showToast('메시지 전송에 실패했습니다. 다시 시도해주세요.', 'negative');
     }, SEND_TIMEOUT_MS);
 
@@ -150,5 +154,5 @@ export function useChatMessages({
     setInput('');
   };
 
-  return { messages, input, setInput, pendingContent, listEndRef, handleSend };
+  return { messages, input, setInput, pendingContent, listEndRef, inputRef, handleSend };
 }

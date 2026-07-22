@@ -37,7 +37,11 @@ export default function SelfIntroPageClient({
         />
       </div>
       <div className="sticky top-4">
-        <SelfIntroSidebar initialReview={latestCoverLetterReview} isDirty={isDirty} />
+        <SelfIntroSidebar
+          initialReview={latestCoverLetterReview}
+          isDirty={isDirty}
+          isSaved={savedCoverLetter !== null}
+        />
       </div>
     </div>
   );

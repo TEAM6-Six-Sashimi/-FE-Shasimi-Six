@@ -21,7 +21,11 @@ export async function POST(req: NextRequest) {
   }
 
   const formData = await req.formData();
-  const file = formData.get('file') as File;
+  const file = formData.get('file');
+
+  if (!(file instanceof File) || file.size === 0) {
+    return NextResponse.json({ error: '업로드할 파일이 없습니다.' }, { status: 400 });
+  }
 
   const newFormData = new FormData();
   newFormData.append('file', file);
