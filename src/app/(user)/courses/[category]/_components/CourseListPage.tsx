@@ -14,6 +14,7 @@ import CourseCard from '@/features/user/courses/components/CourseCard';
 import FilterDropdown, {
   type FilterValues,
 } from '@/features/user/courses/components/FilterDropdown';
+import SearchInput from '@/components/ui/SearchInput';
 import Image from 'next/image';
 import { Category } from '@/features/categories/types';
 import { CourseFromAPI } from '@/features/user/courses/types';
@@ -100,24 +101,8 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
 
           <div className="flex items-center gap-3">
             {/* 검색 */}
-            <div className="relative flex-1 max-w-xl">
-              <label htmlFor="course-search" className="sr-only">
-                강의 검색
-              </label>
-              <input
-                id="course-search"
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="강의 검색..."
-                className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
-              />
-              <span
-                aria-hidden="true"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6A7282]"
-              >
-                <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
-              </span>
+            <div className="flex-1 max-w-xl">
+              <SearchInput onSearch={setSearch} placeholder="강의 검색..." className="w-full" />
             </div>
 
             {/* 상세검색 필터 */}

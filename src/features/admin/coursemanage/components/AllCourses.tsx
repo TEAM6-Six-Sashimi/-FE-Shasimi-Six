@@ -9,8 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import Image from 'next/image';
 import Pagination from '@/components/ui/Pagination';
+import SearchInput from '@/components/ui/SearchInput';
 import { AdminCourse } from '../type';
 import type { Category } from '@/features/categories/types';
 
@@ -50,7 +50,10 @@ export default function AllCourses({ courses, categories }: Props) {
 
   const filtered = useMemo(() => {
     let result = [...courses];
-    if (search) result = result.filter((c) => c.title.includes(search));
+    if (search)
+      result = result.filter(
+        (c) => c.title.includes(search) || c.instructorName.includes(search),
+      );
     if (categoryFilter !== '전체')
       result = result.filter((c) => getMainCategory(c.categoryName) === categoryFilter);
     if (sort === '인기순') result.sort((a, b) => b.studentCount - a.studentCount);
@@ -81,21 +84,14 @@ export default function AllCourses({ courses, categories }: Props) {
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
       <div className="flex items-center gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder="강의명, 강사명 검색..."
-            className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
-          />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2">
-            <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
-          </span>
-        </div>
+        <SearchInput
+          onSearch={(v) => {
+            setSearch(v);
+            setCurrentPage(1);
+          }}
+          placeholder="강의명, 강사명 검색"
+          className="flex-1 max-w-sm"
+        />
         <Select
           value={sort}
           onValueChange={(v) => {

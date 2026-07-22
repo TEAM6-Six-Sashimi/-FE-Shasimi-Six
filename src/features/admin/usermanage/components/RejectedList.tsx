@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import RejectDetailModal from '@/components/modals/RejectDetailModal';
 import Pagination from '@/components/ui/Pagination';
+import SearchInput from '@/components/ui/SearchInput';
 import { RejectedInstructorApplication } from '../types';
 
 const CATEGORY_LABEL_MAP: Record<string, string> = {
@@ -20,6 +21,7 @@ interface Props {
 
 export default function RejectedList({ rejected }: Props) {
   const [detailModal, setDetailModal] = useState<RejectedInstructorApplication | null>(null);
+  const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
   // 최신순(반려일)
@@ -31,12 +33,31 @@ export default function RejectedList({ rejected }: Props) {
     [rejected],
   );
 
-  const totalPages = Math.ceil(sorted.length / ITEMS_PER_PAGE);
-  const paged = sorted.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const filtered = useMemo(
+    () =>
+      search
+        ? sorted.filter(
+            (r) => r.name.includes(search) || r.loginId.includes(search) || r.email.includes(search),
+          )
+        : sorted,
+    [sorted, search],
+  );
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paged = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
-      <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-6">강사 신청 반려 이력</h2>
+      <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-4">강사 신청 반려 이력</h2>
+      <div className="mb-6">
+        <SearchInput
+          onSearch={(v) => {
+            setSearch(v);
+            setCurrentPage(1);
+          }}
+          placeholder="이름, 아이디, 이메일 검색"
+        />
+      </div>
       <table className="w-full text-[13px] table-fixed">
         <thead>
           <tr className="border-b border-[#E5E7EB]">

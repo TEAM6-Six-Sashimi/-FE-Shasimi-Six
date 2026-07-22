@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import Image from 'next/image';
+import SearchInput from '@/components/ui/SearchInput';
 import type { ApprovedCourse as ApprovedCourseType } from '@/features/user/mycourses-instructor/types';
 import type { Category } from '@/features/categories/types';
 
@@ -55,20 +55,15 @@ export default function ApprovedCourse({ courses = [], categories = [] }: Props)
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           {/* 검색창 */}
-          <div className="relative flex-1 max-w-sm">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
+          <div className="flex-1 max-w-sm">
+            <SearchInput
+              onSearch={(v) => {
+                setSearch(v);
                 setPage(1);
               }}
               placeholder="강의 검색..."
-              className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
+              className="w-full"
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6A7282]">
-              <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
-            </span>
           </div>
 
           {/* 정렬 드롭다운 */}
