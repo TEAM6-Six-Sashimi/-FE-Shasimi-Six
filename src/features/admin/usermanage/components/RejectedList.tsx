@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import RejectDetailModal from '@/components/modals/RejectDetailModal';
+import Pagination from '@/components/ui/Pagination';
 import { RejectedInstructorApplication } from '../types';
 
 const CATEGORY_LABEL_MAP: Record<string, string> = {
@@ -100,37 +101,7 @@ export default function RejectedList({ rejected }: Props) {
         </tbody>
       </table>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-1 mt-6">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
-          >
-            이전
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`w-8 h-8 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
-                currentPage === page
-                  ? 'bg-[#1E2125] text-white'
-                  : 'text-[#6A7282] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
-              }`}
-            >
-              {page}
-            </button>
-          ))}
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
-          >
-            다음
-          </button>
-        </div>
-      )}
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
 
       {/* 반려 사유 상세 모달 (공용) */}
       {detailModal && (

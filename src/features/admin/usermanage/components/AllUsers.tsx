@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Pagination from '@/components/ui/Pagination';
 import { AdminUser } from '../types';
 
 type RoleFilter = 'ALL' | 'STUDENT' | 'INSTRUCTOR';
@@ -10,6 +11,13 @@ type RoleFilter = 'ALL' | 'STUDENT' | 'INSTRUCTOR';
 const ROLE_LABEL: Record<AdminUser['role'], string> = {
   STUDENT: '수강생',
   INSTRUCTOR: '강사',
+  ADMIN: '관리자',
+};
+
+const ROLE_BADGE_CLS: Record<AdminUser['role'], string> = {
+  STUDENT: 'bg-[#EEF4FF] text-[#5B8DEE]',
+  INSTRUCTOR: 'bg-[#FEF3C7]/70 text-[#92400E]',
+  ADMIN: 'bg-[#E5E7EB]/40 text-[#6A7282]',
 };
 
 const STATUS_LABEL: Record<AdminUser['status'], string> = {
@@ -146,11 +154,7 @@ export default function AllUsers({ users }: Props) {
                 </td>
                 <td className="py-3 text-center">
                   <span
-                    className={`inline-block px-2.5 py-1 rounded-sm text-[11.5px] font-semibold ${
-                      u.role === 'INSTRUCTOR'
-                        ? 'bg-[#FEF3C7]/70 text-[#92400E]'
-                        : 'bg-[#EEF4FF] text-[#5B8DEE]'
-                    }`}
+                    className={`inline-block px-2.5 py-1 rounded-sm text-[11.5px] font-semibold ${ROLE_BADGE_CLS[u.role]}`}
                   >
                     {ROLE_LABEL[u.role]}
                   </span>
@@ -178,37 +182,7 @@ export default function AllUsers({ users }: Props) {
         </tbody>
       </table>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-1 mt-6">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
-          >
-            이전
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`w-8 h-8 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
-                currentPage === page
-                  ? 'bg-[#1E2125] text-white'
-                  : 'text-[#6A7282] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
-              }`}
-            >
-              {page}
-            </button>
-          ))}
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
-          >
-            다음
-          </button>
-        </div>
-      )}
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
     </div>
   );
 }

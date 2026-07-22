@@ -7,7 +7,11 @@ import InputForm from './InputForm';
 import RecomResult from './RecomResult';
 import RecomResultSkeleton from './RecomResultSkeleton';
 import { JobPostingRecommendationResult, LatestJobPostingRecommendation } from '../types';
-import { fetchJobPostingRecommendationAction, fetchCourseDetailsAction } from '../actions';
+import {
+  fetchJobPostingRecommendationAction,
+  fetchCourseDetailsAction,
+  fetchLatestJobPostingRecommendationAction,
+} from '../actions';
 import { MySubscription } from '../../payments/types';
 import { CourseFromAPI } from '../../courses/types';
 
@@ -25,10 +29,13 @@ const MAX_POLLING_ATTEMPTS = 25; // 최대 대기 2 * 25초(50초)
 export default function RecommendationPageClient({
   resumeId,
   mySubscription,
-  latestRecommendation,
+  latestRecommendation: initialLatestRecommendation,
   isLoggedIn,
 }: RecommendationPageClientProps) {
   const [result, setResult] = useState<JobPostingRecommendationResult | null>(null);
+  // 최근 분석 기록 드롭다운용
+  const [latestRecommendation, setLatestRecommendation] =
+    useState<LatestJobPostingRecommendation | null>(initialLatestRecommendation);
   const [courseDetails, setCourseDetails] = useState<CourseFromAPI[]>([]);
   // PENDING 상태(polling) - 전체 화면 로딩 표시
   const [isPolling, setIsPolling] = useState(false);
@@ -88,6 +95,10 @@ export default function RecommendationPageClient({
     setResult(data);
     await loadCourseDetails(data);
     setIsPolling(false);
+
+    // 새로고침 없이도 입력창 드롭다운에 바로 반영되도록 다시 조회해서 갱신
+    const latest = await fetchLatestJobPostingRecommendationAction();
+    if (latest) setLatestRecommendation(latest);
   };
 
   // 분석 요청(POST) 성공 시 recommendationId를 받아 polling 시작

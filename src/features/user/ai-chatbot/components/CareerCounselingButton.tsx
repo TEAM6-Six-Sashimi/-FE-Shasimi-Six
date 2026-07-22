@@ -28,7 +28,8 @@ export default function CareerCounselingButton() {
   const [isHovered, setIsHovered] = useState(false);
   const [typedText, setTypedText] = useState('');
   const [isChatOpen, setIsChatOpen] = useState(false);
-  // 새로고침하면 다시 보이도록 저장소 없이 메모리 상태로만 관리 (페이지 이동 중에는 유지, 새로고침하면 초기화)
+  // 새로고침하면 다시 보이도록 저장소 없이 메모리 상태로만 관리 
+  // (페이지 이동 중에는 유지, 새로고침하면 초기화)
   const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
@@ -46,10 +47,6 @@ export default function CareerCounselingButton() {
 
     return () => clearInterval(timer);
   }, [isHovered, isChatOpen]);
-
-  useEffect(() => {
-    setIsChatOpen(false);
-  }, [pathname]);
 
   const isHidden =
     isDismissed || HIDDEN_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));

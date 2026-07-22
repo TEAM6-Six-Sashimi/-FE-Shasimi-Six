@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { fetchCoursePaymentsAction } from '../actions';
 import { AdminCoursePayment } from '../types';
+import Pagination from '@/components/ui/Pagination';
 import { useToast } from '@/components/ui/ToastContext';
 import { logoutAction } from '@/features/auth/actions';
 
@@ -163,37 +164,11 @@ export default function CoursePayments() {
         </tbody>
       </table>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-1 mt-6">
-          <button
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0}
-            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
-          >
-            이전
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i).map((p) => (
-            <button
-              key={p}
-              onClick={() => setPage(p)}
-              className={`w-8 h-8 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
-                page === p
-                  ? 'bg-[#1E2125] text-white'
-                  : 'text-[#6A7282] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
-              }`}
-            >
-              {p + 1}
-            </button>
-          ))}
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={page === totalPages - 1}
-            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
-          >
-            다음
-          </button>
-        </div>
-      )}
+      <Pagination
+        currentPage={page + 1}
+        totalPages={totalPages}
+        onPageChange={(p) => setPage(p - 1)}
+      />
     </div>
   );
 }

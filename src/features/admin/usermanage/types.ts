@@ -3,7 +3,7 @@ export interface AdminUser {
   name: string;
   loginId: string;
   email: string;
-  role: 'STUDENT' | 'INSTRUCTOR';
+  role: 'STUDENT' | 'INSTRUCTOR' | 'ADMIN';
   createdAt: string;
   lastLoginAt: string | null;
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
@@ -28,6 +28,7 @@ export interface InstructorApplication {
   email: string;
   categoryName: string;
   createdAt: string;
+  verificationStatus: 'PENDING' | 'SUBMITTED';
 }
 
 export interface CertificationFile {

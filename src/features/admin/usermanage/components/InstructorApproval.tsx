@@ -5,11 +5,22 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { InstructorApplication } from '../types';
 import { Button } from '@/components/ui/button';
-import Checkbox from '@/components/ui/Checkbox';
+import Pagination from '@/components/ui/Pagination';
 import { useToast } from '@/components/ui/ToastContext';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 
 const ITEMS_PER_PAGE = 10;
+
+const VERIFICATION_STATUS_LABEL: Record<InstructorApplication['verificationStatus'], string> = {
+  PENDING: '대기',
+  SUBMITTED: '제출됨',
+};
+
+const VERIFICATION_STATUS_BADGE_CLS: Record<InstructorApplication['verificationStatus'], string> =
+  {
+    PENDING: 'bg-[#E5E7EB]/40 text-[#6A7282]',
+    SUBMITTED: 'bg-[#F9FBE7] text-[#827717]',
+  };
 
 interface Props {
   applicants: InstructorApplication[];
@@ -39,7 +50,6 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
   const { showToast } = useToast();
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -53,36 +63,16 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-  const isAllPagedSelected =
-    paged.length > 0 && paged.every((a) => selectedIds.has(a.applicationId));
-
-  const toggleSelect = (applicationId: number) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(applicationId)) next.delete(applicationId);
-      else next.add(applicationId);
-      return next;
-    });
-  };
-
-  const toggleSelectAllOnPage = () => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (isAllPagedSelected) {
-        paged.forEach((a) => next.delete(a.applicationId));
-      } else {
-        paged.forEach((a) => next.add(a.applicationId));
-      }
-      return next;
-    });
-  };
+  // 이미 진위확인 명단으로 제출된 지원자는 다시 제출 대상에 포함시키지 않는다
+  // (verificationStatus가 아직 내려오지 않는 환경도 있어 대기로 취급)
+  const unsubmitted = filtered.filter((a) => (a.verificationStatus ?? 'PENDING') === 'PENDING');
 
   const handleSubmitVerificationList = async () => {
-    if (selectedIds.size === 0 || isSubmitting) return;
+    if (unsubmitted.length === 0 || isSubmitting) return;
     setIsSubmitting(true);
 
     try {
-      const idsParam = Array.from(selectedIds).join(',');
+      const idsParam = unsubmitted.map((a) => a.applicationId).join(',');
       const res = await fetch(`/api/admin/verification/excel?applicationIds=${idsParam}`);
 
       if (!res.ok) {
@@ -102,7 +92,6 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
       URL.revokeObjectURL(url);
 
       showToast('진위확인 명단이 제출되었습니다.', 'positive');
-      setSelectedIds(new Set());
       router.refresh();
     } catch {
       showToast('진위확인 명단 제출 중 오류가 발생했습니다.', 'negative');
@@ -140,53 +129,44 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
         </div>
         <Button
           type="button"
-          disabled={selectedIds.size === 0}
+          disabled={unsubmitted.length === 0}
           onClick={() => setShowSubmitModal(true)}
           className="h-10 px-4 border border-[#FF5F5F] bg-white hover:bg-[#FFEBEB] text-[#FF5F5F] text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white"
         >
-          진위확인 명단 제출{selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}
+          진위확인 명단 제출{unsubmitted.length > 0 ? ` (${unsubmitted.length})` : ''}
         </Button>
       </div>
 
       <table className="w-full text-[13px] table-fixed">
         <thead>
           <tr className="border-b border-[#E5E7EB]">
-            <th className="py-3 w-[6%] text-center font-semibold text-[#1E2125]">
-              <Checkbox
-                checked={isAllPagedSelected}
-                onChange={toggleSelectAllOnPage}
-                ariaLabel="이 페이지 전체 선택"
-              />
-            </th>
+            <th className="py-3 w-[5%] text-center font-semibold text-[#1E2125]">#</th>
             <th className="py-3 w-[8%] text-center font-semibold text-[#1E2125]">이름</th>
-            <th className="py-3 w-[10%] text-center font-semibold text-[#1E2125]">회원 ID</th>
-            <th className="py-3 w-[20%] text-center font-semibold text-[#1E2125]">이메일</th>
-            <th className="py-3 w-[14%] text-center font-semibold text-[#1E2125]">
+            <th className="py-3 w-[9%] text-center font-semibold text-[#1E2125]">회원 ID</th>
+            <th className="py-3 w-[15%] text-center font-semibold text-[#1E2125]">이메일</th>
+            <th className="py-3 w-[13%] text-center font-semibold text-[#1E2125]">
               지원 카테고리명
             </th>
-            <th className="py-3 w-[12%] text-center font-semibold text-[#1E2125]">신청일</th>
+            <th className="py-3 w-[11%] text-center font-semibold text-[#1E2125]">신청일</th>
+            <th className="py-3 w-[9%] text-center font-semibold text-[#1E2125]">제출 상태</th>
             <th className="py-3 w-[14%] text-center font-semibold text-[#1E2125]">서류</th>
           </tr>
         </thead>
         <tbody>
           {paged.length === 0 ? (
             <tr>
-              <td colSpan={7} className="py-16 text-center text-[#6A7282]">
+              <td colSpan={8} className="py-16 text-center text-[#6A7282]">
                 승인 대기 중인 강사가 없습니다.
               </td>
             </tr>
           ) : (
-            paged.map((a) => (
+            paged.map((a, i) => (
               <tr
                 key={a.applicationId}
                 className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
               >
-                <td className="py-3 text-center">
-                  <Checkbox
-                    checked={selectedIds.has(a.applicationId)}
-                    onChange={() => toggleSelect(a.applicationId)}
-                    ariaLabel={`${a.name} 선택`}
-                  />
+                <td className="py-3 text-center text-[#6A7282]">
+                  {(currentPage - 1) * ITEMS_PER_PAGE + i + 1}
                 </td>
                 <td className="py-3 text-center font-semibold text-[#1E2125]">{a.name}</td>
                 <td className="py-3 text-center text-[#6A7282]">{a.loginId}</td>
@@ -203,6 +183,13 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
                 </td>
                 <td className="py-3 text-center font-semibold text-[#1E2125]">{a.categoryName}</td>
                 <td className="py-3 text-center text-[#6A7282]">{a.createdAt?.slice(0, 10)}</td>
+                <td className="py-3 text-center">
+                  <span
+                    className={`inline-block px-2.5 py-1 rounded-sm text-[11.5px] font-semibold ${VERIFICATION_STATUS_BADGE_CLS[a.verificationStatus ?? 'PENDING']}`}
+                  >
+                    {VERIFICATION_STATUS_LABEL[a.verificationStatus ?? 'PENDING']}
+                  </span>
+                </td>
                 <td className="py-3 text-center">
                   <Button
                     variant="outline"
@@ -229,37 +216,7 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
         </tbody>
       </table>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-1 mt-6">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
-          >
-            이전
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`w-8 h-8 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
-                currentPage === page
-                  ? 'bg-[#1E2125] text-white'
-                  : 'text-[#6A7282] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
-              }`}
-            >
-              {page}
-            </button>
-          ))}
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
-          >
-            다음
-          </button>
-        </div>
-      )}
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
 
       {showSubmitModal && (
         <TwoButtonModal
@@ -267,8 +224,8 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
           message={
             <div className="flex flex-col gap-3">
               <p className="text-[15px] text-[#1E2125] font-medium leading-relaxed">
-                선택된 <span className="text-[#FF5E5E]">{selectedIds.size}건</span>을 진위확인
-                명단으로 제출하시겠습니까?
+                아직 제출되지 않은 <span className="text-[#FF5E5E]">{unsubmitted.length}건</span>을
+                진위확인 명단으로 제출하시겠습니까?
               </p>
               <p className="flex items-start gap-1.5 text-[12.5px] text-[#6A7282] leading-relaxed bg-[#F9FAFB] rounded-lg px-3 py-2.5">
                 <span aria-hidden="true">ℹ</span>
