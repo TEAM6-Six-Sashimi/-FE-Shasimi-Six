@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
+import Pagination from '@/components/ui/Pagination';
 import { ReviewReport, REPORT_CATEGORY_LABEL, REPORT_CATEGORY_STYLE } from '../types';
 import ReviewReportDetailModal from './ReviewReportDetailModal';
 
@@ -153,37 +154,7 @@ export default function CourseReviewReports({ reports, setReports }: Props) {
         </tbody>
       </table>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-1 mt-6">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
-          >
-            이전
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`w-8 h-8 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
-                currentPage === page
-                  ? 'bg-[#1E2125] text-white'
-                  : 'text-[#6A7282] hover:bg-[#F9FAFB] hover:text-[#1E2125]'
-              }`}
-            >
-              {page}
-            </button>
-          ))}
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1.5 text-[13px] text-[#6A7282] disabled:opacity-30 hover:text-[#1E2125] cursor-pointer"
-          >
-            다음
-          </button>
-        </div>
-      )}
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
 
       {selectedReportId !== null && (
         <ReviewReportDetailModal
