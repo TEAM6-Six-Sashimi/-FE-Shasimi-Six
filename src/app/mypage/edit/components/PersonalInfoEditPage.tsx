@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { UserMeWithAgreements } from '@/features/mypage/types';
 import { changePasswordAction, updateMeAction } from '@/features/mypage/actions';
 import { useMypagePassword } from '@/features/mypage/MypagePasswordContext';
+import { PASSWORD_REGEX } from '@/features/auth/components/signupform/fields/Passwordfield';
 import Image from 'next/image';
 
 interface Props {
@@ -47,6 +48,7 @@ export default function PersonalInfoEditPage({ user }: Props) {
   const [aiUsage, setAiUsage] = useState(agreements.aiUsage);
 
   const [loading, setLoading] = useState(false);
+  const [passwordFormatError, setPasswordFormatError] = useState(false);
   const [passwordMismatch, setPasswordMismatch] = useState(false);
 
   useEffect(() => {
@@ -64,6 +66,12 @@ export default function PersonalInfoEditPage({ user }: Props) {
 
   const handleSave = async () => {
     if (!currentPassword) return;
+
+    if (newPassword && !PASSWORD_REGEX.test(newPassword)) {
+      setPasswordFormatError(true);
+      return;
+    }
+    setPasswordFormatError(false);
 
     if (newPassword && newPassword !== newPasswordConfirm) {
       setPasswordMismatch(true);
@@ -170,8 +178,9 @@ export default function PersonalInfoEditPage({ user }: Props) {
                 type={showPassword ? 'text' : 'password'}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="대소문자+숫자+특수문자(!@#$%^_), 8~16자"
-                className="w-full h-11 px-4 rounded-lg border border-[#D1D5DB] bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors"
+                className={`w-full h-11 px-4 rounded-lg border bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors ${
+                  passwordFormatError ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]'
+                }`}
               />
               <button
                 type="button"
@@ -187,6 +196,12 @@ export default function PersonalInfoEditPage({ user }: Props) {
                 />
               </button>
             </div>
+            <p className="text-[12px] text-[#6A7282] mt-1">
+              영문 대문자와 소문자, 숫자, 특수문자(!@#$%^_) 모두 포함, 8자 이상 16자 이하
+            </p>
+            {passwordFormatError && (
+              <p className="text-[12px] text-[#FF5E5E] mt-1">비밀번호 형식을 확인해주세요.</p>
+            )}
           </div>
           <div>
             <label className="block text-[12.5px] text-[#6A7282] mb-1.5">새 비밀번호 확인</label>
