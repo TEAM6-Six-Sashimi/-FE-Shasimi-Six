@@ -30,15 +30,16 @@ export default function ChatPanel({
 }: ChatPanelProps) {
   const profileImageUrl = getThumbnailUrl(room.profileImagePath);
 
-  const { messages, input, setInput, pendingContent, listEndRef, handleSend } = useChatMessages({
-    chatId: room.chatId,
-    myUserId,
-    fetchMessages: fetchChatMessagesAction,
-    isConnected,
-    subscribe,
-    sendMessage,
-    onMessage,
-  });
+  const { messages, input, setInput, pendingContent, listEndRef, inputRef, handleSend } =
+    useChatMessages({
+      chatId: room.chatId,
+      myUserId,
+      fetchMessages: fetchChatMessagesAction,
+      isConnected,
+      subscribe,
+      sendMessage,
+      onMessage,
+    });
 
   return (
     <div className="flex-1 flex flex-col bg-white h-full">
@@ -84,6 +85,7 @@ export default function ChatPanel({
       <ChatMessageList messages={messages} myUserId={myUserId} listEndRef={listEndRef} />
 
       <ChatMessageInput
+        ref={inputRef}
         value={input}
         onChange={setInput}
         onSubmit={handleSend}

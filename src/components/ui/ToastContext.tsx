@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useRef, useState, ReactNode } from 'react';
 
 type ToastType = 'positive' | 'negative' | 'alarm'
 
@@ -23,10 +23,12 @@ const TOAST_STYLES: Record<ToastType, string> = {
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<Toast | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-const showToast = (message: string, type: ToastType = 'positive') => {
+  const showToast = (message: string, type: ToastType = 'positive') => {
+    if (timerRef.current) clearTimeout(timerRef.current); // 이전 토스트의 타이머가 새 토스트를 조기에 지우지 않도록 정리
     setToast({ message, type });
-    setTimeout(() => setToast(null), 5000); // 5초 후 자동 사라짐
+    timerRef.current = setTimeout(() => setToast(null), 5000); // 5초 후 자동 사라짐
   };
 
   return (

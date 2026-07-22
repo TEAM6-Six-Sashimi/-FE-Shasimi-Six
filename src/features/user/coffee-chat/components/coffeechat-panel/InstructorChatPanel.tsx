@@ -42,15 +42,16 @@ export default function InstructorChatPanel({
   const [isResponding, setIsResponding] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
-  const { messages, input, setInput, pendingContent, listEndRef, handleSend } = useChatMessages({
-    chatId: room.chatId,
-    myUserId,
-    fetchMessages: fetchInstructorMessagesAction,
-    isConnected,
-    subscribe,
-    sendMessage,
-    onMessage,
-  });
+  const { messages, input, setInput, pendingContent, listEndRef, inputRef, handleSend } =
+    useChatMessages({
+      chatId: room.chatId,
+      myUserId,
+      fetchMessages: fetchInstructorMessagesAction,
+      isConnected,
+      subscribe,
+      sendMessage,
+      onMessage,
+    });
 
   // 승인 성공 후 요청/채팅방 목록을 다시 GET해서 반영
   const handleAccept = async () => {
@@ -173,6 +174,7 @@ export default function InstructorChatPanel({
         </div>
       ) : (
         <ChatMessageInput
+          ref={inputRef}
           value={input}
           onChange={setInput}
           onSubmit={handleSend}

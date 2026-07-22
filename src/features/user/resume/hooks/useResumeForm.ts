@@ -68,7 +68,7 @@ export function useResumeForm({
   const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
 
   // 저장된 이력서가 있으면 그 값으로, 없으면 빈 배열로 초기화
-  const initial = savedResume ? toFormState(savedResume) : null;
+  const initial = useMemo(() => (savedResume ? toFormState(savedResume) : null), [savedResume]);
 
   const [educations, setEducations] = useState<EducationItem[]>(initial?.educations ?? []);
   const [isNewGraduate, setIsNewGraduate] = useState(initial?.isNewGraduate ?? false);
@@ -287,7 +287,10 @@ export function useResumeForm({
           setMaintenance(true, result.message);
           return;
         } else if (result.authError) {
-          showToast(result.message ?? '다른 기기에서 로그인되어 자동 로그아웃 되었습니다.', 'alarm');
+          showToast(
+            result.message ?? '다른 기기에서 로그인되어 자동 로그아웃 되었습니다.',
+            'alarm',
+          );
           await logoutAction();
           return;
         } else if (result.validationError) {
@@ -306,7 +309,10 @@ export function useResumeForm({
           setMaintenance(true, result.message);
           return;
         } else if (result.authError) {
-          showToast(result.message ?? '다른 기기에서 로그인되어 자동 로그아웃 되었습니다.', 'alarm');
+          showToast(
+            result.message ?? '다른 기기에서 로그인되어 자동 로그아웃 되었습니다.',
+            'alarm',
+          );
           await logoutAction();
           return;
         } else if (result.validationError) {
