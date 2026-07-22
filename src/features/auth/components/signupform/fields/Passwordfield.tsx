@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import FieldLabel, { FieldLabelVariant } from '@/features/auth/components/FieldLabel';
 
+// 비밀번호 유효성 검증(대문자+소문자+숫자+특수문자)
 export const PASSWORD_REGEX =
-  /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,16}$/;
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,16}$/;
 
 interface PasswordFieldsProps {
   password: string;

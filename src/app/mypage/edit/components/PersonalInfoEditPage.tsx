@@ -177,7 +177,10 @@ export default function PersonalInfoEditPage({ user }: Props) {
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e) => {
+                  setNewPassword(e.target.value);
+                  if (passwordFormatError) setPasswordFormatError(false);
+                }}
                 className={`w-full h-11 px-4 rounded-lg border bg-white text-[13.5px] text-[#1E2125] placeholder:text-[#9CA3AF] outline-none focus:border-[#1E2125] transition-colors ${
                   passwordFormatError ? 'border-[#FF5E5E]' : 'border-[#D1D5DB]'
                 }`}
