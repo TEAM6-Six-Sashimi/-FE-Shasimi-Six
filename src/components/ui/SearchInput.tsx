@@ -9,7 +9,7 @@ interface SearchInputProps {
   initialValue?: string;
 }
 
-// 검색창 공용 컴포넌트. 검색 아이콘 클릭 또는 엔터 입력 시에만 검색을 확정한다.
+// 검색창 공용 컴포넌트
 export default function SearchInput({
   onSearch,
   placeholder,
@@ -43,7 +43,13 @@ export default function SearchInput({
         aria-label="검색"
         className="absolute right-4 top-1/2 -translate-y-1/2 text-[#99A1AF] hover:text-[#1E2125] transition-colors cursor-pointer"
       >
-        <svg width="17" height="17" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          width="17"
+          height="17"
+          viewBox="0 0 20 20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path
             d="M9.16667 15.8333C12.8486 15.8333 15.8333 12.8486 15.8333 9.16667C15.8333 5.48477 12.8486 2.5 9.16667 2.5C5.48477 2.5 2.5 5.48477 2.5 9.16667C2.5 12.8486 5.48477 15.8333 9.16667 15.8333Z"
             stroke="currentColor"

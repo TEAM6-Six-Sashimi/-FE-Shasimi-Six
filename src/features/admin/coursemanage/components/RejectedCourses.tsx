@@ -87,7 +87,7 @@ export default function RejectedCourses({ courses, categories }: Props) {
           {paged.length === 0 ? (
             <tr>
               <td colSpan={7} className="py-16 text-center text-[#6A7282]">
-                반려된 강의가 없습니다.
+                {search ? '검색 결과에 해당하는 강의가 없습니다.' : '반려된 강의가 없습니다.'}
               </td>
             </tr>
           ) : (

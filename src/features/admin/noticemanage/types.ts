@@ -11,6 +11,8 @@ export interface AdminNoticeListResponse {
   size: number;
   totalPages: number;
   totalElements: number;
+  // 조회 자체가 실패했을 때만 true (실제로 0건인 경우와 구분하기 위한 필드)
+  error?: boolean;
 }
 
 export interface AdminNoticeSearchParams {

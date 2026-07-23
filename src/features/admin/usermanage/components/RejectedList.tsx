@@ -37,7 +37,8 @@ export default function RejectedList({ rejected }: Props) {
     () =>
       search
         ? sorted.filter(
-            (r) => r.name.includes(search) || r.loginId.includes(search) || r.email.includes(search),
+            (r) =>
+              r.name.includes(search) || r.loginId.includes(search) || r.email.includes(search),
           )
         : sorted,
     [sorted, search],
@@ -78,7 +79,9 @@ export default function RejectedList({ rejected }: Props) {
           {paged.length === 0 ? (
             <tr>
               <td colSpan={7} className="py-16 text-center text-[#6A7282]">
-                반려된 강사 신청 이력이 없습니다.
+                {search
+                  ? '검색 결과에 해당하는 강사 신청이 없습니다.'
+                  : '반려된 강사 신청 이력이 없습니다.'}
               </td>
             </tr>
           ) : (

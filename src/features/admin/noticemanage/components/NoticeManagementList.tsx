@@ -12,7 +12,8 @@ import { AdminNotice } from '../types';
 
 const ITEMS_PER_PAGE = 10;
 // 공지사항 API가 title 파라미터로 서버 필터링을 지원하지 않아, 전체 목록을 한 번에 받아와 프론트에서 검색/페이지네이션한다
-const FETCH_ALL_SIZE = 100;
+// (백엔드가 size=1000 요청을 400으로 거부해 페이지당 100개씩 나눠 끝까지 순회한다)
+const FETCH_PAGE_SIZE = 100;
 
 export default function NoticeManagementList() {
   const router = useRouter();
@@ -20,28 +21,43 @@ export default function NoticeManagementList() {
   const [currentPage, setCurrentPage] = useState(1);
   // null = 아직 조회 전 (로딩 상태를 별도 state 대신 이 값으로 파생시킨다)
   const [notices, setNotices] = useState<AdminNotice[] | null>(null);
-  const isLoading = notices === null;
+  const [loadError, setLoadError] = useState(false);
+  const isLoading = notices === null && !loadError;
 
   useEffect(() => {
     let active = true;
-    fetchNoticesAction({ page: 0, size: FETCH_ALL_SIZE })
-      .then((result) => {
+
+    (async () => {
+      const all: AdminNotice[] = [];
+      let page = 0;
+      let totalPages = 1;
+
+      while (page < totalPages) {
+        const result = await fetchNoticesAction({ page, size: FETCH_PAGE_SIZE });
         if (!active) return;
-        setNotices(result.items);
-      })
-      .catch(() => {
-        if (!active) return;
-        setNotices([]);
-      });
+        if (result.error) {
+          setLoadError(true);
+          return;
+        }
+        all.push(...result.items);
+        totalPages = result.totalPages;
+        page += 1;
+      }
+
+      setNotices(all);
+    })();
+
     return () => {
       active = false;
     };
   }, []);
 
-  const filtered = useMemo(
-    () => (title ? (notices ?? []).filter((n) => n.title.includes(title)) : (notices ?? [])),
-    [notices, title],
-  );
+  const filtered = useMemo(() => {
+    const list = notices ?? [];
+    if (!title) return list;
+    const keyword = title.toLowerCase();
+    return list.filter((n) => n.title.toLowerCase().includes(keyword));
+  }, [notices, title]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
@@ -81,6 +97,12 @@ export default function NoticeManagementList() {
             <tr>
               <td colSpan={4} className="py-16 text-center text-[#6A7282]">
                 불러오는 중...
+              </td>
+            </tr>
+          ) : loadError ? (
+            <tr>
+              <td colSpan={4} className="py-16 text-center text-[#FF5E5E]">
+                공지사항을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
               </td>
             </tr>
           ) : paged.length === 0 ? (

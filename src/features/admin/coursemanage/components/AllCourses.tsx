@@ -51,9 +51,7 @@ export default function AllCourses({ courses, categories }: Props) {
   const filtered = useMemo(() => {
     let result = [...courses];
     if (search)
-      result = result.filter(
-        (c) => c.title.includes(search) || c.instructorName.includes(search),
-      );
+      result = result.filter((c) => c.title.includes(search) || c.instructorName.includes(search));
     if (categoryFilter !== '전체')
       result = result.filter((c) => getMainCategory(c.categoryName) === categoryFilter);
     if (sort === '인기순') result.sort((a, b) => b.studentCount - a.studentCount);
