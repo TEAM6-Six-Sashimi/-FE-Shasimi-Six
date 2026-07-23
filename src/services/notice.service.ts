@@ -22,6 +22,8 @@ const EMPTY_LIST: AdminNoticeListResponse = {
   totalElements: 0,
 };
 
+const ERROR_LIST: AdminNoticeListResponse = { ...EMPTY_LIST, error: true };
+
 function buildQuery(params: AdminNoticeSearchParams): string {
   const query = new URLSearchParams();
   if (params.title) query.set('title', params.title);
@@ -43,13 +45,13 @@ export async function fetchNotices(
     if (!res.ok) {
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchNotices] status=${res.status} body=${errorBody}`);
-      return EMPTY_LIST;
+      return ERROR_LIST;
     }
 
     return res.json();
   } catch (e) {
     console.error('[fetchNotices] fetch error:', e);
-    return EMPTY_LIST;
+    return ERROR_LIST;
   }
 }
 

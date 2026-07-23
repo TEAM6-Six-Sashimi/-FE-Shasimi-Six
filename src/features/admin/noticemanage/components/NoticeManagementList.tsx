@@ -1,79 +1,80 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import Pagination from '@/components/ui/Pagination';
+import SearchInput from '@/components/ui/SearchInput';
 import { fetchNoticesAction } from '../actions';
 import { AdminNotice } from '../types';
 
 const ITEMS_PER_PAGE = 10;
+// 공지사항 API가 title 파라미터로 서버 필터링을 지원하지 않아, 전체 목록을 한 번에 받아와 프론트에서 검색/페이지네이션한다
+// (백엔드가 size=1000 요청을 400으로 거부해 페이지당 100개씩 나눠 끝까지 순회한다)
+const FETCH_PAGE_SIZE = 100;
 
 export default function NoticeManagementList() {
   const router = useRouter();
   const [title, setTitle] = useState('');
-  const [debouncedTitle, setDebouncedTitle] = useState('');
-  const [page, setPage] = useState(0);
-  const [items, setItems] = useState<AdminNotice[]>([]);
-  const [totalPages, setTotalPages] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // 검색어는 디바운스 처리
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedTitle(title.trim()), 300);
-    return () => clearTimeout(timer);
-  }, [title]);
-
-  // 검색 조건이 바뀌면 첫 페이지로
-  useEffect(() => {
-    setPage(0);
-  }, [debouncedTitle]);
+  const [currentPage, setCurrentPage] = useState(1);
+  // null = 아직 조회 전 (로딩 상태를 별도 state 대신 이 값으로 파생시킨다)
+  const [notices, setNotices] = useState<AdminNotice[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const isLoading = notices === null && !loadError;
 
   useEffect(() => {
     let active = true;
-    setIsLoading(true);
-    fetchNoticesAction({
-      title: debouncedTitle || undefined,
-      page,
-      size: ITEMS_PER_PAGE,
-    })
-      .then((result) => {
+
+    (async () => {
+      const all: AdminNotice[] = [];
+      let page = 0;
+      let totalPages = 1;
+
+      while (page < totalPages) {
+        const result = await fetchNoticesAction({ page, size: FETCH_PAGE_SIZE });
         if (!active) return;
-        setItems(result.items);
-        setTotalPages(result.totalPages);
-      })
-      .catch(() => {
-        if (!active) return;
-        setItems([]);
-        setTotalPages(0);
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
+        if (result.error) {
+          setLoadError(true);
+          return;
+        }
+        all.push(...result.items);
+        totalPages = result.totalPages;
+        page += 1;
+      }
+
+      setNotices(all);
+    })();
+
     return () => {
       active = false;
     };
-  }, [debouncedTitle, page]);
+  }, []);
+
+  const filtered = useMemo(() => {
+    const list = notices ?? [];
+    if (!title) return list;
+    const keyword = title.toLowerCase();
+    return list.filter((n) => n.title.toLowerCase().includes(keyword));
+  }, [notices, title]);
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paged = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
       <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-4">전체 공지사항 목록</h2>
 
       <div className="flex items-center justify-between mb-6">
-        <div className="relative w-72">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="제목 검색"
-            className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
-          />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6A7282]">
-            <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
-          </span>
-        </div>
+        <SearchInput
+          onSearch={(v) => {
+            setTitle(v);
+            setCurrentPage(1);
+          }}
+          placeholder="제목 검색"
+          className="w-72"
+        />
         <Button
           onClick={() => router.push('/admin/noticemanage/edit')}
           className="h-10 px-4 bg-[#FF5F5F] hover:bg-[#D14848] text-white text-[13px] font-semibold cursor-pointer"
@@ -98,22 +99,28 @@ export default function NoticeManagementList() {
                 불러오는 중...
               </td>
             </tr>
-          ) : items.length === 0 ? (
+          ) : loadError ? (
+            <tr>
+              <td colSpan={4} className="py-16 text-center text-[#FF5E5E]">
+                공지사항을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+              </td>
+            </tr>
+          ) : paged.length === 0 ? (
             <tr>
               <td colSpan={4} className="py-16 text-center text-[#6A7282]">
-                {debouncedTitle
+                {title
                   ? '검색 결과에 해당하는 공지사항이 없습니다.'
                   : '등록된 공지사항이 없습니다.'}
               </td>
             </tr>
           ) : (
-            items.map((notice, idx) => (
+            paged.map((notice, idx) => (
               <tr
                 key={notice.noticeId}
                 className="border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
               >
                 <td className="py-3 text-center text-[#6A7282]">
-                  {page * ITEMS_PER_PAGE + idx + 1}
+                  {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
                 </td>
                 <td className="py-3 px-2 text-left">
                   <div className="flex items-center gap-1.5 min-w-0">
@@ -150,11 +157,7 @@ export default function NoticeManagementList() {
         </tbody>
       </table>
 
-      <Pagination
-        currentPage={page + 1}
-        totalPages={totalPages}
-        onPageChange={(p) => setPage(p - 1)}
-      />
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
     </div>
   );
 }

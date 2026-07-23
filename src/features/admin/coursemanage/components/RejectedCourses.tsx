@@ -5,6 +5,7 @@ import type { RejectedCourse } from '../type';
 import type { Category } from '@/features/categories/types';
 import RejectDetailModal from '@/components/modals/RejectDetailModal';
 import Pagination from '@/components/ui/Pagination';
+import SearchInput from '@/components/ui/SearchInput';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -15,6 +16,7 @@ interface Props {
 
 export default function RejectedCourses({ courses, categories }: Props) {
   const [detailModal, setDetailModal] = useState<RejectedCourse | null>(null);
+  const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
   const subToMainMap = useMemo(() => {
@@ -40,12 +42,29 @@ export default function RejectedCourses({ courses, categories }: Props) {
     [courses],
   );
 
-  const totalPages = Math.ceil(sorted.length / ITEMS_PER_PAGE);
-  const paged = sorted.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const filtered = useMemo(
+    () =>
+      search
+        ? sorted.filter((c) => c.title.includes(search) || c.instructorName.includes(search))
+        : sorted,
+    [sorted, search],
+  );
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paged = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
-      <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-6">반려된 강의 목록</h2>
+      <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-4">반려된 강의 목록</h2>
+      <div className="mb-6">
+        <SearchInput
+          onSearch={(v) => {
+            setSearch(v);
+            setCurrentPage(1);
+          }}
+          placeholder="강의명, 강사명 검색"
+        />
+      </div>
       <table className="w-full text-[13px] table-fixed">
         <thead>
           <tr className="border-b border-[#E5E7EB]">
@@ -68,7 +87,7 @@ export default function RejectedCourses({ courses, categories }: Props) {
           {paged.length === 0 ? (
             <tr>
               <td colSpan={7} className="py-16 text-center text-[#6A7282]">
-                반려된 강의가 없습니다.
+                {search ? '검색 결과에 해당하는 강의가 없습니다.' : '반려된 강의가 없습니다.'}
               </td>
             </tr>
           ) : (
