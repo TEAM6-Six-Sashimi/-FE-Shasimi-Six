@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { InstructorApplication } from '../types';
 import { Button } from '@/components/ui/button';
 import Pagination from '@/components/ui/Pagination';
+import SearchInput from '@/components/ui/SearchInput';
 import { useToast } from '@/components/ui/ToastContext';
 import TwoButtonModal from '@/components/modals/TwoButtonModal';
 
@@ -16,11 +16,10 @@ const VERIFICATION_STATUS_LABEL: Record<InstructorApplication['verificationStatu
   SUBMITTED: '제출됨',
 };
 
-const VERIFICATION_STATUS_BADGE_CLS: Record<InstructorApplication['verificationStatus'], string> =
-  {
-    PENDING: 'bg-[#E5E7EB]/40 text-[#6A7282]',
-    SUBMITTED: 'bg-[#F9FBE7] text-[#827717]',
-  };
+const VERIFICATION_STATUS_BADGE_CLS: Record<InstructorApplication['verificationStatus'], string> = {
+  PENDING: 'bg-[#E5E7EB]/40 text-[#6A7282]',
+  SUBMITTED: 'bg-[#F9FBE7] text-[#827717]',
+};
 
 interface Props {
   applicants: InstructorApplication[];
@@ -112,21 +111,13 @@ export default function InstructorApproval({ applicants, setApplicants }: Props)
       </div>
 
       <div className="flex items-center justify-between mb-6">
-        <div className="relative w-64">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder="이름, 아이디 검색"
-            className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
-          />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6A7282]">
-            <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
-          </span>
-        </div>
+        <SearchInput
+          onSearch={(v) => {
+            setSearch(v);
+            setCurrentPage(1);
+          }}
+          placeholder="이름, 아이디 검색"
+        />
         <Button
           type="button"
           disabled={unsubmitted.length === 0}

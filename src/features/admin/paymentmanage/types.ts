@@ -21,6 +21,8 @@ export interface AdminCoursePaymentListResponse {
   page: number;
   size: number;
   authError?: true;
+  // 조회 자체가 실패했을 때만 true("실제로 0건"인 경우와 구분)
+  error?: true;
 }
 
 // 구독권 결제 내역
@@ -44,6 +46,8 @@ export interface AdminSubscriptionPaymentListResponse {
   page: number;
   size: number;
   authError?: true;
+  // 조회 자체가 실패했을 때만 true("실제로 0건"인 경우와 구분)
+  error?: true;
 }
 
 export interface AdminPaymentSearchParams {

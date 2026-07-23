@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { useEffect, useRef, useState } from 'react';
 import { fetchCoursePaymentsAction } from '../actions';
 import { AdminCoursePayment } from '../types';
 import Pagination from '@/components/ui/Pagination';
+import SearchInput from '@/components/ui/SearchInput';
 import { useToast } from '@/components/ui/ToastContext';
 import { logoutAction } from '@/features/auth/actions';
 
@@ -13,86 +13,99 @@ export default function CoursePayments() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [keyword, setKeyword] = useState('');
-  const [debouncedKeyword, setDebouncedKeyword] = useState('');
   const [page, setPage] = useState(0);
   const [items, setItems] = useState<AdminCoursePayment[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const requestIdRef = useRef(0);
 
-  // 검색어는 디바운스 처리
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedKeyword(keyword.trim()), 300);
-    return () => clearTimeout(timer);
-  }, [keyword]);
-
-  // 검색/기간 조건이 바뀌면 첫 페이지로
-  useEffect(() => {
-    setPage(0);
-  }, [startDate, endDate, debouncedKeyword]);
-
-  useEffect(() => {
-    let active = true;
-    setIsLoading(true);
+  const loadData = (params: {
+    startDate: string;
+    endDate: string;
+    keyword: string;
+    page: number;
+  }) => {
+    const requestId = ++requestIdRef.current;
     fetchCoursePaymentsAction({
-      startDate: startDate || undefined,
-      endDate: endDate || undefined,
-      keyword: debouncedKeyword || undefined,
-      page,
+      startDate: params.startDate || undefined,
+      endDate: params.endDate || undefined,
+      keyword: params.keyword || undefined,
+      page: params.page,
       size: 10,
     })
       .then(async (result) => {
-        if (!active) return;
+        if (requestId !== requestIdRef.current) return;
         if (result.authError) {
           showToast('다른 기기에서 로그인되어 자동 로그아웃 되었습니다.', 'alarm');
           await logoutAction();
           return;
         }
+        if (result.error) {
+          setLoadError(true);
+          setItems([]);
+          setTotalPages(0);
+          return;
+        }
+        setLoadError(false);
         setItems(result.items);
         setTotalPages(result.totalPages);
       })
       .catch(() => {
-        if (!active) return;
+        if (requestId !== requestIdRef.current) return;
+        setLoadError(true);
         setItems([]);
         setTotalPages(0);
       })
       .finally(() => {
-        if (active) setIsLoading(false);
+        if (requestId === requestIdRef.current) setIsLoading(false);
       });
-    return () => {
-      active = false;
-    };
-  }, [startDate, endDate, debouncedKeyword, page, showToast]);
+  };
+
+  useEffect(() => {
+    loadData({ startDate: '', endDate: '', keyword: '', page: 0 });
+  }, []);
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
       <h2 className="text-[18px] font-extrabold text-[#1E2125] mb-4">전체 강의 결제 내역</h2>
 
       <div className="flex items-center justify-between gap-3 mb-6">
-        <div className="relative w-72">
-          <input
-            type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="회원명, 회원 ID, 주문번호 검색"
-            className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
-          />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6A7282]">
-            <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
-          </span>
-        </div>
+        <SearchInput
+          onSearch={(v) => {
+            setKeyword(v);
+            setPage(0);
+            setIsLoading(true);
+            loadData({ startDate, endDate, keyword: v, page: 0 });
+          }}
+          placeholder="회원명, 회원 ID, 주문번호 검색"
+          className="w-72"
+        />
 
         <div className="flex items-center gap-2">
           <input
             type="date"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setStartDate(value);
+              setPage(0);
+              setIsLoading(true);
+              loadData({ startDate: value, endDate, keyword, page: 0 });
+            }}
             className="h-11 px-3 rounded-lg border border-[#D1D5DB] bg-[#F9FAFB] text-[13px] text-[#1E2125] outline-none focus:border-[#1E2125] transition-colors"
           />
           <span className="text-[#6A7282] text-[13px]">~</span>
           <input
             type="date"
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setEndDate(value);
+              setPage(0);
+              setIsLoading(true);
+              loadData({ startDate, endDate: value, keyword, page: 0 });
+            }}
             className="h-11 px-3 rounded-lg border border-[#D1D5DB] bg-[#F9FAFB] text-[13px] text-[#1E2125] outline-none focus:border-[#1E2125] transition-colors"
           />
         </div>
@@ -115,6 +128,12 @@ export default function CoursePayments() {
             <tr>
               <td colSpan={7} className="py-16 text-center text-[#6A7282]">
                 불러오는 중...
+              </td>
+            </tr>
+          ) : loadError ? (
+            <tr>
+              <td colSpan={7} className="py-16 text-center text-[#FF5E5E]">
+                결제 내역을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
               </td>
             </tr>
           ) : items.length === 0 ? (
@@ -167,7 +186,12 @@ export default function CoursePayments() {
       <Pagination
         currentPage={page + 1}
         totalPages={totalPages}
-        onPageChange={(p) => setPage(p - 1)}
+        onPageChange={(p) => {
+          const newPage = p - 1;
+          setPage(newPage);
+          setIsLoading(true);
+          loadData({ startDate, endDate, keyword, page: newPage });
+        }}
       />
     </div>
   );

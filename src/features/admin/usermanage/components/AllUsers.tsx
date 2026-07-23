@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Pagination from '@/components/ui/Pagination';
+import SearchInput from '@/components/ui/SearchInput';
 import { AdminUser } from '../types';
 
 type RoleFilter = 'ALL' | 'STUDENT' | 'INSTRUCTOR';
@@ -73,21 +73,13 @@ export default function AllUsers({ users }: Props) {
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
-        <div className="relative w-64">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder="이름, 아이디, 이메일 검색"
-            className="w-full h-11 pl-4 pr-10 rounded-full border border-[#D1D5DB] bg-[#F9FAFB] text-[13.5px] text-[#1E2125] placeholder:text-[#6A7282] outline-none focus:border-[#1E2125] transition-colors"
-          />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6A7282]">
-            <Image src="/search/search-Icon.svg" alt="" width={17} height={17} />
-          </span>
-        </div>
+        <SearchInput
+          onSearch={(v) => {
+            setSearch(v);
+            setCurrentPage(1);
+          }}
+          placeholder="이름, 아이디, 이메일 검색"
+        />
 
         <div className="flex items-center gap-2">
           {FILTERS.map((f) => (
