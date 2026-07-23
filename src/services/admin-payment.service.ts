@@ -9,6 +9,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const EMPTY_LIST = { items: [], totalElements: 0, totalPages: 0, page: 0, size: 10 };
 const AUTH_ERROR_LIST = { ...EMPTY_LIST, authError: true as const };
+const ERROR_LIST = { ...EMPTY_LIST, error: true as const };
 
 function buildQuery(params: AdminPaymentSearchParams): string {
   const query = new URLSearchParams();
@@ -39,13 +40,13 @@ export async function fetchAdminCoursePayments(
 
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchAdminCoursePayments] status=${res.status} body=${errorBody}`);
-      return EMPTY_LIST;
+      return ERROR_LIST;
     }
 
     return res.json();
   } catch (e) {
     console.error('[fetchAdminCoursePayments] fetch error:', e);
-    return EMPTY_LIST;
+    return ERROR_LIST;
   }
 }
 
@@ -68,12 +69,12 @@ export async function fetchAdminSubscriptionPayments(
 
       const errorBody = await res.text().catch(() => '');
       console.error(`[fetchAdminSubscriptionPayments] status=${res.status} body=${errorBody}`);
-      return EMPTY_LIST;
+      return ERROR_LIST;
     }
 
     return res.json();
   } catch (e) {
     console.error('[fetchAdminSubscriptionPayments] fetch error:', e);
-    return EMPTY_LIST;
+    return ERROR_LIST;
   }
 }
