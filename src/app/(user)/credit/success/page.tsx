@@ -57,8 +57,8 @@ export default function CreditSuccessPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F9FAFB]">
         <div className="flex flex-col items-center justify-center gap-3">
-          <InlineDotsLoading dotColor="#FF5E5E" />
           <p className="text-[15px] text-[#6A7282]">결제를 승인하고 있습니다...</p>
+          <InlineDotsLoading dotColor="#FF5E5E" />
         </div>
       </div>
     );
