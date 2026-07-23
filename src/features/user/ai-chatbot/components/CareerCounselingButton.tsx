@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
+import { ChatMessage } from '../types';
 
 // 실제로 챗봇을 열기 전까지는 다운로드되지 않도록 지연 로딩
 const CareerCounselingChatPanel = dynamic(() => import('./CareerCounselingChatPanel'), {
@@ -28,9 +29,14 @@ export default function CareerCounselingButton() {
   const [isHovered, setIsHovered] = useState(false);
   const [typedText, setTypedText] = useState('');
   const [isChatOpen, setIsChatOpen] = useState(false);
-  // 새로고침하면 다시 보이도록 저장소 없이 메모리 상태로만 관리 
+  // 새로고침하면 다시 보이도록 저장소 없이 메모리 상태로만 관리
   // (페이지 이동 중에는 유지, 새로고침하면 초기화)
   const [isDismissed, setIsDismissed] = useState(false);
+  // 대화 내용을 여기서 들고 있어야, 숨김 대상 페이지(HIDDEN_PATH_PREFIXES)로 이동해
+  // 컴포넌트가 null을 반환하는 동안에도 대화가 유지된다
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // 사용자가 드래그로 조절한 채팅창 높이도 같은 이유로 여기서 유지한다
+  const [height, setHeight] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isHovered || isChatOpen) {
@@ -57,9 +63,23 @@ export default function CareerCounselingButton() {
     setIsDismissed(true);
   };
 
+  const handleToggleChat = () => {
+    // 사용자가 직접 닫을 때만 대화 내용을 초기화한다 (헤더의 안내 문구와 일치하는 의도된 동작)
+    if (isChatOpen) setMessages([]);
+    setIsChatOpen((prev) => !prev);
+  };
+
   return (
     <>
-      {isChatOpen && <CareerCounselingChatPanel onClose={() => setIsChatOpen(false)} />}
+      {isChatOpen && (
+        <CareerCounselingChatPanel
+          messages={messages}
+          setMessages={setMessages}
+          height={height}
+          setHeight={setHeight}
+          onClose={() => setIsChatOpen(false)}
+        />
+      )}
 
       <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-2">
         {!isChatOpen && (
@@ -75,7 +95,7 @@ export default function CareerCounselingButton() {
             onMouseLeave={() => setIsHovered(false)}
             onFocus={() => setIsHovered(true)}
             onBlur={() => setIsHovered(false)}
-            onClick={() => setIsChatOpen((prev) => !prev)}
+            onClick={handleToggleChat}
             className={`h-14 min-w-14 rounded-full inline-flex items-center justify-center shrink-0 transition-all duration-300 ease-out cursor-pointer overflow-hidden shadow-lg ${
               isChatOpen ? 'bg-[#1E2125] text-white max-w-15 px-0' : 'bg-[#EEF4FF] text-[#1E2125]'
             } ${!isChatOpen && isHovered ? 'max-w-95 px-5 gap-2' : !isChatOpen ? 'max-w-15 px-0' : ''}`}
