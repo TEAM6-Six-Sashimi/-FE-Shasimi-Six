@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { sendChatbotMessageAction } from '../actions';
 import { ChatbotHistoryItem, ChatMessage } from '../types';
 import { useTypewriter } from '../hooks/useTypewriter';
@@ -20,22 +20,35 @@ const MIN_HEIGHT_PX = 320;
 const BOTTOM_MARGIN_PX = 120; // 뷰포트 상단 여유분
 
 interface Props {
+  messages: ChatMessage[];
+  setMessages: Dispatch<SetStateAction<ChatMessage[]>>;
+  height: number | null;
+  setHeight: Dispatch<SetStateAction<number | null>>;
   onClose: () => void;
 }
 
-export default function CareerCounselingChatPanel({ onClose }: Props) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+export default function CareerCounselingChatPanel({
+  messages,
+  setMessages,
+  height,
+  setHeight,
+  onClose,
+}: Props) {
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isWaitingReply, setIsWaitingReply] = useState(false);
-  const [height, setHeight] = useState<number | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<HTMLTextAreaElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
 
   const { streamingId, setStreamingId, startTyping } = useTypewriter(setMessages);
-  const isIntroPlaying = useIntroMessages({ setMessages, startTyping, setStreamingId });
+  const isIntroPlaying = useIntroMessages({
+    setMessages,
+    startTyping,
+    setStreamingId,
+    hasExistingMessages: messages.length > 0,
+  });
   const { hasTTSSupport, speakingMessageId, toggleSpeak } = useSpeechSynthesis();
 
   // 새 메시지가 추가/갱신되거나 로딩 인디케이터가 뜨면 항상 맨 아래로 스크롤
