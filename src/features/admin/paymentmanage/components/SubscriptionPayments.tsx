@@ -32,6 +32,7 @@ export default function SubscriptionPayments() {
   const [items, setItems] = useState<AdminSubscriptionPayment[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const planMenuRef = useRef<HTMLDivElement>(null);
   const requestIdRef = useRef(0);
 
@@ -56,11 +57,19 @@ export default function SubscriptionPayments() {
           await logoutAction();
           return;
         }
+        if (result.error) {
+          setLoadError(true);
+          setItems([]);
+          setTotalPages(0);
+          return;
+        }
+        setLoadError(false);
         setItems(result.items);
         setTotalPages(result.totalPages);
       })
       .catch(() => {
         if (requestId !== requestIdRef.current) return;
+        setLoadError(true);
         setItems([]);
         setTotalPages(0);
       })
@@ -71,7 +80,6 @@ export default function SubscriptionPayments() {
 
   useEffect(() => {
     loadData({ startDate: '', endDate: '', keyword: '', page: 0 });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 드롭다운 바깥을 클릭하면 닫기
@@ -167,9 +175,6 @@ export default function SubscriptionPayments() {
                         onClick={() => {
                           setPlanFilter(option);
                           setPlanMenuOpen(false);
-                          setPage(0);
-                          setIsLoading(true);
-                          loadData({ startDate, endDate, keyword, page: 0 });
                         }}
                         className={`w-full px-3 py-1.5 text-left text-[12.5px] font-medium hover:bg-[#F9FAFB] cursor-pointer ${
                           planFilter === option ? 'text-[#FF5E5E]' : 'text-[#1E2125]'
@@ -191,6 +196,12 @@ export default function SubscriptionPayments() {
             <tr>
               <td colSpan={7} className="py-16 text-center text-[#6A7282]">
                 불러오는 중...
+              </td>
+            </tr>
+          ) : loadError ? (
+            <tr>
+              <td colSpan={7} className="py-16 text-center text-[#FF5E5E]">
+                결제 내역을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
               </td>
             </tr>
           ) : filteredItems.length === 0 ? (

@@ -45,6 +45,13 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
   const [currentPage, setCurrentPage] = useState(1);
   const filterRef = useRef<HTMLDivElement>(null);
 
+  const routeKey = `${category}|${subCategoryId ?? ''}`;
+  const [prevRouteKey, setPrevRouteKey] = useState(routeKey);
+  if (routeKey !== prevRouteKey) {
+    setPrevRouteKey(routeKey);
+    setCurrentPage(1);
+  }
+
   const currentCategory = categories.find((c) => c.name === category);
   const subCategories = currentCategory
     ? [{ id: 0, name: '전체' }, ...currentCategory.options]
@@ -60,11 +67,6 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
-
-  // 필터/정렬/검색 변경 시 페이지 초기화
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [category, sub, search, filters, sort]);
 
   const filteredCourses = useMemo(() => {
     let result = [...initialCourses];
@@ -102,7 +104,14 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
           <div className="flex items-center gap-3">
             {/* 검색 */}
             <div className="flex-1 max-w-xl">
-              <SearchInput onSearch={setSearch} placeholder="강의 검색..." className="w-full" />
+              <SearchInput
+                onSearch={(v) => {
+                  setSearch(v);
+                  setCurrentPage(1);
+                }}
+                placeholder="강의 검색..."
+                className="w-full"
+              />
             </div>
 
             {/* 상세검색 필터 */}
@@ -127,13 +136,15 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
                   onApply={(f) => {
                     setFilters(f);
                     setFilterOpen(false);
+                    setCurrentPage(1);
                   }}
-                  onReset={() =>
+                  onReset={() => {
                     setFilters({
                       priceRange: [0, 100000000],
                       ratingRange: [0, 5],
-                    })
-                  }
+                    });
+                    setCurrentPage(1);
+                  }}
                 />
               </div>
             </div>
@@ -173,7 +184,13 @@ export default function CourseListPage({ categories, initialCourses }: CourseLis
             <label htmlFor="sort-select" className="sr-only">
               정렬 기준
             </label>
-            <Select value={sort} onValueChange={(v) => setSort(v as SortType)}>
+            <Select
+              value={sort}
+              onValueChange={(v) => {
+                setSort(v as SortType);
+                setCurrentPage(1);
+              }}
+            >
               <SelectTrigger
                 id="sort-select"
                 className="h-8 w-32 text-[12.5px] border-[#D1D5DB] text-[#1E2125]"

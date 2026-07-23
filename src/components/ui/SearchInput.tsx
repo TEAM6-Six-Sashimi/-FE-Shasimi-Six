@@ -29,7 +29,8 @@ export default function SearchInput({
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
+          // 한글 등 조합 입력 중 Enter로 조합을 확정하는 경우까지 검색이 실행되지 않도록 방지
+          if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
             e.preventDefault();
             handleSubmit();
           }
