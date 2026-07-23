@@ -232,7 +232,7 @@ export default function PendingCourse({ courses, categories }: Props) {
                         className="h-9 px-4 text-[12.5px] font-semibold text-[#6A7282] bg-[#E5E7EB] cursor-not-allowed"
                       >
                         <Image src="/delete-Icon-gray.svg" alt="" width={16} height={16} />{' '}
-                        {deleteLoading ? <InlineDotsLoading label="삭제 중" /> : '삭제'}
+                        {deleteLoading ? '삭제 중...' : '삭제'}
                       </Button>
                     ) : (
                       <Button

@@ -82,8 +82,8 @@ export default function SelfIntroSidebar({
 
           {isEvaluating ? (
             <div className="flex flex-col items-center justify-center gap-3 py-10">
-              <InlineDotsLoading dotColor="#5B8DEE" />
               <p className="text-[13px] text-[#6A7282]">AI가 자기소개서를 분석하고 있어요...</p>
+              <InlineDotsLoading dotColor="#5B8DEE" />
             </div>
           ) : !summary ? (
             <p className="text-[13px] text-[#6A7282] leading-relaxed">
