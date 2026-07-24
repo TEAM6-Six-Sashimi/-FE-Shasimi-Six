@@ -8,10 +8,10 @@ import { AuthSessionError } from '@/features/auth/errors';
 import SessionExpiredRedirect from '@/components/layout/SessionExpiredRedirect';
 
 export const metadata: Metadata = {
-  title: 'AI 맞춤 강의 추천',
+  title: 'AI 채용공고 분석 및 맞춤 강의 추천',
   description: '채용공고를 등록하고 나에게 필요한 강의를 추천받아보세요.',
   openGraph: {
-    title: 'AI 맞춤 강의 추천 | 핏(Fit)-격',
+    title: 'AI 채용공고 분석 | 핏(Fit)-격',
     description: '채용공고를 등록하고 나에게 필요한 강의를 추천받아보세요.',
     url: '/recommendations',
   },

@@ -6,7 +6,7 @@ const FEATURE_CARDS = [
     href: '/recommendations',
     icon: '/main/recommendation-Icon-white.svg',
     iconBg: 'bg-[#FF5E5E]',
-    title: 'AI 맞춤 강의 추천',
+    title: 'AI 채용공고 분석',
     isFree: false,
     description: '채용공고를 등록하면 AI가 부족한 역량을 분석하고 딱 맞는 강의를 추천해드려요.',
     buttonLabel: '추천 받기',
@@ -49,7 +49,7 @@ export default function FeatureCards() {
                 aria-hidden="true"
                 className={`${iconBg} w-12 h-12 rounded-full flex items-center justify-center shrink-0`}
               >
-                <Image src={icon} alt="" width={24} height={24} />
+                <Image src={icon} alt="아이콘" width={24} height={24} />
               </div>
 
               {/* 텍스트 */}
