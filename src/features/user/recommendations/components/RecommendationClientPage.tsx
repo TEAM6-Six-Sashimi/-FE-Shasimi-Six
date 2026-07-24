@@ -133,7 +133,7 @@ export default function RecommendationPageClient({
     <div className="bg-[#F9FAFB]">
       <FeatureHeader
         icon="ai"
-        title="AI 맞춤 강의 추천"
+        title="AI 채용공고 분석 및 맞춤 강의 추천"
         description="채용공고를 등록하고 나에게 필요한 강의를 추천받아보세요."
         right={subscriptionText}
         rightHighlight={!mySubscription?.subscribed}
