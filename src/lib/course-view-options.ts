@@ -4,9 +4,8 @@ import { ReviewMode } from '@/features/user/review/types';
 export type ActionType =
   | 'purchase' // 구매하기/장바구니 (PUBLIC)
   | 'continue-watching' // 이어보기/다시보기 (ENROLLED)
-  | 'manage' // 운영관리 (OWNER/ADMIN, APPROVED/CLOSED)
   | 'approve-reject' // 승인/반려 (ADMIN, PENDING)
-  | 'none'; // 버튼 없음 (OWNER의 PENDING/REJECTED 등)
+  | 'none'; // 버튼 없음 (OWNER/ADMIN의 APPROVED/CLOSED, OWNER의 PENDING/REJECTED 등)
 
 export interface CourseViewOptions {
   showProgress: boolean;
@@ -40,7 +39,7 @@ export function resolveCourseViewOptions(course: CourseDetailFromAPI): CourseVie
         showProgress: false,
         allSessionsPlayable: true,
         reviewMode: reviewCount === 0 ? 'no-reviews' : 'hidden-form',
-        actionType: status === 'APPROVED' || status === 'CLOSED' ? 'manage' : 'none',
+        actionType: 'none',
       };
 
     case 'ADMIN':
@@ -48,12 +47,7 @@ export function resolveCourseViewOptions(course: CourseDetailFromAPI): CourseVie
         showProgress: false,
         allSessionsPlayable: true,
         reviewMode: reviewCount === 0 ? 'no-reviews' : 'hidden-form',
-        actionType:
-          status === 'PENDING'
-            ? 'approve-reject'
-            : status === 'APPROVED' || status === 'CLOSED'
-              ? 'manage'
-              : 'none',
+        actionType: status === 'PENDING' ? 'approve-reject' : 'none',
       };
 
     default:
