@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import type { Category } from '@/features/categories/types';
 import {
   AdminCourse,
@@ -39,9 +39,9 @@ export default function CourseManagePage({
   adminCategories,
   accessToken,
 }: Props) {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
+  // 최초 진입 시(예: 즐겨찾기, 새로고침)에만 URL의 tab 쿼리를 읽어서 초기값으로 사용한다.
   const tabFromUrl = searchParams.get('tab');
   const initialTab: Tab = VALID_TABS.includes(tabFromUrl as Tab) ? (tabFromUrl as Tab) : 'all';
 
@@ -52,22 +52,13 @@ export default function CourseManagePage({
     setPending(pendingCourses);
   }, [pendingCourses]);
 
-  // URL의 tab 쿼리가 바뀌면 탭 상태도 동기화
-  useEffect(() => {
-    if (VALID_TABS.includes(tabFromUrl as Tab)) {
-      setTab(tabFromUrl as Tab);
-    } else {
-      setTab('all');
-    }
-  }, [tabFromUrl]);
-
   const handleTabChange = (next: Tab) => {
     setTab(next);
-    if (next === 'all') {
-      router.replace('/admin/coursemanage', { scroll: false });
-    } else {
-      router.replace(`/admin/coursemanage?tab=${next}`, { scroll: false });
-    }
+    // 이 페이지는 탭과 무관하게 데이터를 전부 미리 받아두므로 탭 전환에 서버 이동이 필요 없다.
+    // router.replace를 쓰면 Next.js가 searchParams를 읽지 않는 이 라우트의 캐시를 재사용하면서
+    // 예전에 방문했던 탭으로 되돌아가는 문제가 있어, 순수 클라이언트 상태 + native history API로만 URL을 동기화한다.
+    const url = next === 'all' ? '/admin/coursemanage' : `/admin/coursemanage?tab=${next}`;
+    window.history.replaceState(null, '', url);
   };
 
   const TABS: { id: Tab; label: string }[] = [
